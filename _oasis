@@ -1,0 +1,22 @@
+OASISFormat: 0.2
+Name:        github
+Version:     0.9-dev
+Synopsis:    Github API interface
+Authors:     Anil Madhavapeddy
+License:     ISC
+Plugins:     META (0.2)
+BuildTools: ocamlbuild
+
+Library github
+  Path: lib
+  Findlibname: github
+  Modules: Github
+  BuildDepends: lwt.syntax, cohttpd
+
+Executable rwo
+  Path:               lib_test
+  MainIs:             rwo.ml
+  Custom:             true
+  CompiledObject:     best
+  Install:            false
+  BuildDepends:       cohttpd, lwt.syntax, lwt.unix, lwt.ssl, github

@@ -1,0 +1,3 @@
+(* Information from https://github.com/account/applications *)
+let client_id = ""
+let client_secret = ""

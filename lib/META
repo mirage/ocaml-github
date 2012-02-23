@@ -1,0 +1,10 @@
+# OASIS_START
+# DO NOT EDIT (digest: b526d9e6314f130b7432f4d2d7f4107e)
+version = "0.9-dev"
+description = "Github API interface"
+requires = "lwt.syntax cohttpd"
+archive(byte) = "github.cma"
+archive(native) = "github.cmxa"
+exists_if = "github.cma"
+# OASIS_STOP
+

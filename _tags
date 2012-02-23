@@ -1,0 +1,22 @@
+# OASIS_START
+# DO NOT EDIT (digest: 1b6bb4a664d7d84e912e9758ffb05f09)
+# Library github
+"lib": include
+<lib/*.ml{,i}>: pkg_lwt.syntax
+<lib/*.ml{,i}>: pkg_cohttpd
+# Executable rwo
+<lib_test/rwo.{native,byte}>: use_github
+<lib_test/rwo.{native,byte}>: pkg_lwt.unix
+<lib_test/rwo.{native,byte}>: pkg_lwt.syntax
+<lib_test/rwo.{native,byte}>: pkg_lwt.ssl
+<lib_test/rwo.{native,byte}>: pkg_cohttpd
+<lib_test/*.ml{,i}>: use_github
+<lib_test/*.ml{,i}>: pkg_lwt.unix
+<lib_test/*.ml{,i}>: pkg_lwt.syntax
+<lib_test/*.ml{,i}>: pkg_lwt.ssl
+<lib_test/*.ml{,i}>: pkg_cohttpd
+<lib_test/rwo.{native,byte}>: custom
+# OASIS_STOP
+<lib/*.ml{,i}>: syntax_camlp4o, annot, pkg_lwt.syntax
+<lib_test/*.ml{,i}>: syntax_camlp4o, annot, pkg_lwt.syntax
+

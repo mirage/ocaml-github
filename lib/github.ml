@@ -59,13 +59,13 @@ module URI = struct
     let q = match scopes with
      |Some scopes -> ("scope", Scopes.scopes_to_string scopes) :: q
      |None -> q in
-    let uri = { uri with Uri.query=Some (Uri.(make_query q)) } in
-    uri
+    { uri with Uri.query=Some (Uri.(make_query q)) }
 
   let token ~client_id ~client_secret ~code () =
     let uri = Uri.of_string "https://github.com/login/oauth/access_token" in
     let q = [ "client_id", client_id; "code", code; "client_secret", client_secret ] in
     { uri with Uri.query=Some (Uri.(make_query q)) }
+
 end 
 
 open Printf
@@ -104,9 +104,38 @@ let authorize ?scopes ~client_id () =
    * registered in the application entry on Github *)
     request get uri (fun ~headers ~body -> ())
 
-let token ~client_id ~client_secret ~code () =
+type token = string
+
+let token ~client_id ~client_secret ~code () : token response Lwt.t =
   let uri = URI.token ~client_id ~client_secret ~code () in
   request post uri (fun ~headers ~body ->
     List.assoc "access_token" (Uri.parse_query body)
   )
+
+module Issues = struct
+  
+  type filter = [
+    | `Assigned
+    | `Created
+    | `Mentioned
+    | `Subscribed
+  ]
+
+  type state = [
+    | `Open
+    | `Closed
+  ]
+
+  type sort = [
+    | `Created  
+    | `Updated
+    | `Comments
+  ]
+
+  type direction = [
+    | `Ascending
+    | `Descending
+  ]
+
+end
 

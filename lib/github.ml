@@ -59,12 +59,12 @@ module URI = struct
     let q = match scopes with
      |Some scopes -> ("scope", Scopes.scopes_to_string scopes) :: q
      |None -> q in
-    { uri with Uri.query=Some (Uri.(make_query q)) }
+    Uri.with_query uri q
 
   let token ~client_id ~client_secret ~code () =
     let uri = Uri.of_string "https://github.com/login/oauth/access_token" in
     let q = [ "client_id", client_id; "code", code; "client_secret", client_secret ] in
-    { uri with Uri.query=Some (Uri.(make_query q)) }
+    Uri.with_query uri q
 
 end 
 
@@ -109,7 +109,7 @@ type token = string
 let token ~client_id ~client_secret ~code () : token response Lwt.t =
   let uri = URI.token ~client_id ~client_secret ~code () in
   request post uri (fun ~headers ~body ->
-    List.assoc "access_token" (Uri.parse_query body)
+    List.assoc "access_token" (Uri.query_of_encoded body)
   )
 
 module Issues = struct

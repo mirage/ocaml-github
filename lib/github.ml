@@ -15,6 +15,7 @@
  *
  *)
 
+(* Authorization Scopes *)
 module Scopes = struct
   type scope =
   | User
@@ -66,6 +67,8 @@ module URI = struct
     let q = [ "client_id", client_id; "code", code; "client_secret", client_secret ] in
     Uri.with_query uri q
 
+  let api = "https://api.github.com/"
+
 end 
 
 open Printf
@@ -75,18 +78,18 @@ open Cohttpd.Client
 type error =
 | Generic of int * (string * string) list * string
 | Bad_response of exn
-
-type 'a response =
+and 'a response =
 | Error of error
 | Response of 'a
 
 let error_to_string = function
-| Generic (code, headers, body) ->
-  sprintf "HTTP Error %d\n%s\n" code
-  (String.concat "\n" (List.map (fun (k,v) -> sprintf "%s: %s" k v) headers))
-| Bad_response exn -> sprintf "Bad response: %s\n" (Printexc.to_string exn)    
+  | Generic (code, headers, body) ->
+    sprintf "HTTP Error %d\n%s\n" code
+      (String.concat "\n" (List.map (fun (k,v) -> sprintf "%s: %s" k v) headers))
+  | Bad_response exn -> sprintf "Bad response: %s\n" (Printexc.to_string exn)    
 
-let request reqfn uri respfn =
+(* Generic request function that wraps result in 'a response *)
+let request uri reqfn respfn =
   try_lwt 
     lwt headers, body = reqfn uri in
     let r =
@@ -98,19 +101,72 @@ let request reqfn uri respfn =
     return (Error (Generic (code, headers, response)))
   end 
 
+(* Authorization request, normally not used (a link in the HTML is
+ * sufficient to redirect user to Github *)
 let authorize ?scopes ~client_id () =
   let uri = URI.authorize ?scopes ~client_id () in
   (* Github will return a 302 usually, to the redirect_uri
    * registered in the application entry on Github *)
-    request get uri (fun ~headers ~body -> ())
+    request uri get (fun ~headers ~body -> ())
 
 type token = string
 
+(* Convert a code after a user oAuth into an access token that cdan
+ * be used in subsequent requests.
+ *)
 let token ~client_id ~client_secret ~code () : token response Lwt.t =
   let uri = URI.token ~client_id ~client_secret ~code () in
-  request post uri (fun ~headers ~body ->
+  request uri post (fun ~headers ~body ->
     List.assoc "access_token" (Uri.query_of_encoded body)
   )
+
+(* Add an authorization token onto a request URI *)
+let request_with_token ~token uri =
+  request (Uri.add_query_param uri ("access_token", token))
+
+(* GET wrapper that takes a URI, adds an access token and calls the 
+ * result on the callback function.  *)
+let get ?headers ~token uri fn =
+  request_with_token ~token uri (get ?headers) fn
+
+open Yojson.Basic.Util
+
+(* Convert a JSON fragment into a URI option *)
+let to_uri_option =
+  function
+  | `String s -> Some (Uri.of_string s)
+  | _ -> None
+
+(* Convert a JSON fragment into a URI *)
+let to_uri =
+  function
+  | `String s -> Uri.of_string s
+  | x -> raise (Type_error ("to_uri_option", x))
+
+(* Propagate an optional value *)
+let to_option fn =
+  function
+  |`Null -> None
+  |x -> Some (fn x)
+
+module User = struct
+  type t = {
+    login: string;
+    id: int;
+    avatar_url: Uri.t option;
+    gravatar_id: string option;
+    url: Uri.t;
+  }
+
+  let of_json j =
+    { login = member "login" j |> to_string;
+      id = member "id" j |> to_int;
+      avatar_url = member "avatar_url" j |> to_uri_option;
+      gravatar_id = member "gravatar_id" j |> to_string_option;
+      url = member "url" j |> to_uri;
+    }
+
+end
 
 module Issues = struct
   
@@ -118,24 +174,60 @@ module Issues = struct
     | `Assigned
     | `Created
     | `Mentioned
-    | `Subscribed
-  ]
+    | `Subscribed ]
 
   type state = [
     | `Open
-    | `Closed
-  ]
+    | `Closed ]
+
+  let to_state =
+    function
+    |`String "open" -> `Open
+    |`String "closed" -> `Closed
+    |x -> raise (Type_error ("Issues.to_state",x))
 
   type sort = [
     | `Created  
     | `Updated
-    | `Comments
-  ]
+    | `Comments ]
 
   type direction = [
     | `Ascending
-    | `Descending
-  ]
+    | `Descending ]
+
+  type milestone = [
+    | `Int of int
+    | `None
+    | `Any ]
+
+  type issue = {
+    url: Uri.t;
+    html_url: Uri.t;
+    number: int;
+    state: state;
+    title: string;
+    body: string;
+    user: User.t;
+    assignee: User.t option;
+  }
+
+  let of_json j =
+    let (||>) a b = member a j |> b in
+    { url = "url" ||> to_uri; 
+      html_url = "html_url" ||> to_uri;
+      number = "number" ||> to_int;
+      state = "state" ||> to_state;
+      title = "title" ||> to_string;
+      body = "body" ||> to_string;
+      user = "user" ||> User.of_json;
+      assignee = "assignee" ||> to_option User.of_json
+    }
+
+  let repo ?(milestone=`Any) ?(state=`Open) ?mentioned ?labels ?(sort=`Created) ?(direction=`Descending) ~token ~user ~repo () =
+    let uri = Uri.of_string (sprintf "%srepos/%s/%s/issues" URI.api user repo) in
+    let params = [   ] in (* TODO *)
+    get ~token uri (fun ~headers ~body ->
+      convert_each of_json (Yojson.Basic.from_string body)
+    )
 
 end
-

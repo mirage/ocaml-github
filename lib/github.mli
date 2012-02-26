@@ -27,17 +27,13 @@ module Monad : sig
 end
 
 (* Authorization scopes *)
-module Scopes : sig
-  type scope = User | Public_repo | Repo | Gist
-  val scope_to_string : scope -> string
-  val scope_of_string : string -> scope option
-  val scopes_to_string : scope list -> string
-  val scopes_of_string : string -> scope list
+module Scope : sig
+  type t = User | Public_repo | Repo | Gist
 end
 
 (* Authorization request, normally not used (a link in the HTML is
  * sufficient to redirect user to Github *)
-val authorize : ?scopes:Scopes.scope list -> client_id:string -> unit -> unit Monad.t
+val authorize : ?scopes:Scope.t list -> client_id:string -> unit -> unit Monad.t
 
 (* Access token to the API, usually obtained via a user oAuth *)
 type token
@@ -45,19 +41,25 @@ val token_of_code : client_id:string -> client_secret:string -> code:string -> u
 val token_of_string : string -> token
 val token_to_string : token -> string
 
-(* Generic get function, not normally used directly, but useful in case you
+(* Generic API accessor function, not normally used directly, but useful in case you
  * wish to call an API call that isn't wrapped in the rest of the library (i.e. most
- * of them!)
+ * of them at the moment!)
  *)
-val get : ?headers:Cohttpd.Client.headers -> token:string -> Uri.t ->
-  (headers:Cohttpd.Client.headers -> body:string -> 'a) -> 'a Monad.t
+module API : sig
+  val get : ?headers:Cohttpd.Client.headers ->
+    token:token -> uri:Uri.t -> (Yojson.Basic.json -> 'a) -> 'a Monad.t
+
+  val post : ?headers:Cohttpd.Client.headers -> ?body:Yojson.Basic.json -> token:token ->
+      uri:Uri.t -> (Yojson.Basic.json -> 'a) -> 'a Monad.t
+end
 
 (* Various useful URI generation functions, normally for displaying on a web-page.
  * The [authorize] function is the entry URL for your users, and the [token] URI
  * is the URI used to convert the result into a concrete access token *)
 module URI : sig
-  val authorize : ?scopes:Scopes.scope list -> client_id:string -> unit -> Uri.t
+  val authorize : ?scopes:Scope.t list -> client_id:string -> unit -> Uri.t
   val token : client_id:string -> client_secret:string -> code:string -> unit -> Uri.t
+  val repo_issues : user:string -> repo:string -> Uri.t
 end
 
 (* Github users *)
@@ -76,7 +78,6 @@ end
 module Issues : sig
   type filter = [ `Assigned | `Created | `Mentioned | `Subscribed ]
   type state = [ `Closed | `Open ]
-  val to_state : Yojson.Basic.json -> [> `Closed | `Open ]
   type sort = [ `Comments | `Created | `Updated ]
   type direction = [ `Ascending | `Descending ]
   type milestone = [ `Any | `Int of int | `None ]
@@ -90,10 +91,24 @@ module Issues : sig
     user : User.t;
     assignee : User.t option;
   }
-  val of_json : Yojson.Basic.json -> issue
-  val repo :
-    ?milestone:milestone -> ?state:state -> ?mentioned:string list ->
-    ?labels:'b -> ?sort:sort -> ?direction:direction -> token:token ->
+
+  val for_repo :
+    ?milestone:milestone ->
+    ?state:state ->
+    ?mentioned:string list ->
+    ?labels:'b ->
+    ?sort:sort ->
+    ?direction:direction ->
+    token:token ->
     user:string -> repo:string -> unit -> issue list Monad.t
+
+  val create :
+    title:string ->
+    ?body:string ->
+    ?assignee:string ->
+    ?milestone:int ->
+    ?labels:string list ->
+    token:token ->
+    user:string -> repo:string -> unit -> issue Monad.t
 
 end

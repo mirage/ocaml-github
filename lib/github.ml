@@ -16,8 +16,8 @@
  *)
 
 (* Authorization Scopes *)
-module Scopes = struct
-  type scope =
+module Scope = struct
+  type t =
   | User
   | Public_repo
   | Repo
@@ -58,7 +58,7 @@ module URI = struct
     let uri = Uri.of_string entry_uri in
     let q = ["client_id", client_id ] in
     let q = match scopes with
-     |Some scopes -> ("scope", Scopes.scopes_to_string scopes) :: q
+     |Some scopes -> ("scope", Scope.scopes_to_string scopes) :: q
      |None -> q in
     Uri.with_query uri q
 
@@ -67,8 +67,10 @@ module URI = struct
     let q = [ "client_id", client_id; "code", code; "client_secret", client_secret ] in
     Uri.with_query uri q
 
-  let api = "https://api.github.com/"
+  let api = "https://api.github.com"
 
+  let repo_issues ~user ~repo =
+     Uri.of_string (sprintf "%s/repos/%s/%s/issues" api user repo) 
 end 
 
 open Printf
@@ -110,6 +112,7 @@ end
 (* Generic request function that wraps result in 'a response *)
 let request uri reqfn respfn =
   try_lwt 
+    eprintf "%s\n%!" (Uri.to_string uri);
     lwt headers, body = reqfn uri in
     let r =
       try Response(respfn ~headers ~body)
@@ -142,34 +145,80 @@ let token_of_code ~client_id ~client_secret ~code () : token response Lwt.t =
 let token_of_string x = x
 let token_to_string x = x
 
-(* Add an authorization token onto a request URI *)
-let request_with_token ~token uri =
-  request (Uri.add_query_param uri ("access_token", token))
+module API = struct
 
-(* GET wrapper that takes a URI, adds an access token and calls the 
- * result on the callback function.  *)
-let get ?headers ~token uri fn =
-  request_with_token ~token uri (get ?headers) fn
+  (* Add an authorization token onto a request URI and parse the response
+   * as JSON. *)
+  let json_request ~token uri req resp =
+    request (Uri.add_query_param uri ("access_token", token)) req
+     (fun ~headers ~body -> resp (Yojson.Basic.from_string body))
 
-open Yojson.Basic.Util
+  (* GET wrapper that takes a URI, adds an access token and calls the 
+   * result on the callback function.  *)
+  let get ?headers ~token ~uri fn =
+    json_request ~token uri (get ?headers) fn
 
-(* Convert a JSON fragment into a URI option *)
-let to_uri_option =
-  function
-  | `String s -> Some (Uri.of_string s)
-  | _ -> None
+  (* POST wrapper that takes a URI, adds an access token and calls the 
+   * result on the callback function.  *)
+  let post ?headers ?body ~token ~uri fn =
+    (* Convert any body into JSON *)
+    let body = match body with
+     |Some x -> Some (`String (Yojson.Basic.to_string x))
+     |None -> None in
+    (* Add the correct mime-type header *)
+    let headers = match headers with
+     |Some x -> Some (("content-type","application/json") :: x)
+     |None -> Some ["content-type","application/json"] in
+    json_request ~token uri (post ?headers ?body) fn
+end
 
-(* Convert a JSON fragment into a URI *)
-let to_uri =
-  function
-  | `String s -> Uri.of_string s
-  | x -> raise (Type_error ("to_uri_option", x))
+(* Utility module with the Yojson parsing combinators and some extra
+ * uri and option combinators *)
+module Parse = struct
+  include Yojson.Basic.Util
 
-(* Propagate an optional value *)
-let to_option fn =
-  function
-  |`Null -> None
-  |x -> Some (fn x)
+  (* Convert a JSON fragment into a URI option *)
+  let to_uri_option =
+    function
+    | `String s -> Some (Uri.of_string s)
+    | _ -> None
+
+  (* Convert a JSON fragment into a URI *)
+  let to_uri =
+    function
+    | `String s -> Uri.of_string s
+    | x -> raise (Type_error ("to_uri_option", x))
+
+  (* Propagate an optional value *)
+  let to_option fn =
+    function
+    |`Null -> None
+    |x -> Some (fn x)
+end
+
+(* Utility module that can be opened when creating Yojson *)
+module Create = struct
+  let of_string x =
+    `String x
+
+  let of_string_option =
+    function
+    |Some x -> `String x
+    |None -> `Null
+
+  let of_int_option =
+    function
+    |Some i -> `Int i
+    |None -> `Null
+
+  let of_string_list_option =
+    function
+    |None -> `List []
+    |Some l -> `List (List.map (fun x -> `String x) l)
+
+  let record x =
+    `Assoc x
+end
 
 module User = struct
   type t = {
@@ -181,13 +230,14 @@ module User = struct
   }
 
   let of_json j =
-    { login = member "login" j |> to_string;
-      id = member "id" j |> to_int;
-      avatar_url = member "avatar_url" j |> to_uri_option;
-      gravatar_id = member "gravatar_id" j |> to_string_option;
-      url = member "url" j |> to_uri;
+    let open Parse in
+    let (||>) a b = member a j |> b in
+    { login = "login" ||> to_string;
+      id = "id" ||> to_int;
+      avatar_url = "avatar_url" ||> to_uri_option;
+      gravatar_id = "gravatar_id" ||> to_string_option;
+      url = "url" ||> to_uri;
     }
-
 end
 
 module Issues = struct
@@ -206,7 +256,7 @@ module Issues = struct
     function
     |`String "open" -> `Open
     |`String "closed" -> `Closed
-    |x -> raise (Type_error ("Issues.to_state",x))
+    |x -> raise (Yojson.Basic.Util.Type_error ("Issues.to_state",x))
 
   type sort = [
     | `Created  
@@ -234,6 +284,7 @@ module Issues = struct
   }
 
   let of_json j =
+    let open Parse in
     let (||>) a b = member a j |> b in
     { url = "url" ||> to_uri; 
       html_url = "html_url" ||> to_uri;
@@ -245,11 +296,21 @@ module Issues = struct
       assignee = "assignee" ||> to_option User.of_json
     }
 
-  let repo ?(milestone=`Any) ?(state=`Open) ?mentioned ?labels ?(sort=`Created) ?(direction=`Descending) ~token ~user ~repo () =
-    let uri = Uri.of_string (sprintf "%srepos/%s/%s/issues" URI.api user repo) in
+  let for_repo ?(milestone=`Any) ?(state=`Open) ?mentioned ?labels ?(sort=`Created) ?(direction=`Descending) ~token ~user ~repo () =
+    let open Parse in
+    let uri = URI.repo_issues ~user ~repo in
     let params = [   ] in (* TODO *)
-    get ~token uri (fun ~headers ~body ->
-      convert_each of_json (Yojson.Basic.from_string body)
-    )
+    API.get ~token ~uri (convert_each of_json)
 
+  let create ~title ?body ?assignee ?milestone ?labels ~token ~user ~repo () =
+    let open Create in
+    let body = record [ 
+      "title", of_string title;
+      "body", of_string_option body;
+      "assignee", of_string_option assignee;
+      "milestone", of_int_option milestone;
+      "labels", of_string_list_option labels;
+    ] in
+    let uri = URI.repo_issues ~user ~repo in
+    API.post ~body ~token ~uri of_json
 end

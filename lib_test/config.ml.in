@@ -1,3 +1,6 @@
 (* Information from https://github.com/account/applications *)
 let client_id = ""
 let client_secret = ""
+(* Just put in a valid oAuth token here for the post-auth tests *)
+let access_token = ""
+

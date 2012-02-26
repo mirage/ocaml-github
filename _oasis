@@ -11,7 +11,7 @@ Library github
   Path: lib
   Findlibname: github
   Modules: Github
-  BuildDepends: lwt.syntax, cohttpd
+  BuildDepends: lwt.syntax, cohttpd, yojson
 
 Executable rwo
   Path:               lib_test
@@ -20,3 +20,12 @@ Executable rwo
   CompiledObject:     best
   Install:            false
   BuildDepends:       cohttpd, lwt.syntax, lwt.unix, lwt.ssl, github
+
+Executable issues
+  Path:               lib_test
+  MainIs:             issues.ml
+  Custom:             true
+  CompiledObject:     best
+  Install:            false
+  BuildDepends:       cohttpd, lwt.syntax, lwt.unix, lwt.ssl, github, yojson
+

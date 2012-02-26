@@ -88,6 +88,25 @@ let error_to_string = function
       (String.concat "\n" (List.map (fun (k,v) -> sprintf "%s: %s" k v) headers))
   | Bad_response exn -> sprintf "Bad response: %s\n" (Printexc.to_string exn)    
 
+module Monad = struct
+  type 'a t = 'a response Lwt.t
+
+  let bind x fn =
+    match_lwt x with
+    |Error e -> return (Error e)
+    |Response r -> fn r
+
+  let return r =
+    return (Response r)
+
+  let run th =
+    match_lwt th with
+    |Response r -> Lwt.return r
+    |Error e -> fail (Failure (error_to_string e))
+
+  let (>>=) = bind
+end
+
 (* Generic request function that wraps result in 'a response *)
 let request uri reqfn respfn =
   try_lwt 
@@ -114,11 +133,14 @@ type token = string
 (* Convert a code after a user oAuth into an access token that cdan
  * be used in subsequent requests.
  *)
-let token ~client_id ~client_secret ~code () : token response Lwt.t =
+let token_of_code ~client_id ~client_secret ~code () : token response Lwt.t =
   let uri = URI.token ~client_id ~client_secret ~code () in
   request uri post (fun ~headers ~body ->
     List.assoc "access_token" (Uri.query_of_encoded body)
   )
+
+let token_of_string x = x
+let token_to_string x = x
 
 (* Add an authorization token onto a request URI *)
 let request_with_token ~token uri =

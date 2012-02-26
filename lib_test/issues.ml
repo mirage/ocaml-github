@@ -4,16 +4,17 @@ open Printf
 let token = Config.access_token
 
 let t =
-  let open Github.Issues in
-  lwt issues  = repo ~token ~user:"avsm" ~repo:"mirage" () in
-  match issues with
-  |Github.Response r ->
-    List.iter (fun issue ->
-      eprintf "issue %d: %s\n%!" issue.number issue.title
-    ) r;
-    return ()
-  |Github.Error e ->
-    prerr_endline (Github.error_to_string e);
-    return ()
+  lwt r = 
+    let open Github.Monad in
+    run (
+    Github.Issues.repo ~token ~user:"avsm" ~repo:"mirage" () >>=
+    fun issues ->
+      List.iter (fun issue ->
+        let open Github.Issues in
+        eprintf "issue %d: %s\n%!" issue.number issue.title
+      ) issues;
+      return ()
+  ) in
+  return ()
 
 let _ = Lwt_main.run t

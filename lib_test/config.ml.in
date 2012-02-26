@@ -2,5 +2,5 @@
 let client_id = ""
 let client_secret = ""
 (* Just put in a valid oAuth token here for the post-auth tests *)
-let access_token = ""
+let access_token = Github.token_of_string ""
 

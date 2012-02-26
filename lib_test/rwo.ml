@@ -63,9 +63,9 @@ module Resp = struct
         index req
     | ["step2"] -> begin
         let code = Request.param ~meth:`GET ~default:"" req "code" in
-        match_lwt Github.token ~client_id ~client_secret ~code () with
+        match_lwt Github.token_of_code ~client_id ~client_secret ~code () with
         | Github.Response token ->
-            return (dyn req (wrap_html ("ok: token is "^token)))
+            return (dyn req (wrap_html ("ok: token is "^(Github.token_to_string token))))
         | Github.Error e ->
             return (dyn req (wrap_html ("err: "^ (Github.error_to_string e))))
     end

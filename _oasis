@@ -21,7 +21,7 @@ Executable rwo
   Install:            false
   BuildDepends:       cohttpd, lwt.syntax, lwt.unix, lwt.ssl, github
 
-Executable issues
+Executable list_issues
   Path:               lib_test
   MainIs:             issues.ml
   Custom:             true
@@ -29,3 +29,10 @@ Executable issues
   Install:            false
   BuildDepends:       cohttpd, lwt.syntax, lwt.unix, lwt.ssl, github, yojson
 
+Executable create_issue
+  Path:               lib_test
+  MainIs:             create_issue.ml
+  Custom:             true
+  CompiledObject:     best
+  Install:            false
+  BuildDepends:       cohttpd, lwt.syntax, lwt.unix, lwt.ssl, github, yojson

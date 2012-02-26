@@ -21,7 +21,7 @@ open Cohttp
 open Cohttpd
 open Config
 
-let scopes = [Github.Scopes.Public_repo] 
+let scopes = [Github.Scope.Public_repo] 
 let step1_link = Github.URI.authorize ~scopes ~client_id ()
   
 module Resp = struct

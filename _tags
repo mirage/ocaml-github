@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 285d8097a4b957ad67aab53106183371)
+# DO NOT EDIT (digest: 352fd9e1e9fda996e7cca94937a32311)
 # Ignore VCS directories, you can use the same kind of rule outside 
 # OASIS_START/STOP if you want to exclude directories that contains 
 # useless stuff for the build process
@@ -18,7 +18,15 @@
 <lib/*.ml{,i}>: pkg_yojson
 <lib/*.ml{,i}>: pkg_lwt.syntax
 <lib/*.ml{,i}>: pkg_cohttpd
-# Executable issues
+# Executable create_issue
+<lib_test/create_issue.{native,byte}>: use_github
+<lib_test/create_issue.{native,byte}>: pkg_yojson
+<lib_test/create_issue.{native,byte}>: pkg_lwt.unix
+<lib_test/create_issue.{native,byte}>: pkg_lwt.syntax
+<lib_test/create_issue.{native,byte}>: pkg_lwt.ssl
+<lib_test/create_issue.{native,byte}>: pkg_cohttpd
+<lib_test/create_issue.{native,byte}>: custom
+# Executable list_issues
 <lib_test/issues.{native,byte}>: use_github
 <lib_test/issues.{native,byte}>: pkg_yojson
 <lib_test/issues.{native,byte}>: pkg_lwt.unix

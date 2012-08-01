@@ -1,10 +1,12 @@
 # OASIS_START
-# DO NOT EDIT (digest: 08f92ed08e057e8f6daad8ee50235024)
+# DO NOT EDIT (digest: 61b3b705812a5d6c1d1e2c2728643c9e)
 version = "0.9-dev"
 description = "Github API interface"
-requires = "lwt.syntax cohttpd yojson"
+requires = "lwt.syntax cohttp cohttp.lwt_client yojson"
 archive(byte) = "github.cma"
+archive(byte, plugin) = "github.cma"
 archive(native) = "github.cmxa"
+archive(native, plugin) = "github.cmxs"
 exists_if = "github.cma"
 # OASIS_STOP
 

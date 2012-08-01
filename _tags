@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 352fd9e1e9fda996e7cca94937a32311)
+# DO NOT EDIT (digest: a44aee8b4acbee02c8d9eb4ea2edaeb6)
 # Ignore VCS directories, you can use the same kind of rule outside 
 # OASIS_START/STOP if you want to exclude directories that contains 
 # useless stuff for the build process
@@ -14,40 +14,47 @@
 "_darcs": -traverse
 "_darcs": not_hygienic
 # Library github
-"lib": include
-<lib/*.ml{,i}>: pkg_yojson
+"lib/github.cmxs": use_github
+<lib/*.ml{,i}>: pkg_cohttp.lwt_client
 <lib/*.ml{,i}>: pkg_lwt.syntax
-<lib/*.ml{,i}>: pkg_cohttpd
-# Executable create_issue
-<lib_test/create_issue.{native,byte}>: use_github
-<lib_test/create_issue.{native,byte}>: pkg_yojson
-<lib_test/create_issue.{native,byte}>: pkg_lwt.unix
-<lib_test/create_issue.{native,byte}>: pkg_lwt.syntax
-<lib_test/create_issue.{native,byte}>: pkg_lwt.ssl
-<lib_test/create_issue.{native,byte}>: pkg_cohttpd
-<lib_test/create_issue.{native,byte}>: custom
-# Executable list_issues
-<lib_test/issues.{native,byte}>: use_github
-<lib_test/issues.{native,byte}>: pkg_yojson
-<lib_test/issues.{native,byte}>: pkg_lwt.unix
-<lib_test/issues.{native,byte}>: pkg_lwt.syntax
-<lib_test/issues.{native,byte}>: pkg_lwt.ssl
-<lib_test/issues.{native,byte}>: pkg_cohttpd
-<lib_test/issues.{native,byte}>: custom
+<lib/*.ml{,i}>: pkg_yojson
+<lib/*.ml{,i}>: pkg_cohttp
 # Executable rwo
 <lib_test/rwo.{native,byte}>: use_github
-<lib_test/rwo.{native,byte}>: pkg_yojson
-<lib_test/rwo.{native,byte}>: pkg_lwt.unix
+<lib_test/rwo.{native,byte}>: pkg_cohttp.lwt_client
 <lib_test/rwo.{native,byte}>: pkg_lwt.syntax
+<lib_test/rwo.{native,byte}>: pkg_lwt.unix
 <lib_test/rwo.{native,byte}>: pkg_lwt.ssl
-<lib_test/rwo.{native,byte}>: pkg_cohttpd
-<lib_test/*.ml{,i}>: use_github
-<lib_test/*.ml{,i}>: pkg_yojson
-<lib_test/*.ml{,i}>: pkg_lwt.unix
-<lib_test/*.ml{,i}>: pkg_lwt.syntax
-<lib_test/*.ml{,i}>: pkg_lwt.ssl
-<lib_test/*.ml{,i}>: pkg_cohttpd
+<lib_test/rwo.{native,byte}>: pkg_yojson
+<lib_test/rwo.{native,byte}>: pkg_cohttp
+<lib_test/rwo.{native,byte}>: pkg_cohttp.lwt_server
+<lib_test/*.ml{,i}>: pkg_cohttp.lwt_server
 <lib_test/rwo.{native,byte}>: custom
+# Executable list_issues
+<lib_test/issues.{native,byte}>: use_github
+<lib_test/issues.{native,byte}>: pkg_cohttp.lwt_client
+<lib_test/issues.{native,byte}>: pkg_lwt.syntax
+<lib_test/issues.{native,byte}>: pkg_lwt.unix
+<lib_test/issues.{native,byte}>: pkg_lwt.ssl
+<lib_test/issues.{native,byte}>: pkg_yojson
+<lib_test/issues.{native,byte}>: pkg_cohttp
+<lib_test/issues.{native,byte}>: custom
+# Executable create_issue
+<lib_test/create_issue.{native,byte}>: use_github
+<lib_test/create_issue.{native,byte}>: pkg_cohttp.lwt_client
+<lib_test/create_issue.{native,byte}>: pkg_lwt.syntax
+<lib_test/create_issue.{native,byte}>: pkg_lwt.unix
+<lib_test/create_issue.{native,byte}>: pkg_lwt.ssl
+<lib_test/create_issue.{native,byte}>: pkg_yojson
+<lib_test/create_issue.{native,byte}>: pkg_cohttp
+<lib_test/*.ml{,i}>: use_github
+<lib_test/*.ml{,i}>: pkg_cohttp.lwt_client
+<lib_test/*.ml{,i}>: pkg_lwt.syntax
+<lib_test/*.ml{,i}>: pkg_lwt.unix
+<lib_test/*.ml{,i}>: pkg_lwt.ssl
+<lib_test/*.ml{,i}>: pkg_yojson
+<lib_test/*.ml{,i}>: pkg_cohttp
+<lib_test/create_issue.{native,byte}>: custom
 # OASIS_STOP
 <lib/*.ml{,i}>: syntax_camlp4o, annot, pkg_lwt.syntax
 <lib_test/*.ml{,i}>: syntax_camlp4o, annot, pkg_lwt.syntax

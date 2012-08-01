@@ -18,7 +18,7 @@
 open Lwt
 open Printf
 open Cohttp
-open Cohttpd
+open Cohttp_lwt_client
 open Config
 
 let scopes = [Github.Scope.Public_repo] 
@@ -84,10 +84,10 @@ let callback con_id req =
   (* normalize path to strip out ../. and such *)
   let path_elem = Re_str.(split (regexp_string "/") path) in
   lwt resp = Resp.dispatch req path_elem in
-  Server.respond_with resp
+  Cohttp_lwt_server.respond_with resp
 
 let server_t =
-  let open Cohttpd.Server in
+  let open Cohttp_lwt_server in
   let port = 8080 in
   let spec = { default_spec with callback; port=port; auto_close=true } in
   main spec

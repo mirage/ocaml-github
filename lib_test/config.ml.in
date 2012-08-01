@@ -1,4 +1,4 @@
-(* Information from https://github.com/account/applications *)
+(* Information from https://github.com/settings/applications *)
 let client_id = ""
 let client_secret = ""
 (* Just put in a valid oAuth token here for the post-auth tests *)

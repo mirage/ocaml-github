@@ -1,8 +1,6 @@
 .PHONY: all clean install build
 all: build doc
 
-export OCAMLRUNPARAM=b
-
 setup.bin: setup.ml
 	ocamlopt.opt -o $@ $< || ocamlopt -o $@ $< || ocamlc -o $@ $<
 	rm -f setup.cmx setup.cmi setup.o setup.cmo

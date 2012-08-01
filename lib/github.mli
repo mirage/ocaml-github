@@ -46,10 +46,10 @@ val token_to_string : token -> string
  * of them at the moment!)
  *)
 module API : sig
-  val get : ?headers:Cohttpd.Client.headers ->
+  val get : ?headers:((string * string) list) ->
     token:token -> uri:Uri.t -> (Yojson.Basic.json -> 'a) -> 'a Monad.t
 
-  val post : ?headers:Cohttpd.Client.headers -> ?body:Yojson.Basic.json -> token:token ->
+  val post : ?headers:((string * string) list) -> ?body:Yojson.Basic.json -> token:token ->
       uri:Uri.t -> (Yojson.Basic.json -> 'a) -> 'a Monad.t
 end
 

@@ -50,7 +50,7 @@ module Scope = struct
 end
 
 module URI = struct
-  open Cohttpd.Client
+  open Cohttp_lwt_client
   open Printf
 
   let authorize ?scopes ~client_id () =
@@ -75,7 +75,7 @@ end
 
 open Printf
 open Lwt
-open Cohttpd.Client
+open Cohttp_lwt_client
 
 type error =
 | Generic of int * (string * string) list * string
@@ -119,7 +119,7 @@ let request uri reqfn respfn =
       with exn -> Error (Bad_response exn) 
     in
     return r
-  with Cohttpd.Client.Http_error (code, headers, response) -> begin
+  with Cohttp_lwt_client.Http_error (code, headers, response) -> begin
     return (Error (Generic (code, headers, response)))
   end 
 
@@ -133,7 +133,7 @@ let authorize ?scopes ~client_id () =
 
 type token = string
 
-(* Convert a code after a user oAuth into an access token that cdan
+(* Convert a code after a user oAuth into an access token that can
  * be used in subsequent requests.
  *)
 let token_of_code ~client_id ~client_secret ~code () : token response Lwt.t =

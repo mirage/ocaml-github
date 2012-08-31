@@ -50,7 +50,7 @@ module Scope = struct
 end
 
 module URI = struct
-  open Cohttp_lwt_client
+  open Cohttp_lwt
   open Printf
 
   let authorize ?scopes ~client_id () =
@@ -75,10 +75,11 @@ end
 
 open Printf
 open Lwt
-open Cohttp_lwt_client
+open Cohttp_lwt
 
 type error =
 | Generic of int * (string * string) list * string
+| No_response
 | Bad_response of exn
 and 'a response =
 | Error of error
@@ -88,6 +89,7 @@ let error_to_string = function
   | Generic (code, headers, body) ->
     sprintf "HTTP Error %d\n%s\n" code
       (String.concat "\n" (List.map (fun (k,v) -> sprintf "%s: %s" k v) headers))
+  | No_response -> "No response"
   | Bad_response exn -> sprintf "Bad response: %s\n" (Printexc.to_string exn)    
 
 module Monad = struct
@@ -111,17 +113,17 @@ end
 
 (* Generic request function that wraps result in 'a response *)
 let request uri reqfn respfn =
-  try_lwt 
-    eprintf "%s\n%!" (Uri.to_string uri);
-    lwt headers, body = reqfn uri in
-    let r =
-      try Response(respfn ~headers ~body)
-      with exn -> Error (Bad_response exn) 
-    in
-    return r
-  with Cohttp_lwt_client.Http_error (code, headers, response) -> begin
-    return (Error (Generic (code, headers, response)))
-  end 
+  eprintf "%s\n%!" (Uri.to_string uri);
+  match_lwt reqfn uri with
+  |None -> return (Error No_response)
+  |Some (res,body) -> begin
+    try_lwt 
+      lwt r = respfn ~res ~body in
+      return (Response r)
+    with exn -> return (Error (Bad_response exn))
+  end
+
+module C = Cohttp_lwt
 
 (* Authorization request, normally not used (a link in the HTML is
  * sufficient to redirect user to Github *)
@@ -129,7 +131,7 @@ let authorize ?scopes ~client_id () =
   let uri = URI.authorize ?scopes ~client_id () in
   (* Github will return a 302 usually, to the redirect_uri
    * registered in the application entry on Github *)
-    request uri get (fun ~headers ~body -> ())
+    request uri C.Client.get (fun ~res ~body -> return ())
 
 type token = string
 
@@ -138,8 +140,10 @@ type token = string
  *)
 let token_of_code ~client_id ~client_secret ~code () : token response Lwt.t =
   let uri = URI.token ~client_id ~client_secret ~code () in
-  request uri post (fun ~headers ~body ->
-    List.assoc "access_token" (Uri.query_of_encoded body)
+  request uri C.Client.post (fun ~res ~body ->
+    lwt body = C.string_of_body body in
+    let t = List.assoc "access_token" (Uri.query_of_encoded body) in
+    return t
   )
 
 let token_of_string x = x
@@ -150,26 +154,29 @@ module API = struct
   (* Add an authorization token onto a request URI and parse the response
    * as JSON. *)
   let json_request ~token uri req resp =
-    request (Uri.add_query_param uri ("access_token", token)) req
-     (fun ~headers ~body -> resp (Yojson.Basic.from_string body))
+    let uri = Uri.add_query_param uri ("access_token", token) in
+    request uri req (fun ~res ~body ->
+      lwt body = C.string_of_body body >|= Yojson.Basic.from_string in
+      resp body
+    )
 
   (* GET wrapper that takes a URI, adds an access token and calls the 
    * result on the callback function.  *)
   let get ?headers ~token ~uri fn =
-    json_request ~token uri (get ?headers) fn
+    json_request ~token uri (C.Client.get ?headers) fn
 
   (* POST wrapper that takes a URI, adds an access token and calls the 
    * result on the callback function.  *)
   let post ?headers ?body ~token ~uri fn =
     (* Convert any body into JSON *)
     let body = match body with
-     |Some x -> Some (`String (Yojson.Basic.to_string x))
+     |Some x -> Cohttp_lwt.body_of_string (Yojson.Basic.to_string x)
      |None -> None in
     (* Add the correct mime-type header *)
     let headers = match headers with
-     |Some x -> Some (("content-type","application/json") :: x)
-     |None -> Some ["content-type","application/json"] in
-    json_request ~token uri (post ?headers ?body) fn
+     |Some x -> Cohttp.Header.add x "content-type" "application/json"
+     |None -> Cohttp.Header.of_list ["content-type","application/json"] in
+    json_request ~token uri (C.Client.post ~headers ?body) fn
 end
 
 (* Utility module with the Yojson parsing combinators and some extra
@@ -300,7 +307,7 @@ module Issues = struct
     let open Parse in
     let uri = URI.repo_issues ~user ~repo in
     let params = [   ] in (* TODO *)
-    API.get ~token ~uri (convert_each of_json)
+    API.get ~token ~uri (fun j -> return (convert_each of_json j))
 
   let create ~title ?body ?assignee ?milestone ?labels ~token ~user ~repo () =
     let open Create in
@@ -312,5 +319,5 @@ module Issues = struct
       "labels", of_string_list_option labels;
     ] in
     let uri = URI.repo_issues ~user ~repo in
-    API.post ~body ~token ~uri of_json
+    API.post ~body ~token ~uri (fun j -> return (of_json j))
 end

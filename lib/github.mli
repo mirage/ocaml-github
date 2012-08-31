@@ -46,11 +46,11 @@ val token_to_string : token -> string
  * of them at the moment!)
  *)
 module API : sig
-  val get : ?headers:((string * string) list) ->
-    token:token -> uri:Uri.t -> (Yojson.Basic.json -> 'a) -> 'a Monad.t
+  val get : ?headers:Cohttp.Header.t ->
+    token:token -> uri:Uri.t -> (Yojson.Basic.json -> 'a Lwt.t) -> 'a Monad.t
 
-  val post : ?headers:((string * string) list) -> ?body:Yojson.Basic.json -> token:token ->
-      uri:Uri.t -> (Yojson.Basic.json -> 'a) -> 'a Monad.t
+  val post : ?headers:Cohttp.Header.t -> ?body:Yojson.Basic.json -> token:token ->
+      uri:Uri.t -> (Yojson.Basic.json -> 'a Lwt.t) -> 'a Monad.t
 end
 
 (* Various useful URI generation functions, normally for displaying on a web-page.

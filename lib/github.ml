@@ -111,19 +111,21 @@ module Monad = struct
   let (>>=) = bind
 end
 
+module C = Cohttp_lwt
+
 (* Generic request function that wraps result in 'a response *)
 let request uri reqfn respfn =
   eprintf "%s\n%!" (Uri.to_string uri);
   match_lwt reqfn uri with
   |None -> return (Error No_response)
   |Some (res,body) -> begin
+    Printf.eprintf "Github response code %s\n%!" (Cohttp.Code.string_of_status (C.Response.status res));
+    (* TODO check that this is a valid response code *)
     try_lwt 
       lwt r = respfn ~res ~body in
       return (Response r)
     with exn -> return (Error (Bad_response exn))
   end
-
-module C = Cohttp_lwt
 
 (* Authorization request, normally not used (a link in the HTML is
  * sufficient to redirect user to Github *)
@@ -169,13 +171,17 @@ module API = struct
    * result on the callback function.  *)
   let post ?headers ?body ~token ~uri fn =
     (* Convert any body into JSON *)
-    let body = match body with
-     |Some x -> Cohttp_lwt.body_of_string (Yojson.Basic.to_string x)
-     |None -> None in
+    let body, clen = match body with
+     |Some x ->
+       let buf = Yojson.Basic.to_string x in
+       let clen = String.length buf in
+       Cohttp_lwt.body_of_string (Yojson.Basic.to_string x), clen
+     |None -> None, 0 in
     (* Add the correct mime-type header *)
     let headers = match headers with
      |Some x -> Cohttp.Header.add x "content-type" "application/json"
      |None -> Cohttp.Header.of_list ["content-type","application/json"] in
+    let headers = Cohttp.Header.add headers "content-length" (string_of_int clen) in
     json_request ~token uri (C.Client.post ~headers ?body) fn
 end
 

@@ -24,7 +24,7 @@ let t =
   lwt issue = 
     Github.Monad.(
       run (Github.Issues.create
-        ~title:"ocaml-github regression test"
+        ~title:"ocaml-github regression test with v2-interface"
         ~body:"and i guess it worked!"
         ~assignee:"avsm"
         ~token

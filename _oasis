@@ -21,6 +21,14 @@ Executable rwo
   Install:            false
   BuildDepends:       cohttp, lwt.syntax, lwt.unix, lwt.ssl, github, cohttp.lwt
 
+Executable get_token
+  Path:               lib_test
+  MainIs:             get_token.ml
+  Custom:             true
+  CompiledObject:     best
+  Install:            false
+  BuildDepends:       cohttp, lwt.syntax, lwt.unix, lwt.ssl, github, cohttp.lwt
+
 Executable list_issues
   Path:               lib_test
   MainIs:             issues.ml

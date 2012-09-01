@@ -28,11 +28,14 @@ end
 
 (* Authorization scopes *)
 module Scope : sig
-  type t =
-  | User 
-  | Public_repo 
-  | Repo 
-  | Gist
+  type t = [
+    | `User
+    | `Public_repo
+    | `Gist
+    | `Repo
+    | `Repo_status
+    | `Delete_repo 
+  ]
 end
 
 (* Authorization request, normally not used (a link in the HTML is

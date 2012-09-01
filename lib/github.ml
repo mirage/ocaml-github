@@ -17,27 +17,36 @@
 
 (* Authorization Scopes *)
 module Scope = struct
-  type t =
-  | User
-  | Public_repo
-  | Repo
-  | Gist
+  type t = [
+    | `User
+    | `Public_repo
+    | `Gist
+    | `Repo
+    | `Repo_status
+    | `Delete_repo 
+  ]
 
-  let scope_to_string = function
-  | User -> "user"
-  | Public_repo -> "public_repo"
-  | Repo -> "repo"
-  | Gist -> "gist"
+  let string_of_scope (x:t) =
+    match x with
+    | `User -> "user"
+    | `Public_repo -> "public_repo"
+    | `Repo -> "repo"
+    | `Gist -> "gist"
+    | `Repo_status -> "repo_status"
+    | `Delete_repo -> "delete_repo"
 
-  let scope_of_string = function
-  | "user" -> Some User
-  | "public_repo" -> Some Public_repo
-  | "repo" -> Some Repo
-  | "gist" -> Some Gist
-  | _ -> None
+  let scope_of_string x : t option =
+    match x with
+    | "user" -> Some `User
+    | "public_repo" -> Some `Public_repo
+    | "repo" -> Some `Repo
+    | "gist" -> Some `Gist
+    | "repo_status" -> Some `Repo_status
+    | "delete_repo" -> Some `Delete_repo
+    | _ -> None
 
-  let scopes_to_string scopes =
-    String.concat "," (List.map scope_to_string scopes)
+  let string_of_scopes scopes =
+    String.concat "," (List.map string_of_scope scopes)
 
   let scopes_of_string s =
     let scopes = Re_str.(split (regexp_string ",") s) in
@@ -55,7 +64,7 @@ module URI = struct
     let uri = Uri.of_string entry_uri in
     let q = ["client_id", client_id ] in
     let q = match scopes with
-     |Some scopes -> ("scope", Scope.scopes_to_string scopes) :: q
+     |Some scopes -> ("scope", Scope.string_of_scopes scopes) :: q
      |None -> q in
     Uri.with_query uri q
 
@@ -197,8 +206,8 @@ end
 
 module Token = struct
   type t = string
-  let direct ?(scopes=[Scope.Repo]) ~user ~pass () =
-    let scopes = List.map (fun x -> `String (Scope.scope_to_string x)) scopes in
+  let direct ?(scopes=[`Repo]) ~user ~pass () =
+    let scopes = List.map (fun x -> `String (Scope.string_of_scope x)) scopes in
     let body = `Assoc [ "scopes", `List scopes; "note", `String "ocaml-github" ] in
     let headers = Cohttp.Header.(add_authorization (init ()) (Cohttp.Auth.Basic (user,pass))) in
     let open Parse in

@@ -1,6 +1,12 @@
 (* Information from https://github.com/settings/applications *)
 let client_id = ""
 let client_secret = ""
-(* Just put in a valid oAuth token here for the post-auth tests *)
-let access_token = Github.token_of_string ""
 
+(* Use lib_test/get_issue with these Github credentials set to 
+   obtain an oAuth token *)
+let user = ""
+let pass = ""
+
+(* Put in the valid oAuth token here for the post-auth tests,
+ * such as lib_test/create_issue *)
+let access_token = Github.Token.of_string ""

@@ -70,7 +70,10 @@ module URI = struct
   let api = "https://api.github.com"
 
   let repo_issues ~user ~repo =
-     Uri.of_string (sprintf "%s/repos/%s/%s/issues" api user repo) 
+    Uri.of_string (sprintf "%s/repos/%s/%s/issues" api user repo) 
+
+  let authorizations =
+    Uri.of_string "https://api.github.com/authorizations"
 end 
 
 open Printf
@@ -135,28 +138,14 @@ let authorize ?scopes ~client_id () =
    * registered in the application entry on Github *)
     request uri C.Client.get (fun ~res ~body -> return ())
 
-type token = string
-
-(* Convert a code after a user oAuth into an access token that can
- * be used in subsequent requests.
- *)
-let token_of_code ~client_id ~client_secret ~code () : token response Lwt.t =
-  let uri = URI.token ~client_id ~client_secret ~code () in
-  request uri C.Client.post (fun ~res ~body ->
-    lwt body = C.string_of_body body in
-    let t = List.assoc "access_token" (Uri.query_of_encoded body) in
-    return t
-  )
-
-let token_of_string x = x
-let token_to_string x = x
-
 module API = struct
 
   (* Add an authorization token onto a request URI and parse the response
    * as JSON. *)
-  let json_request ~token uri req resp =
-    let uri = Uri.add_query_param uri ("access_token", token) in
+  let json_request ?token uri req resp =
+    let uri = match token with
+     |Some token -> Uri.add_query_param uri ("access_token", token) 
+     |None -> uri in
     request uri req (fun ~res ~body ->
       lwt body = C.string_of_body body >|= Yojson.Basic.from_string in
       resp body
@@ -164,12 +153,12 @@ module API = struct
 
   (* GET wrapper that takes a URI, adds an access token and calls the 
    * result on the callback function.  *)
-  let get ?headers ~token ~uri fn =
-    json_request ~token uri (C.Client.get ?headers) fn
+  let get ?headers ?token ~uri fn =
+    json_request ?token uri (C.Client.get ?headers) fn
 
   (* POST wrapper that takes a URI, adds an access token and calls the 
    * result on the callback function.  *)
-  let post ?headers ?body ~token ~uri fn =
+  let post ?headers ?body ?token ~uri fn =
     (* Convert any body into JSON *)
     let body, clen = match body with
      |Some x ->
@@ -182,7 +171,7 @@ module API = struct
      |Some x -> Cohttp.Header.add x "content-type" "application/json"
      |None -> Cohttp.Header.of_list ["content-type","application/json"] in
     let headers = Cohttp.Header.add headers "content-length" (string_of_int clen) in
-    json_request ~token uri (C.Client.post ~headers ?body) fn
+    json_request ?token uri (C.Client.post ~headers ?body) fn
 end
 
 (* Utility module with the Yojson parsing combinators and some extra
@@ -209,6 +198,33 @@ module Parse = struct
     |x -> Some (fn x)
 end
 
+module Token = struct
+  type t = string
+  let direct ?(scopes=[Scope.Repo]) ~user ~pass () =
+    let scopes = List.map (fun x -> `String (Scope.scope_to_string x)) scopes in
+    let body = `Assoc [ "scopes", `List scopes; "note", `String "ocaml-github" ] in
+    let headers = Cohttp.Header.(add_authorization (init ()) (Cohttp.Auth.Basic (user,pass))) in
+    let open Parse in
+    API.post ~headers ~body ~uri:URI.authorizations (fun json ->
+      let token = (to_string (member "token" json)) in
+      return token
+    )
+
+  (* Convert a code after a user oAuth into an access token that can
+   * be used in subsequent requests.
+   *)
+  let of_code ~client_id ~client_secret ~code () =
+    let uri = URI.token ~client_id ~client_secret ~code () in
+    request uri C.Client.post (fun ~res ~body ->
+      lwt body = C.string_of_body body in
+      let t = List.assoc "access_token" (Uri.query_of_encoded body) in
+      return t
+    )
+
+  let of_string x = x
+  let to_string x = x
+end
+ 
 (* Utility module that can be opened when creating Yojson *)
 module Create = struct
   let of_string x =
@@ -326,4 +342,5 @@ module Issues = struct
     ] in
     let uri = URI.repo_issues ~user ~repo in
     API.post ~body ~token ~uri (fun j -> return (of_json j))
+
 end

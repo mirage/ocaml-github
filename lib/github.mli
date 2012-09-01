@@ -36,10 +36,13 @@ end
 val authorize : ?scopes:Scope.t list -> client_id:string -> unit -> unit Monad.t
 
 (* Access token to the API, usually obtained via a user oAuth *)
-type token
-val token_of_code : client_id:string -> client_secret:string -> code:string -> unit -> token Monad.t
-val token_of_string : string -> token
-val token_to_string : token -> string
+module Token : sig
+  type t
+  val of_code: client_id:string -> client_secret:string -> code:string -> unit -> t Monad.t
+  val direct : ?scopes:Scope.t list -> user:string -> pass:string -> unit -> t Monad.t
+  val to_string : t -> string
+  val of_string : string -> t
+end
 
 (* Generic API accessor function, not normally used directly, but useful in case you
  * wish to call an API call that isn't wrapped in the rest of the library (i.e. most
@@ -47,9 +50,9 @@ val token_to_string : token -> string
  *)
 module API : sig
   val get : ?headers:Cohttp.Header.t ->
-    token:token -> uri:Uri.t -> (Yojson.Basic.json -> 'a Lwt.t) -> 'a Monad.t
+    ?token:Token.t -> uri:Uri.t -> (Yojson.Basic.json -> 'a Lwt.t) -> 'a Monad.t
 
-  val post : ?headers:Cohttp.Header.t -> ?body:Yojson.Basic.json -> token:token ->
+  val post : ?headers:Cohttp.Header.t -> ?body:Yojson.Basic.json -> ?token:Token.t ->
       uri:Uri.t -> (Yojson.Basic.json -> 'a Lwt.t) -> 'a Monad.t
 end
 
@@ -99,7 +102,7 @@ module Issues : sig
     ?labels:'b ->
     ?sort:sort ->
     ?direction:direction ->
-    token:token ->
+    token:Token.t ->
     user:string -> repo:string -> unit -> issue list Monad.t
 
   val create :
@@ -108,7 +111,7 @@ module Issues : sig
     ?assignee:string ->
     ?milestone:int ->
     ?labels:string list ->
-    token:token ->
+    token:Token.t ->
     user:string -> repo:string -> unit -> issue Monad.t
 
 end

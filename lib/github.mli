@@ -28,7 +28,11 @@ end
 
 (* Authorization scopes *)
 module Scope : sig
-  type t = User | Public_repo | Repo | Gist
+  type t =
+  | User 
+  | Public_repo 
+  | Repo 
+  | Gist
 end
 
 (* Authorization request, normally not used (a link in the HTML is
@@ -49,17 +53,25 @@ end
  * of them at the moment!)
  *)
 module API : sig
-  val get : ?headers:Cohttp.Header.t ->
-    ?token:Token.t -> uri:Uri.t -> (Yojson.Basic.json -> 'a Lwt.t) -> 'a Monad.t
+  val get : 
+    ?headers:Cohttp.Header.t -> 
+    ?token:Token.t -> 
+    uri:Uri.t -> 
+    (Yojson.Basic.json -> 'a Lwt.t) -> 'a Monad.t
 
-  val post : ?headers:Cohttp.Header.t -> ?body:Yojson.Basic.json -> ?token:Token.t ->
-      uri:Uri.t -> (Yojson.Basic.json -> 'a Lwt.t) -> 'a Monad.t
+  val post : 
+    ?headers:Cohttp.Header.t ->
+    ?body:Yojson.Basic.json ->
+    ?token:Token.t ->
+    uri:Uri.t ->
+    (Yojson.Basic.json -> 'a Lwt.t) -> 'a Monad.t
 end
 
 (* Various useful URI generation functions, normally for displaying on a web-page.
  * The [authorize] function is the entry URL for your users, and the [token] URI
  * is the URI used to convert the result into a concrete access token *)
 module URI : sig
+  val authorizations : Uri.t
   val authorize : ?scopes:Scope.t list -> client_id:string -> unit -> Uri.t
   val token : client_id:string -> client_secret:string -> code:string -> unit -> Uri.t
   val repo_issues : user:string -> repo:string -> Uri.t
@@ -113,5 +125,4 @@ module Issues : sig
     ?labels:string list ->
     token:Token.t ->
     user:string -> repo:string -> unit -> issue Monad.t
-
 end

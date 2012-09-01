@@ -50,9 +50,6 @@ module Scope = struct
 end
 
 module URI = struct
-  open Cohttp_lwt
-  open Printf
-
   let authorize ?scopes ~client_id () =
     let entry_uri = "https://github.com/login/oauth/authorize" in
     let uri = Uri.of_string entry_uri in
@@ -70,7 +67,7 @@ module URI = struct
   let api = "https://api.github.com"
 
   let repo_issues ~user ~repo =
-    Uri.of_string (sprintf "%s/repos/%s/%s/issues" api user repo) 
+    Uri.of_string (Printf.sprintf "%s/repos/%s/%s/issues" api user repo) 
 
   let authorizations =
     Uri.of_string "https://api.github.com/authorizations"

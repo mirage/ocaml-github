@@ -488,4 +488,36 @@ let dispatch_default = MyOCamlbuildBase.dispatch_default package_default;;
 
 # 490 "myocamlbuild.ml"
 (* OASIS_STOP *)
-Ocamlbuild_plugin.dispatch dispatch_default;;
+open Ocamlbuild_plugin
+
+module Atdgen = struct
+  let cmd = "atdgen" (* TODO detect from ./configure phase *)
+  let run_atdgen tagger env _ =
+    let tags = tagger (tags_of_pathname "%.atd"++"atdgen") in
+    Cmd (S [A cmd; T tags; Px (env "%.atd")])
+
+  let rules () =
+    flag ["atdgen"; "generate"; "json"] & S[A"-j"];
+    flag ["atdgen"; "generate"; "typedef"] & S[A"-t"];
+    flag ["atdgen"; "generate"; "biniou"] & S[A"-b"];
+    flag ["atdgen"; "generate"; "validator"] & S[A"-v"];
+    flag ["atdgen"; "generate"; "std_json"] & S[A"-j-std"];
+    rule "%.atd -> %_j.ml{i}" ~prods:["%_j.ml";"%_j.mli"] ~dep:"%.atd"
+     (run_atdgen (fun tags -> tags++"generate"++"json"));
+    rule "%.atd -> %_t.ml{i}" ~prods:["%_t.ml";"%_t.mli"] ~dep:"%.atd"
+     (run_atdgen (fun tags -> tags++"generate"++"typedef"));
+    rule "%.atd -> %_b.ml{i}" ~prods:["%_b.ml";"%_b.mli"] ~dep:"%.atd"
+     (run_atdgen (fun tags -> tags++"generate"++"biniou"));
+    rule "%.atd -> %_v.ml{i}" ~prods:["%_v.ml";"%_v.mli"] ~dep:"%.atd"
+     (run_atdgen (fun tags -> tags++"generate"++"validator"));
+end
+
+let () =
+  dispatch
+    (fun hook ->
+       dispatch_default hook;
+       match hook with
+         | After_rules ->
+             Atdgen.rules ();
+         | _ -> ()
+    )

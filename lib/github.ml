@@ -55,7 +55,6 @@ module Scope = struct
       | None -> a
       | Some b -> b::a
     ) [] scopes
-  
 end
 
 module URI = struct
@@ -84,25 +83,25 @@ end
 
 open Printf
 open Lwt
-open Cohttp_lwt
-
-type error =
-| Generic of int * (string * string) list * string
-| No_response
-| Bad_response of exn
-and 'a response =
-| Error of error
-| Response of 'a
-
-let error_to_string = function
-  | Generic (code, headers, body) ->
-    sprintf "HTTP Error %d\n%s\n" code
-      (String.concat "\n" (List.map (fun (k,v) -> sprintf "%s: %s" k v) headers))
-  | No_response -> "No response"
-  | Bad_response exn -> sprintf "Bad response: %s\n" (Printexc.to_string exn)    
 
 module Monad = struct
+
+  type error =
+  | Generic of int * (string * string) list * string
+  | No_response
+  | Bad_response of exn
+  and 'a response =
+  | Error of error
+  | Response of 'a
+
   type 'a t = 'a response Lwt.t
+
+  let error_to_string = function
+    | Generic (code, headers, body) ->
+      sprintf "HTTP Error %d\n%s\n" code
+        (String.concat "\n" (List.map (fun (k,v) -> sprintf "%s: %s" k v) headers))
+    | No_response -> "No response"
+    | Bad_response exn -> sprintf "Bad response: %s\n" (Printexc.to_string exn)    
 
   let bind x fn =
     match_lwt x with
@@ -126,14 +125,14 @@ module C = Cohttp_lwt
 let request uri reqfn respfn =
   eprintf "%s\n%!" (Uri.to_string uri);
   match_lwt reqfn uri with
-  |None -> return (Error No_response)
+  |None -> return (Monad.(Error No_response))
   |Some (res,body) -> begin
     Printf.eprintf "Github response code %s\n%!" (Cohttp.Code.string_of_status (C.Response.status res));
     (* TODO check that this is a valid response code *)
     try_lwt 
       lwt r = respfn ~res ~body in
-      return (Response r)
-    with exn -> return (Error (Bad_response exn))
+      return (Monad.Response r)
+    with exn -> return (Monad.(Error (Bad_response exn)))
   end
 
 (* Authorization request, normally not used (a link in the HTML is

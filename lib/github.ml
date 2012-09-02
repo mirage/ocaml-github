@@ -123,15 +123,18 @@ module CL = Cohttp_lwt
 
 module API = struct
   open Lwt
+
   (* Generic request function that wraps result in 'a response *)
   let request uri reqfn respfn =
     Printf.eprintf "%s\n%!" (Uri.to_string uri);
     match_lwt reqfn uri with
-    |None -> return (Monad.(Error No_response))
+    |None ->
+      return (Monad.(Error No_response))
     |Some (res,body) -> begin
       Printf.eprintf "Github response code %s\n%!" (C.Code.string_of_status (CL.Response.status res));
       (* TODO check that this is a valid response code *)
       try_lwt 
+        lwt body = CL.string_of_body body in
         lwt r = respfn ~res ~body in
         return (Monad.Response r)
       with exn -> return (Monad.(Error (Bad_response exn)))
@@ -139,18 +142,16 @@ module API = struct
 
   (* Add an authorization token onto a request URI and parse the response
    * as JSON. *)
-  let json_request ?token uri req resp =
+  let request_with_token ?token uri req resp =
     let uri = match token with
      |Some token -> Uri.add_query_param uri ("access_token", token) 
      |None -> uri in
-    request uri req (fun ~res ~body ->
-      CL.string_of_body body >>= resp
-    )
+    request uri req (fun ~res ~body -> resp body)
 
   (* GET wrapper that takes a URI, adds an access token and calls the 
    * result on the callback function.  *)
   let get ?headers ?token ~uri fn =
-    json_request ?token uri (CL.Client.get ?headers) fn
+    request_with_token ?token uri (CL.Client.get ?headers) fn
 
   (* POST wrapper that takes a URI, adds an access token and calls the 
    * result on the callback function.  *)
@@ -166,7 +167,7 @@ module API = struct
      |Some x -> C.Header.add x "content-type" "application/json"
      |None -> C.Header.of_list ["content-type","application/json"] in
     let headers = C.Header.add headers "content-length" (string_of_int clen) in
-    json_request ?token uri (CL.Client.post ~headers ?body) fn
+    request_with_token ?token uri (CL.Client.post ~headers ?body) fn
 end
 
 (* Authorization request, normally not used (a link in the HTML is
@@ -196,7 +197,6 @@ module Token = struct
   let of_code ~client_id ~client_secret ~code () =
     let uri = URI.token ~client_id ~client_secret ~code () in
     API.request uri CL.Client.post (fun ~res ~body ->
-      lwt body = CL.string_of_body body in
       let t = List.assoc "access_token" (Uri.query_of_encoded body) in
       Lwt.return t
     )

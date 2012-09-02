@@ -19,7 +19,7 @@ Executable rwo
   Custom:             true
   CompiledObject:     best
   Install:            false
-  BuildDepends:       cohttp, lwt.syntax, lwt.unix, lwt.ssl, github, cohttp.lwt
+  BuildDepends:       cohttp.lwt, lwt.syntax, github, atdgen
 
 Executable get_token
   Path:               lib_test
@@ -27,7 +27,7 @@ Executable get_token
   Custom:             true
   CompiledObject:     best
   Install:            false
-  BuildDepends:       cohttp, lwt.syntax, lwt.unix, lwt.ssl, github, cohttp.lwt
+  BuildDepends:       cohttp.lwt, lwt.syntax, github, atdgen
 
 Executable list_issues
   Path:               lib_test
@@ -35,7 +35,7 @@ Executable list_issues
   Custom:             true
   CompiledObject:     best
   Install:            false
-  BuildDepends:       cohttp.lwt, lwt.syntax, lwt.unix, lwt.ssl, github, yojson
+  BuildDepends:       cohttp.lwt, lwt.syntax, github, atdgen
 
 Executable list_milestones
   Path:               lib_test
@@ -51,4 +51,12 @@ Executable create_issue
   Custom:             true
   CompiledObject:     best
   Install:            false
-  BuildDepends:       cohttp.lwt, lwt.syntax, lwt.unix, lwt.ssl, github, yojson
+  BuildDepends:       cohttp.lwt, lwt.syntax, github, atdgen
+
+Executable create_milestone
+  Path:               lib_test
+  MainIs:             create_milestone.ml
+  Custom:             true
+  CompiledObject:     best
+  Install:            false
+  BuildDepends:       cohttp.lwt, lwt.syntax, github, atdgen

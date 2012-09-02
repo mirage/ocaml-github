@@ -26,14 +26,10 @@ module Monad : sig
   val (>>=) : 'a t -> ('a -> 'b t) -> 'b t
 end
 
-(* Authorization request, normally not used (a link in the HTML is
- * sufficient to redirect user to Github *)
-val authorize : ?scopes:Github_t.scope list -> client_id:string -> unit -> unit Monad.t
-
 (* Access token to the API, usually obtained via a user oAuth *)
 module Token : sig
   type t
-  val of_code: client_id:string -> client_secret:string -> code:string -> unit -> t option Monad.t
+  val of_code: client_id:string -> client_secret:string -> code:string -> unit -> t option Lwt.t
   val direct : ?scopes:Github_t.scope list -> user:string -> pass:string -> unit -> t Monad.t
   val to_string : t -> string
   val of_string : string -> t

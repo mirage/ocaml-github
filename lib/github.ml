@@ -124,25 +124,10 @@ module CL = Cohttp_lwt
 module API = struct
   open Lwt
 
-  (* Generic request function that wraps result in 'a response *)
-  let request uri reqfn respfn =
-    Printf.eprintf "%s\n%!" (Uri.to_string uri);
-    match_lwt reqfn uri with
-    |None ->
-      return (Monad.(Error No_response))
-    |Some (res,body) -> begin
-      Printf.eprintf "Github response code %s\n%!" (C.Code.string_of_status (CL.Response.status res));
-      (* TODO check that this is a valid response code *)
-      try_lwt 
-        lwt body = CL.string_of_body body in
-        lwt r = respfn ~res ~body in
-        return (Monad.Response r)
-      with exn -> return (Monad.(Error (Bad_response exn)))
-    end
-
-  (* Add an authorization token onto a request URI and parse the response
+   (* Add an authorization token onto a request URI and parse the response
    * as JSON. *)
-  let request_with_token ?headers ?token uri req resp =
+  let request_with_token ?headers ?token ?(params=[]) uri reqfn respfn =
+    let uri = Uri.add_query_params uri params in
     (* Add the correct mime-type header *)
     let headers = match headers with
      |Some x -> Some (C.Header.add x "content-type" "application/json")
@@ -150,34 +135,41 @@ module API = struct
     let uri = match token with
      |Some token -> Uri.add_query_param uri ("access_token", token) 
      |None -> uri in
-    request uri (req ?headers) (fun ~res ~body -> resp body)
+    Printf.eprintf "%s\n%!" (Uri.to_string uri);
+    match_lwt (reqfn ?headers) uri with
+    |None ->
+      return (Monad.(Error No_response))
+    |Some (res,body) -> begin
+      Printf.eprintf "Github response code %s\n%!" (C.Code.string_of_status (CL.Response.status res));
+      (* TODO check that this is a valid response code *)
+      try_lwt 
+        lwt body = CL.string_of_body body in
+        lwt r = respfn body in
+        return (Monad.Response r)
+      with exn -> return (Monad.(Error (Bad_response exn)))
+    end
+
+  (* Convert a request body into a stream and force chunked-encoding
+   * to be disabled (to satisfy Github, which returns 411 Length Required
+   * to a chunked-encoding POST request). *)
+  let request_with_token_body ?headers ?token ?body uri req resp =
+    let body = match body with
+      |None -> None |Some b -> CL.body_of_string b in
+    let chunked = Some false in
+    request_with_token ?headers ?token uri (req ?body ?chunked) resp
 
   let get ?headers ?token ?(params=[]) ~uri fn =
-    let uri = Uri.add_query_params uri params in
-    request_with_token ?headers ?token uri CL.Client.get fn
+    request_with_token ?headers ?token ~params uri CL.Client.get fn
 
   let post ?headers ?body ?token ~uri fn =
-    let body = match body with |None -> None |Some b -> CL.body_of_string b in
-    let chunked = false in
-    request_with_token ?headers ?token uri (CL.Client.post ?body ~chunked) fn
+    request_with_token_body ?headers ?token ?body uri CL.Client.post fn
 
   let patch ?headers ?body ?token ~uri fn =
-    let body = match body with |None -> None |Some b -> CL.body_of_string b in
-    let chunked = false in
-    request_with_token ?headers ?token uri (CL.Client.patch ?body ~chunked) fn
+    request_with_token_body ?headers ?token ?body uri CL.Client.patch fn
 
   let delete ?headers ?token ?(params=[]) ~uri fn =
-    let uri = Uri.add_query_params uri params in
-    request_with_token ?headers ?token uri CL.Client.delete fn
+    request_with_token ?headers ?token ~params uri CL.Client.delete fn
 end
-
-(* Authorization request, normally not used (a link in the HTML is
- * sufficient to redirect user to Github *)
-let authorize ?scopes ~client_id () =
-  let uri = URI.authorize ?scopes ~client_id () in
-  (* Github will return a 302 usually, to the redirect_uri
-   * registered in the application entry on Github *)
-    API.request uri CL.Client.get (fun ~res ~body -> Lwt.return_unit)
 
 open Github_t
 open Github_j
@@ -200,12 +192,16 @@ module Token = struct
    *)
   let of_code ~client_id ~client_secret ~code () =
     let uri = URI.token ~client_id ~client_secret ~code () in
-    API.request uri CL.Client.post (fun ~res ~body ->
+    match_lwt CL.Client.post uri with
+    |None -> return None
+    |Some (res, body) -> begin
+      lwt body = CL.string_of_body body in
       try
-        return (Some (List.assoc "access_token" (Uri.query_of_encoded body)))
-      with Not_found ->
+        let form = Uri.query_of_encoded body in
+        return (Some (List.assoc "access_token" form))
+      with _ ->
         return None
-    )
+    end
 
   let of_string x = x
   let to_string x = x

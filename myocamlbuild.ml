@@ -492,24 +492,24 @@ open Ocamlbuild_plugin
 
 module Atdgen = struct
   let cmd = "atdgen" (* TODO detect from ./configure phase *)
-  let run_atdgen tagger env _ =
-    let tags = tagger (tags_of_pathname "%.atd"++"atdgen") in
+  let run_atdgen dst tagger env _ =
+    let tags = tagger (tags_of_pathname (env dst) ++"atdgen") in
     Cmd (S [A cmd; T tags; Px (env "%.atd")])
-
   let rules () =
+    rule "%.atd -> %_j.ml{i}" ~prods:["%_j.ml";"%_j.mli"] ~dep:"%.atd"
+     (run_atdgen "%_j.ml" (fun tags -> tags++"generate"++"json"));
+    rule "%.atd -> %_t.ml{i}" ~prods:["%_t.ml";"%_t.mli"] ~dep:"%.atd"
+     (run_atdgen "%_t.ml" (fun tags -> tags++"generate"++"typedef"));
+    rule "%.atd -> %_b.ml{i}" ~prods:["%_b.ml";"%_b.mli"] ~dep:"%.atd"
+     (run_atdgen "%_b.ml" (fun tags -> tags++"generate"++"biniou"));
+    rule "%.atd -> %_v.ml{i}" ~prods:["%_v.ml";"%_v.mli"] ~dep:"%.atd"
+     (run_atdgen "%_v.ml" (fun tags -> tags++"generate"++"validator"));
     flag ["atdgen"; "generate"; "json"] & S[A"-j"];
+    flag ["atdgen"; "generate"; "std_json"] & S[A"-j-std"];
     flag ["atdgen"; "generate"; "typedef"] & S[A"-t"];
     flag ["atdgen"; "generate"; "biniou"] & S[A"-b"];
     flag ["atdgen"; "generate"; "validator"] & S[A"-v"];
-    flag ["atdgen"; "generate"; "std_json"] & S[A"-j-std"];
-    rule "%.atd -> %_j.ml{i}" ~prods:["%_j.ml";"%_j.mli"] ~dep:"%.atd"
-     (run_atdgen (fun tags -> tags++"generate"++"json"));
-    rule "%.atd -> %_t.ml{i}" ~prods:["%_t.ml";"%_t.mli"] ~dep:"%.atd"
-     (run_atdgen (fun tags -> tags++"generate"++"typedef"));
-    rule "%.atd -> %_b.ml{i}" ~prods:["%_b.ml";"%_b.mli"] ~dep:"%.atd"
-     (run_atdgen (fun tags -> tags++"generate"++"biniou"));
-    rule "%.atd -> %_v.ml{i}" ~prods:["%_v.ml";"%_v.mli"] ~dep:"%.atd"
-     (run_atdgen (fun tags -> tags++"generate"++"validator"));
+ 
 end
 
 let () =

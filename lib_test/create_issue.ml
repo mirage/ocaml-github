@@ -29,11 +29,10 @@ let t =
         ~assignee:"avsm"
         ~token
         ~user:"avsm"
-        ~repo:"ocaml-github"
-        ()
+        ~repo:"ocaml-github" ()
       )
     ) in
-  eprintf "created issue number %d\n%!" (issue.Github.Issues.number);
+  eprintf "created issue number %d\n%!" (issue.Github_t.issue_number);
   return ()
 
 let _ = Lwt_main.run t

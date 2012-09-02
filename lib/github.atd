@@ -1,0 +1,103 @@
+type scope = [
+    User <json name="user">
+  | Public_repo <json name="public_repo">
+  | Repo <json name="repo">
+  | Repo_status <json name="repo_status">
+  | Delete_repo <json name="delete_repo">
+  | Gist <json name="gist">
+]
+
+type app = {
+  name: string;
+  url: string;
+}  <ocaml field_prefix="app_">
+
+type authorization_request = {
+  scopes: scope list;
+  note: string;
+} <ocaml field_prefix="auth_req_">
+
+type authorization_response = {
+  scopes: scope list;
+  token: string;
+  app: app;
+  url: string;
+  id: int;
+  ?note: string option;
+  ?note_url: string option;
+}
+
+type new_issue = {
+  title: string;
+  ?body: string option;
+  ?assignee: string option;
+  ?milestone: string option;
+  ?labels: string list option;
+} <ocaml field_prefix="new_issue_">
+
+type issue_sort = [
+  | Created <json name="created">
+  | Updated <json name="updated">
+  | Comments <json name="comments">
+]
+
+type state = [
+  | Open <json name="open">
+  | Closed <json name="closed">
+]
+
+type direction = [
+  | Asc <json name="asc">
+  | Desc <json name="desc">
+]
+
+type user = {
+  login: string;
+  id: int;
+  ?avatar_url: string option;
+  ?gravatar_id: string option;
+  url: string;
+} <ocaml field_prefix="user_">
+
+type label = {
+  url: string;
+  name: string;
+  color: string;
+} <ocaml field_prefix="label_">
+
+type issue = {
+  url: string;
+  html_url: string;
+  number: int;
+  ~state <ocaml default="`Open">: state;
+  title: string;
+  ~body: string;
+  user: user;
+  labels: label list;
+  ~comments: int;
+  ~sort <ocaml default="`Created">: issue_sort;
+  ~direction <ocaml default="`Desc">: direction;
+  ?mentioned: string list option;
+} <ocaml field_prefix="issue_">
+
+type issues = issue list
+
+type milestone_sort = [
+  | Due_date <json name="due_date">
+  | Completeness <json name="completeness">
+]
+
+type milestone = {
+  url: string;
+  number: int;
+  ~state <ocaml default="`Open">: state;
+  ~title: string;
+  ~description: string;
+  ?creator: user option;
+  open_issues: int;
+  closed_issues: int;
+  created_at: string;
+  ?due_on: string option;
+} <ocaml field_prefix="milestone_"> 
+
+type milestones = milestone list

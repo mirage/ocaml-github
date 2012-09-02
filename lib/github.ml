@@ -17,16 +17,8 @@
 
 (* Authorization Scopes *)
 module Scope = struct
-  type t = [
-    | `User
-    | `Public_repo
-    | `Gist
-    | `Repo
-    | `Repo_status
-    | `Delete_repo 
-  ]
 
-  let string_of_scope (x:t) =
+  let string_of_scope (x:Github_t.scope) =
     match x with
     | `User -> "user"
     | `Public_repo -> "public_repo"
@@ -35,7 +27,7 @@ module Scope = struct
     | `Repo_status -> "repo_status"
     | `Delete_repo -> "delete_repo"
 
-  let scope_of_string x : t option =
+  let scope_of_string x : Github_t.scope option =
     match x with
     | "user" -> Some `User
     | "public_repo" -> Some `Public_repo
@@ -79,6 +71,12 @@ module URI = struct
 
   let authorizations =
     Uri.of_string "https://api.github.com/authorizations"
+
+  let repo_milestones ~user ~repo =
+    Uri.of_string (Printf.sprintf "%s/repos/%s/%s/milestones" api user repo)
+
+  let milestone ~user ~repo ~num =
+    Uri.of_string (Printf.sprintf "%s/repos/%s/%s/milestones/%d" api user repo num)
 end 
 
 open Printf
@@ -152,8 +150,7 @@ module API = struct
      |Some token -> Uri.add_query_param uri ("access_token", token) 
      |None -> uri in
     request uri req (fun ~res ~body ->
-      lwt body = C.string_of_body body >|= Yojson.Basic.from_string in
-      resp body
+      C.string_of_body body >>= resp
     )
 
   (* GET wrapper that takes a URI, adds an access token and calls the 
@@ -166,10 +163,9 @@ module API = struct
   let post ?headers ?body ?token ~uri fn =
     (* Convert any body into JSON *)
     let body, clen = match body with
-     |Some x ->
-       let buf = Yojson.Basic.to_string x in
+     |Some buf ->
        let clen = String.length buf in
-       Cohttp_lwt.body_of_string (Yojson.Basic.to_string x), clen
+       Cohttp_lwt.body_of_string buf, clen
      |None -> None, 0 in
     (* Add the correct mime-type header *)
     let headers = match headers with
@@ -179,40 +175,16 @@ module API = struct
     json_request ?token uri (C.Client.post ~headers ?body) fn
 end
 
-(* Utility module with the Yojson parsing combinators and some extra
- * uri and option combinators *)
-module Parse = struct
-  include Yojson.Basic.Util
-
-  (* Convert a JSON fragment into a URI option *)
-  let to_uri_option =
-    function
-    | `String s -> Some (Uri.of_string s)
-    | _ -> None
-
-  (* Convert a JSON fragment into a URI *)
-  let to_uri =
-    function
-    | `String s -> Uri.of_string s
-    | x -> raise (Type_error ("to_uri_option", x))
-
-  (* Propagate an optional value *)
-  let to_option fn =
-    function
-    |`Null -> None
-    |x -> Some (fn x)
-end
-
 module Token = struct
   type t = string
   let direct ?(scopes=[`Repo]) ~user ~pass () =
-    let scopes = List.map (fun x -> `String (Scope.string_of_scope x)) scopes in
-    let body = `Assoc [ "scopes", `List scopes; "note", `String "ocaml-github" ] in
+    let req = { Github_t.auth_req_scopes=scopes; auth_req_note="ocaml-github" } in
+    let body = Github_j.string_of_authorization_request req in
     let headers = Cohttp.Header.(add_authorization (init ()) (Cohttp.Auth.Basic (user,pass))) in
-    let open Parse in
-    API.post ~headers ~body ~uri:URI.authorizations (fun json ->
-      let token = (to_string (member "token" json)) in
-      return token
+    API.post ~headers ~body ~uri:URI.authorizations (fun body ->
+      let open Github_t in
+      let json = Github_j.authorization_response_of_string body in
+      return json.token
     )
 
   (* Convert a code after a user oAuth into an access token that can
@@ -230,122 +202,33 @@ module Token = struct
   let to_string x = x
 end
  
-(* Utility module that can be opened when creating Yojson *)
-module Create = struct
-  let of_string x =
-    `String x
+module Milestone = struct
+  open Github_t
+  let for_repo ?(state=`Open) ?(sort=`Due_date) ?(direction=`Desc) ~token ~user ~repo () =
+    let string_of_state = function |`Open -> "open" |`Closed -> "closed" in
+    let string_of_sort = function |`Due_date -> "due_date" |`Completeness -> "completeness" in
+    let string_of_direction = function |`Asc -> "asc" |`Desc -> "desc" in
+    let params = [ "state", string_of_state state; "sort", string_of_sort sort;
+      "direction", string_of_direction direction ] in
+    let uri = Uri.add_query_params (URI.repo_milestones ~user ~repo) params in
+    API.get ~token ~uri (fun b -> return (Github_j.milestones_of_string b))
 
-  let of_string_option =
-    function
-    |Some x -> `String x
-    |None -> `Null
-
-  let of_int_option =
-    function
-    |Some i -> `Int i
-    |None -> `Null
-
-  let of_string_list_option =
-    function
-    |None -> `List []
-    |Some l -> `List (List.map (fun x -> `String x) l)
-
-  let record x =
-    `Assoc x
-end
-
-module User = struct
-  type t = {
-    login: string;
-    id: int;
-    avatar_url: Uri.t option;
-    gravatar_id: string option;
-    url: Uri.t;
-  }
-
-  let of_json j =
-    let open Parse in
-    let (||>) a b = member a j |> b in
-    { login = "login" ||> to_string;
-      id = "id" ||> to_int;
-      avatar_url = "avatar_url" ||> to_uri_option;
-      gravatar_id = "gravatar_id" ||> to_string_option;
-      url = "url" ||> to_uri;
-    }
+  let get ~token ~user ~repo ~num () =
+    let uri = URI.milestone ~user ~repo ~num in
+    API.get ~token ~uri (fun b -> return (Github_j.milestone_of_string b))
 end
 
 module Issues = struct
   
-  type filter = [
-    | `Assigned
-    | `Created
-    | `Mentioned
-    | `Subscribed ]
-
-  type state = [
-    | `Open
-    | `Closed ]
-
-  let to_state =
-    function
-    |`String "open" -> `Open
-    |`String "closed" -> `Closed
-    |x -> raise (Yojson.Basic.Util.Type_error ("Issues.to_state",x))
-
-  type sort = [
-    | `Created  
-    | `Updated
-    | `Comments ]
-
-  type direction = [
-    | `Ascending
-    | `Descending ]
-
-  type milestone = [
-    | `Int of int
-    | `None
-    | `Any ]
-
-  type issue = {
-    url: Uri.t;
-    html_url: Uri.t;
-    number: int;
-    state: state;
-    title: string;
-    body: string;
-    user: User.t;
-    assignee: User.t option;
-  }
-
-  let of_json j =
-    let open Parse in
-    let (||>) a b = member a j |> b in
-    { url = "url" ||> to_uri; 
-      html_url = "html_url" ||> to_uri;
-      number = "number" ||> to_int;
-      state = "state" ||> to_state;
-      title = "title" ||> to_string;
-      body = "body" ||> to_string;
-      user = "user" ||> User.of_json;
-      assignee = "assignee" ||> to_option User.of_json
-    }
-
-  let for_repo ?(milestone=`Any) ?(state=`Open) ?mentioned ?labels ?(sort=`Created) ?(direction=`Descending) ~token ~user ~repo () =
-    let open Parse in
+  let for_repo ~token ~user ~repo () =
     let uri = URI.repo_issues ~user ~repo in
-    let params = [   ] in (* TODO *)
-    API.get ~token ~uri (fun j -> return (convert_each of_json j))
+    API.get ~token ~uri (fun b -> return (Github_j.issues_of_string b))
 
   let create ~title ?body ?assignee ?milestone ?labels ~token ~user ~repo () =
-    let open Create in
-    let body = record [ 
-      "title", of_string title;
-      "body", of_string_option body;
-      "assignee", of_string_option assignee;
-      "milestone", of_int_option milestone;
-      "labels", of_string_list_option labels;
-    ] in
+    let issue = { Github_t.new_issue_title=title; new_issue_body=body;
+      new_issue_assignee=assignee; new_issue_milestone=milestone;
+      new_issue_labels=labels } in
+    let body = Github_j.string_of_new_issue issue in
     let uri = URI.repo_issues ~user ~repo in
-    API.post ~body ~token ~uri (fun j -> return (of_json j))
-
+    API.post ~body ~token ~uri (fun b -> return (Github_j.issue_of_string b))
 end

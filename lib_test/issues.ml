@@ -10,8 +10,8 @@ let t =
     Github.Issues.for_repo ~token ~user:"avsm" ~repo:"mirage" () >>=
     fun issues ->
       List.iter (fun issue ->
-        let open Github.Issues in
-        eprintf "issue %d: %s\n%!" issue.number issue.title
+        let open Github_t in
+        eprintf "issue %d: %s\n%!" issue.issue_number issue.issue_title
       ) issues;
       return ()
   ) in

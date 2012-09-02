@@ -509,7 +509,6 @@ module Atdgen = struct
     flag ["atdgen"; "generate"; "typedef"] & S[A"-t"];
     flag ["atdgen"; "generate"; "biniou"] & S[A"-b"];
     flag ["atdgen"; "generate"; "validator"] & S[A"-v"];
- 
 end
 
 let () =

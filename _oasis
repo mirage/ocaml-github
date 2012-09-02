@@ -10,8 +10,8 @@ BuildTools: ocamlbuild
 Library github
   Path: lib
   Findlibname: github
-  Modules: Github
-  BuildDepends: lwt.syntax, cohttp, cohttp.lwt, yojson
+  Modules: Github, Github_j, Github_t
+  BuildDepends: lwt.syntax, cohttp, cohttp.lwt, yojson, atdgen
 
 Executable rwo
   Path:               lib_test
@@ -36,6 +36,14 @@ Executable list_issues
   CompiledObject:     best
   Install:            false
   BuildDepends:       cohttp.lwt, lwt.syntax, lwt.unix, lwt.ssl, github, yojson
+
+Executable list_milestones
+  Path:               lib_test
+  MainIs:             milestones.ml
+  Custom:             true
+  CompiledObject:     best
+  Install:            false
+  BuildDepends:       cohttp.lwt, lwt.syntax, github, atdgen
 
 Executable create_issue
   Path:               lib_test

@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: b2e5b2d9bd1b2ce5c8729fca949a25ca)
+# DO NOT EDIT (digest: 3701ac8217fe091cb51caea4c83a7f59)
 # Ignore VCS directories, you can use the same kind of rule outside 
 # OASIS_START/STOP if you want to exclude directories that contains 
 # useless stuff for the build process
@@ -18,6 +18,7 @@
 <lib/*.ml{,i}>: pkg_cohttp.lwt
 <lib/*.ml{,i}>: pkg_lwt.syntax
 <lib/*.ml{,i}>: pkg_yojson
+<lib/*.ml{,i}>: pkg_atdgen
 <lib/*.ml{,i}>: pkg_cohttp
 # Executable rwo
 <lib_test/rwo.{native,byte}>: use_github
@@ -26,6 +27,7 @@
 <lib_test/rwo.{native,byte}>: pkg_lwt.unix
 <lib_test/rwo.{native,byte}>: pkg_lwt.ssl
 <lib_test/rwo.{native,byte}>: pkg_yojson
+<lib_test/rwo.{native,byte}>: pkg_atdgen
 <lib_test/rwo.{native,byte}>: pkg_cohttp
 <lib_test/rwo.{native,byte}>: custom
 # Executable get_token
@@ -35,6 +37,7 @@
 <lib_test/get_token.{native,byte}>: pkg_lwt.unix
 <lib_test/get_token.{native,byte}>: pkg_lwt.ssl
 <lib_test/get_token.{native,byte}>: pkg_yojson
+<lib_test/get_token.{native,byte}>: pkg_atdgen
 <lib_test/get_token.{native,byte}>: pkg_cohttp
 <lib_test/get_token.{native,byte}>: custom
 # Executable list_issues
@@ -44,8 +47,17 @@
 <lib_test/issues.{native,byte}>: pkg_lwt.unix
 <lib_test/issues.{native,byte}>: pkg_lwt.ssl
 <lib_test/issues.{native,byte}>: pkg_yojson
+<lib_test/issues.{native,byte}>: pkg_atdgen
 <lib_test/issues.{native,byte}>: pkg_cohttp
 <lib_test/issues.{native,byte}>: custom
+# Executable list_milestones
+<lib_test/milestones.{native,byte}>: use_github
+<lib_test/milestones.{native,byte}>: pkg_cohttp.lwt
+<lib_test/milestones.{native,byte}>: pkg_lwt.syntax
+<lib_test/milestones.{native,byte}>: pkg_yojson
+<lib_test/milestones.{native,byte}>: pkg_atdgen
+<lib_test/milestones.{native,byte}>: pkg_cohttp
+<lib_test/milestones.{native,byte}>: custom
 # Executable create_issue
 <lib_test/create_issue.{native,byte}>: use_github
 <lib_test/create_issue.{native,byte}>: pkg_cohttp.lwt
@@ -53,6 +65,7 @@
 <lib_test/create_issue.{native,byte}>: pkg_lwt.unix
 <lib_test/create_issue.{native,byte}>: pkg_lwt.ssl
 <lib_test/create_issue.{native,byte}>: pkg_yojson
+<lib_test/create_issue.{native,byte}>: pkg_atdgen
 <lib_test/create_issue.{native,byte}>: pkg_cohttp
 <lib_test/*.ml{,i}>: use_github
 <lib_test/*.ml{,i}>: pkg_cohttp.lwt
@@ -60,9 +73,11 @@
 <lib_test/*.ml{,i}>: pkg_lwt.unix
 <lib_test/*.ml{,i}>: pkg_lwt.ssl
 <lib_test/*.ml{,i}>: pkg_yojson
+<lib_test/*.ml{,i}>: pkg_atdgen
 <lib_test/*.ml{,i}>: pkg_cohttp
 <lib_test/create_issue.{native,byte}>: custom
 # OASIS_STOP
 <lib/*.ml{,i}>: syntax_camlp4o, annot, pkg_lwt.syntax
 <lib_test/*.ml{,i}>: syntax_camlp4o, annot, pkg_lwt.syntax
 true: annot
+<lib/*_j.ml{,i}>: std_json

@@ -47,6 +47,7 @@ module API : sig
   val get : 
     ?headers:Cohttp.Header.t -> 
     ?token:Token.t -> 
+    ?params:(string * string) list ->
     uri:Uri.t -> 
     (string -> 'a Lwt.t) -> 'a Monad.t
 
@@ -84,17 +85,12 @@ module Milestone : sig
 end
 
 module Issues: sig
-(* Github issues *)
   val for_repo :
     ?token:Token.t ->
     user:string -> repo:string -> unit -> Github_t.issue list Monad.t
 
   val create :
-    title:string ->
-    ?body:string ->
-    ?assignee:string ->
-    ?milestone:string ->
-    ?labels:string list ->
     ?token:Token.t ->
-    user:string -> repo:string -> unit -> Github_t.issue Monad.t
+    user:string -> repo:string -> 
+    issue:Github_t.new_issue -> unit -> Github_t.issue Monad.t
 end

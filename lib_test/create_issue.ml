@@ -21,17 +21,15 @@ open Printf
 let token = Config.access_token
 
 let t =
-  lwt issue = 
-    Github.Monad.(
-      run (Github.Issues.create
-        ~title:"ocaml-github regression test with v2-interface"
-        ~body:"and i guess it worked!"
-        ~assignee:"avsm"
-        ~token
-        ~user:"avsm"
-        ~repo:"ocaml-github" ()
-      )
-    ) in
+  let issue = {
+    Github_t.new_issue_title="ocaml-github regression test";
+    new_issue_body=Some "ocaml-github body";
+    new_issue_assignee=Some "avsm";
+    new_issue_milestone=None;
+    new_issue_labels=None;
+  } in
+    
+  lwt issue = Github.(Monad.(run (Issues.create ~token ~user:"avsm" ~repo:"ocaml-github" ~issue ()))) in
   eprintf "created issue number %d\n%!" (issue.Github_t.issue_number);
   return ()
 

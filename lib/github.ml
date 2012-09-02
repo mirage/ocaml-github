@@ -150,7 +150,8 @@ module API = struct
 
   (* GET wrapper that takes a URI, adds an access token and calls the 
    * result on the callback function.  *)
-  let get ?headers ?token ~uri fn =
+  let get ?headers ?token ?(params=[]) ~uri fn =
+    let uri = Uri.add_query_params uri params in
     request_with_token ?token uri (CL.Client.get ?headers) fn
 
   (* POST wrapper that takes a URI, adds an access token and calls the 
@@ -208,13 +209,18 @@ end
 module Milestone = struct
   open Github_t
   let for_repo ?(state=`Open) ?(sort=`Due_date) ?(direction=`Desc) ?token ~user ~repo () =
+    (* TODO see if atdgen can generate these conversion functions to normal OCaml
+     * strings. The Github_j will put quotes around the string. *)
     let string_of_state = function |`Open -> "open" |`Closed -> "closed" in
     let string_of_sort = function |`Due_date -> "due_date" |`Completeness -> "completeness" in
     let string_of_direction = function |`Asc -> "asc" |`Desc -> "desc" in
-    let params = [ "state", string_of_state state; "sort", string_of_sort sort;
-      "direction", string_of_direction direction ] in
-    let uri = Uri.add_query_params (URI.repo_milestones ~user ~repo) params in
-    API.get ?token ~uri (fun b -> Lwt.return (Github_j.milestones_of_string b))
+    let params = [ 
+      "state", string_of_state state;
+      "sort", string_of_sort sort;
+      "direction", string_of_direction direction 
+    ] in
+    API.get ?token ~params ~uri:(URI.repo_milestones ~user ~repo) 
+      (fun b -> Lwt.return (Github_j.milestones_of_string b))
 
   let get ?token ~user ~repo ~num () =
     let uri = URI.milestone ~user ~repo ~num in
@@ -227,10 +233,7 @@ module Issues = struct
     let uri = URI.repo_issues ~user ~repo in
     API.get ?token ~uri (fun b -> Lwt.return (Github_j.issues_of_string b))
 
-  let create ~title ?body ?assignee ?milestone ?labels ?token ~user ~repo () =
-    let issue = { Github_t.new_issue_title=title; new_issue_body=body;
-      new_issue_assignee=assignee; new_issue_milestone=milestone;
-      new_issue_labels=labels } in
+  let create ?token ~user ~repo ~issue () =
     let body = Github_j.string_of_new_issue issue in
     let uri = URI.repo_issues ~user ~repo in
     API.post ~body ?token ~uri (fun b -> Lwt.return (Github_j.issue_of_string b))

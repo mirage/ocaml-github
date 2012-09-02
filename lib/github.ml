@@ -212,7 +212,7 @@ module Token = struct
 end
  
 module Milestone = struct
-  open Github_t
+
   let for_repo ?(state=`Open) ?(sort=`Due_date) ?(direction=`Desc) ?token ~user ~repo () =
     (* TODO see if atdgen can generate these conversion functions to normal OCaml
      * strings. The Github_j will put quotes around the string. *)
@@ -225,21 +225,21 @@ module Milestone = struct
       "direction", string_of_direction direction 
     ] in
     API.get ?token ~params ~uri:(URI.repo_milestones ~user ~repo) 
-      (fun b -> Lwt.return (Github_j.milestones_of_string b))
+      (fun b -> return (milestones_of_string b))
 
   let get ?token ~user ~repo ~num () =
     let uri = URI.milestone ~user ~repo ~num in
-    API.get ?token ~uri (fun b -> Lwt.return (Github_j.milestone_of_string b))
+    API.get ?token ~uri (fun b -> return (milestone_of_string b))
 end
 
 module Issues = struct
   
   let for_repo ?token ~user ~repo () =
     let uri = URI.repo_issues ~user ~repo in
-    API.get ?token ~uri (fun b -> Lwt.return (Github_j.issues_of_string b))
+    API.get ?token ~uri (fun b -> return (issues_of_string b))
 
   let create ?token ~user ~repo ~issue () =
     let body = Github_j.string_of_new_issue issue in
     let uri = URI.repo_issues ~user ~repo in
-    API.post ~body ?token ~uri (fun b -> Lwt.return (Github_j.issue_of_string b))
+    API.post ~body ?token ~uri (fun b -> return (issue_of_string b))
 end

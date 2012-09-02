@@ -79,10 +79,9 @@ module URI = struct
     Uri.of_string (Printf.sprintf "%s/repos/%s/%s/milestones/%d" api user repo num)
 end 
 
-open Printf
-open Lwt
-
 module Monad = struct
+  open Lwt
+  open Printf
 
   type error =
   | Generic of int * (string * string) list * string
@@ -119,29 +118,21 @@ end
 
 module C = Cohttp_lwt
 
-(* Generic request function that wraps result in 'a response *)
-let request uri reqfn respfn =
-  eprintf "%s\n%!" (Uri.to_string uri);
-  match_lwt reqfn uri with
-  |None -> return (Monad.(Error No_response))
-  |Some (res,body) -> begin
-    Printf.eprintf "Github response code %s\n%!" (Cohttp.Code.string_of_status (C.Response.status res));
-    (* TODO check that this is a valid response code *)
-    try_lwt 
-      lwt r = respfn ~res ~body in
-      return (Monad.Response r)
-    with exn -> return (Monad.(Error (Bad_response exn)))
-  end
-
-(* Authorization request, normally not used (a link in the HTML is
- * sufficient to redirect user to Github *)
-let authorize ?scopes ~client_id () =
-  let uri = URI.authorize ?scopes ~client_id () in
-  (* Github will return a 302 usually, to the redirect_uri
-   * registered in the application entry on Github *)
-    request uri C.Client.get (fun ~res ~body -> return ())
-
 module API = struct
+  open Lwt
+  (* Generic request function that wraps result in 'a response *)
+  let request uri reqfn respfn =
+    Printf.eprintf "%s\n%!" (Uri.to_string uri);
+    match_lwt reqfn uri with
+    |None -> return (Monad.(Error No_response))
+    |Some (res,body) -> begin
+      Printf.eprintf "Github response code %s\n%!" (Cohttp.Code.string_of_status (C.Response.status res));
+      (* TODO check that this is a valid response code *)
+      try_lwt 
+        lwt r = respfn ~res ~body in
+        return (Monad.Response r)
+      with exn -> return (Monad.(Error (Bad_response exn)))
+    end
 
   (* Add an authorization token onto a request URI and parse the response
    * as JSON. *)
@@ -175,6 +166,15 @@ module API = struct
     json_request ?token uri (C.Client.post ~headers ?body) fn
 end
 
+(* Authorization request, normally not used (a link in the HTML is
+ * sufficient to redirect user to Github *)
+let authorize ?scopes ~client_id () =
+  let uri = URI.authorize ?scopes ~client_id () in
+  (* Github will return a 302 usually, to the redirect_uri
+   * registered in the application entry on Github *)
+    API.request uri C.Client.get (fun ~res ~body -> Lwt.return_unit)
+
+
 module Token = struct
   type t = string
   let direct ?(scopes=[`Repo]) ~user ~pass () =
@@ -184,7 +184,7 @@ module Token = struct
     API.post ~headers ~body ~uri:URI.authorizations (fun body ->
       let open Github_t in
       let json = Github_j.authorization_response_of_string body in
-      return json.token
+      Lwt.return json.token
     )
 
   (* Convert a code after a user oAuth into an access token that can
@@ -192,10 +192,10 @@ module Token = struct
    *)
   let of_code ~client_id ~client_secret ~code () =
     let uri = URI.token ~client_id ~client_secret ~code () in
-    request uri C.Client.post (fun ~res ~body ->
+    API.request uri C.Client.post (fun ~res ~body ->
       lwt body = C.string_of_body body in
       let t = List.assoc "access_token" (Uri.query_of_encoded body) in
-      return t
+      Lwt.return t
     )
 
   let of_string x = x
@@ -211,18 +211,18 @@ module Milestone = struct
     let params = [ "state", string_of_state state; "sort", string_of_sort sort;
       "direction", string_of_direction direction ] in
     let uri = Uri.add_query_params (URI.repo_milestones ~user ~repo) params in
-    API.get ~token ~uri (fun b -> return (Github_j.milestones_of_string b))
+    API.get ~token ~uri (fun b -> Lwt.return (Github_j.milestones_of_string b))
 
   let get ~token ~user ~repo ~num () =
     let uri = URI.milestone ~user ~repo ~num in
-    API.get ~token ~uri (fun b -> return (Github_j.milestone_of_string b))
+    API.get ~token ~uri (fun b -> Lwt.return (Github_j.milestone_of_string b))
 end
 
 module Issues = struct
   
   let for_repo ~token ~user ~repo () =
     let uri = URI.repo_issues ~user ~repo in
-    API.get ~token ~uri (fun b -> return (Github_j.issues_of_string b))
+    API.get ~token ~uri (fun b -> Lwt.return (Github_j.issues_of_string b))
 
   let create ~title ?body ?assignee ?milestone ?labels ~token ~user ~repo () =
     let issue = { Github_t.new_issue_title=title; new_issue_body=body;
@@ -230,5 +230,5 @@ module Issues = struct
       new_issue_labels=labels } in
     let body = Github_j.string_of_new_issue issue in
     let uri = URI.repo_issues ~user ~repo in
-    API.post ~body ~token ~uri (fun b -> return (Github_j.issue_of_string b))
+    API.post ~body ~token ~uri (fun b -> Lwt.return (Github_j.issue_of_string b))
 end

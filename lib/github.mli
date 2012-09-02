@@ -44,6 +44,7 @@ module API : sig
     ?headers:Cohttp.Header.t -> 
     ?token:Token.t -> 
     ?params:(string * string) list ->
+    ?expected_code:Cohttp.Code.status_code ->
     uri:Uri.t -> 
     (string -> 'a Lwt.t) -> 'a Monad.t
 
@@ -51,8 +52,27 @@ module API : sig
     ?headers:Cohttp.Header.t ->
     ?body:string ->
     ?token:Token.t ->
+    expected_code:Cohttp.Code.status_code ->
     uri:Uri.t ->
     (string -> 'a Lwt.t) -> 'a Monad.t
+
+   val delete : 
+    ?headers:Cohttp.Header.t -> 
+    ?token:Token.t -> 
+    ?params:(string * string) list ->
+    ?expected_code:Cohttp.Code.status_code ->
+    uri:Uri.t -> 
+    (string -> 'a Lwt.t) -> 'a Monad.t
+
+  val patch : 
+    ?headers:Cohttp.Header.t ->
+    ?body:string ->
+    ?token:Token.t ->
+    expected_code:Cohttp.Code.status_code ->
+    uri:Uri.t ->
+    (string -> 'a Lwt.t) -> 'a Monad.t
+
+
 end
 
 (* Various useful URI generation functions, normally for displaying on a web-page.

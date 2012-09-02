@@ -79,15 +79,18 @@ module URI = struct
     Uri.of_string (Printf.sprintf "%s/repos/%s/%s/milestones/%d" api user repo num)
 end 
 
+module C = Cohttp
+module CL = Cohttp_lwt
+open Lwt
+
 module Monad = struct
-  open Lwt
   open Printf
 
   (* Each API call results in either a valid response or
    * an HTTP error. Depending on the error status code, it may
    * be retried within the monad, or a permanent failure returned *)
   type error =
-  | Generic of int * (string * string) list * string
+  | Generic of Cohttp_lwt.Response.response
   | No_response
   | Bad_response of exn
   and 'a response =
@@ -96,9 +99,9 @@ module Monad = struct
   and 'a t = 'a response Lwt.t
 
   let error_to_string = function
-    | Generic (code, headers, body) ->
-      sprintf "HTTP Error %d\n%s\n" code
-        (String.concat "\n" (List.map (fun (k,v) -> sprintf "%s: %s" k v) headers))
+    | Generic res ->
+      sprintf "HTTP Error %s\n%s\n" (C.Code.string_of_status (CL.Response.status res))
+        (String.concat "\n" (C.Header.to_lines (CL.Response.headers res)))
     | No_response -> "No response"
     | Bad_response exn -> sprintf "Bad response: %s\n" (Printexc.to_string exn)    
 
@@ -118,15 +121,12 @@ module Monad = struct
   let (>>=) = bind
 end
 
-module C = Cohttp
-module CL = Cohttp_lwt
-
 module API = struct
   open Lwt
 
    (* Add an authorization token onto a request URI and parse the response
    * as JSON. *)
-  let request_with_token ?headers ?token ?(params=[]) uri reqfn respfn =
+  let request_with_token ?headers ?token ?(params=[]) ~expected_code uri reqfn respfn =
     let uri = Uri.add_query_params uri params in
     (* Add the correct mime-type header *)
     let headers = match headers with
@@ -141,34 +141,35 @@ module API = struct
       return (Monad.(Error No_response))
     |Some (res,body) -> begin
       Printf.eprintf "Github response code %s\n%!" (C.Code.string_of_status (CL.Response.status res));
-      (* TODO check that this is a valid response code *)
-      try_lwt 
-        lwt body = CL.string_of_body body in
-        lwt r = respfn body in
-        return (Monad.Response r)
-      with exn -> return (Monad.(Error (Bad_response exn)))
+      if CL.Response.status res = expected_code then begin
+        try_lwt 
+          lwt r = CL.string_of_body body >>= respfn in
+          return (Monad.Response r)
+        with exn -> return (Monad.(Error (Bad_response exn)))
+      end else
+        return (Monad.(Error (Generic res)))
     end
 
   (* Convert a request body into a stream and force chunked-encoding
    * to be disabled (to satisfy Github, which returns 411 Length Required
    * to a chunked-encoding POST request). *)
-  let request_with_token_body ?headers ?token ?body uri req resp =
+  let request_with_token_body ?headers ?token ?body ~expected_code uri req resp =
     let body = match body with
       |None -> None |Some b -> CL.body_of_string b in
     let chunked = Some false in
-    request_with_token ?headers ?token uri (req ?body ?chunked) resp
+    request_with_token ?headers ?token ~expected_code uri (req ?body ?chunked) resp
 
-  let get ?headers ?token ?(params=[]) ~uri fn =
-    request_with_token ?headers ?token ~params uri CL.Client.get fn
+  let get ?headers ?token ?(params=[]) ?(expected_code=`OK) ~uri fn =
+    request_with_token ?headers ?token ~params ~expected_code uri CL.Client.get fn
 
-  let post ?headers ?body ?token ~uri fn =
-    request_with_token_body ?headers ?token ?body uri CL.Client.post fn
+  let post ?headers ?body ?token ~expected_code ~uri fn =
+    request_with_token_body ?headers ?token ?body ~expected_code uri CL.Client.post fn
 
-  let patch ?headers ?body ?token ~uri fn =
-    request_with_token_body ?headers ?token ?body uri CL.Client.patch fn
+  let patch ?headers ?body ?token ~expected_code ~uri fn =
+    request_with_token_body ?headers ?token ?body ~expected_code uri CL.Client.patch fn
 
-  let delete ?headers ?token ?(params=[]) ~uri fn =
-    request_with_token ?headers ?token ~params uri CL.Client.delete fn
+  let delete ?headers ?token ?(params=[]) ?(expected_code=`No_content) ~uri fn =
+    request_with_token ?headers ?token ~params ~expected_code uri CL.Client.delete fn
 end
 
 open Github_t
@@ -182,10 +183,11 @@ module Token = struct
     let req = { auth_req_scopes=scopes; auth_req_note="ocaml-github" } in
     let body = string_of_authorization_request req in
     let headers = C.Header.(add_authorization (init ()) (C.Auth.Basic (user,pass))) in
-    API.post ~headers ~body ~uri:URI.authorizations (fun body ->
-      let json = authorization_response_of_string body in
-      return json.token
-    )
+    API.post ~headers ~body ~uri:URI.authorizations ~expected_code:`Created
+      (fun body ->
+        let json = authorization_response_of_string body in
+        return json.token
+      )
 
   (* Convert a code after a user oAuth into an access token that can
    * be used in subsequent requests.
@@ -225,25 +227,21 @@ module Milestone = struct
 
   let get ?token ~user ~repo ~num () =
     let uri = URI.milestone ~user ~repo ~num in
-    (* TODO success is 200 *)
     API.get ?token ~uri (fun b -> return (milestone_of_string b))
 
   let delete ?token ~user ~repo ~num () =
     let uri = URI.milestone ~user ~repo ~num in
-    (* TODO success is 204 no content *)
     API.delete ?token ~uri (fun _ -> return ())
 
   let create ?token ~user ~repo ~milestone () =
     let uri = URI.repo_milestones ~user ~repo in
     let body = string_of_new_milestone milestone in
-    (* TODO success is 201 created *)
-    API.post ?token ~body ~uri (fun b -> return (milestone_of_string b))
+    API.post ?token ~body ~uri ~expected_code:`Created (fun b -> return (milestone_of_string b))
 
   let update ?token ~user ~repo ~milestone ~num () =
     let uri = URI.milestone ~user ~repo ~num in
     let body = string_of_update_milestone milestone in
-    (* TODO success is 200 ok *)
-    API.patch ?token ~body ~uri (fun b -> return (milestone_of_string b))
+    API.patch ?token ~body ~uri ~expected_code:`OK (fun b -> return (milestone_of_string b))
 end
 
 module Issues = struct
@@ -255,5 +253,5 @@ module Issues = struct
   let create ?token ~user ~repo ~issue () =
     let body = Github_j.string_of_new_issue issue in
     let uri = URI.repo_issues ~user ~repo in
-    API.post ~body ?token ~uri (fun b -> return (issue_of_string b))
+    API.post ~body ?token ~uri ~expected_code:`Created (fun b -> return (issue_of_string b))
 end

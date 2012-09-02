@@ -1,5 +1,4 @@
-* Detect incorrect error codes and propagate appropriately in the
-  Monad. (e.g. the X-Rate-Limit header)
+* X-Rate-Limit support in the Monad.
 
 * Would be very useful if ATDgen could convert to/from normal string
   as well as JSON for variants.  The Github API takes strings as

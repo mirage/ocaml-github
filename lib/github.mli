@@ -82,6 +82,21 @@ module Milestone : sig
   val get:
     ?token:Token.t ->
     user:string -> repo:string -> num:int -> unit -> Github_t.milestone Monad.t
+
+  val create :
+    ?token:Token.t ->
+    user:string -> repo:string ->
+    milestone:Github_t.new_milestone -> unit -> Github_t.milestone Monad.t
+
+  val delete:
+    ?token:Token.t ->
+    user:string -> repo:string -> num:int -> unit -> unit Monad.t
+
+  val update :
+    ?token:Token.t ->
+    user:string -> repo:string ->
+    milestone:Github_t.update_milestone -> num:int ->
+    unit -> Github_t.milestone Monad.t
 end
 
 module Issues: sig
@@ -91,6 +106,6 @@ module Issues: sig
 
   val create :
     ?token:Token.t ->
-    user:string -> repo:string -> 
+    user:string -> repo:string ->
     issue:Github_t.new_issue -> unit -> Github_t.issue Monad.t
 end

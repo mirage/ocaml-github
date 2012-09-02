@@ -142,33 +142,33 @@ module API = struct
 
   (* Add an authorization token onto a request URI and parse the response
    * as JSON. *)
-  let request_with_token ?token uri req resp =
+  let request_with_token ?headers ?token uri req resp =
+    (* Add the correct mime-type header *)
+    let headers = match headers with
+     |Some x -> Some (C.Header.add x "content-type" "application/json")
+     |None -> Some (C.Header.of_list ["content-type","application/json"]) in
     let uri = match token with
      |Some token -> Uri.add_query_param uri ("access_token", token) 
      |None -> uri in
-    request uri req (fun ~res ~body -> resp body)
+    request uri (req ?headers) (fun ~res ~body -> resp body)
 
-  (* GET wrapper that takes a URI, adds an access token and calls the 
-   * result on the callback function.  *)
   let get ?headers ?token ?(params=[]) ~uri fn =
     let uri = Uri.add_query_params uri params in
-    request_with_token ?token uri (CL.Client.get ?headers) fn
+    request_with_token ?headers ?token uri CL.Client.get fn
 
-  (* POST wrapper that takes a URI, adds an access token and calls the 
-   * result on the callback function.  *)
   let post ?headers ?body ?token ~uri fn =
-    (* Convert any body into JSON *)
-    let body, clen = match body with
-     |Some buf ->
-       let clen = String.length buf in
-       CL.body_of_string buf, clen
-     |None -> None, 0 in
-    (* Add the correct mime-type header *)
-    let headers = match headers with
-     |Some x -> C.Header.add x "content-type" "application/json"
-     |None -> C.Header.of_list ["content-type","application/json"] in
-    let headers = C.Header.add headers "content-length" (string_of_int clen) in
-    request_with_token ?token uri (CL.Client.post ~headers ?body) fn
+    let body = match body with |None -> None |Some b -> CL.body_of_string b in
+    let chunked = false in
+    request_with_token ?headers ?token uri (CL.Client.post ?body ~chunked) fn
+
+  let patch ?headers ?body ?token ~uri fn =
+    let body = match body with |None -> None |Some b -> CL.body_of_string b in
+    let chunked = false in
+    request_with_token ?headers ?token uri (CL.Client.patch ?body ~chunked) fn
+
+  let delete ?headers ?token ?(params=[]) ~uri fn =
+    let uri = Uri.add_query_params uri params in
+    request_with_token ?headers ?token uri CL.Client.delete fn
 end
 
 (* Authorization request, normally not used (a link in the HTML is
@@ -229,7 +229,25 @@ module Milestone = struct
 
   let get ?token ~user ~repo ~num () =
     let uri = URI.milestone ~user ~repo ~num in
+    (* TODO success is 200 *)
     API.get ?token ~uri (fun b -> return (milestone_of_string b))
+
+  let delete ?token ~user ~repo ~num () =
+    let uri = URI.milestone ~user ~repo ~num in
+    (* TODO success is 204 no content *)
+    API.delete ?token ~uri (fun _ -> return ())
+
+  let create ?token ~user ~repo ~milestone () =
+    let uri = URI.repo_milestones ~user ~repo in
+    let body = string_of_new_milestone milestone in
+    (* TODO success is 201 created *)
+    API.post ?token ~body ~uri (fun b -> return (milestone_of_string b))
+
+  let update ?token ~user ~repo ~milestone ~num () =
+    let uri = URI.milestone ~user ~repo ~num in
+    let body = string_of_update_milestone milestone in
+    (* TODO success is 200 ok *)
+    API.patch ?token ~body ~uri (fun b -> return (milestone_of_string b))
 end
 
 module Issues = struct

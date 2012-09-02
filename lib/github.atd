@@ -87,6 +87,20 @@ type milestone_sort = [
   | Completeness <json name="completeness">
 ]
 
+type new_milestone = {
+  title: string;
+  ~state <ocaml default="`Open">: state;
+  ?description: string option;
+  ?due_on: string option;
+} <ocaml field_prefix="new_milestone_">
+
+type update_milestone = {
+  ?title: string option;
+  ?state: state option;
+  ?description: string option;
+  ?due_on: string option;
+} <ocaml field_prefix="update_milestone_">
+
 type milestone = {
   url: string;
   number: int;

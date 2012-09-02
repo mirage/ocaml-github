@@ -179,17 +179,20 @@ let authorize ?scopes ~client_id () =
    * registered in the application entry on Github *)
     API.request uri CL.Client.get (fun ~res ~body -> Lwt.return_unit)
 
+open Github_t
+open Github_j
+open Lwt
 
 module Token = struct
   type t = string
+
   let direct ?(scopes=[`Repo]) ~user ~pass () =
-    let req = { Github_t.auth_req_scopes=scopes; auth_req_note="ocaml-github" } in
-    let body = Github_j.string_of_authorization_request req in
+    let req = { auth_req_scopes=scopes; auth_req_note="ocaml-github" } in
+    let body = string_of_authorization_request req in
     let headers = C.Header.(add_authorization (init ()) (C.Auth.Basic (user,pass))) in
     API.post ~headers ~body ~uri:URI.authorizations (fun body ->
-      let open Github_t in
-      let json = Github_j.authorization_response_of_string body in
-      Lwt.return json.token
+      let json = authorization_response_of_string body in
+      return json.token
     )
 
   (* Convert a code after a user oAuth into an access token that can
@@ -198,8 +201,10 @@ module Token = struct
   let of_code ~client_id ~client_secret ~code () =
     let uri = URI.token ~client_id ~client_secret ~code () in
     API.request uri CL.Client.post (fun ~res ~body ->
-      let t = List.assoc "access_token" (Uri.query_of_encoded body) in
-      Lwt.return t
+      try
+        return (Some (List.assoc "access_token" (Uri.query_of_encoded body)))
+      with Not_found ->
+        return None
     )
 
   let of_string x = x

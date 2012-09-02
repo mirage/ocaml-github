@@ -33,7 +33,7 @@ val authorize : ?scopes:Github_t.scope list -> client_id:string -> unit -> unit 
 (* Access token to the API, usually obtained via a user oAuth *)
 module Token : sig
   type t
-  val of_code: client_id:string -> client_secret:string -> code:string -> unit -> t Monad.t
+  val of_code: client_id:string -> client_secret:string -> code:string -> unit -> t option Monad.t
   val direct : ?scopes:Github_t.scope list -> user:string -> pass:string -> unit -> t Monad.t
   val to_string : t -> string
   val of_string : string -> t

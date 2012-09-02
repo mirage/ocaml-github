@@ -60,10 +60,11 @@ module Resp = struct
         index req
     | ["step2"] -> begin
         let code = try List.assoc "code" (Request.params req) with Not_found -> "" in
-        try_lwt 
-          lwt token = Github.Monad.(run (Github.Token.of_code ~client_id ~client_secret ~code ())) in
-          dyn req (wrap_html ("ok: token is "^(Github.Token.to_string token)))
-        with Failure e ->
+        try_lwt begin
+          match_lwt Github.Monad.(run (Github.Token.of_code ~client_id ~client_secret ~code ())) with
+          |None -> internal_error "no token in response" ()
+          |Some token -> dyn req (wrap_html ("ok: token is "^(Github.Token.to_string token)))
+        end with Failure e ->
           dyn req (wrap_html ("err: "^e))
     end
     | _ -> 

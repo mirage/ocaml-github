@@ -83,6 +83,9 @@ module Monad = struct
   open Lwt
   open Printf
 
+  (* Each API call results in either a valid response or
+   * an HTTP error. Depending on the error status code, it may
+   * be retried within the monad, or a permanent failure returned *)
   type error =
   | Generic of int * (string * string) list * string
   | No_response
@@ -90,8 +93,7 @@ module Monad = struct
   and 'a response =
   | Error of error
   | Response of 'a
-
-  type 'a t = 'a response Lwt.t
+  and 'a t = 'a response Lwt.t
 
   let error_to_string = function
     | Generic (code, headers, body) ->

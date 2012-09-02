@@ -11,14 +11,11 @@ let print_milestones m =
   eprintf "--\n%!"
  
 let t =
-  lwt m1 = Github.(Monad.run (Milestone.for_repo ~state:`Closed ~token ~user:"OCamlPro" ~repo:"opam" ())) in
-  print_milestones m1;
-  lwt m1 = Github.(Monad.run (Milestone.for_repo ~state:`Closed ~direction:`Asc ~token ~user:"OCamlPro" ~repo:"opam" ())) in
-  print_milestones m1;
-  lwt m2 = Github.(Monad.run (Milestone.for_repo ~sort:`Completeness ~direction:`Asc ~token ~user:"mxcl" ~repo:"homebrew" ())) in
-  print_milestones m2;
-  lwt m3 = Github.(Monad.run (Milestone.for_repo ~sort:`Completeness ~direction:`Desc ~token ~user:"mxcl" ~repo:"homebrew" ())) in
-  print_milestones m2;
+  let opro_milestones = Github.Milestone.for_repo ~user:"OCamlPro" ~repo:"opam" in
+  Github.(Monad.run (opro_milestones ~state:`Closed ())) >|= print_milestones >>
+  Github.(Monad.run (opro_milestones ~state:`Closed ~direction:`Asc ())) >|= print_milestones >>
+  Github.(Monad.run (Milestone.for_repo ~sort:`Completeness ~direction:`Asc ~user:"mxcl" ~repo:"homebrew" ())) >|= print_milestones >>
+  Github.(Monad.run (Milestone.for_repo ~sort:`Completeness ~direction:`Desc ~user:"mxcl" ~repo:"homebrew" ())) >|= print_milestones >>
   let user = "mxcl" in
   let repo = "homebrew" in
   Github.(Monad.(run (

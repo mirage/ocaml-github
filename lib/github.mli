@@ -75,18 +75,18 @@ module Milestone : sig
     ?state:Github_t.state ->
     ?sort:Github_t.milestone_sort ->
     ?direction:Github_t.direction ->
-    token:Token.t ->
+    ?token:Token.t ->
     user:string -> repo:string -> unit -> Github_t.milestone list Monad.t
 
   val get:
-    token:Token.t ->
+    ?token:Token.t ->
     user:string -> repo:string -> num:int -> unit -> Github_t.milestone Monad.t
 end
 
 module Issues: sig
 (* Github issues *)
   val for_repo :
-    token:Token.t ->
+    ?token:Token.t ->
     user:string -> repo:string -> unit -> Github_t.issue list Monad.t
 
   val create :
@@ -95,6 +95,6 @@ module Issues: sig
     ?assignee:string ->
     ?milestone:string ->
     ?labels:string list ->
-    token:Token.t ->
+    ?token:Token.t ->
     user:string -> repo:string -> unit -> Github_t.issue Monad.t
 end

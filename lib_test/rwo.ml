@@ -86,10 +86,9 @@ let callback con_id ?body req =
 let server_t =
   let port = 8080 in
   let conn_closed con_id () = () in
-  let root_dir = None in
   let timeout = None in
   let address = "0.0.0.0" in (* TODO address to option *)
-  let spec = { Cohttp_lwt.Server.callback; port=port; conn_closed; root_dir; timeout; address } in
+  let spec = { Cohttp_lwt.Server.callback; port=port; conn_closed; timeout; address } in
   Cohttp_lwt.Server.main spec
 
 let _ =

@@ -1,6 +1,6 @@
-OASISFormat: 0.2
+OASISFormat: 0.3
 Name:        github
-Version:     0.9-dev
+Version:     1.0.0
 Synopsis:    Github API interface
 Authors:     Anil Madhavapeddy
 License:     ISC
@@ -11,7 +11,7 @@ Library github
   Path: lib
   Findlibname: github
   Modules: Github, Github_j, Github_t
-  BuildDepends: lwt.syntax, cohttp, cohttp.lwt, yojson, atdgen
+  BuildDepends: lwt.syntax, cohttp, cohttp.lwt (>= 1.0.0), yojson, atdgen
 
 Executable rwo
   Path:               lib_test

@@ -18,7 +18,7 @@
 open Lwt
 open Printf
 open Cohttp
-open Cohttp_lwt
+open Cohttp_lwt_unix
 open Config
 
 let scopes = [`Public_repo] 
@@ -88,8 +88,8 @@ let server_t =
   let conn_closed con_id () = () in
   let timeout = None in
   let address = "0.0.0.0" in (* TODO address to option *)
-  let spec = { Cohttp_lwt.Server.callback; port=port; conn_closed; timeout; address } in
-  Cohttp_lwt.Server.main spec
+  let spec = { Cohttp_lwt_unix.Server.callback; conn_closed } in
+  Cohttp_lwt_unix.server ~address ~port spec
 
 let _ =
   Lwt_main.run server_t

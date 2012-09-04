@@ -80,7 +80,8 @@ module URI = struct
 end 
 
 module C = Cohttp
-module CL = Cohttp_lwt
+module CL = Cohttp_lwt_unix
+module CLB = CL.Body
 open Lwt
 
 module Monad = struct
@@ -143,7 +144,7 @@ module API = struct
       Printf.eprintf "Github response code %s\n%!" (C.Code.string_of_status (CL.Response.status res));
       if CL.Response.status res = expected_code then begin
         try_lwt 
-          lwt r = CL.Body.string_of_body body >>= respfn in
+          lwt r = CLB.string_of_body body >>= respfn in
           return (Monad.Response r)
         with exn -> return (Monad.(Error (Bad_response exn)))
       end else
@@ -155,7 +156,7 @@ module API = struct
    * to a chunked-encoding POST request). *)
   let request_with_token_body ?headers ?token ?body ~expected_code uri req resp =
     let body = match body with
-      |None -> None |Some b -> CL.Body.body_of_string b in
+      |None -> None |Some b -> CLB.body_of_string b in
     let chunked = Some false in
     request_with_token ?headers ?token ~expected_code uri (req ?body ?chunked) resp
 
@@ -197,7 +198,7 @@ module Token = struct
     match_lwt CL.Client.post uri with
     |None -> return None
     |Some (res, body) -> begin
-      lwt body = CL.Body.string_of_body body in
+      lwt body = CLB.string_of_body body in
       try
         let form = Uri.query_of_encoded body in
         return (Some (List.assoc "access_token" form))

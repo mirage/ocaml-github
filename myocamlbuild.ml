@@ -494,7 +494,10 @@ module Atdgen = struct
   let cmd = "atdgen" (* TODO detect from ./configure phase *)
   let run_atdgen dst tagger env _ =
     let tags = tagger (tags_of_pathname (env dst) ++"atdgen") in
-    Cmd (S [A cmd; T tags; Px (env "%.atd")])
+    let dir = Filename.dirname (env dst) in
+    let fname = Filename.basename (env "%.atd") in
+     Cmd (S [A "cd"; Px dir; Sh "&&"; A cmd; T tags; Px fname])
+
   let rules () =
     rule "%.atd -> %_j.ml{i}" ~prods:["%_j.ml";"%_j.mli"] ~dep:"%.atd"
      (run_atdgen "%_j.ml" (fun tags -> tags++"generate"++"json"));

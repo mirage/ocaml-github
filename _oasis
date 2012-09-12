@@ -11,7 +11,7 @@ Library github
   Path: lib
   Findlibname: github
   Modules: Github, Github_j, Github_t
-  BuildDepends: lwt.syntax, cohttp, cohttp.lwt (>= 1.0.0), yojson, atdgen
+  BuildDepends: lwt.syntax, cohttp, cohttp.lwt (>= 0.9.1), yojson, atdgen
 
 Executable rwo
   Path:               lib_test

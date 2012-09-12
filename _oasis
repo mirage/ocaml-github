@@ -1,6 +1,6 @@
 OASISFormat: 0.3
 Name:        github
-Version:     1.0.0
+Version:     0.3.0
 Synopsis:    Github API interface
 Authors:     Anil Madhavapeddy
 License:     ISC

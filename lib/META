@@ -1,6 +1,6 @@
 # OASIS_START
-# DO NOT EDIT (digest: 6b9ebb75e3a48fb8c963b2129c55d58e)
-version = "1.0.0"
+# DO NOT EDIT (digest: f22cd36ce0bb0c496251cacb768572c7)
+version = "0.3.0"
 description = "Github API interface"
 requires = "lwt.syntax cohttp cohttp.lwt yojson atdgen"
 archive(byte) = "github.cma"

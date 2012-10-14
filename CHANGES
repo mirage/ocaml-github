@@ -1,5 +1,7 @@
 ===== 0.3.1 (2012-10-14) =====
 
+* Support PREFIX during build for installation prefix.
+
 * Adapt to uri-1.3.3 interface (which now supports multi-value
   queries, as per the RFC).
 

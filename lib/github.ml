@@ -57,12 +57,12 @@ module URI = struct
     let q = match scopes with
      |Some scopes -> ("scope", Scope.string_of_scopes scopes) :: q
      |None -> q in
-    Uri.with_query uri q
+    Uri.with_query' uri q
 
   let token ~client_id ~client_secret ~code () =
     let uri = Uri.of_string "https://github.com/login/oauth/access_token" in
     let q = [ "client_id", client_id; "code", code; "client_secret", client_secret ] in
-    Uri.with_query uri q
+    Uri.with_query' uri q
 
   let api = "https://api.github.com"
 
@@ -128,13 +128,13 @@ module API = struct
    (* Add an authorization token onto a request URI and parse the response
    * as JSON. *)
   let request_with_token ?headers ?token ?(params=[]) ~expected_code uri reqfn respfn =
-    let uri = Uri.add_query_params uri params in
+    let uri = Uri.add_query_params' uri params in
     (* Add the correct mime-type header *)
     let headers = match headers with
      |Some x -> Some (C.Header.add x "content-type" "application/json")
      |None -> Some (C.Header.of_list ["content-type","application/json"]) in
     let uri = match token with
-     |Some token -> Uri.add_query_param uri ("access_token", token) 
+     |Some token -> Uri.add_query_param uri ("access_token", [token]) 
      |None -> uri in
     Printf.eprintf "%s\n%!" (Uri.to_string uri);
     match_lwt (reqfn ?headers) uri with
@@ -201,7 +201,7 @@ module Token = struct
       lwt body = CLB.string_of_body body in
       try
         let form = Uri.query_of_encoded body in
-        return (Some (List.assoc "access_token" form))
+        return (Some (List.(hd (assoc "access_token" form))))
       with _ ->
         return None
     end

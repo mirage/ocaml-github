@@ -59,7 +59,7 @@ module Resp = struct
     | ["index.html"]  ->
         index req
     | ["step2"] -> begin
-        let code = try List.assoc "code" (Request.params req) with Not_found -> "" in
+        let code = try List.(hd (assoc "code" (Request.params req))) with _ -> "" in
         try_lwt begin
           match_lwt Github.Token.of_code ~client_id ~client_secret ~code () with
           |None -> internal_error "no token in response" ()
@@ -76,7 +76,7 @@ let callback con_id ?body req =
   let path = Request.path req in
 
   printf "%s %s [%s]\n%!" (Code.string_of_method (Request.meth req)) path 
-    (String.concat "," (List.map (fun (h,v) -> sprintf "%s=%s" h v) 
+    (String.concat "," (List.map (fun (h,v) -> sprintf "%s=%s" h (String.concat "," v)) 
       (Request.params req)));
 
   (* normalize path to strip out ../. and such *)

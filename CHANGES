@@ -1,3 +1,8 @@
+===== 0.3.1 (2012-10-14) =====
+
+* Adapt to uri-1.3.3 interface (which now supports multi-value
+  queries, as per the RFC).
+
 ===== 0.3.0 (2012-09-11) =====
 
 * Initial public release.

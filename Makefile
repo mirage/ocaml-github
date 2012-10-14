@@ -1,4 +1,6 @@
 .PHONY: all clean install build
+PREFIX ?= /usr/local
+
 all: build doc
 
 setup.bin: setup.ml
@@ -10,7 +12,7 @@ lib_test/config.ml: lib_test/config.ml.in
 	if [ ! -e lib_test/config.ml ]; then cp $< $@; else touch $@; fi
 
 setup.data: setup.bin
-	./setup.bin -configure
+	./setup.bin -configure --prefix $(PREFIX)
 
 build: setup.data setup.bin lib_test/config.ml
 	./setup.bin -build -classic-display

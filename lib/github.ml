@@ -69,6 +69,23 @@ module URI = struct
   let repo_issues ~user ~repo =
     Uri.of_string (Printf.sprintf "%s/repos/%s/%s/issues" api user repo) 
 
+  let repo_tags ~user ~repo =
+    Uri.of_string (Printf.sprintf "%s/repos/%s/%s/tags" api user repo)
+
+  let repo_tag ~user ~repo ~sha =
+    Uri.of_string (Printf.sprintf "%s/repos/%s/%s/git/tags/%s" api user repo sha)
+
+  let repo_refs ?ty ~user ~repo =
+    let suffix =
+      match ty with
+      |None -> ""
+      |Some ty -> "/"^ty
+    in
+    Uri.of_string (Printf.sprintf "%s/repos/%s/%s/git/refs%s" api user repo suffix)
+
+  let repo_commit ~user ~repo ~sha =
+    Uri.of_string (Printf.sprintf "%s/repos/%s/%s/commits/%s" api user repo sha)
+
   let authorizations =
     Uri.of_string "https://api.github.com/authorizations"
 
@@ -256,3 +273,70 @@ module Issues = struct
     let uri = URI.repo_issues ~user ~repo in
     API.post ~body ?token ~uri ~expected_code:`Created (fun b -> return (issue_of_string b))
 end
+
+module Repo = struct
+
+  let tags ?token ~user ~repo () =
+    let uri = URI.repo_tags ~user ~repo in
+    API.get ?token ~uri (fun b -> return (repo_tags_of_string b))
+
+  let refs ?token ?ty ~user ~repo () =
+    let uri = URI.repo_refs ?ty ~user ~repo in
+    API.get ?token ~uri (fun b -> return (git_refs_of_string b))
+
+  let commit ?token ~user ~repo ~sha () =
+    let uri = URI.repo_commit ~user ~repo ~sha in
+    API.get ?token ~uri (fun b -> return (commit_of_string b))
+end
+
+module Git_obj = struct
+
+  let obj_type_to_string (o:obj_type)=
+    match o with
+    |`Tree -> "tree"
+    |`Commit -> "commit"
+    |`Blob -> "blob"
+    |`Tag -> "tag"
+
+  let split_ref =
+    let re = Re_str.regexp_string "/" in
+    fun ref ->
+      match Re_str.bounded_split re ref 3 with
+      |[_;ty;tl] -> ty, tl
+      |_ -> "", ref
+end
+
+module Tag = struct
+
+  let tag ?token ~user ~repo ~sha () =
+    let uri = URI.repo_tag ~user ~repo ~sha in
+    API.get ?token ~uri (fun b -> return (tag_of_string b))
+
+  (* Retrieve a list of SHA hashes for tags, and obtain a
+   * name and time for each tag.  If annotated, this is explicit,
+   * and otherwise it uses the last commit *)
+  let get_tags_and_times ?token ~user ~repo () =
+    let open Monad in
+    Repo.refs ?token ~ty:"tags" ~user ~repo () >>=
+    fun tags ->
+      let rec aux acc = function
+        | [] -> return acc
+        | hd :: tl -> begin
+            let _,name = Git_obj.split_ref hd.git_ref_name in
+            let sha = hd.git_ref_obj.obj_sha in
+            match hd.git_ref_obj.obj_ty with
+            |`Commit -> (* lightweight tag, so get commit info *)
+               Repo.commit ?token ~user ~repo ~sha () >>=
+               fun c ->
+                 let acc = (name, c.commit_git.git_commit_author.info_date) :: acc in
+                 aux acc tl
+            |`Tag ->
+               tag ?token ~user ~repo ~sha () >>=
+               fun t ->
+                 let acc = (name, t.tag_tagger.info_date) :: acc in
+                 aux acc tl
+            |_ -> aux acc tl
+        end
+      in aux [] tags
+end
+

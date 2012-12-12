@@ -71,8 +71,6 @@ module API : sig
     expected_code:Cohttp.Code.status_code ->
     uri:Uri.t ->
     (string -> 'a Lwt.t) -> 'a Monad.t
-
-
 end
 
 (* Various useful URI generation functions, normally for displaying on a web-page.
@@ -124,4 +122,40 @@ module Issues: sig
     ?token:Token.t ->
     user:string -> repo:string ->
     issue:Github_t.new_issue -> unit -> Github_t.issue Monad.t
+end
+
+module Repo: sig
+  val tags :
+    ?token:Token.t ->
+    user:string -> repo:string ->
+    unit -> Github_t.repo_tags Monad.t
+
+  val refs :
+    ?token:Token.t ->
+    ?ty:string -> user:string -> repo:string ->
+    unit -> Github_t.git_refs Monad.t
+
+  val commit :
+    ?token:Token.t ->
+    user:string -> repo:string -> sha:string ->
+    unit -> Github_t.commit Monad.t
+end
+
+module Git_obj : sig
+  val obj_type_to_string : Github_t.obj_type -> string
+
+  (** Split a [ref] like "refs/tags/foo/bar" into ("tags","foo/bar") *)
+  val split_ref : string -> string * string
+end
+
+module Tag : sig
+  val tag :
+    ?token:Token.t ->
+    user:string -> repo:string -> sha:string ->
+    unit -> Github_t.tag Monad.t
+
+  val get_tags_and_times :
+    ?token:Token.t ->
+    user:string -> repo:string ->
+    unit -> (string * string) list Monad.t
 end

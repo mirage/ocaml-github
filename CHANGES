@@ -1,3 +1,9 @@
+===== 0.3.2 (unreleased) =====
+
+* Add ATD descriptions for commits, tags, author info, and repo tags.
+
+* Add API calls to retrieve tags, dates and refs.
+
 ===== 0.3.1 (2012-10-14) =====
 
 * Support PREFIX during build for installation prefix.

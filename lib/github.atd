@@ -115,3 +115,67 @@ type milestone = {
 } <ocaml field_prefix="milestone_"> 
 
 type milestones = milestone list
+
+type repo_commit = {
+  sha: string;
+  url: string;
+} <ocaml field_prefix="repo_commit_">
+
+type repo_tag = {
+  name: string;
+  commit: repo_commit;
+  zipball_url: string;
+  tarball_url: string;
+} <ocaml field_prefix="repo_tag_">
+
+type repo_tags = repo_tag list
+
+type obj_type = [
+    Blob <json name="blob">
+  | Tree <json name="tree">
+  | Commit <json name="commit">
+  | Tag <json name="tag">
+]
+
+type obj = {
+  ty <json name="type">: obj_type;
+  sha: string;
+  url: string;
+} <ocaml field_prefix="obj_">
+
+type git_ref = {
+  name <json name="ref">: string;
+  url: string;
+  obj <json name="object">: obj;
+} <ocaml field_prefix="git_ref_">
+
+type git_refs = git_ref list
+
+type info = {
+  date: string;
+  email: string;
+  name: string;
+} <ocaml field_prefix="info_">
+
+type tag = {
+  obj <json name="object">: obj;
+  url: string;
+  sha: string;
+  tag: string;
+  message: string;
+  tagger: info;
+} <ocaml field_prefix="tag_">
+
+type git_commit = {
+  url: string;
+  author: info;
+  message: string;
+} <ocaml field_prefix="git_commit_">
+
+type commit = {
+  url: string;
+  sha: string;
+  git <json name="commit">: git_commit;
+  author: user;
+  committer: user;
+} <ocaml field_prefix="commit_">

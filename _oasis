@@ -1,6 +1,6 @@
 OASISFormat: 0.3
 Name:        github
-Version:     0.3.1
+Version:     0.3.2
 Synopsis:    Github API interface
 Authors:     Anil Madhavapeddy
 License:     ISC
@@ -32,6 +32,14 @@ Executable get_token
 Executable list_issues
   Path:               lib_test
   MainIs:             issues.ml
+  Custom:             true
+  CompiledObject:     best
+  Install:            false
+  BuildDepends:       cohttp.lwt, lwt.syntax, github, atdgen
+
+Executable list_tags
+  Path:               lib_test
+  MainIs:             tags.ml
   Custom:             true
   CompiledObject:     best
   Install:            false

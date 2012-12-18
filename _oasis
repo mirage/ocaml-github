@@ -29,6 +29,14 @@ Executable get_token
   Install:            false
   BuildDepends:       cohttp.lwt, lwt.syntax, github, atdgen
 
+Executable repo_info
+  Path:               lib_test
+  MainIs:             repo_info.ml
+  Custom:             true
+  CompiledObject:     best
+  Install:            false
+  BuildDepends:       cohttp.lwt, lwt.syntax, github, atdgen
+
 Executable list_issues
   Path:               lib_test
   MainIs:             issues.ml

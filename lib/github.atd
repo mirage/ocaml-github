@@ -179,3 +179,35 @@ type commit = {
   author: user;
   committer: user;
 } <ocaml field_prefix="commit_">
+
+type repo = {
+  id: int;
+  owner: user;
+  name: string;
+  full_name: string;
+  description: string;
+  ~private: bool;
+  fork: bool;
+  url: string;
+  html_url: string;
+  clone_url: string;
+  git_url: string;
+  ssh_url: string;
+  svn_url: string;
+  ?mirror_url: string option;
+  ~homepage: string;
+  forks: int;
+  forks_count: int;
+  watchers: int;
+  watchers_count: int;
+  size: int;
+  master_branch: string;
+  open_issues: int;
+  pushed_at: string;
+  created_at: string;
+  updated_at: string;
+  ?organization: user option;
+  has_issues: bool;
+  has_wiki: bool;
+  has_downloads: bool;
+} <ocaml field_prefix="repo_">

@@ -125,6 +125,11 @@ module Issues: sig
 end
 
 module Repo: sig
+  val info:
+    ?token:Token.t ->
+    user:string -> repo:string ->
+    unit -> Github_t.repo Monad.t
+
   val tags :
     ?token:Token.t ->
     user:string -> repo:string ->

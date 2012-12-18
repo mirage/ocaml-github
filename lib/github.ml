@@ -66,6 +66,9 @@ module URI = struct
 
   let api = "https://api.github.com"
 
+  let repo ~user ~repo =
+    Uri.of_string (Printf.sprintf "%s/repos/%s/%s" api user repo) 
+
   let repo_issues ~user ~repo =
     Uri.of_string (Printf.sprintf "%s/repos/%s/%s/issues" api user repo) 
 
@@ -275,6 +278,10 @@ module Issues = struct
 end
 
 module Repo = struct
+
+  let info ?token ~user ~repo () =
+    let uri = URI.repo ~user ~repo in
+    API.get ?token ~uri (fun b -> return (repo_of_string b))
 
   let tags ?token ~user ~repo () =
     let uri = URI.repo_tags ~user ~repo in

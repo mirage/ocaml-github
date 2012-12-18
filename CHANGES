@@ -1,4 +1,4 @@
-0.3.3 (trunk):
+0.3.3 (2012-12-18):
 * Add `Repo.info` to retrieve repository metadata.
 
 0.3.2 (2012-12-14):

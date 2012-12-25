@@ -12,12 +12,15 @@ type app = {
   url: string;
 }  <ocaml field_prefix="app_">
 
-type authorization_request = {
-  scopes: scope list;
-  note: string;
+type auth_req = {
+  ~scopes: scope list;
+  ?note: string option;
+  ?note_url: string option;
+  ?client_id: string option;
+  ?client_secret: string option;
 } <ocaml field_prefix="auth_req_">
 
-type authorization_response = {
+type auth = {
   scopes: scope list;
   token: string;
   app: app;
@@ -25,7 +28,9 @@ type authorization_response = {
   id: int;
   ?note: string option;
   ?note_url: string option;
-}
+} <ocaml field_prefix="auth_">
+
+type auths = auth list
 
 type new_issue = {
   title: string;
@@ -211,3 +216,5 @@ type repo = {
   has_wiki: bool;
   has_downloads: bool;
 } <ocaml field_prefix="repo_">
+
+

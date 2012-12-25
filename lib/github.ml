@@ -47,6 +47,8 @@ module Scope = struct
       | None -> a
       | Some b -> b::a
     ) [] scopes
+
+  let all = [ `User; `Public_repo; `Repo; `Gist; `Repo_status; `Delete_repo ]
 end
 
 module URI = struct
@@ -65,6 +67,12 @@ module URI = struct
     Uri.with_query' uri q
 
   let api = "https://api.github.com"
+
+  let authorizations =
+    Uri.of_string (Printf.sprintf "%s/authorizations" api)
+
+  let authorization ~id =
+    Uri.of_string (Printf.sprintf "%s/authorizations/%d" api id)
 
   let repo ~user ~repo =
     Uri.of_string (Printf.sprintf "%s/repos/%s/%s" api user repo) 
@@ -88,9 +96,6 @@ module URI = struct
 
   let repo_commit ~user ~repo ~sha =
     Uri.of_string (Printf.sprintf "%s/repos/%s/%s/commits/%s" api user repo sha)
-
-  let authorizations =
-    Uri.of_string "https://api.github.com/authorizations"
 
   let repo_milestones ~user ~repo =
     Uri.of_string (Printf.sprintf "%s/repos/%s/%s/milestones" api user repo)
@@ -200,15 +205,22 @@ open Lwt
 module Token = struct
   type t = string
 
-  let direct ?(scopes=[`Repo]) ~user ~pass () =
-    let req = { auth_req_scopes=scopes; auth_req_note="ocaml-github" } in
-    let body = string_of_authorization_request req in
+  let create ?(scopes=[`Repo]) ?note ?note_url ?client_id ?client_secret ~user ~pass () =
+    let req = { auth_req_scopes=scopes; auth_req_note=note; auth_req_note_url=note_url;
+     auth_req_client_id=client_id; auth_req_client_secret=client_secret } in
+    let body = string_of_auth_req req in
     let headers = C.Header.(add_authorization (init ()) (C.Auth.Basic (user,pass))) in
-    API.post ~headers ~body ~uri:URI.authorizations ~expected_code:`Created
+    let uri = URI.authorizations in
+    API.post ~headers ~body ~uri ~expected_code:`Created
       (fun body ->
-        let json = authorization_response_of_string body in
-        return json.token
+        let json = auth_of_string body in
+        return json.auth_token
       )
+
+  let get_all ~user ~pass () =
+    let uri = URI.authorizations in
+    let headers = C.Header.(add_authorization (init ()) (C.Auth.Basic (user,pass))) in
+    API.get ~headers ~uri ~expected_code:`OK (fun body -> return (auths_of_string body))
 
   (* Convert a code after a user oAuth into an access token that can
    * be used in subsequent requests.
@@ -226,6 +238,7 @@ module Token = struct
         return None
     end
 
+  let of_auth x = x.auth_token
   let of_string x = x
   let to_string x = x
 end

@@ -26,13 +26,30 @@ module Monad : sig
   val (>>=) : 'a t -> ('a -> 'b t) -> 'b t
 end
 
+(* Authorization scopes; http://developer.github.com/v3/oauth/ *)
+module Scope : sig
+  val string_of_scope : Github_t.scope -> string
+  val scope_of_string : string -> Github_t.scope option
+  val string_of_scopes : Github_t.scope list -> string
+  val scopes_of_string : string -> Github_t.scope list
+  val all : Github_t.scope list
+end
+
 (* Access token to the API, usually obtained via a user oAuth *)
 module Token : sig
   type t
+
   val of_code: client_id:string -> client_secret:string -> code:string -> unit -> t option Lwt.t
-  val direct : ?scopes:Github_t.scope list -> user:string -> pass:string -> unit -> t Monad.t
-  val to_string : t -> string
+
+  val create : ?scopes:Github_t.scope list -> ?note:string -> ?note_url:string ->
+    ?client_id:string -> ?client_secret:string ->
+    user:string -> pass:string -> unit -> t Monad.t
+
+  val get_all : user:string -> pass:string -> unit -> Github_t.auths Monad.t
+
+  val of_auth : Github_t.auth -> t
   val of_string : string -> t
+  val to_string : t -> string
 end
 
 (* Generic API accessor function, not normally used directly, but useful in case you

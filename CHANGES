@@ -1,13 +1,13 @@
-0.4.0 (trunk):
+0.4.0 (2012-12-25):
+* Add a `git-jar` command which provides a convenient command-line interface
+  to list, create and save tokens.
+* Add a `github.unix` subpackage which provides a `Github_cookie_jar` module
+  which saves tokens in `$HOME/.github` for other applications to query if
+  they use the Github API.
 * Complete the auth API, and rename functions slightly for consistency. We now
   have `Token.get_all` and `Token.get` to retrieve auth information, and
  `Token.create` for constructing them. The API also includes support for adding
   notes and URLs, which are stored on the Github side.
-* Add a `github.unix` subpackage which provides a `Github_cookie_jar` module
-  which saves tokens in `$HOME/.github` for other applications to query if
-  they use the Github API.
-* Add a `git-jar` command which provides a convenient command-line interface
-  to list, create and save tokens.
 
 0.3.3 (2012-12-18):
 * Add `Repo.info` to retrieve repository metadata.

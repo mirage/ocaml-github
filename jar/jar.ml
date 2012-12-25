@@ -21,8 +21,6 @@ open Lwt
 
 let version = "1.0.0"
 
-let run_github fn = Lwt_main.run (Github.Monad.run (fn ()))
-
 (* Cmdliner converter for Github scope lists *)
 let scope =
   let parse s =
@@ -35,7 +33,7 @@ let scope =
 (* Command definitions *)
 let list_auth user pass =
   let open Github_t in
-  let t = 
+  Lwt_main.run (
     lwt pass = Passwd.get pass in
     lwt auths = Github.Monad.run (Github.Token.get_all ~user ~pass ()) in
     lwt local = Github_cookie_jar.get_all () in
@@ -57,20 +55,24 @@ let list_auth user pass =
       |names -> List.iter (fun x -> print_line (Some x)) names
     ) auths;
     return ()
-  in
-  let () = Lwt_main.run t in ()
+  )
 
 let make_auth user pass scopes note note_url client_id client_secret =
   let open Github_t in
-  let token = run_github (Github.Token.create ~scopes ~note ?note_url 
-   ?client_id ?client_secret ~user ~pass) in
-  Printf.printf "Created token %d: %s\n" token.auth_id (Github.Token.(to_string (of_auth token)))
+  Lwt_main.run (
+    lwt pass = Passwd.get pass in
+    lwt auth = Github.Monad.run (Github.Token.create ~scopes ~note ?note_url ?client_id ?client_secret ~user ~pass ()) in
+    Printf.printf "Created token %d: %s\n" auth.auth_id (Github.Token.(to_string (of_auth auth)));
+    return ()
+  )
 
 let save_auth user pass id name =
   let open Github_t in
-  let auth = run_github (Github.Token.get ~user ~pass ~id) in
-  let t = Github_cookie_jar.save ~name ~auth in
-  Lwt_main.run t
+  Lwt_main.run (
+    lwt pass = Passwd.get pass in
+    lwt auth = Github.Monad.run (Github.Token.get ~user ~pass ~id ()) in
+    Github_cookie_jar.save ~name ~auth
+  )
 
 (* Command declarations for Cmdliner *)
 let list_cmd =

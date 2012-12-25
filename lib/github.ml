@@ -211,16 +211,17 @@ module Token = struct
     let body = string_of_auth_req req in
     let headers = C.Header.(add_authorization (init ()) (C.Auth.Basic (user,pass))) in
     let uri = URI.authorizations in
-    API.post ~headers ~body ~uri ~expected_code:`Created
-      (fun body ->
-        let json = auth_of_string body in
-        return json.auth_token
-      )
+    API.post ~headers ~body ~uri ~expected_code:`Created (fun body -> return (auth_of_string body))
 
   let get_all ~user ~pass () =
     let uri = URI.authorizations in
     let headers = C.Header.(add_authorization (init ()) (C.Auth.Basic (user,pass))) in
     API.get ~headers ~uri ~expected_code:`OK (fun body -> return (auths_of_string body))
+
+  let get ~user ~pass ~id () =
+    let uri = URI.authorization id in
+    let headers = C.Header.(add_authorization (init ()) (C.Auth.Basic (user,pass))) in
+    API.get ~headers ~uri ~expected_code:`OK (fun body -> return (auth_of_string body))
 
   (* Convert a code after a user oAuth into an access token that can
    * be used in subsequent requests.

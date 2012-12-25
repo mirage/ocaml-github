@@ -43,9 +43,10 @@ module Token : sig
 
   val create : ?scopes:Github_t.scope list -> ?note:string -> ?note_url:string ->
     ?client_id:string -> ?client_secret:string ->
-    user:string -> pass:string -> unit -> t Monad.t
+    user:string -> pass:string -> unit -> Github_t.auth Monad.t
 
   val get_all : user:string -> pass:string -> unit -> Github_t.auths Monad.t
+  val get : user:string -> pass:string -> id:int -> unit -> Github_t.auth Monad.t
 
   val of_auth : Github_t.auth -> t
   val of_string : string -> t

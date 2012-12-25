@@ -7,10 +7,6 @@ setup.bin: setup.ml
 	ocamlopt.opt -o $@ $< || ocamlopt -o $@ $< || ocamlc -o $@ $<
 	rm -f setup.cmx setup.cmi setup.o setup.cmo
 
-# do not overwrite an existing config.ml
-lib_test/config.ml: lib_test/config.ml.in
-	if [ ! -e lib_test/config.ml ]; then cp $< $@; else touch $@; fi
-
 setup.data: setup.bin
 	./setup.bin -configure --prefix $(PREFIX)
 

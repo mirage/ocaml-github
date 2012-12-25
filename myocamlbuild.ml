@@ -1,7 +1,7 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: eafcd4e2de3e68989ed303a6aeff2b24) *)
+(* DO NOT EDIT (digest: f28adecde8eed7d36c3b37c32184cbf3) *)
 module OASISGettext = struct
-(* # 21 "/Users/avsm/.opam/4.00.1+short-types/build/oasis-mirage.0.3.0/src/oasis/OASISGettext.ml" *)
+# 21 "/Users/avsm/src/git/avsm/oasis/src/oasis/OASISGettext.ml"
 
   let ns_ str =
     str
@@ -24,7 +24,7 @@ module OASISGettext = struct
 end
 
 module OASISExpr = struct
-(* # 21 "/Users/avsm/.opam/4.00.1+short-types/build/oasis-mirage.0.3.0/src/oasis/OASISExpr.ml" *)
+# 21 "/Users/avsm/src/git/avsm/oasis/src/oasis/OASISExpr.ml"
 
 
 
@@ -116,7 +116,7 @@ end
 
 # 117 "myocamlbuild.ml"
 module BaseEnvLight = struct
-(* # 21 "/Users/avsm/.opam/4.00.1+short-types/build/oasis-mirage.0.3.0/src/base/BaseEnvLight.ml" *)
+# 21 "/Users/avsm/src/git/avsm/oasis/src/base/BaseEnvLight.ml"
 
   module MapString = Map.Make(String)
 
@@ -214,7 +214,7 @@ end
 
 # 215 "myocamlbuild.ml"
 module MyOCamlbuildFindlib = struct
-(* # 21 "/Users/avsm/.opam/4.00.1+short-types/build/oasis-mirage.0.3.0/src/plugins/ocamlbuild/MyOCamlbuildFindlib.ml" *)
+# 21 "/Users/avsm/src/git/avsm/oasis/src/plugins/ocamlbuild/MyOCamlbuildFindlib.ml"
 
   (** OCamlbuild extension, copied from 
     * http://brion.inria.fr/gallium/index.php/Using_ocamlfind_with_ocamlbuild
@@ -290,11 +290,20 @@ module MyOCamlbuildFindlib = struct
            * linking. *)
           List.iter 
             begin fun pkg ->
-              flag ["ocaml"; "compile";  "pkg_"^pkg] & S[A"-package"; A pkg];
-              flag ["ocaml"; "ocamldep"; "pkg_"^pkg] & S[A"-package"; A pkg];
-              flag ["ocaml"; "doc";      "pkg_"^pkg] & S[A"-package"; A pkg];
-              flag ["ocaml"; "link";     "pkg_"^pkg] & S[A"-package"; A pkg];
-              flag ["ocaml"; "infer_interface"; "pkg_"^pkg] & S[A"-package"; A pkg];
+              let base_args = [A"-package"; A pkg] in
+              let syn_args = [A"-syntax"; A "camlp4o"] in
+              let args =
+  			  (* heuristic to identify syntax extensions: 
+  				 whether they end in ".syntax"; some might not *)
+                if Filename.check_suffix pkg "syntax"
+                then syn_args @ base_args
+                else base_args
+              in
+              flag ["ocaml"; "compile";  "pkg_"^pkg] & S args;
+              flag ["ocaml"; "ocamldep"; "pkg_"^pkg] & S args;
+              flag ["ocaml"; "doc";      "pkg_"^pkg] & S args;
+              flag ["ocaml"; "link";     "pkg_"^pkg] & S base_args;
+              flag ["ocaml"; "infer_interface"; "pkg_"^pkg] & S args;
             end 
             (find_packages ());
 
@@ -326,7 +335,7 @@ module MyOCamlbuildFindlib = struct
 end
 
 module MyOCamlbuildBase = struct
-(* # 21 "/Users/avsm/.opam/4.00.1+short-types/build/oasis-mirage.0.3.0/src/plugins/ocamlbuild/MyOCamlbuildBase.ml" *)
+# 21 "/Users/avsm/src/git/avsm/oasis/src/plugins/ocamlbuild/MyOCamlbuildBase.ml"
 
   (** Base functions for writing myocamlbuild.ml
       @author Sylvain Le Gall
@@ -342,7 +351,7 @@ module MyOCamlbuildBase = struct
   type name = string 
   type tag = string 
 
-(* # 56 "/Users/avsm/.opam/4.00.1+short-types/build/oasis-mirage.0.3.0/src/plugins/ocamlbuild/MyOCamlbuildBase.ml" *)
+# 56 "/Users/avsm/src/git/avsm/oasis/src/plugins/ocamlbuild/MyOCamlbuildBase.ml"
 
   type t =
       {
@@ -494,20 +503,21 @@ module MyOCamlbuildBase = struct
 end
 
 
-# 497 "myocamlbuild.ml"
+# 506 "myocamlbuild.ml"
 open Ocamlbuild_plugin;;
 let package_default =
   {
-     MyOCamlbuildBase.lib_ocaml = [("github", ["lib"])];
+     MyOCamlbuildBase.lib_ocaml =
+       [("github", ["lib"]); ("github_unix", ["unix"])];
      lib_c = [];
      flags = [];
-     includes = [("lib_test", ["lib"])];
+     includes = [("unix", ["lib"]); ("lib_test", ["lib"]); ("jar", ["unix"])];
      }
   ;;
 
 let dispatch_default = MyOCamlbuildBase.dispatch_default package_default;;
 
-# 511 "myocamlbuild.ml"
+# 521 "myocamlbuild.ml"
 (* OASIS_STOP *)
 open Ocamlbuild_plugin
 

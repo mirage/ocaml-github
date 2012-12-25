@@ -1,17 +1,30 @@
 OASISFormat: 0.3
 Name:        github
-Version:     0.3.4
+Version:     0.4.0
 Synopsis:    Github API interface
 Authors:     Anil Madhavapeddy
 License:     ISC
 Plugins:     META (0.3)
 BuildTools: ocamlbuild
 
+Flag unix
+  Description: build the UNIX subpackage
+  Default: true
+
 Library github
   Path: lib
   Findlibname: github
   Modules: Github, Github_j, Github_t
   BuildDepends: lwt.syntax, cohttp, uri (>= 1.3.3), cohttp.lwt (>= 0.9.1), yojson, atdgen
+
+Library github_unix
+  Build$: flag(unix)
+  Install$: flag(unix)
+  Path: unix
+  Findlibname: unix
+  FindlibParent: github
+  Modules: Github_cookie_jar
+  BuildDepends: lwt.syntax, lwt.unix, github, lambda-term
 
 Executable rwo
   Path:               lib_test
@@ -20,6 +33,14 @@ Executable rwo
   CompiledObject:     best
   Install:            false
   BuildDepends:       cohttp.lwt, lwt.syntax, github, atdgen
+
+Executable "git-jar"
+  Path:               jar
+  MainIs:             jar.ml
+  Custom:             true
+  CompiledObject:     best
+  Install:            true
+  BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, cmdliner
 
 Executable get_token
   Path:               lib_test

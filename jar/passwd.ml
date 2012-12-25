@@ -29,7 +29,7 @@ class read_password term = object(self)
     | action ->
         super#send_action action
   initializer
-    self#set_prompt (S.const (LTerm_text.of_string "Type a password: "))
+    self#set_prompt (S.const (LTerm_text.of_string "Enter Github password: "))
 end
 
 let get =

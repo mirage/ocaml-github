@@ -76,36 +76,45 @@ let save_auth user pass id name =
 
 (* Command declarations for Cmdliner *)
 let list_cmd =
-  let user = Arg.(required & pos 0 (some string) None & info [] ~docv:"USERNAME" ~doc:"Github username") in
-  let pass = Arg.(value & opt string "" & info ["p";"password"] ~docv:"PASSWORD" ~doc:"Github password") in
+  let user = Arg.(required & pos 0 (some string) None & info [] ~docv:"USERNAME" ~doc:"Github username.") in
+  let pass = Arg.(value & opt string "" & info ["p";"password"] ~docv:"PASSWORD" ~doc:"Github password. If not specified, this will be obtained interactively.") in
   Term.(pure list_auth $ user $ pass),
-  Term.info "show" ~doc:"list active Github authorizations"
+  Term.info "show" ~doc:"list all active Github authorization tokens, including remote ones."
 
 let make_cmd =
-  let user = Arg.(required & pos 0 (some string) None & info [] ~docv:"USERNAME" ~doc:"Github username") in
-  let pass = Arg.(value & opt string "" & info ["p";"password"] ~docv:"PASSWORD" ~doc:"Github password") in
+  let user = Arg.(required & pos 0 (some string) None & info [] ~docv:"USERNAME" ~doc:"Github username.") in
+  let pass = Arg.(value & opt string "" & info ["p";"password"] ~docv:"PASSWORD" ~doc:"Github password. If not specified, this will be obtained interactively.") in
   let scopes =
-    let doc = Printf.sprintf "Comma delimited list of repo scopes. Can be: %s" (Github.Scope.(string_of_scopes all)) in
+    let doc = Printf.sprintf "Comma delimited list of repository scopes. Can be: %s" (Github.Scope.(string_of_scopes all)) in
     Arg.(value & opt (list scope) [] & info ["s";"scopes"] ~docv:"SCOPES" ~doc) in
-  let note = Arg.(value & opt string "OCaml Github jar" & info ["note"] ~docv:"NOTE" ~doc:"Note to record beside the authorization token") in
+  let note = Arg.(value & opt string "OCaml Github jar" & info ["note"] ~docv:"NOTE" ~doc:"Informational note to record beside the authorization token") in
   let note_url = Arg.(value & opt (some string) None & info ["url"] ~docv:"URL" ~doc:"URL to record beside the authorization token") in
   let client_id = Arg.(value & opt (some string) None & info ["client-id"] ~docv:"CLIENT_ID" ~doc:"Optional oAuth client id to register this token with an application.") in
   let client_secret = Arg.(value & opt (some string) None & info ["client-secret"] ~docv:"CLIENT_SECRET" ~doc:"Optional oAuth client secret to register this token with an application.") in
   Term.(pure make_auth $ user $ pass $ scopes $ note $ note_url $ client_id $ client_secret),
-  Term.info "make" ~doc:"create a new Github authorization"
+  Term.info "make" ~doc:"create a new Github authorization token remotely."
 
 let save_cmd =
-  let user = Arg.(required & pos 0 (some string) None & info [] ~docv:"USERNAME" ~doc:"Github username") in
-  let pass = Arg.(value & opt string "" & info ["p";"password"] ~docv:"PASSWORD" ~doc:"Github password") in
-  let id = Arg.(required & pos 1 (some int) None & info [] ~docv:"TOKEN_ID" ~doc:"Github token id") in
-  let tname = Arg.(required & pos 2 (some string) None & info [] ~docv:"COOKIE" ~doc:"Local cookie name that applications can look up") in
+  let user = Arg.(required & pos 0 (some string) None & info [] ~docv:"USERNAME" ~doc:"Github username.") in
+  let pass = Arg.(value & opt string "" & info ["p";"password"] ~docv:"PASSWORD" ~doc:"Github password. If not specified, this will be obtained interactively.") in
+  let id = Arg.(required & pos 1 (some int) None & info [] ~docv:"TOKEN_ID" ~doc:"Numeric Github token id (obtained via the $(b,show) command).") in
+  let tname = Arg.(required & pos 2 (some string) None & info [] ~docv:"COOKIE" ~doc:"The local name for the authorization token that applications can look up.") in
   Term.(pure save_auth $ user $ pass $ id $ tname),
-  Term.info "save" ~doc:"save a Github auth to the local cookie jar"
+  Term.info "save" ~doc:"save a remote Github authorization token to the local cookie jar."
 
 let default_cmd = 
-  let doc = "manipulate Github authorizations" in 
+  let doc = "let local applications use Github authorization tokens" in 
   Term.(ret (pure (`Help (`Pager, None)))),
-  Term.info "git-jar" ~version ~doc
+  let man = [
+    `S "DESCRIPTION";
+    `P "Applications that want to use Github will need to save authentication tokens locally, and $(b,git-jar) provides a CLI interface to manipulate them. Github authentication tokens are mapped onto a local $(i,name), and applictions can query that name at runtime to retrieve a token to use in Github API calls.";
+    `P "All the tokens are stored in $(i,$HOME/.github/<name>), where $(i,<name>) is the local name of the token.";
+    `S "COMMON OPTIONS";
+    `P "$(b,--password) optionally specifies the Github password on the command-line. If it isn't present, then the password will be obtained interactively.";
+    `P "$(b,--help) will show more help for each of the sub-commands above.";
+    `S "BUGS";
+     `P "Email bug reports to <cl-mirage@lists.cl.cam.ac.uk>, or report them online at <http://github.com/avsm/ocaml-github>."] in
+  Term.info "git-jar" ~version ~doc ~man
        
 let cmds = [list_cmd; make_cmd; save_cmd]
 

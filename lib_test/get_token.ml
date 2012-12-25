@@ -3,7 +3,8 @@ open Printf
 
 let t =
   let r = Github.Token.create ~user:Config.user ~pass:Config.pass () in
-  lwt token = Github.Monad.run r in
+  lwt auth = Github.Monad.run r in
+  let token = Github.Token.of_auth auth in
   prerr_endline (Github.Token.to_string token);
   return ()
 

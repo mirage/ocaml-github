@@ -24,7 +24,7 @@ Library github_unix
   Findlibname: unix
   FindlibParent: github
   Modules: Github_cookie_jar
-  BuildDepends: lwt.syntax, lwt.unix, github, lambda-term
+  BuildDepends: lwt.syntax, lwt.unix, github
 
 Executable rwo
   Path:               lib_test
@@ -40,7 +40,7 @@ Executable "git-jar"
   Custom:             true
   CompiledObject:     best
   Install:            true
-  BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, cmdliner
+  BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, cmdliner, lambda-term
 
 Executable get_token
   Path:               lib_test

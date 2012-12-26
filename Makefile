@@ -10,7 +10,7 @@ setup.bin: setup.ml
 setup.data: setup.bin
 	./setup.bin -configure --prefix $(PREFIX)
 
-build: setup.data setup.bin lib_test/config.ml
+build: setup.data setup.bin
 	./setup.bin -build -j 4 -classic-display
 
 doc: setup.data setup.bin

@@ -1,3 +1,6 @@
+0.4.1 (trunk):
+* Expose the `milestone` field for an issue.
+
 0.4.0 (2012-12-25):
 * Add a `git-jar` command which provides a convenient command-line interface
   to list, create and save tokens.

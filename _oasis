@@ -6,6 +6,7 @@ Authors:     Anil Madhavapeddy
 License:     ISC
 Plugins:     META (0.3)
 BuildTools: ocamlbuild
+PostConfCommand: ./init_config.sh
 
 Flag unix
   Description: build the UNIX subpackage

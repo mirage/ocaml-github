@@ -102,6 +102,13 @@ module URI = struct
 
   let milestone ~user ~repo ~num =
     Uri.of_string (Printf.sprintf "%s/repos/%s/%s/milestones/%d" api user repo num)
+
+  let issue_comments ~user ~repo ~issue_number =
+    Uri.of_string (Printf.sprintf "%s/repos/%s/%s/issues/%d/comments" api user repo issue_number)
+
+  let issue_comment ~user ~repo ~comment_id =
+    Uri.of_string (Printf.sprintf "%s/repos/%s/%s/issues/comments/%d" api user repo comment_id)
+
 end 
 
 module C = Cohttp
@@ -289,6 +296,10 @@ module Issues = struct
     let body = Github_j.string_of_new_issue issue in
     let uri = URI.repo_issues ~user ~repo in
     API.post ~body ?token ~uri ~expected_code:`Created (fun b -> return (issue_of_string b))
+
+  let comments ?token ~user ~repo ~issue_number () =
+    let uri = URI.issue_comments ~user ~repo ~issue_number in
+    API.get ?token ~uri (fun b -> return (issue_comments_of_string b))
 end
 
 module Repo = struct

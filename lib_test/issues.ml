@@ -2,19 +2,26 @@ open Lwt
 open Printf
 
 let token = Config.access_token
+let user = "ocamllabs"
+let repo = "rwo-comments"
 
 let t =
-  lwt r = 
-    let open Github.Monad in
-    run (
-    Github.Issues.for_repo ~token ~user:"avsm" ~repo:"mirage" () >>=
-    fun issues ->
-      List.iter (fun issue ->
-        let open Github_t in
-        eprintf "issue %d: %s\n%!" issue.issue_number issue.issue_title
-      ) issues;
-      return ()
-  ) in
-  return ()
+  let open Github.Monad in
+  let open Github_t in
+  run (
+    Github.Issues.for_repo ~token ~user ~repo () 
+    >>= fun issues ->
+      let rec iter =
+        function
+        |[] -> return ()
+        |issue::tl ->
+          let issue_number = issue.issue_number in
+          eprintf "issue %d: %s\n%!" issue_number issue.issue_title;
+          Github.Issues.comments ~token ~user ~repo ~issue_number ()
+          >>= fun comments ->
+            List.iter (fun c -> eprintf "  > %d: %s\n" c.issue_comment_id c.issue_comment_body) comments;
+            iter tl
+      in iter issues
+  )
 
 let _ = Lwt_main.run t

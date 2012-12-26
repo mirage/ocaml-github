@@ -122,6 +122,17 @@ type issue = {
 
 type issues = issue list
 
+type issue_comment = {
+  id: int;
+  url: string;
+  body: string;
+  user: user;
+  created_at: string;
+  updated_at: string;
+} <ocaml field_prefix="issue_comment_">
+
+type issue_comments = issue_comment list
+
 type repo_commit = {
   sha: string;
   url: string;

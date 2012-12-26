@@ -97,6 +97,8 @@ end
 module URI : sig
   val authorizations : Uri.t
   val authorize : ?scopes:Github_t.scope list -> client_id:string -> unit -> Uri.t
+  val issue_comments: user:string -> repo:string -> issue_number:int -> Uri.t
+  val issue_comment: user:string -> repo:string -> comment_id:int -> Uri.t
   val token : client_id:string -> client_secret:string -> code:string -> unit -> Uri.t
   val repo_issues : user:string -> repo:string -> Uri.t
   val repo_milestones : user:string -> repo:string -> Uri.t
@@ -140,6 +142,11 @@ module Issues: sig
     ?token:Token.t ->
     user:string -> repo:string ->
     issue:Github_t.new_issue -> unit -> Github_t.issue Monad.t
+
+  val comments :
+    ?token:Token.t ->
+    user:string -> repo:string ->
+    issue_number:int -> unit -> Github_t.issue_comments Monad.t
 end
 
 module Repo: sig

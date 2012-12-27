@@ -133,6 +133,10 @@ type issue_comment = {
 
 type issue_comments = issue_comment list
 
+type new_issue_comment = {
+  body: string;
+} <ocaml field_prefix="new_issue_comment_">
+
 type repo_commit = {
   sha: string;
   url: string;

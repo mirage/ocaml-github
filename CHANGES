@@ -1,6 +1,7 @@
 0.4.1 (trunk):
 * Add `Github.Issues.comments` to retrieve issue comments, and an `issue_comment`
   type in the ATD specification for the returned value.
+* Add `Github.Issues.create_comment` to add a new issue comment.
 * Expose the `milestone` field for an issue.
 * Create a default `lib_test/config.ml` if one doesnt exist (from the template
   in `lib_test/config.ml.in`.

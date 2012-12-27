@@ -1,4 +1,4 @@
-0.4.1 (trunk):
+0.4.1 (2012-12-27):
 * Add `Github.Issues.comments` to retrieve issue comments, and an `issue_comment`
   type in the ATD specification for the returned value.
 * Add `Github.Issues.create_comment` to add a new issue comment.

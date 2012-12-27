@@ -135,18 +135,20 @@ end
 
 module Issues: sig
   val for_repo :
-    ?token:Token.t ->
-    user:string -> repo:string -> unit -> Github_t.issue list Monad.t
+    ?token:Token.t -> user:string -> repo:string ->
+    unit -> Github_t.issue list Monad.t
 
   val create :
-    ?token:Token.t ->
-    user:string -> repo:string ->
+    ?token:Token.t -> user:string -> repo:string ->
     issue:Github_t.new_issue -> unit -> Github_t.issue Monad.t
 
   val comments :
-    ?token:Token.t ->
-    user:string -> repo:string ->
+    ?token:Token.t -> user:string -> repo:string ->
     issue_number:int -> unit -> Github_t.issue_comments Monad.t
+
+  val create_comment :
+    ?token:Token.t -> user:string -> repo:string ->
+    issue_number:int -> body:string -> unit -> Github_t.issue_comment Monad.t
 end
 
 module Repo: sig

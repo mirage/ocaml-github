@@ -304,8 +304,7 @@ module Issues = struct
   let create_comment ?token ~user ~repo ~issue_number ~body () =
     let body = Github_j.string_of_new_issue_comment { new_issue_comment_body=body } in
     let uri = URI.issue_comments ~user ~repo ~issue_number in
-    API.post ~body ?token ~uri (fun b -> return (issue_comments_of_string b))
-  
+    API.post ~body ?token ~uri ~expected_code:`Created (fun b -> return (issue_comment_of_string b))
 end
 
 module Repo = struct

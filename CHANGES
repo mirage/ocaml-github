@@ -1,3 +1,8 @@
+0.4.2 (trunk):
+* Add `Issues.edit` to patch an existing issue.
+* Correct the type of `Issues.milestone` to be an integer.
+* `Issues.labels` is now a `string list`, instead of a `string list option` (with the empty list denoting `None`).
+
 0.4.1 (2012-12-27):
 * Add `Github.Issues.comments` to retrieve issue comments, and an `issue_comment`
   type in the ATD specification for the returned value.

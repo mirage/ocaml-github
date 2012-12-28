@@ -80,6 +80,9 @@ module URI = struct
   let repo_issues ~user ~repo =
     Uri.of_string (Printf.sprintf "%s/repos/%s/%s/issues" api user repo) 
 
+  let repo_issue ~user ~repo ~issue_number =
+    Uri.of_string (Printf.sprintf "%s/repos/%s/%s/issues/%d" api user repo issue_number) 
+
   let repo_tags ~user ~repo =
     Uri.of_string (Printf.sprintf "%s/repos/%s/%s/tags" api user repo)
 
@@ -296,6 +299,11 @@ module Issues = struct
     let body = Github_j.string_of_new_issue issue in
     let uri = URI.repo_issues ~user ~repo in
     API.post ~body ?token ~uri ~expected_code:`Created (fun b -> return (issue_of_string b))
+
+  let edit ?token ~user ~repo ~issue_number ~issue () =
+    let body = Github_j.string_of_new_issue issue in
+    let uri = URI.repo_issue ~user ~repo ~issue_number in
+    API.patch ~body ?token ~uri ~expected_code:`OK (fun b -> return (issue_of_string b))
 
   let comments ?token ~user ~repo ~issue_number () =
     let uri = URI.issue_comments ~user ~repo ~issue_number in

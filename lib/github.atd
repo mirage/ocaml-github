@@ -36,8 +36,8 @@ type new_issue = {
   title: string;
   ?body: string option;
   ?assignee: string option;
-  ?milestone: string option;
-  ?labels: string list option;
+  ?milestone: int option;
+  ~labels: string list;
 } <ocaml field_prefix="new_issue_">
 
 type issue_sort = [

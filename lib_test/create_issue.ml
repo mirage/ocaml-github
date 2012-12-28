@@ -26,7 +26,7 @@ let t =
     new_issue_body=Some "ocaml-github body";
     new_issue_assignee=Some "avsm";
     new_issue_milestone=None;
-    new_issue_labels=None;
+    new_issue_labels=[];
   } in
     
   lwt issue = Github.(Monad.(run (Issues.create ~token ~user:"avsm" ~repo:"ocaml-github" ~issue ()))) in

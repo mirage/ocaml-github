@@ -52,12 +52,15 @@ module Scope = struct
 end
 
 module URI = struct
-  let authorize ?scopes ~client_id () =
+  let authorize ?scopes ?redirect_uri ~client_id () =
     let entry_uri = "https://github.com/login/oauth/authorize" in
     let uri = Uri.of_string entry_uri in
     let q = ["client_id", client_id ] in
     let q = match scopes with
      |Some scopes -> ("scope", Scope.string_of_scopes scopes) :: q
+     |None -> q in
+    let q = match redirect_uri with
+     |Some uri -> ("redirect_uri", Uri.to_string uri) :: q 
      |None -> q in
     Uri.with_query' uri q
 

@@ -96,7 +96,8 @@ end
  * is the URI used to convert the result into a concrete access token *)
 module URI : sig
   val authorizations : Uri.t
-  val authorize : ?scopes:Github_t.scope list -> client_id:string -> unit -> Uri.t
+  val authorize : ?scopes:Github_t.scope list -> ?redirect_uri:Uri.t ->
+    client_id:string -> unit -> Uri.t
   val issue_comments: user:string -> repo:string -> issue_number:int -> Uri.t
   val issue_comment: user:string -> repo:string -> comment_id:int -> Uri.t
   val token : client_id:string -> client_secret:string -> code:string -> unit -> Uri.t

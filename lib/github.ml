@@ -74,6 +74,11 @@ module URI = struct
   let authorization ~id =
     Uri.of_string (Printf.sprintf "%s/authorizations/%d" api id)
 
+  let user ?login () =
+    match login with
+    |None -> Uri.of_string (Printf.sprintf "%s/user" api)
+    |Some u -> Uri.of_string (Printf.sprintf "%s/users/%s" api u)
+
   let repo ~user ~repo =
     Uri.of_string (Printf.sprintf "%s/repos/%s/%s" api user repo) 
 
@@ -252,6 +257,16 @@ module Token = struct
   let of_auth x = x.auth_token
   let of_string x = x
   let to_string x = x
+end
+
+module User = struct
+  let current_info ~token () =
+    let uri = URI.user () in
+    API.get ~token ~uri (fun body -> return (user_info_of_string body))
+
+  let info ?token ~login () =
+    let uri = URI.user ~login () in
+    API.get ?token ~uri (fun body -> return (user_info_of_string body))
 end
  
 module Milestone = struct

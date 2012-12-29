@@ -106,6 +106,13 @@ module URI : sig
   val milestone : user:string -> repo:string -> num:int -> Uri.t
 end
 
+module User : sig
+  val current_info : token:Token.t -> unit -> Github_t.user_info Monad.t
+  (** Return the currently logged in user *)
+
+  val info : ?token:Token.t -> login:string -> unit -> Github_t.user_info Monad.t
+end
+
 module Milestone : sig
   val for_repo:
     ?state:Github_t.state ->

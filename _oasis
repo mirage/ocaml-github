@@ -1,6 +1,6 @@
 OASISFormat: 0.3
 Name:        github
-Version:     0.4.1
+Version:     0.4.2
 Synopsis:    Github API interface
 Authors:     Anil Madhavapeddy
 License:     ISC
@@ -42,6 +42,14 @@ Executable "git-jar"
   CompiledObject:     best
   Install:            true
   BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, cmdliner, lambda-term
+
+Executable current_user
+  Path:               lib_test
+  MainIs:             current_user.ml
+  Custom:             true
+  CompiledObject:     best
+  Install:            false
+  BuildDepends:       cohttp.lwt, lwt.syntax, github, atdgen
 
 Executable get_token
   Path:               lib_test

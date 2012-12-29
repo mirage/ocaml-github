@@ -64,6 +64,33 @@ type user = {
   url: string;
 } <ocaml field_prefix="user_">
 
+type user_type = [
+  | User <json name="User">
+  | Organization <json name="Organization">
+]
+
+type user_info = {
+  login: string;
+  id: int;
+  ?avatar_url: string option;
+  ?gravatar_id: string option;
+  url: string;
+  ?name: string option;
+  ?company: string option;
+  ?blog: string option;
+  ?location: string option;
+  ?email: string option;
+  ~hireable: bool;
+  ~bio: string;
+  ~public_repos: int;
+  ~public_gists: int;
+  ~followers: int;
+  ~following: int;
+  html_url: string;
+  created_at: string;
+  ty <json name="type">: user_type;
+} <ocaml field_prefix="user_info_">
+ 
 type label = {
   url: string;
   name: string;

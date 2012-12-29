@@ -1,4 +1,5 @@
 0.4.2 (trunk):
+* Add `User.current_info` and `User.info` to retrieve information about the logged in user, or a public one.
 * Add `Issues.edit` to patch an existing issue.
 * Correct the type of `Issues.milestone` to be an integer.
 * `Issues.labels` is now a `string list`, instead of a `string list option` (with the empty list denoting `None`).

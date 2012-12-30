@@ -17,7 +17,7 @@
 * Add a `git-jar` command which provides a convenient command-line interface
   to list, create and save tokens.
 * Add a `github.unix` subpackage which provides a `Github_cookie_jar` module
-  which saves tokens in `$HOME/.github` for other applications to query if
+  which saves tokens in `~/.github` for other applications to query if
   they use the Github API.
 * Complete the auth API, and rename functions slightly for consistency. We now
   have `Token.get_all` and `Token.get` to retrieve auth information, and

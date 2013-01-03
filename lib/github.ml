@@ -271,20 +271,55 @@ module User = struct
     let uri = URI.user ~login () in
     API.get ?token ~uri (fun body -> return (user_info_of_string body))
 end
+
+module Filter = struct
+  type state = [ `Open | `Closed ]
+  let string_of_state (s:state) =
+    match s with
+    |`Open -> "open"
+    |`Closed -> "closed"
+  
+  type milestone_sort = [ `Due_date | `Completeness ]
+  let string_of_sort (s:milestone_sort) =
+    match s with
+    |`Due_date -> "due_date"
+    |`Completeness -> "completeness"
+
+  type issue_sort = [ `Created | `Updated | `Comments ]
+  let string_of_issue_sort (s:issue_sort) =
+    match s with
+    |`Created -> "created"
+    |`Updated -> "updated"
+    |`Comments -> "comments"
+
+  type direction = [ `Asc | `Desc ]
+  let string_of_direction (d:direction) =
+    match d with
+    |`Asc -> "asc"
+    |`Desc -> "desc"
+
+  type milestone = [ `Any | `None | `Num of int ]
+  let string_of_milestone (m:milestone) =
+    match m with 
+    |`Any -> "*"
+    |`None -> "none"
+    |`Num n -> string_of_int n 
+
+  type user = [ `Any | `None | `Login of string ]
+  let string_of_user (a:user) =
+    match a with
+    |`Any -> "*"
+    |`None -> "none"
+    |`Login u -> u
+end
  
 module Milestone = struct
 
   let for_repo ?(state=`Open) ?(sort=`Due_date) ?(direction=`Desc) ?token ~user ~repo () =
-    (* TODO see if atdgen can generate these conversion functions to normal OCaml
-     * strings. The Github_j will put quotes around the string. *)
-    let string_of_state = function |`Open -> "open" |`Closed -> "closed" in
-    let string_of_sort = function |`Due_date -> "due_date" |`Completeness -> "completeness" in
-    let string_of_direction = function |`Asc -> "asc" |`Desc -> "desc" in
-    let params = [ 
-      "state", string_of_state state;
-      "sort", string_of_sort sort;
-      "direction", string_of_direction direction 
-    ] in
+    let params = Filter.([
+      "direction", string_of_direction direction;
+      "sort", string_of_milestone_sort sort;
+      "state", string_of_state state ]) in
     API.get ?token ~params ~uri:(URI.repo_milestones ~user ~repo) 
       (fun b -> return (milestones_of_string b))
 
@@ -309,9 +344,20 @@ end
 
 module Issues = struct
   
-  let for_repo ?token ~user ~repo () =
+  let for_repo ?token ?creator ?mentioned ?labels
+    ?(milestone=`Any) ?(state=`Open) ?(sort=`Created)
+    ?(direction=`Desc) ?assignee ~user ~repo () =
+    let params = Filter.([
+      "direction", string_of_direction direction;
+      "sort", string_of_issue_sort sort;
+      "state", string_of_state state;
+      "milestone", string_of_milestone milestone ]) in
+    let params = match assignee with |None -> params |Some a -> ("assignee", Filter.string_of_user a)::params in
+    let params = match creator with |None -> params |Some c -> ("creator", c)::params in
+    let params = match mentioned with |None -> params |Some m -> ("mentioned", m)::params in
+    let params = match labels with |None -> params |Some l -> ("labels",String.concat "," l)::params in
     let uri = URI.repo_issues ~user ~repo in
-    API.get ?token ~uri (fun b -> return (issues_of_string b))
+    API.get ?token ~params ~uri (fun b -> return (issues_of_string b))
 
   let create ?token ~user ~repo ~issue () =
     let body = Github_j.string_of_new_issue issue in

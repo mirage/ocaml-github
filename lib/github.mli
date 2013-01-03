@@ -114,11 +114,20 @@ module User : sig
   val info : ?token:Token.t -> login:string -> unit -> Github_t.user_info Monad.t
 end
 
+module Filter : sig
+  type state = [ `Open | `Closed ]
+  type milestone_sort = [ `Due_date | `Completeness ]
+  type issue_sort = [ `Created | `Updated | `Comments ]
+  type direction = [ `Asc | `Desc ]
+  type milestone = [ `Any | `None | `Num of int ]
+  type user = [ `Any | `None | `Login of string ]
+end
+
 module Milestone : sig
   val for_repo:
-    ?state:Github_t.state ->
-    ?sort:Github_t.milestone_sort ->
-    ?direction:Github_t.direction ->
+    ?state:Filter.state ->
+    ?sort:Filter.milestone_sort ->
+    ?direction:Filter.direction ->
     ?token:Token.t ->
     user:string -> repo:string -> unit -> Github_t.milestone list Monad.t
 
@@ -144,8 +153,11 @@ end
 
 module Issues: sig
   val for_repo :
-    ?token:Token.t -> user:string -> repo:string ->
-    unit -> Github_t.issue list Monad.t
+    ?token:Token.t -> ?creator:string -> ?mentioned:string ->
+    ?labels:string list -> ?milestone:Filter.milestone ->
+    ?state:Filter.state -> ?sort:Filter.issue_sort ->
+    ?direction:Filter.direction -> ?assignee:Filter.user ->
+    user:string -> repo:string -> unit -> Github_t.issues Monad.t
 
   val create :
     ?token:Token.t -> user:string -> repo:string ->

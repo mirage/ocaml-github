@@ -1,3 +1,6 @@
+0.4.3 (2013-01-??):
+* Add filters and sort order parameters for `Issues` and `Milestones` for a repository.
+
 0.4.2 (2012-12-29):
 * Add a `redirect_uri` option to `URI.authorize`, to permit the redirection URL to be parameterizable.
 * Add `User.current_info` and `User.info` to retrieve information about the logged in user, or a public one.

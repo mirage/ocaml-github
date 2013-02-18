@@ -144,3 +144,4 @@
 <lib_test/*.ml{,i}>: pkg_yojson
 <lib_test/create_milestone.{native,byte}>: custom
 # OASIS_STOP
+<lib/*>: std_json

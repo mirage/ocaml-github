@@ -1,3 +1,6 @@
+0.4.4 (trunk):
+* Force `-j-std` to ATDgen to always use standards-compliant JSON (#11)
+
 0.4.3 (2013-01-14):
 * Add filters and sort order parameters for `Issues` and `Milestones` for a repository.
 

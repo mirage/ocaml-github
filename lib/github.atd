@@ -228,6 +228,8 @@ type commit = {
   committer: user;
 } <ocaml field_prefix="commit_">
 
+type commits = commit list
+
 type repo = {
   id: int;
   owner: user;
@@ -259,3 +261,77 @@ type repo = {
   has_wiki: bool;
   has_downloads: bool;
 } <ocaml field_prefix="repo_">
+
+type branch = {
+  label: string;
+  ref: string;
+  sha: string;
+  user: user;
+  ?repo: repo option;
+} <ocaml field_prefix="branch_">
+
+type link = {
+  href: string;
+}
+
+type pull_links = {
+  self: link;
+  html: link;
+  comments: link;
+  review_comments: link;
+} <ocaml field_prefix="pull_">
+
+type pull = {
+  url: string;
+  html_url: string;
+  diff_url: string;
+  patch_url: string;
+  issue_url: string;
+  number: int;
+  ~state <ocaml default="`Open">: state;
+  title: string;
+  body: string;
+  created_at: string;
+  updated_at: string;
+  ?closed_at: string option;
+  ?merged_at: string option;
+  head: branch;
+  base: branch;
+  links <json name="_links">: pull_links;
+  user: user;
+} <ocaml field_prefix="pull_">
+
+type pulls = pull list
+
+type new_pull = {
+  title: string;
+  ?body: string option;
+  base: string;
+  head: string;
+} <ocaml field_prefix="new_pull_">
+
+type new_pull_issue = {
+  issue: int;
+  base: string;
+  head: string;
+} <ocaml field_prefix="new_pull_issue_">
+
+type update_pull = {
+  ?title: string option;
+  ?body: string option;
+  ?state: state option;
+} <ocaml field_prefix="update_pull_">
+
+type file = {
+  ?sha: string option; (* e.g. if status is 'renamed', this is None *)
+  filename: string;
+  status: string; (* TODO: variant? at least "added" *)
+  additions: int;
+  deletions: int;
+  changes: int;
+  blob_url: string;
+  raw_url: string;
+  ?patch: string option;
+} <ocaml field_prefix="file_">
+
+type files = file list

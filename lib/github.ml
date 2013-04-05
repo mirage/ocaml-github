@@ -108,6 +108,18 @@ module URI = struct
   let repo_commit ~user ~repo ~sha =
     Uri.of_string (Printf.sprintf "%s/repos/%s/%s/commits/%s" api user repo sha)
 
+  let repo_pulls ~user ~repo =
+    Uri.of_string (Printf.sprintf "%s/repos/%s/%s/pulls" api user repo)
+
+  let pull ~user ~repo ~num =
+    Uri.of_string (Printf.sprintf "%s/repos/%s/%s/pulls/%d" api user repo num)
+
+  let pull_commits ~user ~repo ~num =
+    Uri.of_string (Printf.sprintf "%s/repos/%s/%s/pulls/%d/commits" api user repo num)
+
+  let pull_files ~user ~repo ~num =
+    Uri.of_string (Printf.sprintf "%s/repos/%s/%s/pulls/%d/files" api user repo num)
+
   let repo_milestones ~user ~repo =
     Uri.of_string (Printf.sprintf "%s/repos/%s/%s/milestones" api user repo)
 
@@ -312,7 +324,55 @@ module Filter = struct
     |`None -> "none"
     |`Login u -> u
 end
- 
+
+module Pull = struct
+
+  let for_repo ?(state=`Open) ?token ~user ~repo () =
+    let params = Filter.([
+      "state", string_of_state state ]) in
+    API.get ?token ~params ~uri:(URI.repo_pulls ~user ~repo)
+      (fun b -> return (pulls_of_string b))
+
+  let get ?token ~user ~repo ~num () =
+    let uri = URI.pull ~user ~repo ~num in
+    API.get ?token ~uri (fun b -> return (pull_of_string b))
+
+  let create ?token ~user ~repo ~pull () =
+    let uri = URI.repo_pulls ~user ~repo in
+    let body = string_of_new_pull pull in
+    API.post ?token ~body ~uri ~expected_code:`Created (fun b -> return (pull_of_string b))
+
+  let create_from_issue ?token ~user ~repo ~pull_issue () =
+    let uri = URI.repo_pulls ~user ~repo in
+    let body = string_of_new_pull_issue pull_issue in
+    API.post ?token ~body ~uri ~expected_code:`Created (fun b -> return (pull_of_string b))
+
+  let update ?token ~user ~repo ~pull ~num () =
+    let uri = URI.pull ~user ~repo ~num in
+    let body = string_of_update_pull pull in
+    API.patch ?token ~body ~uri ~expected_code:`OK (fun b -> return (pull_of_string b))
+
+  let list_commits ?token ~user ~repo ~num () =
+    let uri = URI.pull_commits ~user ~repo ~num in
+    API.get ?token ~uri (fun b -> return (commits_of_string b))
+
+  let list_files ?token ~user ~repo ~num () =
+    let uri = URI.pull_files ~user ~repo ~num in
+    API.get ?token ~uri (fun b -> return (files_of_string b))
+
+(* TODO: requires monad trickery to branch on status code
+  let is_merged ?token ~user ~repo ~num () =
+    let uri = URI.pull_merge ~user ~repo ~num in
+    API.get ?token ~uri 
+*)
+
+(* TODO: requires PUT method in API
+  let merge ?token ~user ~repo ~num () =
+    let uri = URI.pull_merge ~user ~repo ~num in
+    API.put ?token ~uri
+*)
+end
+
 module Milestone = struct
 
   let for_repo ?(state=`Open) ?(sort=`Due_date) ?(direction=`Desc) ?token ~user ~repo () =

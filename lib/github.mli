@@ -103,6 +103,7 @@ module URI : sig
   val token : client_id:string -> client_secret:string -> code:string -> unit -> Uri.t
   val repo_issues : user:string -> repo:string -> Uri.t
   val repo_issue : user:string -> repo:string -> issue_number:int ->  Uri.t
+  val repo_pulls : user:string -> repo:string -> Uri.t
   val repo_milestones : user:string -> repo:string -> Uri.t
   val milestone : user:string -> repo:string -> num:int -> Uri.t
 end
@@ -123,13 +124,50 @@ module Filter : sig
   type user = [ `Any | `None | `Login of string ]
 end
 
+module Pull : sig
+  val for_repo :
+    ?state:Filter.state ->
+    ?token:Token.t ->
+    user:string ->
+    repo:string -> unit -> Github_t.pulls Monad.t
+  val get :
+    ?token:Token.t ->
+    user:string ->
+    repo:string -> num:int -> unit -> Github_t.pull Monad.t
+  val create :
+    ?token:Token.t ->
+    user:string ->
+    repo:string ->
+    pull:Github_t.new_pull -> unit -> Github_t.pull Monad.t
+  val create_from_issue :
+    ?token:Token.t ->
+    user:string ->
+    repo:string ->
+    pull_issue:Github_t.new_pull_issue ->
+    unit -> Github_t.pull Monad.t
+  val update :
+    ?token:Token.t ->
+    user:string ->
+    repo:string ->
+    pull:Github_t.update_pull ->
+    num:int -> unit -> Github_t.pull Monad.t
+  val list_commits :
+    ?token:Token.t ->
+    user:string ->
+    repo:string -> num:int -> unit -> Github_t.commits Monad.t
+  val list_files :
+    ?token:Token.t ->
+    user:string ->
+    repo:string -> num:int -> unit -> Github_t.files Monad.t
+end
+
 module Milestone : sig
   val for_repo:
     ?state:Filter.state ->
     ?sort:Filter.milestone_sort ->
     ?direction:Filter.direction ->
     ?token:Token.t ->
-    user:string -> repo:string -> unit -> Github_t.milestone list Monad.t
+    user:string -> repo:string -> unit -> Github_t.milestones Monad.t
 
   val get:
     ?token:Token.t ->

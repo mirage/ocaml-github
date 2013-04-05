@@ -91,6 +91,14 @@ Executable list_milestones
   Install:            false
   BuildDepends:       cohttp.lwt, lwt.syntax, github, atdgen
 
+Executable list_pulls
+  Path:               lib_test
+  MainIs:             pulls.ml
+  Custom:             true
+  CompiledObject:     best
+  Install:            false
+  BuildDepends:       cohttp.lwt, lwt.syntax, github, atdgen
+
 Executable create_issue
   Path:               lib_test
   MainIs:             create_issue.ml

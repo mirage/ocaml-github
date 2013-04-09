@@ -219,7 +219,7 @@ module Issue: sig
     ?token:Token.t -> user:string -> repo:string ->
     issue:Github_t.new_issue -> unit -> Github_t.issue Monad.t
 
-  val edit :
+  val update :
     ?token:Token.t -> user:string -> repo:string ->
     issue_number:int -> issue:Github_t.new_issue ->
     unit -> Github_t.issue Monad.t

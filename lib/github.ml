@@ -458,7 +458,7 @@ module Issue = struct
     let uri = URI.repo_issues ~user ~repo in
     API.post ~body ?token ~uri ~expected_code:`Created (fun b -> return (issue_of_string b))
 
-  let edit ?token ~user ~repo ~issue_number ~issue () =
+  let update ?token ~user ~repo ~issue_number ~issue () =
     let body = Github_j.string_of_new_issue issue in
     let uri = URI.repo_issue ~user ~repo ~issue_number in
     API.patch ~body ?token ~uri ~expected_code:`OK (fun b -> return (issue_of_string b))

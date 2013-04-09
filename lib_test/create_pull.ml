@@ -1,5 +1,5 @@
 (*
- * Copyright (c) 2012 Anil Madhavapeddy <anil@recoil.org>
+ * Copyright (c) 2013 David Sheets <sheets@alum.mit.edu>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -30,13 +30,13 @@ let t =
     new_issue_milestone=None;
     new_issue_labels=[];
   } in
-    
-  lwt issue = Github.(Monad.(run (Issues.create ~token ~user ~repo ~issue ()))) in
+
+  lwt issue = Github.(Monad.(run (Issue.create ~token ~user ~repo ~issue ()))) in
   eprintf "created issue number %d\n%!" (issue.Github_t.issue_number);
 
   let pull_issue = Github_t.({
     new_pull_issue_issue=issue.issue_number;
-    new_pull_issue_head="ocamlot-dev:master";
+    new_pull_issue_head="ocamlot:master";
     new_pull_issue_base="master";
   }) in
 

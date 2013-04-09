@@ -1,3 +1,14 @@
+type error = {
+  resource: string;
+  ?field: string option;
+  code: string;
+} <ocaml field_prefix="error_">
+
+type message = {
+  message: string;
+  ~errors <ocaml default="[]">: error list;
+} <ocaml field_prefix="message_">
+
 type scope = [
     User <json name="user">
   | Public_repo <json name="public_repo">
@@ -224,8 +235,8 @@ type commit = {
   url: string;
   sha: string;
   git <json name="commit">: git_commit;
-  author: user;
-  committer: user;
+  ?author: user option; (* why? *)
+  ?committer: user option; (* why? *)
 } <ocaml field_prefix="commit_">
 
 type commits = commit list
@@ -335,3 +346,13 @@ type file = {
 } <ocaml field_prefix="file_">
 
 type files = file list
+
+type merge_request = {
+  ?commit_message: string option;
+} <ocaml field_prefix="merge_">
+
+type merge = {
+  ?sha: string option;
+  merged: bool;
+  message: string;
+} <ocaml field_prefix="merge_">

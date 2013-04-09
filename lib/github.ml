@@ -120,6 +120,9 @@ module URI = struct
   let pull_files ~user ~repo ~num =
     Uri.of_string (Printf.sprintf "%s/repos/%s/%s/pulls/%d/files" api user repo num)
 
+  let pull_merge ~user ~repo ~num =
+    Uri.of_string (Printf.sprintf "%s/repos/%s/%s/pulls/%d/merge" api user repo num)
+
   let repo_milestones ~user ~repo =
     Uri.of_string (Printf.sprintf "%s/repos/%s/%s/milestones" api user repo)
 
@@ -147,6 +150,7 @@ module Monad = struct
    * be retried within the monad, or a permanent failure returned *)
   type error =
   | Generic of CL.Response.t
+  | Semantic of Github_t.message
   | No_response
   | Bad_response of exn
   and 'a response =
@@ -158,6 +162,14 @@ module Monad = struct
     | Generic res ->
       sprintf "HTTP Error %s\n%s\n" (C.Code.string_of_status (CL.Response.status res))
         (String.concat "\n" (C.Header.to_lines (CL.Response.headers res)))
+    | Semantic message ->
+      sprintf "GitHub Error %s\n%s"
+        message.Github_t.message_message
+        (List.fold_left (fun s {Github_t.error_resource; error_field; error_code} ->
+          let error_field = match error_field with None -> "\"\"" | Some x -> x in
+          sprintf "%s> Resource type: %s\n  Field: %s\n  Code: %s\n"
+            s error_resource error_field error_code)
+           "" message.Github_t.message_errors)
     | No_response -> "No response"
     | Bad_response exn -> sprintf "Bad response: %s\n" (Printexc.to_string exn)    
 
@@ -180,9 +192,24 @@ end
 module API = struct
   open Lwt
 
-   (* Add an authorization token onto a request URI and parse the response
+  (* Use the highest precedence handler that matches the response. *)
+  let rec handle_response response = function
+    | (p, handler)::more -> if p response then begin
+      try_lwt
+        lwt r = CLB.string_of_body (snd response) >>= handler in
+        return (Monad.Response r)
+      with exn -> return (Monad.(Error (Bad_response exn)))
+      end else handle_response response more
+    | [] ->
+        let envelope, message = response in
+        if CL.Response.status envelope = `Unprocessable_entity
+        then lwt body = CLB.string_of_body message in
+             return (Monad.(Error (Semantic (Github_j.message_of_string body))))
+        else return (Monad.(Error (Generic envelope)))
+
+  (* Add an authorization token onto a request URI and parse the response
    * as JSON. *)
-  let request_with_token ?headers ?token ?(params=[]) ~expected_code uri reqfn respfn =
+  let request_with_token ?headers ?token ?(params=[]) uri reqfn resp_handlers =
     let uri = Uri.add_query_params' uri params in
     (* Add the correct mime-type header *)
     let headers = match headers with
@@ -195,37 +222,43 @@ module API = struct
     match_lwt (reqfn ?headers) uri with
     |None ->
       return (Monad.(Error No_response))
-    |Some (res,body) -> begin
-      Printf.eprintf "Github response code %s\n%!" (C.Code.string_of_status (CL.Response.status res));
-      if CL.Response.status res = expected_code then begin
-        try_lwt 
-          lwt r = CLB.string_of_body body >>= respfn in
-          return (Monad.Response r)
-        with exn -> return (Monad.(Error (Bad_response exn)))
-      end else
-        return (Monad.(Error (Generic res)))
+    |Some response -> begin
+      Printf.eprintf "Github response code %s\n%!"
+        (C.Code.string_of_status (CL.Response.status (fst response)));
+      handle_response response resp_handlers
     end
 
   (* Convert a request body into a stream and force chunked-encoding
    * to be disabled (to satisfy Github, which returns 411 Length Required
    * to a chunked-encoding POST request). *)
-  let request_with_token_body ?headers ?token ?body ~expected_code uri req resp =
+  let request_with_token_body ?headers ?token ?body uri req resp_handlers =
     let body = match body with
       |None -> None |Some b -> CLB.body_of_string b in
     let chunked = Some false in
-    request_with_token ?headers ?token ~expected_code uri (req ?body ?chunked) resp
+    request_with_token ?headers ?token uri (req ?body ?chunked) resp_handlers
+
+  let code_handler ~expected_code handler =
+    (fun (res,_) -> CL.Response.status res = expected_code), handler
 
   let get ?headers ?token ?(params=[]) ?(expected_code=`OK) ~uri fn =
-    request_with_token ?headers ?token ~params ~expected_code uri CL.Client.get fn
+    request_with_token ?headers ?token ~params uri CL.Client.get
+      [code_handler ~expected_code fn]
 
   let post ?headers ?body ?token ~expected_code ~uri fn =
-    request_with_token_body ?headers ?token ?body ~expected_code uri CL.Client.post fn
+    request_with_token_body ?headers ?token ?body uri CL.Client.post
+      [code_handler ~expected_code fn]
 
   let patch ?headers ?body ?token ~expected_code ~uri fn =
-    request_with_token_body ?headers ?token ?body ~expected_code uri CL.Client.patch fn
+    request_with_token_body ?headers ?token ?body uri CL.Client.patch
+      [code_handler ~expected_code fn]
+
+  let put ?headers ?body ?token ~expected_code ~uri fn =
+    request_with_token_body ?headers ?token ?body uri CL.Client.put
+      [code_handler ~expected_code fn]
 
   let delete ?headers ?token ?(params=[]) ?(expected_code=`No_content) ~uri fn =
-    request_with_token ?headers ?token ~params ~expected_code uri CL.Client.delete fn
+    request_with_token ?headers ?token ~params uri CL.Client.delete
+      [code_handler ~expected_code fn]
 end
 
 open Github_t
@@ -347,9 +380,9 @@ module Pull = struct
     let body = string_of_new_pull_issue pull_issue in
     API.post ?token ~body ~uri ~expected_code:`Created (fun b -> return (pull_of_string b))
 
-  let update ?token ~user ~repo ~pull ~num () =
+  let update ?token ~user ~repo ~update_pull ~num () =
     let uri = URI.pull ~user ~repo ~num in
-    let body = string_of_update_pull pull in
+    let body = string_of_update_pull update_pull in
     API.patch ?token ~body ~uri ~expected_code:`OK (fun b -> return (pull_of_string b))
 
   let list_commits ?token ~user ~repo ~num () =
@@ -360,17 +393,18 @@ module Pull = struct
     let uri = URI.pull_files ~user ~repo ~num in
     API.get ?token ~uri (fun b -> return (files_of_string b))
 
-(* TODO: requires monad trickery to branch on status code
   let is_merged ?token ~user ~repo ~num () =
     let uri = URI.pull_merge ~user ~repo ~num in
-    API.get ?token ~uri 
-*)
+    API.(request_with_token ?token uri CL.Client.get [
+      code_handler ~expected_code:`No_content (fun _ -> return true);
+      code_handler ~expected_code:`Not_found  (fun _ -> return false);
+    ])
 
-(* TODO: requires PUT method in API
-  let merge ?token ~user ~repo ~num () =
+  let merge ?token ~user ~repo ~num ?merge_commit_message () =
     let uri = URI.pull_merge ~user ~repo ~num in
-    API.put ?token ~uri
-*)
+    let body = string_of_merge_request Github_t.({merge_commit_message}) in
+    API.put ?token ~body ~uri ~expected_code:`OK (fun b -> return (merge_of_string b))
+
 end
 
 module Milestone = struct
@@ -402,7 +436,7 @@ module Milestone = struct
     API.patch ?token ~body ~uri ~expected_code:`OK (fun b -> return (milestone_of_string b))
 end
 
-module Issues = struct
+module Issue = struct
   
   let for_repo ?token ?creator ?mentioned ?labels
     ?(milestone=`Any) ?(state=`Open) ?(sort=`Created)

@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: f0bbf62f0cf9991f6787d798c882b865)
+# DO NOT EDIT (digest: a57538d22f134a612a4cdc614f8affc0)
 # Ignore VCS directories, you can use the same kind of rule outside 
 # OASIS_START/STOP if you want to exclude directories that contains 
 # useless stuff for the build process
@@ -162,6 +162,15 @@
 <lib_test/create_hook.{native,byte}>: pkg_cohttp
 <lib_test/create_hook.{native,byte}>: pkg_uri
 <lib_test/create_hook.{native,byte}>: pkg_yojson
+<lib_test/create_hook.{native,byte}>: custom
+# Executable create_statuses
+<lib_test/create_statuses.{native,byte}>: use_github
+<lib_test/create_statuses.{native,byte}>: pkg_cohttp.lwt
+<lib_test/create_statuses.{native,byte}>: pkg_lwt.syntax
+<lib_test/create_statuses.{native,byte}>: pkg_atdgen
+<lib_test/create_statuses.{native,byte}>: pkg_cohttp
+<lib_test/create_statuses.{native,byte}>: pkg_uri
+<lib_test/create_statuses.{native,byte}>: pkg_yojson
 <lib_test/*.ml{,i}>: use_github
 <lib_test/*.ml{,i}>: pkg_cohttp.lwt
 <lib_test/*.ml{,i}>: pkg_lwt.syntax
@@ -169,6 +178,6 @@
 <lib_test/*.ml{,i}>: pkg_cohttp
 <lib_test/*.ml{,i}>: pkg_uri
 <lib_test/*.ml{,i}>: pkg_yojson
-<lib_test/create_hook.{native,byte}>: custom
+<lib_test/create_statuses.{native,byte}>: custom
 # OASIS_STOP
 <lib/*>: std_json

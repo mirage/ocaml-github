@@ -122,3 +122,11 @@ Executable create_pull
   CompiledObject:     best
   Install:            false
   BuildDepends:       cohttp.lwt, lwt.syntax, github, atdgen
+
+Executable create_hook
+  Path:               lib_test
+  MainIs:             create_hook.ml
+  Custom:             true
+  CompiledObject:     best
+  Install:            false
+  BuildDepends:       cohttp.lwt, lwt.syntax, github, atdgen

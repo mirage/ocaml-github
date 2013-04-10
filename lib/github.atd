@@ -10,7 +10,7 @@ type message = {
 } <ocaml field_prefix="message_">
 
 type scope = [
-    User <json name="user">
+  | User <json name="user">
   | Public_repo <json name="public_repo">
   | Repo <json name="repo">
   | Repo_status <json name="repo_status">
@@ -356,3 +356,112 @@ type merge = {
   merged: bool;
   message: string;
 } <ocaml field_prefix="merge_">
+
+type event_type = [
+  | CommitComment <json name="commit_comment">
+  | Create <json name="create">
+  | Delete <json name="delete">
+  | Download <json name="download">
+  | Follow <json name="follow">
+  | Fork <json name="fork">
+  | ForkApply <json name="fork_apply">
+  | Gist <json name="gist">
+  | Gollum <json name="gollum">
+  | IssueComment <json name="issue_comment">
+  | Issues <json name="issues">
+  | Member <json name="member">
+  | Public <json name="public">
+  | PullRequest <json name="pull_request">
+  | PullRequestReviewComment <json name="pull_request_review_comment">
+  | Push <json name="push">
+  | Status <json name="status">
+  | TeamAdd <json name="team_add">
+  | Watch <json name="watch">
+]
+
+type pull_action_type = [
+  | Opened <json name="opened">
+  | Closed <json name="closed">
+  | Synchronize <json name="synchonize">
+  | Reopened <json name="reopened">
+]
+
+type pull_action = {
+  action: pull_action_type;
+  number: int;
+  pull_request: pull;
+} <ocaml field_prefix="pull_action_">
+
+type pull_comment_action = {
+  comment: issue_comment;
+} <ocaml field_prefix="pull_comment_action_">
+
+type event = {
+  ty <json name="type">: event_type;
+  public: bool;
+(*  payload  TODO: this is the event data with type determined by constructor field ty *)
+  actor: user;
+  org: user;
+  created_at: string;
+  id: int; (* TODO: too small? *)
+} <ocaml field_prefix="event_">
+
+type web_hook_config = {
+  url: string;
+  content_type: string;
+  insecure_ssl: string; (* TODO: should be bool but GitHub doesn't respect their own schema *)
+  ?secret: string option;
+} <ocaml field_prefix="web_hook_config_">
+
+type hook = {
+  url: string;
+  updated_at: string;
+  created_at: string;
+  name: string;
+  events: event_type list;
+  active: bool;
+  config: web_hook_config; (* TODO: determined by constructor field name *)
+  id: int;
+} <ocaml field_prefix="hook_">
+
+type hooks = hook list
+
+type new_hook = {
+  name: string;
+  config: web_hook_config; (* TODO: determined by constructor field name *)
+  events: event_type list;
+  active: bool;
+} <ocaml field_prefix="new_hook_">
+
+type update_hook = {
+  name: string;
+  config: web_hook_config; (* TODO: determined by constructor field name *)
+  ?events: event_type list option;
+  active: bool;
+} <ocaml field_prefix="update_hook_">
+
+type status_state = [
+  | Pending <json name="pending">
+  | Success <json name="success">
+  | Failure <json name="failure">
+  | Error <json name="error">
+]
+
+type status = {
+  url: string;
+  updated_at: string;
+  created_at: string;
+  id: int;
+  state: status_state;
+  ?target_url: string option;
+  ?description: string option;
+  creator: user;
+} <ocaml field_prefix="status_">
+
+type statuses = status list
+
+type new_status = {
+  state: status_state;
+  ?target_url: string option;
+  ?description: string option;
+} <ocaml field_prefix="new_status_">

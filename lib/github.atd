@@ -409,7 +409,7 @@ type event = {
 type web_hook_config = {
   url: string;
   content_type: string;
-  insecure_ssl: bool;
+  insecure_ssl: string; (* TODO: should be bool but GitHub doesn't respect their own schema *)
   ?secret: string option;
 } <ocaml field_prefix="web_hook_config_">
 
@@ -424,6 +424,8 @@ type hook = {
   id: int;
 } <ocaml field_prefix="hook_">
 
+type hooks = hook list
+
 type new_hook = {
   name: string;
   config: web_hook_config; (* TODO: determined by constructor field name *)
@@ -431,9 +433,9 @@ type new_hook = {
   active: bool;
 } <ocaml field_prefix="new_hook_">
 
-type patch_hook = {
+type update_hook = {
   name: string;
   config: web_hook_config; (* TODO: determined by constructor field name *)
   ?events: event_type list option;
   active: bool;
-} <ocaml field_prefix="patch_hook_">
+} <ocaml field_prefix="update_hook_">

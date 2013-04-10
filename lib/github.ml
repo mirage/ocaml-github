@@ -108,6 +108,15 @@ module URI = struct
   let repo_commit ~user ~repo ~sha =
     Uri.of_string (Printf.sprintf "%s/repos/%s/%s/commits/%s" api user repo sha)
 
+  let repo_hooks ~user ~repo =
+    Uri.of_string (Printf.sprintf "%s/repos/%s/%s/hooks" api user repo)
+
+  let hook ~user ~repo ~num =
+    Uri.of_string (Printf.sprintf "%s/repos/%s/%s/hooks/%d" api user repo num)
+
+  let hook_test ~user ~repo ~num =
+    Uri.of_string (Printf.sprintf "%s/repos/%s/%s/hooks/%d/tests" api user repo num)
+
   let repo_pulls ~user ~repo =
     Uri.of_string (Printf.sprintf "%s/repos/%s/%s/pulls" api user repo)
 
@@ -402,7 +411,7 @@ module Pull = struct
 
   let merge ?token ~user ~repo ~num ?merge_commit_message () =
     let uri = URI.pull_merge ~user ~repo ~num in
-    let body = string_of_merge_request Github_t.({merge_commit_message}) in
+    let body = string_of_merge_request {merge_commit_message} in
     API.put ?token ~body ~uri ~expected_code:`OK (fun b -> return (merge_of_string b))
 
 end
@@ -454,12 +463,12 @@ module Issue = struct
     API.get ?token ~params ~uri (fun b -> return (issues_of_string b))
 
   let create ?token ~user ~repo ~issue () =
-    let body = Github_j.string_of_new_issue issue in
+    let body = string_of_new_issue issue in
     let uri = URI.repo_issues ~user ~repo in
     API.post ~body ?token ~uri ~expected_code:`Created (fun b -> return (issue_of_string b))
 
   let edit ?token ~user ~repo ~issue_number ~issue () =
-    let body = Github_j.string_of_new_issue issue in
+    let body = string_of_new_issue issue in
     let uri = URI.repo_issue ~user ~repo ~issue_number in
     API.patch ~body ?token ~uri ~expected_code:`OK (fun b -> return (issue_of_string b))
 
@@ -468,7 +477,7 @@ module Issue = struct
     API.get ?token ~uri (fun b -> return (issue_comments_of_string b))
 
   let create_comment ?token ~user ~repo ~issue_number ~body () =
-    let body = Github_j.string_of_new_issue_comment { new_issue_comment_body=body } in
+    let body = string_of_new_issue_comment { new_issue_comment_body=body } in
     let uri = URI.issue_comments ~user ~repo ~issue_number in
     API.post ~body ?token ~uri ~expected_code:`Created (fun b -> return (issue_comment_of_string b))
 end
@@ -490,6 +499,32 @@ module Repo = struct
   let commit ?token ~user ~repo ~sha () =
     let uri = URI.repo_commit ~user ~repo ~sha in
     API.get ?token ~uri (fun b -> return (commit_of_string b))
+
+  let hooks ?token ~user ~repo () =
+    let uri = URI.repo_hooks ~user ~repo in
+    API.get ?token ~uri (fun b -> return (hooks_of_string b))
+
+  let hook ?token ~user ~repo ~num () =
+    let uri = URI.hook ~user ~repo ~num in
+    API.get ?token ~uri (fun b -> return (hook_of_string b))
+
+  let create_hook ?token ~user ~repo ~hook () =
+    let uri = URI.repo_hooks ~user ~repo in
+    let body = string_of_new_hook hook in
+    API.post ~body ?token ~uri ~expected_code:`Created (fun b -> return (hook_of_string b))
+
+  let update_hook ?token ~user ~repo ~num ~hook () =
+    let uri = URI.hook ~user ~repo ~num in
+    let body = string_of_update_hook hook in
+    API.patch ?token ~body ~uri ~expected_code:`OK (fun b -> return (hook_of_string b))
+
+  let delete_hook ?token ~user ~repo ~num () =
+    let uri = URI.hook ~user ~repo ~num in
+    API.delete ?token ~uri (fun _ -> return ())
+
+  let test_hook ?token ~user ~repo ~num () =
+    let uri = URI.hook_test ~user ~repo ~num in
+    API.post ?token ~uri ~expected_code:`No_content (fun b -> return ())
 end
 
 module Git_obj = struct

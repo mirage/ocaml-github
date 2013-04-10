@@ -108,6 +108,9 @@ module URI = struct
   let repo_commit ~user ~repo ~sha =
     Uri.of_string (Printf.sprintf "%s/repos/%s/%s/commits/%s" api user repo sha)
 
+  let repo_statuses ~user ~repo ~sha =
+    Uri.of_string (Printf.sprintf "%s/repos/%s/%s/statuses/%s" api user repo sha)
+
   let repo_hooks ~user ~repo =
     Uri.of_string (Printf.sprintf "%s/repos/%s/%s/hooks" api user repo)
 
@@ -499,6 +502,15 @@ module Repo = struct
   let commit ?token ~user ~repo ~sha () =
     let uri = URI.repo_commit ~user ~repo ~sha in
     API.get ?token ~uri (fun b -> return (commit_of_string b))
+
+  let statuses ?token ~user ~repo ~sha () =
+    let uri = URI.repo_statuses ~user ~repo ~sha in
+    API.get ?token ~uri (fun b -> return (statuses_of_string b))
+
+  let create_status ?token ~user ~repo ~sha ~status () =
+    let uri = URI.repo_statuses ~user ~repo ~sha in
+    let body = string_of_new_status status in
+    API.post ~body ?token ~uri ~expected_code:`Created (fun b -> return (status_of_string b))
 
   let hooks ?token ~user ~repo () =
     let uri = URI.repo_hooks ~user ~repo in

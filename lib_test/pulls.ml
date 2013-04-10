@@ -25,6 +25,11 @@ let t =
           Pull.get ?token ~user ~repo ~num:hd.Github_t.pull_number ()
           >>= fun p ->
           eprintf "Inside monad: pull %d: %s\n" p.Github_t.pull_number p.Github_t.pull_title;
+          Pull.list_commits ?token ~user ~repo ~num:hd.Github_t.pull_number ()
+          >>= fun commits -> List.iter (fun commit ->
+            eprintf "    %s\n" commit.Github_t.commit_sha
+          ) commits;
+          eprintf "---------\n";
           Pull.list_files ?token ~user ~repo ~num:hd.Github_t.pull_number ()
           >>= fun files -> List.iter (fun file ->
             eprintf "    %s\n" file.Github_t.file_filename

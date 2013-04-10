@@ -114,3 +114,11 @@ Executable create_milestone
   CompiledObject:     best
   Install:            false
   BuildDepends:       cohttp.lwt, lwt.syntax, github, atdgen
+
+Executable create_pull
+  Path:               lib_test
+  MainIs:             create_pull.ml
+  Custom:             true
+  CompiledObject:     best
+  Install:            false
+  BuildDepends:       cohttp.lwt, lwt.syntax, github, atdgen

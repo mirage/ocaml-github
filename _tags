@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 040e8fb22c0dde58382a3c4ccde463c5)
+# DO NOT EDIT (digest: 4f95b6d447808716128e121f7d7f5683)
 # Ignore VCS directories, you can use the same kind of rule outside 
 # OASIS_START/STOP if you want to exclude directories that contains 
 # useless stuff for the build process
@@ -144,6 +144,15 @@
 <lib_test/create_milestone.{native,byte}>: pkg_cohttp
 <lib_test/create_milestone.{native,byte}>: pkg_uri
 <lib_test/create_milestone.{native,byte}>: pkg_yojson
+<lib_test/create_milestone.{native,byte}>: custom
+# Executable create_pull
+<lib_test/create_pull.{native,byte}>: use_github
+<lib_test/create_pull.{native,byte}>: pkg_cohttp.lwt
+<lib_test/create_pull.{native,byte}>: pkg_lwt.syntax
+<lib_test/create_pull.{native,byte}>: pkg_atdgen
+<lib_test/create_pull.{native,byte}>: pkg_cohttp
+<lib_test/create_pull.{native,byte}>: pkg_uri
+<lib_test/create_pull.{native,byte}>: pkg_yojson
 <lib_test/*.ml{,i}>: use_github
 <lib_test/*.ml{,i}>: pkg_cohttp.lwt
 <lib_test/*.ml{,i}>: pkg_lwt.syntax
@@ -151,6 +160,6 @@
 <lib_test/*.ml{,i}>: pkg_cohttp
 <lib_test/*.ml{,i}>: pkg_uri
 <lib_test/*.ml{,i}>: pkg_yojson
-<lib_test/create_milestone.{native,byte}>: custom
+<lib_test/create_pull.{native,byte}>: custom
 # OASIS_STOP
 <lib/*>: std_json

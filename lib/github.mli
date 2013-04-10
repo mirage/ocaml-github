@@ -130,35 +130,53 @@ module Pull : sig
     ?token:Token.t ->
     user:string ->
     repo:string -> unit -> Github_t.pulls Monad.t
+
   val get :
     ?token:Token.t ->
     user:string ->
     repo:string -> num:int -> unit -> Github_t.pull Monad.t
+
   val create :
     ?token:Token.t ->
     user:string ->
     repo:string ->
     pull:Github_t.new_pull -> unit -> Github_t.pull Monad.t
+
   val create_from_issue :
     ?token:Token.t ->
     user:string ->
     repo:string ->
     pull_issue:Github_t.new_pull_issue ->
     unit -> Github_t.pull Monad.t
+
   val update :
     ?token:Token.t ->
     user:string ->
     repo:string ->
-    pull:Github_t.update_pull ->
+    update_pull:Github_t.update_pull ->
     num:int -> unit -> Github_t.pull Monad.t
+
   val list_commits :
     ?token:Token.t ->
     user:string ->
     repo:string -> num:int -> unit -> Github_t.commits Monad.t
+
   val list_files :
     ?token:Token.t ->
     user:string ->
     repo:string -> num:int -> unit -> Github_t.files Monad.t
+
+  val is_merged :
+    ?token:Token.t ->
+    user:string ->
+    repo:string -> num:int -> unit -> bool Monad.t
+
+  val merge :
+    ?token:Token.t ->
+    user:string ->
+    repo:string ->
+    num:int ->
+    ?merge_commit_message:string -> unit -> Github_t.merge Monad.t
 end
 
 module Milestone : sig
@@ -189,7 +207,7 @@ module Milestone : sig
     unit -> Github_t.milestone Monad.t
 end
 
-module Issues: sig
+module Issue: sig
   val for_repo :
     ?token:Token.t -> ?creator:string -> ?mentioned:string ->
     ?labels:string list -> ?milestone:Filter.milestone ->
@@ -201,7 +219,7 @@ module Issues: sig
     ?token:Token.t -> user:string -> repo:string ->
     issue:Github_t.new_issue -> unit -> Github_t.issue Monad.t
 
-  val edit :
+  val update :
     ?token:Token.t -> user:string -> repo:string ->
     issue_number:int -> issue:Github_t.new_issue ->
     unit -> Github_t.issue Monad.t

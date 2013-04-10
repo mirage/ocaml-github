@@ -2,7 +2,7 @@
 let client_id = ""
 let client_secret = ""
 
-(* Use lib_test/get_issue with these Github credentials set to 
+(* Use lib_test/get_token with these Github credentials set to
    obtain an oAuth token *)
 let user = ""
 let pass = ""

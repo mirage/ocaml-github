@@ -130,3 +130,11 @@ Executable create_hook
   CompiledObject:     best
   Install:            false
   BuildDepends:       cohttp.lwt, lwt.syntax, github, atdgen
+
+Executable create_statuses
+  Path:               lib_test
+  MainIs:             create_statuses.ml
+  Custom:             true
+  CompiledObject:     best
+  Install:            false
+  BuildDepends:       cohttp.lwt, lwt.syntax, github, atdgen

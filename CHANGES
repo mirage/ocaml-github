@@ -3,6 +3,8 @@
 * Rename `Github.Issues` to `Github.Issue` to parallel other submodules
 * Rename `Github.Issue.edit` to `Github.Issue.update` to parallel other CRUD interfaces
 * Add Pull Request API
+* Add Hook API (generic "web" hooks only)
+* Add Statuses API
 * Add structured semantic errors
 
 0.4.3 (2013-01-14):

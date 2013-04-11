@@ -6,6 +6,8 @@
 * Add Hook API (generic "web" hooks only)
 * Add Statuses API
 * Add structured semantic errors
+* Nows sends User-Agent string
+* Declare ocaml-re dependency
 
 0.4.3 (2013-01-14):
 * Add filters and sort order parameters for `Issues` and `Milestones` for a repository.

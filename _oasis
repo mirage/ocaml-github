@@ -1,8 +1,8 @@
 OASISFormat: 0.3
 Name:        github
-Version:     0.4.4
+Version:     0.5.0
 Synopsis:    Github API interface
-Authors:     Anil Madhavapeddy
+Authors:     Anil Madhavapeddy, David Sheets
 License:     ISC
 Plugins:     META (0.3)
 BuildTools: ocamlbuild
@@ -16,7 +16,7 @@ Library github
   Path: lib
   Findlibname: github
   Modules: Github, Github_j, Github_t
-  BuildDepends: lwt.syntax, cohttp, uri (>= 1.3.3), cohttp.lwt (>= 0.9.1), yojson, atdgen
+  BuildDepends: lwt.syntax, cohttp, uri (>= 1.3.3), cohttp.lwt (>= 0.9.7), yojson, atdgen, re
 
 Library github_unix
   Build$: flag(unix)

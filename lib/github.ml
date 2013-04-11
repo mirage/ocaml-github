@@ -280,30 +280,25 @@ module API = struct
   (* Add the correct mime-type header *)
   let realize_headers headers = C.Header.add_opt headers "content-type" "application/json"
 
-  let get ?headers ?token ?params ?(expected_code=`OK) ~uri fn =
+  let idempotent meth ?headers ?token ?params ~expected_code ~uri fn =
     Monad.(request ?token ?params
-             {meth=`GET; uri; headers=realize_headers headers; body=None})
+             {meth; uri; headers=realize_headers headers; body=None})
       (request [code_handler ~expected_code fn])
 
-  let post ?headers ?body ?token ~expected_code ~uri fn =
+  let effectful meth ?headers ?body ?token ~expected_code ~uri fn =
     Monad.(request ?token
-             {meth=`POST; uri; headers=realize_headers headers; body=realize_body body})
+             {meth; uri; headers=realize_headers headers; body=realize_body body})
       (request [code_handler ~expected_code fn])
 
-  let patch ?headers ?body ?token ~expected_code ~uri fn =
-    Monad.(request ?token
-             {meth=`PATCH; uri; headers=realize_headers headers; body=realize_body body})
-      (request [code_handler ~expected_code fn])
+  let get ?(expected_code=`OK) = idempotent `GET ~expected_code
 
-  let put ?headers ?body ?token ~expected_code ~uri fn =
-    Monad.(request ?token
-             {meth=`PUT; uri; headers=realize_headers headers; body=realize_body body})
-      (request [code_handler ~expected_code fn])
+  let post ~expected_code = effectful `POST ~expected_code
 
-  let delete ?headers ?token ?params ?(expected_code=`No_content) ~uri fn =
-    Monad.(request ?token ?params
-             {meth=`DELETE; uri; headers=realize_headers headers; body=None})
-      (request [code_handler ~expected_code fn])
+  let patch ~expected_code = effectful `PATCH ~expected_code
+
+  let put ~expected_code = effectful `PUT ~expected_code
+
+  let delete ?(expected_code=`No_content) = idempotent `DELETE ~expected_code
 end
 
 open Github_t

@@ -59,34 +59,42 @@ end
  *)
 module API : sig
   val get : 
+    ?expected_code:Cohttp.Code.status_code ->
     ?headers:Cohttp.Header.t -> 
     ?token:Token.t -> 
     ?params:(string * string) list ->
-    ?expected_code:Cohttp.Code.status_code ->
     uri:Uri.t -> 
     (string -> 'a Lwt.t) -> 'a Monad.t
 
   val post : 
+    expected_code:Cohttp.Code.status_code ->
     ?headers:Cohttp.Header.t ->
     ?body:string ->
     ?token:Token.t ->
-    expected_code:Cohttp.Code.status_code ->
     uri:Uri.t ->
     (string -> 'a Lwt.t) -> 'a Monad.t
 
    val delete : 
+    ?expected_code:Cohttp.Code.status_code ->
     ?headers:Cohttp.Header.t -> 
     ?token:Token.t -> 
     ?params:(string * string) list ->
-    ?expected_code:Cohttp.Code.status_code ->
     uri:Uri.t -> 
     (string -> 'a Lwt.t) -> 'a Monad.t
 
   val patch : 
+    expected_code:Cohttp.Code.status_code ->
     ?headers:Cohttp.Header.t ->
     ?body:string ->
     ?token:Token.t ->
+    uri:Uri.t ->
+    (string -> 'a Lwt.t) -> 'a Monad.t
+
+  val put :
     expected_code:Cohttp.Code.status_code ->
+    ?headers:Cohttp.Header.t ->
+    ?body:string ->
+    ?token:Token.t ->
     uri:Uri.t ->
     (string -> 'a Lwt.t) -> 'a Monad.t
 end

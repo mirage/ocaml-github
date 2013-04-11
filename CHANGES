@@ -2,6 +2,7 @@
 * Force `-j-std` to ATDgen to always use standards-compliant JSON (#11)
 * Rename `Github.Issues` to `Github.Issue` to parallel other submodules
 * Rename `Github.Issue.edit` to `Github.Issue.update` to parallel other CRUD interfaces
+* Reorder named parameters to raw API submodule functions
 * Add Pull Request API
 * Add Hook API (generic "web" hooks only)
 * Add Statuses API

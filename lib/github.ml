@@ -520,8 +520,48 @@ module Issue = struct
     API.post ~body ?token ~uri ~expected_code:`Created (fun b -> return (issue_comment_of_string b))
 end
 
+module Status = struct
+
+  let for_sha ?token ~user ~repo ~sha () =
+    let uri = URI.repo_statuses ~user ~repo ~sha in
+    API.get ?token ~uri (fun b -> return (statuses_of_string b))
+
+  let create ?token ~user ~repo ~sha ~status () =
+    let uri = URI.repo_statuses ~user ~repo ~sha in
+    let body = string_of_new_status status in
+    API.post ~body ?token ~uri ~expected_code:`Created (fun b -> return (status_of_string b))
+end
+
+module Hook = struct
+
+  let for_repo ?token ~user ~repo () =
+    let uri = URI.repo_hooks ~user ~repo in
+    API.get ?token ~uri (fun b -> return (hooks_of_string b))
+
+  let get ?token ~user ~repo ~num () =
+    let uri = URI.hook ~user ~repo ~num in
+    API.get ?token ~uri (fun b -> return (hook_of_string b))
+
+  let create ?token ~user ~repo ~hook () =
+    let uri = URI.repo_hooks ~user ~repo in
+    let body = string_of_new_hook hook in
+    API.post ~body ?token ~uri ~expected_code:`Created (fun b -> return (hook_of_string b))
+
+  let update ?token ~user ~repo ~num ~hook () =
+    let uri = URI.hook ~user ~repo ~num in
+    let body = string_of_update_hook hook in
+    API.patch ?token ~body ~uri ~expected_code:`OK (fun b -> return (hook_of_string b))
+
+  let delete ?token ~user ~repo ~num () =
+    let uri = URI.hook ~user ~repo ~num in
+    API.delete ?token ~uri (fun _ -> return ())
+
+  let test ?token ~user ~repo ~num () =
+    let uri = URI.hook_test ~user ~repo ~num in
+    API.post ?token ~uri ~expected_code:`No_content (fun b -> return ())
+end
+
 module Repo = struct
-  open Lwt
 
   let info ?token ~user ~repo () =
     let uri = URI.repo ~user ~repo in
@@ -538,41 +578,6 @@ module Repo = struct
   let commit ?token ~user ~repo ~sha () =
     let uri = URI.repo_commit ~user ~repo ~sha in
     API.get ?token ~uri (fun b -> return (commit_of_string b))
-
-  let statuses ?token ~user ~repo ~sha () =
-    let uri = URI.repo_statuses ~user ~repo ~sha in
-    API.get ?token ~uri (fun b -> return (statuses_of_string b))
-
-  let create_status ?token ~user ~repo ~sha ~status () =
-    let uri = URI.repo_statuses ~user ~repo ~sha in
-    let body = string_of_new_status status in
-    API.post ~body ?token ~uri ~expected_code:`Created (fun b -> return (status_of_string b))
-
-  let hooks ?token ~user ~repo () =
-    let uri = URI.repo_hooks ~user ~repo in
-    API.get ?token ~uri (fun b -> return (hooks_of_string b))
-
-  let hook ?token ~user ~repo ~num () =
-    let uri = URI.hook ~user ~repo ~num in
-    API.get ?token ~uri (fun b -> return (hook_of_string b))
-
-  let create_hook ?token ~user ~repo ~hook () =
-    let uri = URI.repo_hooks ~user ~repo in
-    let body = string_of_new_hook hook in
-    API.post ~body ?token ~uri ~expected_code:`Created (fun b -> return (hook_of_string b))
-
-  let update_hook ?token ~user ~repo ~num ~hook () =
-    let uri = URI.hook ~user ~repo ~num in
-    let body = string_of_update_hook hook in
-    API.patch ?token ~body ~uri ~expected_code:`OK (fun b -> return (hook_of_string b))
-
-  let delete_hook ?token ~user ~repo ~num () =
-    let uri = URI.hook ~user ~repo ~num in
-    API.delete ?token ~uri (fun _ -> return ())
-
-  let test_hook ?token ~user ~repo ~num () =
-    let uri = URI.hook_test ~user ~repo ~num in
-    API.post ?token ~uri ~expected_code:`No_content (fun b -> return ())
 end
 
 module Git_obj = struct

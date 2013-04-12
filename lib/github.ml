@@ -521,6 +521,7 @@ module Issue = struct
 end
 
 module Status = struct
+  open Lwt
 
   let for_sha ?token ~user ~repo ~sha () =
     let uri = URI.repo_statuses ~user ~repo ~sha in
@@ -533,6 +534,7 @@ module Status = struct
 end
 
 module Hook = struct
+  open Lwt
 
   let for_repo ?token ~user ~repo () =
     let uri = URI.repo_hooks ~user ~repo in
@@ -562,6 +564,7 @@ module Hook = struct
 end
 
 module Repo = struct
+  open Lwt
 
   let info ?token ~user ~repo () =
     let uri = URI.repo ~user ~repo in

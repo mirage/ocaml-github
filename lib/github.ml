@@ -299,6 +299,10 @@ module API = struct
   let put ~expected_code = effectful `PUT ~expected_code
 
   let delete ?(expected_code=`No_content) = idempotent `DELETE ~expected_code
+
+  let set_user_agent user_agent =
+    Monad.(Lwt.return {user_agent=Some user_agent;
+                       signal=Response ()})
 end
 
 open Github_t

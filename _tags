@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: a57538d22f134a612a4cdc614f8affc0)
+# DO NOT EDIT (digest: 12b59394a7bac5c7df3a504eebf448fb)
 # Ignore VCS directories, you can use the same kind of rule outside 
 # OASIS_START/STOP if you want to exclude directories that contains 
 # useless stuff for the build process
@@ -21,6 +21,7 @@
 <lib/*.ml{,i}>: pkg_cohttp
 <lib/*.ml{,i}>: pkg_uri
 <lib/*.ml{,i}>: pkg_yojson
+<lib/*.ml{,i}>: pkg_re
 # Library github_unix
 "unix/github_unix.cmxs": use_github_unix
 <unix/*.ml{,i}>: use_github
@@ -31,6 +32,7 @@
 <unix/*.ml{,i}>: pkg_cohttp
 <unix/*.ml{,i}>: pkg_uri
 <unix/*.ml{,i}>: pkg_yojson
+<unix/*.ml{,i}>: pkg_re
 # Executable rwo
 <lib_test/rwo.{native,byte}>: use_github
 <lib_test/rwo.{native,byte}>: pkg_cohttp.lwt
@@ -39,6 +41,7 @@
 <lib_test/rwo.{native,byte}>: pkg_cohttp
 <lib_test/rwo.{native,byte}>: pkg_uri
 <lib_test/rwo.{native,byte}>: pkg_yojson
+<lib_test/rwo.{native,byte}>: pkg_re
 <lib_test/rwo.{native,byte}>: custom
 # Executable git-jar
 <jar/jar.{native,byte}>: use_github_unix
@@ -52,6 +55,7 @@
 <jar/jar.{native,byte}>: pkg_cohttp
 <jar/jar.{native,byte}>: pkg_uri
 <jar/jar.{native,byte}>: pkg_yojson
+<jar/jar.{native,byte}>: pkg_re
 <jar/*.ml{,i}>: use_github_unix
 <jar/*.ml{,i}>: use_github
 <jar/*.ml{,i}>: pkg_cohttp.lwt
@@ -63,6 +67,7 @@
 <jar/*.ml{,i}>: pkg_cohttp
 <jar/*.ml{,i}>: pkg_uri
 <jar/*.ml{,i}>: pkg_yojson
+<jar/*.ml{,i}>: pkg_re
 <jar/jar.{native,byte}>: custom
 # Executable current_user
 <lib_test/current_user.{native,byte}>: use_github
@@ -72,6 +77,7 @@
 <lib_test/current_user.{native,byte}>: pkg_cohttp
 <lib_test/current_user.{native,byte}>: pkg_uri
 <lib_test/current_user.{native,byte}>: pkg_yojson
+<lib_test/current_user.{native,byte}>: pkg_re
 <lib_test/current_user.{native,byte}>: custom
 # Executable get_token
 <lib_test/get_token.{native,byte}>: use_github
@@ -81,6 +87,7 @@
 <lib_test/get_token.{native,byte}>: pkg_cohttp
 <lib_test/get_token.{native,byte}>: pkg_uri
 <lib_test/get_token.{native,byte}>: pkg_yojson
+<lib_test/get_token.{native,byte}>: pkg_re
 <lib_test/get_token.{native,byte}>: custom
 # Executable repo_info
 <lib_test/repo_info.{native,byte}>: use_github
@@ -90,6 +97,7 @@
 <lib_test/repo_info.{native,byte}>: pkg_cohttp
 <lib_test/repo_info.{native,byte}>: pkg_uri
 <lib_test/repo_info.{native,byte}>: pkg_yojson
+<lib_test/repo_info.{native,byte}>: pkg_re
 <lib_test/repo_info.{native,byte}>: custom
 # Executable list_issues
 <lib_test/issues.{native,byte}>: use_github
@@ -99,6 +107,7 @@
 <lib_test/issues.{native,byte}>: pkg_cohttp
 <lib_test/issues.{native,byte}>: pkg_uri
 <lib_test/issues.{native,byte}>: pkg_yojson
+<lib_test/issues.{native,byte}>: pkg_re
 <lib_test/issues.{native,byte}>: custom
 # Executable list_tags
 <lib_test/tags.{native,byte}>: use_github
@@ -108,6 +117,7 @@
 <lib_test/tags.{native,byte}>: pkg_cohttp
 <lib_test/tags.{native,byte}>: pkg_uri
 <lib_test/tags.{native,byte}>: pkg_yojson
+<lib_test/tags.{native,byte}>: pkg_re
 <lib_test/tags.{native,byte}>: custom
 # Executable list_milestones
 <lib_test/milestones.{native,byte}>: use_github
@@ -117,6 +127,7 @@
 <lib_test/milestones.{native,byte}>: pkg_cohttp
 <lib_test/milestones.{native,byte}>: pkg_uri
 <lib_test/milestones.{native,byte}>: pkg_yojson
+<lib_test/milestones.{native,byte}>: pkg_re
 <lib_test/milestones.{native,byte}>: custom
 # Executable list_pulls
 <lib_test/pulls.{native,byte}>: use_github
@@ -126,6 +137,7 @@
 <lib_test/pulls.{native,byte}>: pkg_cohttp
 <lib_test/pulls.{native,byte}>: pkg_uri
 <lib_test/pulls.{native,byte}>: pkg_yojson
+<lib_test/pulls.{native,byte}>: pkg_re
 <lib_test/pulls.{native,byte}>: custom
 # Executable create_issue
 <lib_test/create_issue.{native,byte}>: use_github
@@ -135,6 +147,7 @@
 <lib_test/create_issue.{native,byte}>: pkg_cohttp
 <lib_test/create_issue.{native,byte}>: pkg_uri
 <lib_test/create_issue.{native,byte}>: pkg_yojson
+<lib_test/create_issue.{native,byte}>: pkg_re
 <lib_test/create_issue.{native,byte}>: custom
 # Executable create_milestone
 <lib_test/create_milestone.{native,byte}>: use_github
@@ -144,6 +157,7 @@
 <lib_test/create_milestone.{native,byte}>: pkg_cohttp
 <lib_test/create_milestone.{native,byte}>: pkg_uri
 <lib_test/create_milestone.{native,byte}>: pkg_yojson
+<lib_test/create_milestone.{native,byte}>: pkg_re
 <lib_test/create_milestone.{native,byte}>: custom
 # Executable create_pull
 <lib_test/create_pull.{native,byte}>: use_github
@@ -153,6 +167,7 @@
 <lib_test/create_pull.{native,byte}>: pkg_cohttp
 <lib_test/create_pull.{native,byte}>: pkg_uri
 <lib_test/create_pull.{native,byte}>: pkg_yojson
+<lib_test/create_pull.{native,byte}>: pkg_re
 <lib_test/create_pull.{native,byte}>: custom
 # Executable create_hook
 <lib_test/create_hook.{native,byte}>: use_github
@@ -162,6 +177,7 @@
 <lib_test/create_hook.{native,byte}>: pkg_cohttp
 <lib_test/create_hook.{native,byte}>: pkg_uri
 <lib_test/create_hook.{native,byte}>: pkg_yojson
+<lib_test/create_hook.{native,byte}>: pkg_re
 <lib_test/create_hook.{native,byte}>: custom
 # Executable create_statuses
 <lib_test/create_statuses.{native,byte}>: use_github
@@ -171,6 +187,7 @@
 <lib_test/create_statuses.{native,byte}>: pkg_cohttp
 <lib_test/create_statuses.{native,byte}>: pkg_uri
 <lib_test/create_statuses.{native,byte}>: pkg_yojson
+<lib_test/create_statuses.{native,byte}>: pkg_re
 <lib_test/*.ml{,i}>: use_github
 <lib_test/*.ml{,i}>: pkg_cohttp.lwt
 <lib_test/*.ml{,i}>: pkg_lwt.syntax
@@ -178,6 +195,7 @@
 <lib_test/*.ml{,i}>: pkg_cohttp
 <lib_test/*.ml{,i}>: pkg_uri
 <lib_test/*.ml{,i}>: pkg_yojson
+<lib_test/*.ml{,i}>: pkg_re
 <lib_test/create_statuses.{native,byte}>: custom
 # OASIS_STOP
 <lib/*>: std_json

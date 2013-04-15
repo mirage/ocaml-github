@@ -15,7 +15,6 @@
  *
  *)
 
-open Lwt
 open Printf
 
 let token = Config.access_token
@@ -47,8 +46,11 @@ let make_hook url events = Github_t.({
   new_hook_active=true;
 })
 
+let get_hooks = Github.Hook.for_repo ~token ~user ~repo ()
+
 let t = Github.(Monad.(run Github_t.(
-  Hook.for_repo ~token ~user ~repo ()
+  API.set_user_agent "create_hook"
+  >>= fun () -> get_hooks
   >>= fun hooks ->
   print_hooks "Present:" hooks;
   let hook = make_hook "http://example.com/" [`Push; `PullRequest; `Status] in
@@ -71,19 +73,20 @@ let t = Github.(Monad.(run Github_t.(
   } ()
   >>= fun hook ->
   print_hooks "Updated:" [hook];
-  Hook.for_repo ~token ~user ~repo ()
+  API.set_user_agent "lib_test/create_hook.ml"
+  >>= fun () -> get_hooks
   >>= fun hooks ->
   print_hooks "Retrieved:" hooks;
   Hook.delete ~token ~user ~repo ~num:hook.hook_id ()
   >>= fun () ->
   print_hooks "Deleted:" [hook];
-  Hook.for_repo ~token ~user ~repo ()
+  get_hooks
   >>= fun hooks ->
   print_hooks "Retrieved:" hooks;
   Hook.delete ~token ~user ~repo ~num:hook_a.hook_id ()
   >>= fun () ->
   print_hooks "Deleted:" [hook_a];
-  Hook.for_repo ~token ~user ~repo ()
+  get_hooks
   >>= fun hooks ->
   print_hooks "Present:" hooks;
   return ()

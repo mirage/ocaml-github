@@ -173,15 +173,14 @@ module Monad = struct
     headers: C.Header.t; body: CLB.t;
   }
 
+  type state = {
+    user_agent: string option;
+  }
   type 'a signal =
-    | Request of request * (request -> 'a t)
+    | Request of request * (request -> 'a signal Lwt.t)
     | Response of 'a
     | Error of error
-  and 'a context = {
-    user_agent: string option;
-    signal: 'a signal;
-  }
-  and 'a t = 'a context Lwt.t
+  and 'a t = state -> (state * 'a signal) Lwt.t
 
   let error_to_string = function
     | Generic res ->
@@ -198,6 +197,14 @@ module Monad = struct
     | No_response -> "No response"
     | Bad_response exn -> sprintf "Bad response: %s\n" (Printexc.to_string exn)    
 
+  let error err = Error err
+  let response r = Response r
+  let request ?token ?(params=[]) ({uri} as req) reqfn =
+    let uri = Uri.add_query_params' uri begin match token with
+      | None -> params
+      | Some token -> ("access_token", token)::params
+    end in Request ({req with uri}, reqfn)
+
   let add_ua hdrs ua =
     let hdrs = C.Header.prepend_user_agent hdrs (user_agent^" "^C.Header.user_agent) in
     match ua with
@@ -207,34 +214,25 @@ module Monad = struct
   let prepare_request ~user_agent ({headers} as req) =
     {req with headers=add_ua headers user_agent}
 
-  let rec bind x fn = match_lwt x with
-    | {user_agent; signal=Request (req, reqfn)} ->
-        bind (reqfn (prepare_request ~user_agent req)) fn
-    | {user_agent; signal=Response r} ->
-        begin match_lwt fn r with
-          | {user_agent=None} as x -> return {x with user_agent}
-          | x -> return x
-        end
-    | {signal=Error _} as x -> return x
+  let rec bind x fn = fun state -> match_lwt x state with
+    | {user_agent} as state, Request (req, reqfn) ->
+        lwt r = reqfn (prepare_request ~user_agent req) in
+        bind (fun state -> Lwt.return (state, r)) fn state
+    | state, Response r -> fn r state
+    | state, ((Error _) as x) -> Lwt.return (state, x)
 
-  let request ?token ?(params=[]) ({uri} as req) reqfn =
-    let uri = Uri.add_query_params' uri begin match token with
-      | None -> params
-      | Some token -> ("access_token", token)::params
-    end in return {user_agent=None; signal=Request ({req with uri}, reqfn)}
+  let return r = fun state -> Lwt.return (state, Response r)
 
-  let error err =
-    return {user_agent=None; signal=Error err}
+  let initial_state = {user_agent=None}
 
-  let return r =
-    return {user_agent=None; signal=Response r}
-
-  let run th = match_lwt (bind th return) with
-    | {signal=Request (_,_)} -> fail (Failure "Impossible: can't run unapplied request")
-    | {signal=Response r} -> Lwt.return r
-    | {signal=Error e} -> fail (Failure (error_to_string e))
+  let run th = match_lwt bind th return initial_state with
+    | _, Request (_,_) -> fail (Failure "Impossible: can't run unapplied request")
+    | _, Response r -> Lwt.return r
+    | _, Error e -> fail (Failure (error_to_string e))
 
   let (>>=) = bind
+
+  let (>>) a b = a >>= fun _ -> b
 end
 
 module API = struct
@@ -244,15 +242,15 @@ module API = struct
     | (p, handler)::more -> if p response then begin
       try_lwt
         lwt r = Lwt.bind (CLB.string_of_body (snd response)) handler in
-        Monad.return r
-      with exn -> Monad.(error (Bad_response exn))
+        Lwt.return (Monad.response r)
+      with exn -> Lwt.return (Monad.(error (Bad_response exn)))
       end else handle_response response more
     | [] ->
         let envelope, message = response in
         if CL.Response.status envelope = `Unprocessable_entity
         then lwt body = CLB.string_of_body message in
-             Monad.(error (Semantic (Github_j.message_of_string body)))
-        else Monad.(error (Generic envelope))
+             Lwt.return Monad.(error (Semantic (Github_j.message_of_string body)))
+        else Lwt.return Monad.(error (Generic envelope))
 
   (* Force chunked-encoding
    * to be disabled (to satisfy Github, which returns 411 Length Required
@@ -263,7 +261,7 @@ module API = struct
 
   let request resp_handlers req =
     match_lwt (lwt_req req) with
-    | None -> Monad.(error No_response)
+    | None -> Lwt.return Monad.(error No_response)
     | Some response -> begin
       Printf.eprintf "Github response code %s\n%!"
         (C.Code.string_of_status (CL.Response.status (fst response)));
@@ -281,14 +279,18 @@ module API = struct
   let realize_headers headers = C.Header.add_opt headers "content-type" "application/json"
 
   let idempotent meth ?headers ?token ?params ~expected_code ~uri fn =
-    Monad.(request ?token ?params
-             {meth; uri; headers=realize_headers headers; body=None})
-      (request [code_handler ~expected_code fn])
+    fun state -> Lwt.return
+      (state,
+       (Monad.(request ?token ?params
+                 {meth; uri; headers=realize_headers headers; body=None})
+          (request [code_handler ~expected_code fn])))
 
   let effectful meth ?headers ?body ?token ~expected_code ~uri fn =
-    Monad.(request ?token
-             {meth; uri; headers=realize_headers headers; body=realize_body body})
-      (request [code_handler ~expected_code fn])
+    fun state -> Lwt.return
+      (state,
+       (Monad.(request ?token
+                 {meth; uri; headers=realize_headers headers; body=realize_body body})
+          (request [code_handler ~expected_code fn])))
 
   let get ?(expected_code=`OK) = idempotent `GET ~expected_code
 
@@ -300,9 +302,9 @@ module API = struct
 
   let delete ?(expected_code=`No_content) = idempotent `DELETE ~expected_code
 
-  let set_user_agent user_agent =
-    Monad.(Lwt.return {user_agent=Some user_agent;
-                       signal=Response ()})
+  let set_user_agent user_agent = fun state ->
+    Monad.(Lwt.return ({state with user_agent=Some user_agent}, Response ()))
+
 end
 
 open Github_t
@@ -442,12 +444,14 @@ module Pull = struct
 
   let is_merged ?token ~user ~repo ~num () =
     let uri = URI.pull_merge ~user ~repo ~num in
-    Monad.(request ?token
-             {meth=`GET; uri; headers=API.realize_headers None; body=None})
-      API.(request [
-        code_handler ~expected_code:`No_content (fun _ -> return true);
-        code_handler ~expected_code:`Not_found  (fun _ -> return false);
-      ])
+    fun state -> Lwt.return
+      (state,
+       Monad.(request ?token
+                {meth=`GET; uri; headers=API.realize_headers None; body=None})
+         API.(request [
+           code_handler ~expected_code:`No_content (fun _ -> return true);
+           code_handler ~expected_code:`Not_found  (fun _ -> return false);
+         ]))
 
   let merge ?token ~user ~repo ~num ?merge_commit_message () =
     let uri = URI.pull_merge ~user ~repo ~num in

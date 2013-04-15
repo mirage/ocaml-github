@@ -9,6 +9,7 @@
 * Add structured semantic errors
 * Nows sends partially configurable (via `API.set_user_agent`) User-Agent string
 * Declare ocaml-re dependency
+* Add anonymous bind operator (>>) to `Github.Monad`
 
 0.4.3 (2013-01-14):
 * Add filters and sort order parameters for `Issues` and `Milestones` for a repository.

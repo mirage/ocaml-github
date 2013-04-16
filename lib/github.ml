@@ -16,7 +16,7 @@
  *
  *)
 
-let user_agent = "ocaml-github/0.5.0"
+let user_agent = "ocaml-github" (* TODO: add version from build system *)
 
 (* Authorization Scopes *)
 module Scope = struct

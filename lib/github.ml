@@ -1,5 +1,6 @@
 (*
  * Copyright (c) 2012 Anil Madhavapeddy <anil@recoil.org>
+ * Copyright (c) 2013 David Sheets <sheets@alum.mit.edu>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,6 +15,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  *)
+
+let user_agent = "ocaml-github" (* TODO: add version from build system *)
 
 (* Authorization Scopes *)
 module Scope = struct
@@ -152,23 +155,32 @@ end
 module C = Cohttp
 module CL = Cohttp_lwt_unix
 module CLB = CL.Body
-open Lwt
 
 module Monad = struct
   open Printf
+  open Lwt
 
   (* Each API call results in either a valid response or
    * an HTTP error. Depending on the error status code, it may
    * be retried within the monad, or a permanent failure returned *)
   type error =
-  | Generic of CL.Response.t
-  | Semantic of Github_t.message
-  | No_response
-  | Bad_response of exn
-  and 'a response =
-  | Error of error
-  | Response of 'a
-  and 'a t = 'a response Lwt.t
+    | Generic of CL.Response.t
+    | Semantic of Github_t.message
+    | No_response
+    | Bad_response of exn
+  type request = {
+    meth: C.Code.meth; uri: Uri.t;
+    headers: C.Header.t; body: CLB.t;
+  }
+
+  type state = {
+    user_agent: string option;
+  }
+  type 'a signal =
+    | Request of request * (request -> 'a signal Lwt.t)
+    | Response of 'a
+    | Error of error
+  and 'a t = state -> (state * 'a signal) Lwt.t
 
   let error_to_string = function
     | Generic res ->
@@ -185,99 +197,121 @@ module Monad = struct
     | No_response -> "No response"
     | Bad_response exn -> sprintf "Bad response: %s\n" (Printexc.to_string exn)    
 
-  let bind x fn =
-    match_lwt x with
-    |Error e -> return (Error e)
-    |Response r -> fn r
+  let error err = Error err
+  let response r = Response r
+  let request ?token ?(params=[]) ({uri} as req) reqfn =
+    let uri = Uri.add_query_params' uri begin match token with
+      | None -> params
+      | Some token -> ("access_token", token)::params
+    end in Request ({req with uri}, reqfn)
 
-  let return r =
-    return (Response r)
+  let add_ua hdrs ua =
+    let hdrs = C.Header.prepend_user_agent hdrs (user_agent^" "^C.Header.user_agent) in
+    match ua with
+      | None -> hdrs
+      | Some ua -> C.Header.prepend_user_agent hdrs ua
 
-  let run th =
-    match_lwt th with
-    |Response r -> Lwt.return r
-    |Error e -> fail (Failure (error_to_string e))
+  let prepare_request ~user_agent ({headers} as req) =
+    {req with headers=add_ua headers user_agent}
+
+  let rec bind x fn = fun state -> match_lwt x state with
+    | {user_agent} as state, Request (req, reqfn) ->
+        lwt r = reqfn (prepare_request ~user_agent req) in
+        bind (fun state -> Lwt.return (state, r)) fn state
+    | state, Response r -> fn r state
+    | state, ((Error _) as x) -> Lwt.return (state, x)
+
+  let return r = fun state -> Lwt.return (state, Response r)
+
+  let initial_state = {user_agent=None}
+
+  let run th = match_lwt bind th return initial_state with
+    | _, Request (_,_) -> fail (Failure "Impossible: can't run unapplied request")
+    | _, Response r -> Lwt.return r
+    | _, Error e -> fail (Failure (error_to_string e))
 
   let (>>=) = bind
+
+  let (>>) a b = a >>= fun _ -> b
 end
 
 module API = struct
-  open Lwt
 
   (* Use the highest precedence handler that matches the response. *)
   let rec handle_response response = function
     | (p, handler)::more -> if p response then begin
       try_lwt
-        lwt r = CLB.string_of_body (snd response) >>= handler in
-        return (Monad.Response r)
-      with exn -> return (Monad.(Error (Bad_response exn)))
+        lwt r = Lwt.bind (CLB.string_of_body (snd response)) handler in
+        Lwt.return (Monad.response r)
+      with exn -> Lwt.return (Monad.(error (Bad_response exn)))
       end else handle_response response more
     | [] ->
         let envelope, message = response in
         if CL.Response.status envelope = `Unprocessable_entity
         then lwt body = CLB.string_of_body message in
-             return (Monad.(Error (Semantic (Github_j.message_of_string body))))
-        else return (Monad.(Error (Generic envelope)))
+             Lwt.return Monad.(error (Semantic (Github_j.message_of_string body)))
+        else Lwt.return Monad.(error (Generic envelope))
 
-  (* Add an authorization token onto a request URI and parse the response
-   * as JSON. *)
-  let request_with_token ?headers ?token ?(params=[]) uri reqfn resp_handlers =
-    let uri = Uri.add_query_params' uri params in
-    (* Add the correct mime-type header *)
-    let headers = match headers with
-     |Some x -> Some (C.Header.add x "content-type" "application/json")
-     |None -> Some (C.Header.of_list ["content-type","application/json"]) in
-    let uri = match token with
-     |Some token -> Uri.add_query_param uri ("access_token", [token]) 
-     |None -> uri in
+  (* Force chunked-encoding
+   * to be disabled (to satisfy Github, which returns 411 Length Required
+   * to a chunked-encoding POST request). *)
+  let lwt_req {Monad.uri; meth; headers; body} =
     Printf.eprintf "%s\n%!" (Uri.to_string uri);
-    match_lwt (reqfn ?headers) uri with
-    |None ->
-      return (Monad.(Error No_response))
-    |Some response -> begin
+    CL.Client.call ~headers ?body ~chunked:false meth uri
+
+  let request resp_handlers req =
+    match_lwt (lwt_req req) with
+    | None -> Lwt.return Monad.(error No_response)
+    | Some response -> begin
       Printf.eprintf "Github response code %s\n%!"
         (C.Code.string_of_status (CL.Response.status (fst response)));
       handle_response response resp_handlers
     end
 
-  (* Convert a request body into a stream and force chunked-encoding
-   * to be disabled (to satisfy Github, which returns 411 Length Required
-   * to a chunked-encoding POST request). *)
-  let request_with_token_body ?headers ?token ?body uri req resp_handlers =
-    let body = match body with
-      |None -> None |Some b -> CLB.body_of_string b in
-    let chunked = Some false in
-    request_with_token ?headers ?token uri (req ?body ?chunked) resp_handlers
-
+  (* A simple response pattern that matches on HTTP code equivalence *)
   let code_handler ~expected_code handler =
     (fun (res,_) -> CL.Response.status res = expected_code), handler
 
-  let get ?headers ?token ?(params=[]) ?(expected_code=`OK) ~uri fn =
-    request_with_token ?headers ?token ~params uri CL.Client.get
-      [code_handler ~expected_code fn]
+  (* Convert a request body into a stream *)
+  let realize_body = function None -> None | Some b -> CLB.body_of_string b
 
-  let post ?headers ?body ?token ~expected_code ~uri fn =
-    request_with_token_body ?headers ?token ?body uri CL.Client.post
-      [code_handler ~expected_code fn]
+  (* Add the correct mime-type header *)
+  let realize_headers headers = C.Header.add_opt headers "content-type" "application/json"
 
-  let patch ?headers ?body ?token ~expected_code ~uri fn =
-    request_with_token_body ?headers ?token ?body uri CL.Client.patch
-      [code_handler ~expected_code fn]
+  let idempotent meth ?headers ?token ?params ~expected_code ~uri fn =
+    fun state -> Lwt.return
+      (state,
+       (Monad.(request ?token ?params
+                 {meth; uri; headers=realize_headers headers; body=None})
+          (request [code_handler ~expected_code fn])))
 
-  let put ?headers ?body ?token ~expected_code ~uri fn =
-    request_with_token_body ?headers ?token ?body uri CL.Client.put
-      [code_handler ~expected_code fn]
+  let effectful meth ?headers ?body ?token ~expected_code ~uri fn =
+    fun state -> Lwt.return
+      (state,
+       (Monad.(request ?token
+                 {meth; uri; headers=realize_headers headers; body=realize_body body})
+          (request [code_handler ~expected_code fn])))
 
-  let delete ?headers ?token ?(params=[]) ?(expected_code=`No_content) ~uri fn =
-    request_with_token ?headers ?token ~params uri CL.Client.delete
-      [code_handler ~expected_code fn]
+  let get ?(expected_code=`OK) = idempotent `GET ~expected_code
+
+  let post ~expected_code = effectful `POST ~expected_code
+
+  let patch ~expected_code = effectful `PATCH ~expected_code
+
+  let put ~expected_code = effectful `PUT ~expected_code
+
+  let delete ?(expected_code=`No_content) = idempotent `DELETE ~expected_code
+
+  let set_user_agent user_agent = fun state ->
+    Monad.(Lwt.return ({state with user_agent=Some user_agent}, Response ()))
+
 end
 
 open Github_t
 open Github_j
-open Lwt
 
 module Token = struct
+  open Lwt
   type t = string
 
   let create ?(scopes=[`Repo]) ?note ?note_url ?client_id ?client_secret ~user ~pass () =
@@ -320,6 +354,8 @@ module Token = struct
 end
 
 module User = struct
+  open Lwt
+
   let current_info ~token () =
     let uri = URI.user () in
     API.get ~token ~uri (fun body -> return (user_info_of_string body))
@@ -371,6 +407,7 @@ module Filter = struct
 end
 
 module Pull = struct
+  open Lwt
 
   let for_repo ?(state=`Open) ?token ~user ~repo () =
     let params = Filter.([
@@ -407,10 +444,14 @@ module Pull = struct
 
   let is_merged ?token ~user ~repo ~num () =
     let uri = URI.pull_merge ~user ~repo ~num in
-    API.(request_with_token ?token uri CL.Client.get [
-      code_handler ~expected_code:`No_content (fun _ -> return true);
-      code_handler ~expected_code:`Not_found  (fun _ -> return false);
-    ])
+    fun state -> Lwt.return
+      (state,
+       Monad.(request ?token
+                {meth=`GET; uri; headers=API.realize_headers None; body=None})
+         API.(request [
+           code_handler ~expected_code:`No_content (fun _ -> return true);
+           code_handler ~expected_code:`Not_found  (fun _ -> return false);
+         ]))
 
   let merge ?token ~user ~repo ~num ?merge_commit_message () =
     let uri = URI.pull_merge ~user ~repo ~num in
@@ -420,6 +461,7 @@ module Pull = struct
 end
 
 module Milestone = struct
+  open Lwt
 
   let for_repo ?(state=`Open) ?(sort=`Due_date) ?(direction=`Desc) ?token ~user ~repo () =
     let params = Filter.([
@@ -449,6 +491,7 @@ module Milestone = struct
 end
 
 module Issue = struct
+  open Lwt
   
   let for_repo ?token ?creator ?mentioned ?labels
     ?(milestone=`Any) ?(state=`Open) ?(sort=`Created)
@@ -485,7 +528,51 @@ module Issue = struct
     API.post ~body ?token ~uri ~expected_code:`Created (fun b -> return (issue_comment_of_string b))
 end
 
+module Status = struct
+  open Lwt
+
+  let for_sha ?token ~user ~repo ~sha () =
+    let uri = URI.repo_statuses ~user ~repo ~sha in
+    API.get ?token ~uri (fun b -> return (statuses_of_string b))
+
+  let create ?token ~user ~repo ~sha ~status () =
+    let uri = URI.repo_statuses ~user ~repo ~sha in
+    let body = string_of_new_status status in
+    API.post ~body ?token ~uri ~expected_code:`Created (fun b -> return (status_of_string b))
+end
+
+module Hook = struct
+  open Lwt
+
+  let for_repo ?token ~user ~repo () =
+    let uri = URI.repo_hooks ~user ~repo in
+    API.get ?token ~uri (fun b -> return (hooks_of_string b))
+
+  let get ?token ~user ~repo ~num () =
+    let uri = URI.hook ~user ~repo ~num in
+    API.get ?token ~uri (fun b -> return (hook_of_string b))
+
+  let create ?token ~user ~repo ~hook () =
+    let uri = URI.repo_hooks ~user ~repo in
+    let body = string_of_new_hook hook in
+    API.post ~body ?token ~uri ~expected_code:`Created (fun b -> return (hook_of_string b))
+
+  let update ?token ~user ~repo ~num ~hook () =
+    let uri = URI.hook ~user ~repo ~num in
+    let body = string_of_update_hook hook in
+    API.patch ?token ~body ~uri ~expected_code:`OK (fun b -> return (hook_of_string b))
+
+  let delete ?token ~user ~repo ~num () =
+    let uri = URI.hook ~user ~repo ~num in
+    API.delete ?token ~uri (fun _ -> return ())
+
+  let test ?token ~user ~repo ~num () =
+    let uri = URI.hook_test ~user ~repo ~num in
+    API.post ?token ~uri ~expected_code:`No_content (fun b -> return ())
+end
+
 module Repo = struct
+  open Lwt
 
   let info ?token ~user ~repo () =
     let uri = URI.repo ~user ~repo in
@@ -502,41 +589,6 @@ module Repo = struct
   let commit ?token ~user ~repo ~sha () =
     let uri = URI.repo_commit ~user ~repo ~sha in
     API.get ?token ~uri (fun b -> return (commit_of_string b))
-
-  let statuses ?token ~user ~repo ~sha () =
-    let uri = URI.repo_statuses ~user ~repo ~sha in
-    API.get ?token ~uri (fun b -> return (statuses_of_string b))
-
-  let create_status ?token ~user ~repo ~sha ~status () =
-    let uri = URI.repo_statuses ~user ~repo ~sha in
-    let body = string_of_new_status status in
-    API.post ~body ?token ~uri ~expected_code:`Created (fun b -> return (status_of_string b))
-
-  let hooks ?token ~user ~repo () =
-    let uri = URI.repo_hooks ~user ~repo in
-    API.get ?token ~uri (fun b -> return (hooks_of_string b))
-
-  let hook ?token ~user ~repo ~num () =
-    let uri = URI.hook ~user ~repo ~num in
-    API.get ?token ~uri (fun b -> return (hook_of_string b))
-
-  let create_hook ?token ~user ~repo ~hook () =
-    let uri = URI.repo_hooks ~user ~repo in
-    let body = string_of_new_hook hook in
-    API.post ~body ?token ~uri ~expected_code:`Created (fun b -> return (hook_of_string b))
-
-  let update_hook ?token ~user ~repo ~num ~hook () =
-    let uri = URI.hook ~user ~repo ~num in
-    let body = string_of_update_hook hook in
-    API.patch ?token ~body ~uri ~expected_code:`OK (fun b -> return (hook_of_string b))
-
-  let delete_hook ?token ~user ~repo ~num () =
-    let uri = URI.hook ~user ~repo ~num in
-    API.delete ?token ~uri (fun _ -> return ())
-
-  let test_hook ?token ~user ~repo ~num () =
-    let uri = URI.hook_test ~user ~repo ~num in
-    API.post ?token ~uri ~expected_code:`No_content (fun b -> return ())
 end
 
 module Git_obj = struct
@@ -557,16 +609,16 @@ module Git_obj = struct
 end
 
 module Tag = struct
+  open Monad
 
   let tag ?token ~user ~repo ~sha () =
     let uri = URI.repo_tag ~user ~repo ~sha in
-    API.get ?token ~uri (fun b -> return (tag_of_string b))
+    API.get ?token ~uri (fun b -> Lwt.return (tag_of_string b))
 
   (* Retrieve a list of SHA hashes for tags, and obtain a
    * name and time for each tag.  If annotated, this is explicit,
    * and otherwise it uses the last commit *)
   let get_tags_and_times ?token ~user ~repo () =
-    let open Monad in
     Repo.refs ?token ~ty:"tags" ~user ~repo () >>=
     fun tags ->
       let rec aux acc = function

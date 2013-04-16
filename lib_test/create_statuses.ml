@@ -26,9 +26,9 @@ let t =
       new_status_target_url=Some ("http://example.com/commit/#"^sha_a);
       new_status_description=Some "error error on the wall";
     }) in
-    Repo.create_status ~token ~user ~repo ~sha:sha_a ~status ()
+    Status.create ~token ~user ~repo ~sha:sha_a ~status ()
     >>= fun status ->
-    Repo.statuses ~token ~user ~repo ~sha:sha_a ()
+    Status.for_sha ~token ~user ~repo ~sha:sha_a ()
     >>= fun statuses ->
     print_statuses statuses;
     let status = Github_t.({
@@ -36,9 +36,9 @@ let t =
       new_status_target_url=Some ("http://example.com/commit/#"^sha_a);
       new_status_description=Some "append be pend see pend depend";
     }) in
-    Repo.create_status ~token ~user ~repo ~sha:sha_a ~status ()
+    Status.create ~token ~user ~repo ~sha:sha_a ~status ()
     >>= fun status ->
-    Repo.statuses ~token ~user ~repo ~sha:sha_a ()
+    Status.for_sha ~token ~user ~repo ~sha:sha_a ()
     >>= fun statuses ->
     print_statuses statuses;
     return ()

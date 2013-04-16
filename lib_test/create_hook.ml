@@ -15,7 +15,6 @@
  *
  *)
 
-open Lwt
 open Printf
 
 let token = Config.access_token
@@ -47,23 +46,26 @@ let make_hook url events = Github_t.({
   new_hook_active=true;
 })
 
+let get_hooks = Github.Hook.for_repo ~token ~user ~repo ()
+
 let t = Github.(Monad.(run Github_t.(
-  Repo.hooks ~token ~user ~repo ()
+  API.set_user_agent "create_hook"
+  >>= fun () -> get_hooks
   >>= fun hooks ->
   print_hooks "Present:" hooks;
   let hook = make_hook "http://example.com/" [`Push; `PullRequest; `Status] in
-  Repo.create_hook ~token ~user ~repo ~hook ()
+  Hook.create ~token ~user ~repo ~hook ()
   >>= fun hook_a ->
   print_hooks "Created:" [hook_a];
   let hook = make_hook "http://example.org/"
     [`CommitComment; `IssueComment; `PullRequestReviewComment] in
-  Repo.create_hook ~token ~user ~repo ~hook ()
+  Hook.create ~token ~user ~repo ~hook ()
   >>= fun hook_b ->
   print_hooks "Created:" [hook_b];
-  Repo.hook ~token ~user ~repo ~num:hook_b.hook_id ()
+  Hook.get ~token ~user ~repo ~num:hook_b.hook_id ()
   >>= fun hook ->
   print_hooks "Just:" [hook];
-  Repo.update_hook ~token ~user ~repo ~num:hook.hook_id ~hook:{
+  Hook.update ~token ~user ~repo ~num:hook.hook_id ~hook:{
     update_hook_name="web";
     update_hook_config=make_web_hook_config "http://example.net/" None;
     update_hook_events=Some (`Watch::hook.hook_events);
@@ -71,19 +73,20 @@ let t = Github.(Monad.(run Github_t.(
   } ()
   >>= fun hook ->
   print_hooks "Updated:" [hook];
-  Repo.hooks ~token ~user ~repo ()
+  API.set_user_agent "lib_test/create_hook.ml"
+  >>= fun () -> get_hooks
   >>= fun hooks ->
   print_hooks "Retrieved:" hooks;
-  Repo.delete_hook ~token ~user ~repo ~num:hook.hook_id ()
+  Hook.delete ~token ~user ~repo ~num:hook.hook_id ()
   >>= fun () ->
   print_hooks "Deleted:" [hook];
-  Repo.hooks ~token ~user ~repo ()
+  get_hooks
   >>= fun hooks ->
   print_hooks "Retrieved:" hooks;
-  Repo.delete_hook ~token ~user ~repo ~num:hook_a.hook_id ()
+  Hook.delete ~token ~user ~repo ~num:hook_a.hook_id ()
   >>= fun () ->
   print_hooks "Deleted:" [hook_a];
-  Repo.hooks ~token ~user ~repo ()
+  get_hooks
   >>= fun hooks ->
   print_hooks "Present:" hooks;
   return ()

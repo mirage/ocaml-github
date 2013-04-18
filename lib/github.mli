@@ -24,6 +24,7 @@ module Monad : sig
   val return : 'a -> 'a t
   val run : 'a t -> 'a Lwt.t
   val (>>=) : 'a t -> ('a -> 'b t) -> 'b t
+  val (>>) : 'a t -> 'b t -> 'b t
 end
 
 (* Authorization scopes; http://developer.github.com/v3/oauth/ *)
@@ -59,36 +60,46 @@ end
  *)
 module API : sig
   val get : 
+    ?expected_code:Cohttp.Code.status_code ->
     ?headers:Cohttp.Header.t -> 
     ?token:Token.t -> 
     ?params:(string * string) list ->
-    ?expected_code:Cohttp.Code.status_code ->
     uri:Uri.t -> 
     (string -> 'a Lwt.t) -> 'a Monad.t
 
   val post : 
+    expected_code:Cohttp.Code.status_code ->
     ?headers:Cohttp.Header.t ->
     ?body:string ->
     ?token:Token.t ->
-    expected_code:Cohttp.Code.status_code ->
     uri:Uri.t ->
     (string -> 'a Lwt.t) -> 'a Monad.t
 
    val delete : 
+    ?expected_code:Cohttp.Code.status_code ->
     ?headers:Cohttp.Header.t -> 
     ?token:Token.t -> 
     ?params:(string * string) list ->
-    ?expected_code:Cohttp.Code.status_code ->
     uri:Uri.t -> 
     (string -> 'a Lwt.t) -> 'a Monad.t
 
   val patch : 
+    expected_code:Cohttp.Code.status_code ->
     ?headers:Cohttp.Header.t ->
     ?body:string ->
     ?token:Token.t ->
-    expected_code:Cohttp.Code.status_code ->
     uri:Uri.t ->
     (string -> 'a Lwt.t) -> 'a Monad.t
+
+  val put :
+    expected_code:Cohttp.Code.status_code ->
+    ?headers:Cohttp.Header.t ->
+    ?body:string ->
+    ?token:Token.t ->
+    uri:Uri.t ->
+    (string -> 'a Lwt.t) -> 'a Monad.t
+
+  val set_user_agent : string -> unit Monad.t
 end
 
 (* Various useful URI generation functions, normally for displaying on a web-page.
@@ -233,6 +244,57 @@ module Issue: sig
     issue_number:int -> body:string -> unit -> Github_t.issue_comment Monad.t
 end
 
+module Status : sig
+  val for_sha :
+    ?token:Token.t ->
+    user:string ->
+    repo:string ->
+    sha:string -> unit -> Github_t.statuses Monad.t
+
+  val create :
+    ?token:Token.t ->
+    user:string ->
+    repo:string ->
+    sha:string ->
+    status:Github_t.new_status ->
+    unit -> Github_t.status Monad.t
+end
+
+module Hook : sig
+  val for_repo :
+    ?token:Token.t ->
+    user:string ->
+    repo:string -> unit -> Github_t.hooks Monad.t
+
+  val get :
+    ?token:Token.t ->
+    user:string ->
+    repo:string -> num:int -> unit -> Github_t.hook Monad.t
+
+  val create :
+    ?token:Token.t ->
+    user:string ->
+    repo:string ->
+    hook:Github_t.new_hook -> unit -> Github_t.hook Monad.t
+
+  val update :
+    ?token:Token.t ->
+    user:string ->
+    repo:string ->
+    num:int ->
+    hook:Github_t.update_hook -> unit -> Github_t.hook Monad.t
+
+  val delete :
+    ?token:Token.t ->
+    user:string ->
+    repo:string -> num:int -> unit -> unit Monad.t
+
+  val test :
+    ?token:Token.t ->
+    user:string ->
+    repo:string -> num:int -> unit -> unit Monad.t
+end
+
 module Repo: sig
   val info:
     ?token:Token.t ->
@@ -253,53 +315,6 @@ module Repo: sig
     ?token:Token.t ->
     user:string -> repo:string -> sha:string ->
     unit -> Github_t.commit Monad.t
-
-  val statuses :
-    ?token:Token.t ->
-    user:string ->
-    repo:string ->
-    sha:string -> unit -> Github_t.statuses Monad.t
-
-  val create_status :
-    ?token:Token.t ->
-    user:string ->
-    repo:string ->
-    sha:string ->
-    status:Github_t.new_status ->
-    unit -> Github_t.status Monad.t
-
-  val hooks :
-    ?token:Token.t ->
-    user:string ->
-    repo:string -> unit -> Github_t.hooks Monad.t
-
-  val hook :
-    ?token:Token.t ->
-    user:string ->
-    repo:string -> num:int -> unit -> Github_t.hook Monad.t
-
-  val create_hook :
-    ?token:Token.t ->
-    user:string ->
-    repo:string ->
-    hook:Github_t.new_hook -> unit -> Github_t.hook Monad.t
-
-  val update_hook :
-    ?token:Token.t ->
-    user:string ->
-    repo:string ->
-    num:int ->
-    hook:Github_t.update_hook -> unit -> Github_t.hook Monad.t
-
-  val delete_hook :
-    ?token:Token.t ->
-    user:string ->
-    repo:string -> num:int -> unit -> unit Monad.t
-
-  val test_hook :
-    ?token:Token.t ->
-    user:string ->
-    repo:string -> num:int -> unit -> unit Monad.t
 end
 
 module Git_obj : sig

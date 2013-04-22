@@ -175,6 +175,7 @@ module Monad = struct
 
   type state = {
     user_agent: string option;
+    token: string option
   }
   type 'a signal =
     | Request of request * (request -> 'a signal Lwt.t)
@@ -211,19 +212,25 @@ module Monad = struct
       | None -> hdrs
       | Some ua -> C.Header.prepend_user_agent hdrs ua
 
-  let prepare_request ~user_agent ({headers} as req) =
-    {req with headers=add_ua headers user_agent}
+  let prepare_request state ({headers; uri} as req) = { req with
+    headers=add_ua headers state.user_agent;
+    uri=if List.mem_assoc "access_token" (Uri.query req.uri)
+      then uri
+      else match state.token with
+        | Some token -> Uri.add_query_param' uri ("access_token",token)
+        | None -> uri
+  }
 
   let rec bind x fn = fun state -> match_lwt x state with
-    | {user_agent} as state, Request (req, reqfn) ->
-        lwt r = reqfn (prepare_request ~user_agent req) in
+    | state, Request (req, reqfn) ->
+        lwt r = reqfn (prepare_request state req) in
         bind (fun state -> Lwt.return (state, r)) fn state
     | state, Response r -> fn r state
     | state, ((Error _) as x) -> Lwt.return (state, x)
 
   let return r = fun state -> Lwt.return (state, Response r)
 
-  let initial_state = {user_agent=None}
+  let initial_state = {user_agent=None; token=None}
 
   let run th = match_lwt bind th return initial_state with
     | _, Request (_,_) -> fail (Failure "Impossible: can't run unapplied request")
@@ -304,6 +311,9 @@ module API = struct
 
   let set_user_agent user_agent = fun state ->
     Monad.(Lwt.return ({state with user_agent=Some user_agent}, Response ()))
+
+  let set_token token = fun state ->
+    Monad.(Lwt.return ({state with token=Some token}, Response ()))
 
 end
 

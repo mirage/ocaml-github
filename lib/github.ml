@@ -212,14 +212,15 @@ module Monad = struct
       | None -> hdrs
       | Some ua -> C.Header.prepend_user_agent hdrs ua
 
-  let prepare_request state ({headers; uri} as req) = { req with
-    headers=add_ua headers state.user_agent;
-    uri=if List.mem_assoc "access_token" (Uri.query req.uri)
-      then uri
-      else match state.token with
-        | Some token -> Uri.add_query_param' uri ("access_token",token)
-        | None -> uri
-  }
+  let prepare_request state ({headers; uri} as req) =
+    { req with
+      headers=add_ua headers state.user_agent;
+      uri=if List.mem_assoc "access_token" (Uri.query req.uri)
+          then uri
+          else match state.token with
+            | Some token -> Uri.add_query_param' uri ("access_token",token)
+            | None -> uri
+    }
 
   let rec bind x fn = fun state -> match_lwt x state with
     | state, Request (req, reqfn) ->

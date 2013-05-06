@@ -1,5 +1,6 @@
 (*
  * Copyright (c) 2012 Anil Madhavapeddy <anil@recoil.org>
+ * Copyright (c) 2013 David Sheets <sheets@alum.mit.edu>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -32,17 +33,17 @@ let jar = Filename.concat basedir "jar"
 
 let rec mkdir_p dir =
   match Sys.file_exists dir with
-    |true -> ()
-    |false ->
+    | true -> ()
+    | false ->
         mkdir_p (Filename.dirname dir);
         Unix.mkdir dir 0o700
 
 let init () =
   match Sys.file_exists jar with
-  |true -> ()
-  |false ->
-    printf "Github cookie jar: initialized %s\n" jar;
-    mkdir_p jar
+    | true -> ()
+    | false ->
+        printf "Github cookie jar: initialized %s\n" jar;
+        mkdir_p jar
 
 (* Save an authentication token to disk, under the [name]
  * file in the jar *)
@@ -51,16 +52,24 @@ let save ~name ~auth =
     raise (InvalidName name);
   let open Unix in
   init ();
-  (* Backup any old one *)
-  let tm = gmtime (gettimeofday ()) in
-  let backfname = sprintf "%s.%.4d%.2d%.2d.%2d%2d%2d.bak"
-    name (1900 + tm.tm_year) (1 + tm.tm_mon) tm.tm_mday tm.tm_hour tm.tm_min tm.tm_sec in
+  let rec backup_path name =
+    if Sys.file_exists name then begin
+      (* Backup any old one *)
+      let tm = gmtime (gettimeofday ()) in
+      let backfname = sprintf "%s.%.4d%.2d%.2d.%2d%2d%2d.bak"
+        name (1900 + tm.tm_year) (1 + tm.tm_mon) tm.tm_mday
+        tm.tm_hour tm.tm_min tm.tm_sec in
+      let fullback = Filename.concat jar backfname in
+      printf "Github cookie jar: backing up\n%s -> %s\n" name fullback;
+      Unix.rename name fullback;
+    end else begin
+      match Filename.dirname name with
+        | "." -> ()
+        | parent -> backup_path parent
+    end
+  in
   let fullname = Filename.concat jar name in
-  let fullback = Filename.concat jar backfname in
-  if Sys.file_exists fullname then begin
-    printf "Github cookie jar: backing up\n%s -> %s\n" fullname fullback;
-    Unix.rename fullname fullback;
-  end;
+  backup_path fullname;
   mkdir_p (Filename.dirname fullname);
   let fout = open_out fullname in
   fprintf fout "%s" (Github_j.string_of_auth auth);

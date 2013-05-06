@@ -343,6 +343,11 @@ module Token = struct
     let headers = C.Header.(add_authorization (init ()) (C.Auth.Basic (user,pass))) in
     API.get ~headers ~uri ~expected_code:`OK (fun body -> return (auth_of_string body))
 
+  let delete ~user ~pass ~id () =
+    let uri = URI.authorization id in
+    let headers = C.Header.(add_authorization (init ()) (C.Auth.Basic (user,pass))) in
+    API.delete ~headers ~uri ~expected_code:`No_content (fun body -> return ())
+
   (* Convert a code after a user oAuth into an access token that can
    * be used in subsequent requests.
    *)

@@ -19,7 +19,7 @@ open Cmdliner
 open Printf
 open Lwt
 
-let version = "1.0.0"
+let version = "1.1.0"
 
 (* Cmdliner converter for Github scope lists *)
 let scope =
@@ -37,15 +37,15 @@ let list_auth user pass =
     lwt pass = Passwd.get pass in
     lwt auths = Github.Monad.run (Github.Token.get_all ~user ~pass ()) in
     lwt local = Github_cookie_jar.get_all () in
-    printf "%-11s | %-8s | %-40s | %-10s\n" "Cookie Name" "ID" "Application" "Note";
-    printf "----------------------------------------------------------------------------------\n";
+    printf "%-13s | %-8s | %-40s | %-10s\n" "Cookie Name" "ID" "Application" "Note";
+    printf "---------------------------------------------------------------------------------\n";
     List.iter (fun a ->
       (* Check if this id is local *)
       let id = a.auth_id in
       let localnames = List.fold_left (fun acc (n,a) ->
         if a.auth_id = id then n::acc else acc) [] local in
       let print_line name =
-        Printf.printf "%11s | %-8d | %-40s | %-10s\n"
+        Printf.printf "%13s | %-8d | %-40s | %-10s\n"
           (match name with None -> "<remote>" |Some n -> n)
           a.auth_id a.auth_app.app_name
           (match a.auth_note with None -> "" |Some b -> b)
@@ -74,16 +74,32 @@ let save_auth user pass id name =
     Github_cookie_jar.save ~name ~auth
   )
 
+let revoke_auth user pass id =
+  let open Github_t in
+  Lwt_main.run (
+    lwt pass = Passwd.get pass in
+    lwt () = Github.Monad.run (Github.Token.delete ~user ~pass ~id ()) in
+    lwt local = Github_cookie_jar.get_all () in
+    Lwt_list.iter_s (fun (name,a) ->
+      if a.auth_id = id then
+        Github_cookie_jar.delete ~name
+      else return ()
+    ) local
+  )
+
 (* Command declarations for Cmdliner *)
+let user = Arg.(required & pos 0 (some string) None & info [] ~docv:"USERNAME"
+                  ~doc:"Github username.")
+let pass = Arg.(value & opt string "" & info ["p";"password"] ~docv:"PASSWORD"
+                  ~doc:"Github password. If not specified, this will be obtained interactively.")
+let id = Arg.(required & pos 1 (some int) None & info [] ~docv:"TOKEN_ID"
+                ~doc:"Numeric Github token id (obtained via the $(b,show) command).")
+
 let list_cmd =
-  let user = Arg.(required & pos 0 (some string) None & info [] ~docv:"USERNAME" ~doc:"Github username.") in
-  let pass = Arg.(value & opt string "" & info ["p";"password"] ~docv:"PASSWORD" ~doc:"Github password. If not specified, this will be obtained interactively.") in
   Term.(pure list_auth $ user $ pass),
   Term.info "show" ~doc:"list all active Github authorization tokens, including remote ones."
 
 let make_cmd =
-  let user = Arg.(required & pos 0 (some string) None & info [] ~docv:"USERNAME" ~doc:"Github username.") in
-  let pass = Arg.(value & opt string "" & info ["p";"password"] ~docv:"PASSWORD" ~doc:"Github password. If not specified, this will be obtained interactively.") in
   let scopes =
     let doc = Printf.sprintf "Comma delimited list of repository scopes. Can be: %s" (Github.Scope.(string_of_scopes all)) in
     Arg.(value & opt (list scope) [] & info ["s";"scopes"] ~docv:"SCOPES" ~doc) in
@@ -95,12 +111,13 @@ let make_cmd =
   Term.info "make" ~doc:"create a new Github authorization token remotely."
 
 let save_cmd =
-  let user = Arg.(required & pos 0 (some string) None & info [] ~docv:"USERNAME" ~doc:"Github username.") in
-  let pass = Arg.(value & opt string "" & info ["p";"password"] ~docv:"PASSWORD" ~doc:"Github password. If not specified, this will be obtained interactively.") in
-  let id = Arg.(required & pos 1 (some int) None & info [] ~docv:"TOKEN_ID" ~doc:"Numeric Github token id (obtained via the $(b,show) command).") in
   let tname = Arg.(required & pos 2 (some string) None & info [] ~docv:"COOKIE" ~doc:"The local name for the authorization token that applications can look up.") in
   Term.(pure save_auth $ user $ pass $ id $ tname),
   Term.info "save" ~doc:"save a remote Github authorization token to the local cookie jar."
+
+let revoke_cmd =
+  Term.(pure revoke_auth $ user $ pass $ id),
+  Term.info "revoke" ~doc:"revoke a remote Github authorization token and remove it from the local cookie jar."
 
 let default_cmd = 
   let doc = "let local applications use Github authorization tokens" in 
@@ -116,7 +133,7 @@ let default_cmd =
      `P "Email bug reports to <cl-mirage@lists.cl.cam.ac.uk>, or report them online at <http://github.com/avsm/ocaml-github>."] in
   Term.info "git-jar" ~version ~doc ~man
        
-let cmds = [list_cmd; make_cmd; save_cmd]
+let cmds = [list_cmd; make_cmd; save_cmd; revoke_cmd]
 
 let () =
   match Term.eval_choice default_cmd cmds with 

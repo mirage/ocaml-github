@@ -20,8 +20,8 @@ open Lwt
 
 exception InvalidName of string
 let invalid_names = Re.(List.map compile [
-  seq [bos; str "."; eos];
-  seq [bos; str ".."; eos];
+  seq [bos; str "."];
+  str "../";
   seq [bos; str Filename.dir_sep];
   seq [str Filename.dir_sep; eos];
 ])
@@ -93,6 +93,14 @@ let save ~name ~auth =
   close_out fout;
   printf "Github cookie jar: created %s\n" fullname;
   return ()
+
+(* Delete an authentication token from disk, given the [name] in the jar *)
+let delete ~name =
+  lwt () = if List.exists (fun re -> Re.execp re name) invalid_names then
+    fail (InvalidName name)
+  else
+    return () in
+  Lwt_unix.unlink (Filename.concat jar name)
 
 (* Read a JSON auth file in and parse it *)
 let read_auth_file name =

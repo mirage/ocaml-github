@@ -53,23 +53,23 @@ let save ~name ~auth =
   let open Unix in
   init ();
   let rec backup_path name =
-    if Sys.file_exists name then begin
+    let fullname = Filename.concat jar name in
+    if Sys.file_exists fullname then begin
       (* Backup any old one *)
       let tm = gmtime (gettimeofday ()) in
       let backfname = sprintf "%s.%.4d%.2d%.2d.%2d%2d%2d.bak"
         name (1900 + tm.tm_year) (1 + tm.tm_mon) tm.tm_mday
         tm.tm_hour tm.tm_min tm.tm_sec in
       let fullback = Filename.concat jar backfname in
-      printf "Github cookie jar: backing up\n%s -> %s\n" name fullback;
-      Unix.rename name fullback;
+      printf "Github cookie jar: backing up\n%s -> %s\n" fullname fullback;
+      Unix.rename fullname fullback;
     end else begin
       match Filename.dirname name with
         | "." -> ()
         | parent -> backup_path parent
     end
-  in
+  in backup_path name;
   let fullname = Filename.concat jar name in
-  backup_path fullname;
   mkdir_p (Filename.dirname fullname);
   let fout = open_out fullname in
   fprintf fout "%s" (Github_j.string_of_auth auth);

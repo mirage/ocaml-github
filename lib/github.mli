@@ -101,6 +101,8 @@ module API : sig
     (string -> 'a Lwt.t) -> 'a Monad.t
 
   val set_user_agent : string -> unit Monad.t
+
+  val set_token : Token.t -> unit Monad.t
 end
 
 (* Various useful URI generation functions, normally for displaying on a web-page.

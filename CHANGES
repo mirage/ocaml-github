@@ -8,6 +8,7 @@
 * Add Statuses API
 * Add structured semantic errors
 * Nows sends partially configurable (via `API.set_user_agent`) User-Agent string
+* Add `API.set_token` to bind an access token for subsequent requests
 * Declare ocaml-re dependency
 * Add anonymous bind operator (>>) to `Github.Monad`
 * Add `Github.Token.delete` for revoking GitHub authorization tokens

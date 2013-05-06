@@ -31,16 +31,24 @@ let home = try Sys.getenv "HOME" with Not_found -> "."
 let basedir = Filename.concat home ".github"
 let jar = Filename.concat basedir "jar"
 
+let file_kind_match path ~reg ~dir ~other = Lwt_unix.(
+  lwt stats = stat path in
+  match stats.st_kind with
+    | S_REG -> reg ()
+    | S_DIR -> dir ()
+    | S_CHR | S_BLK | S_LNK | S_FIFO | S_SOCK -> other ()
+)
+
 let rec mkdir_p dir =
   match Sys.file_exists dir with
-    | true -> ()
+    | true -> return ()
     | false ->
         mkdir_p (Filename.dirname dir);
-        Unix.mkdir dir 0o700
+        Lwt_unix.mkdir dir 0o700
 
 let init () =
   match Sys.file_exists jar with
-    | true -> ()
+    | true -> return ()
     | false ->
         printf "Github cookie jar: initialized %s\n" jar;
         mkdir_p jar
@@ -48,29 +56,38 @@ let init () =
 (* Save an authentication token to disk, under the [name]
  * file in the jar *)
 let save ~name ~auth =
-  if List.exists (fun re -> Re.execp re name) invalid_names then
-    raise (InvalidName name);
-  let open Unix in
-  init ();
-  let rec backup_path name =
+  lwt () = if List.exists (fun re -> Re.execp re name) invalid_names then
+    fail (InvalidName name)
+  else
+    return () in
+  lwt () = init () in
+  let rec backup_path ?(dirok=false) name =
     let fullname = Filename.concat jar name in
-    if Sys.file_exists fullname then begin
-      (* Backup any old one *)
+    let backup () =
+      let open Unix in
       let tm = gmtime (gettimeofday ()) in
       let backfname = sprintf "%s.%.4d%.2d%.2d.%2d%2d%2d.bak"
         name (1900 + tm.tm_year) (1 + tm.tm_mon) tm.tm_mday
         tm.tm_hour tm.tm_min tm.tm_sec in
       let fullback = Filename.concat jar backfname in
       printf "Github cookie jar: backing up\n%s -> %s\n" fullname fullback;
-      Unix.rename fullname fullback;
-    end else begin
+      Lwt_unix.rename fullname fullback
+    in
+    try_lwt file_kind_match fullname
+      ~reg:backup
+      ~dir:(if dirok then return else backup)
+      ~other:backup
+    with
+      | Unix.Unix_error (Unix.ENOENT, _, _)
+      | Unix.Unix_error (Unix.ENOTDIR, _, _) -> begin
       match Filename.dirname name with
-        | "." -> ()
-        | parent -> backup_path parent
+        | "." -> return ()
+        | parent -> backup_path ~dirok:true parent
     end
-  in backup_path name;
+  in
+  lwt () = backup_path name in
   let fullname = Filename.concat jar name in
-  mkdir_p (Filename.dirname fullname);
+  lwt () = mkdir_p (Filename.dirname fullname) in
   let fout = open_out fullname in
   fprintf fout "%s" (Github_j.string_of_auth auth);
   close_out fout;
@@ -96,16 +113,14 @@ let get_all () =
       if b = "." || b = ".." then return a else begin
         let path = Filename.concat base b in
         let ident = Filename.concat dir b in
-        lwt stats = Lwt_unix.stat path in Lwt_unix.(
-        match stats.st_kind with
-          | S_REG ->
-              lwt auth = read_auth_file ident in
-              return ((ident,auth)::a)
-          | S_DIR ->
-              lwt sub = traverse ident in
-              return (sub@a)
-          | S_CHR | S_BLK | S_LNK | S_FIFO | S_SOCK -> return a
-        )
+        file_kind_match path
+          ~reg:(fun () ->
+            lwt auth = read_auth_file ident in
+            return ((ident,auth)::a))
+          ~dir:(fun () ->
+            lwt sub = traverse ident in
+            return (sub@a))
+          ~other:(fun () -> return a)
     end
     ) files []
   in traverse ""

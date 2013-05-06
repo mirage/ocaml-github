@@ -15,7 +15,7 @@
  *
  *)
 
-val init : unit -> unit
+val init : unit -> unit Lwt.t
 val save : name:string -> auth:Github_t.auth -> unit Lwt.t
 val get_all : unit -> (string * Github_t.auth) list Lwt.t
 val get : name:string -> Github_t.auth option Lwt.t

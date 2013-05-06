@@ -54,7 +54,7 @@ let save ~name ~auth =
   (* Backup any old one *)
   let tm = gmtime (gettimeofday ()) in
   let backfname = sprintf "%s.%.4d%.2d%.2d.%2d%2d%2d.bak"
-    name tm.tm_year tm.tm_mon tm.tm_mday tm.tm_hour tm.tm_min tm.tm_sec in
+    name (1900 + tm.tm_year) (1 + tm.tm_mon) tm.tm_mday tm.tm_hour tm.tm_min tm.tm_sec in
   let fullname = Filename.concat jar name in
   let fullback = Filename.concat jar backfname in
   if Sys.file_exists fullname then begin

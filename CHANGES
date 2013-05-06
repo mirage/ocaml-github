@@ -10,6 +10,11 @@
 * Nows sends partially configurable (via `API.set_user_agent`) User-Agent string
 * Declare ocaml-re dependency
 * Add anonymous bind operator (>>) to `Github.Monad`
+* Add `Github.Token.delete` for revoking GitHub authorization tokens
+* Add `Github_cookie_jar.delete` for deleting local token cookies
+* Add revoke command to git-jar
+* Support GitHub cookie jar names with slashes in
+* Change the signature of `Github_cookie_jar.init` from ... -> unit to ... -> unit Lwt.t (minor breaking)
 
 0.4.3 (2013-01-14):
 * Add filters and sort order parameters for `Issues` and `Milestones` for a repository.

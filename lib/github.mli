@@ -48,6 +48,7 @@ module Token : sig
 
   val get_all : user:string -> pass:string -> unit -> Github_t.auths Monad.t
   val get : user:string -> pass:string -> id:int -> unit -> Github_t.auth Monad.t
+  val delete : user:string -> pass:string -> id:int -> unit -> unit Monad.t
 
   val of_auth : Github_t.auth -> t
   val of_string : string -> t

@@ -131,6 +131,14 @@ Executable create_hook
   Install:            false
   BuildDepends:       cohttp.lwt, lwt.syntax, github, atdgen
 
+Executable delete_all_hooks
+  Path:               lib_test
+  MainIs:             delete_all_hooks.ml
+  Custom:             true
+  CompiledObject:     best
+  Install:            false
+  BuildDepends:       cohttp.lwt, lwt.syntax, github, atdgen
+
 Executable create_statuses
   Path:               lib_test
   MainIs:             create_statuses.ml

@@ -1,4 +1,4 @@
-0.5.0 (2013-05-07):
+0.5.0 (2013-05-10):
 * Force `-j-std` to ATDgen to always use standards-compliant JSON (#11).
 * Rename `Github.Issues` to `Github.Issue` to parallel other submodules.
 * Rename `Github.Issue.edit` to `Github.Issue.update` to parallel other CRUD interfaces.

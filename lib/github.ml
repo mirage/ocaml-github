@@ -154,7 +154,7 @@ end
 
 module C = Cohttp
 module CL = Cohttp_lwt_unix
-module CLB = CL.Body
+module CLB = Cohttp_lwt_body
 
 module Monad = struct
   open Printf

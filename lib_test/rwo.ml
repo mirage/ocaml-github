@@ -59,7 +59,8 @@ module Resp = struct
     | ["index.html"]  ->
         index req
     | ["step2"] -> begin
-        let code = try List.(hd (assoc "code" (Request.params req))) with _ -> "" in
+        let uri = Request.uri req in
+        let code = match Uri.get_query_param uri "code" with hd::_ -> hd |_ -> "" in
         try_lwt begin
           match_lwt Github.Token.of_code ~client_id ~client_secret ~code () with
           |None -> internal_error "no token in response" ()
@@ -73,14 +74,12 @@ end
 
 (* main callback function *)
 let callback con_id ?body req =
-  let path = Request.path req in
-
+  let uri = Request.uri req in
+  let path = Uri.path uri in
   printf "%s %s [%s]\n%!" (Code.string_of_method (Request.meth req)) path 
-    (String.concat "," (List.map (fun (h,v) -> sprintf "%s=%s" h (String.concat "," v)) 
-      (Request.params req)));
-
+    (String.concat "," (List.map (fun (h,v) -> sprintf "%s=%s" h (String.concat "," v)) (Uri.query uri)));
   (* normalize path to strip out ../. and such *)
-  let path_elem = Re_str.(split (regexp_string "/") path) in
+  let path_elem = Re_str.(split (regexp_string "/") (Uri.path uri)) in
   Resp.dispatch req path_elem 
 
 let server_t =
@@ -89,7 +88,7 @@ let server_t =
   let timeout = None in
   let address = "0.0.0.0" in (* TODO address to option *)
   let spec = { Cohttp_lwt_unix.Server.callback; conn_closed } in
-  Cohttp_lwt_unix.server ~address ~port spec
+  Cohttp_lwt_unix.Server.create ~address ~port spec
 
 let _ =
   Lwt_main.run server_t

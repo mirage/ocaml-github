@@ -60,7 +60,8 @@ module Resp = struct
         index req
     | ["step2"] -> begin
         let uri = Request.uri req in
-        let code = match Uri.get_query_param uri "code" with hd::_ -> hd |_ -> "" in
+        let code = match Uri.get_query_param uri "code" with
+          |Some hd -> hd |None -> "" in
         try_lwt begin
           match_lwt Github.Token.of_code ~client_id ~client_secret ~code () with
           |None -> internal_error "no token in response" ()

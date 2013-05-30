@@ -1,5 +1,6 @@
 (*
  * Copyright (c) 2012 Anil Madhavapeddy <anil@recoil.org>
+ * Copyright (c) 2013 David Sheets <sheets@alum.mit.edu>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -15,8 +16,12 @@
  *
  *)
 
-val init : unit -> unit Lwt.t
-val save : name:string -> auth:Github_t.auth -> unit Lwt.t
-val delete : name:string -> unit Lwt.t
-val get_all : unit -> (string * Github_t.auth) list Lwt.t
-val get : name:string -> Github_t.auth option Lwt.t
+type t
+
+val init : ?jar_path:string -> unit -> t Lwt.t
+val save : t -> name:string -> auth:Github_t.auth -> t Lwt.t
+val delete : t -> name:string -> t Lwt.t
+val get_all : t -> (string * Github_t.auth) list Lwt.t
+val get : t -> name:string -> Github_t.auth option Lwt.t
+
+val jar_path : t -> string

@@ -34,11 +34,12 @@ let scope =
 let list_auth user pass =
   let open Github_t in
   Lwt_main.run (
+    lwt jar = Github_cookie_jar.init () in
     lwt pass = Passwd.get pass in
     lwt auths = Github.Monad.run (Github.Token.get_all ~user ~pass ()) in
-    lwt local = Github_cookie_jar.get_all () in
+    lwt local = Github_cookie_jar.get_all jar in
     printf "%-13s | %-8s | %-40s | %-10s\n" "Cookie Name" "ID" "Application" "Note";
-    printf "---------------------------------------------------------------------------------\n";
+    printf "%s\n" (String.make 80 '-');
     List.iter (fun a ->
       (* Check if this id is local *)
       let id = a.auth_id in
@@ -69,22 +70,26 @@ let make_auth user pass scopes note note_url client_id client_secret =
 let save_auth user pass id name =
   let open Github_t in
   Lwt_main.run (
+    lwt jar = Github_cookie_jar.init () in
     lwt pass = Passwd.get pass in
     lwt auth = Github.Monad.run (Github.Token.get ~user ~pass ~id ()) in
-    Github_cookie_jar.save ~name ~auth
+    lwt _ = Github_cookie_jar.save jar ~name ~auth in
+    return ()
   )
 
 let revoke_auth user pass id =
   let open Github_t in
   Lwt_main.run (
+    lwt jar = Github_cookie_jar.init () in
     lwt pass = Passwd.get pass in
     lwt () = Github.Monad.run (Github.Token.delete ~user ~pass ~id ()) in
-    lwt local = Github_cookie_jar.get_all () in
-    Lwt_list.iter_s (fun (name,a) ->
+    lwt local = Github_cookie_jar.get_all jar in
+    lwt _ = Lwt_list.fold_left_s (fun jar (name,a) ->
       if a.auth_id = id then
-        Github_cookie_jar.delete ~name
-      else return ()
-    ) local
+        Github_cookie_jar.delete jar ~name
+      else return jar
+    ) jar local in
+    return ()
   )
 
 (* Command declarations for Cmdliner *)

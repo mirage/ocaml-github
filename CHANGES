@@ -1,3 +1,6 @@
+0.6.1 (trunk):
+* Abstract Github_cookie_jar.t and add Github_cookie_jar.jar_path accessor
+
 0.6.0 (2013-05-24):
 * Update to the Cohttp-0.9.8 interface.
 

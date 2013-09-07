@@ -209,3 +209,5 @@
 <lib_test/create_statuses.{native,byte}>: custom
 # OASIS_STOP
 <lib/*>: std_json
+true: annot, bin_annot
+true: syntax_camlp4o

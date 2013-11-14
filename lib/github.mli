@@ -142,6 +142,7 @@ module Pull : sig
   val for_repo :
     ?state:Filter.state ->
     ?token:Token.t ->
+    ?page:int ->
     user:string ->
     repo:string -> unit -> Github_t.pulls Monad.t
 
@@ -198,6 +199,7 @@ module Milestone : sig
     ?state:Filter.state ->
     ?sort:Filter.milestone_sort ->
     ?direction:Filter.direction ->
+    ?page:int ->
     ?token:Token.t ->
     user:string -> repo:string -> unit -> Github_t.milestones Monad.t
 
@@ -226,7 +228,8 @@ module Issue: sig
     ?token:Token.t -> ?creator:string -> ?mentioned:string ->
     ?labels:string list -> ?milestone:Filter.milestone ->
     ?state:Filter.state -> ?sort:Filter.issue_sort ->
-    ?direction:Filter.direction -> ?assignee:Filter.user ->
+    ?direction:Filter.direction -> ?page:int ->
+    ?assignee:Filter.user ->
     user:string -> repo:string -> unit -> Github_t.issues Monad.t
 
   val create :

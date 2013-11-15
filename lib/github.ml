@@ -425,9 +425,10 @@ end
 module Pull = struct
   open Lwt
 
-  let for_repo ?(state=`Open) ?token ~user ~repo () =
+  let for_repo ?(state=`Open) ?token ?(page=1) ~user ~repo () =
     let params = Filter.([
-      "state", string_of_state state ]) in
+      "state", string_of_state state;
+      "page", string_of_int page ]) in
     API.get ?token ~params ~uri:(URI.repo_pulls ~user ~repo)
       (fun b -> return (pulls_of_string b))
 
@@ -479,9 +480,11 @@ end
 module Milestone = struct
   open Lwt
 
-  let for_repo ?(state=`Open) ?(sort=`Due_date) ?(direction=`Desc) ?token ~user ~repo () =
+  let for_repo ?(state=`Open) ?(sort=`Due_date) ?(direction=`Desc) ?(page=1)
+      ?token ~user ~repo () =
     let params = Filter.([
       "direction", string_of_direction direction;
+      "page", string_of_int page;
       "sort", string_of_milestone_sort sort;
       "state", string_of_state state ]) in
     API.get ?token ~params ~uri:(URI.repo_milestones ~user ~repo) 
@@ -511,9 +514,10 @@ module Issue = struct
   
   let for_repo ?token ?creator ?mentioned ?labels
     ?(milestone=`Any) ?(state=`Open) ?(sort=`Created)
-    ?(direction=`Desc) ?assignee ~user ~repo () =
+    ?(direction=`Desc) ?(page=1) ?assignee ~user ~repo () =
     let params = Filter.([
       "direction", string_of_direction direction;
+      "page", string_of_int page;
       "sort", string_of_issue_sort sort;
       "state", string_of_state state;
       "milestone", string_of_milestone milestone ]) in

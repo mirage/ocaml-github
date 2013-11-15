@@ -18,7 +18,7 @@ let print_statuses sl =
 let t =
   let user = "dsheets" in
   let repo = "opam-repository" in
-  let _sha_a = "85e86c0260dd230b6bd37c17056f8282011baf51" in
+  let sha_a = "85e86c0260dd230b6bd37c17056f8282011baf51" in
   let _sha_b = "4e89aa7f781c6f094d17079ecb6ca875327eddb8" in
   Github.(Monad.(run (
     let status = Github_t.({

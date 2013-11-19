@@ -276,6 +276,8 @@ type repo = {
   has_downloads: bool;
 } <ocaml field_prefix="repo_">
 
+type repos = repo list
+
 type branch = {
   label: string;
   ref: string;

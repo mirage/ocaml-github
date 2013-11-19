@@ -127,6 +127,9 @@ module User : sig
   (** Return the currently logged in user *)
 
   val info : ?token:Token.t -> login:string -> unit -> Github_t.user_info Monad.t
+
+  val repos:
+    user:string -> ?page:int -> unit -> Github_t.repos Monad.t
 end
 
 module Filter : sig

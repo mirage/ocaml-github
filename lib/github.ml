@@ -85,6 +85,9 @@ module URI = struct
     |None -> Uri.of_string (Printf.sprintf "%s/user" api)
     |Some u -> Uri.of_string (Printf.sprintf "%s/users/%s" api u)
 
+  let user_repos ~user =
+    Uri.of_string (Printf.sprintf "%s/users/%s/repos" api user)
+
   let repo ~user ~repo =
     Uri.of_string (Printf.sprintf "%s/repos/%s/%s" api user repo) 
 
@@ -379,6 +382,12 @@ module User = struct
   let info ?token ~login () =
     let uri = URI.user ~login () in
     API.get ?token ~uri (fun body -> return (user_info_of_string body))
+
+  let repos ~user ?(page=1) () =
+    let uri = URI.user_repos ~user in
+    let params = ["page",string_of_int page] in
+    API.get ~uri ~params (fun b -> return (repos_of_string b))
+
 end
 
 module Filter = struct

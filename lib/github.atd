@@ -11,10 +11,13 @@ type message = {
 
 type scope = [
   | User <json name="user">
+  | UserEmail <json name="user:email">
+  | UserFollow <json name="user:follow">
   | Public_repo <json name="public_repo">
   | Repo <json name="repo">
-  | Repo_status <json name="repo_status">
+  | Repo_status <json name="repo:status">
   | Delete_repo <json name="delete_repo">
+  | Notifications <json name="notifications">
   | Gist <json name="gist">
 ]
 
@@ -272,6 +275,8 @@ type repo = {
   has_wiki: bool;
   has_downloads: bool;
 } <ocaml field_prefix="repo_">
+
+type repos = repo list
 
 type branch = {
   label: string;

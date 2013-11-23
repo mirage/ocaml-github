@@ -267,7 +267,7 @@ type repo = {
   size: int;
   master_branch: string;
   open_issues: int;
-  pushed_at: string;
+  ?pushed_at: string option;
   created_at: string;
   updated_at: string;
   ?organization: user option;

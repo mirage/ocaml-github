@@ -11,7 +11,7 @@ let print_milestones m =
   eprintf "--\n%!"
  
 let t =
-  let opro_milestones = Github.Milestone.for_repo ~user:"OCamlPro" ~repo:"opam" in
+  let opro_milestones = Github.Milestone.for_repo ~user:"ocaml" ~repo:"opam" in
   Github.(Monad.run (opro_milestones ~state:`Closed ())) >|= print_milestones >>
   Github.(Monad.run (opro_milestones ~state:`Closed ~direction:`Asc ())) >|= print_milestones >>
   Github.(Monad.run (Milestone.for_repo ~sort:`Completeness ~direction:`Asc ~user:"mxcl" ~repo:"homebrew" ())) >|= print_milestones >>

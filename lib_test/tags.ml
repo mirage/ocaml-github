@@ -10,5 +10,5 @@ let get_tags_and_times ~user ~repo =
   List.iter (fun (k,v) -> eprintf "%s %s\n" k v) res;
   return ()
   
-let _ = Lwt_main.run (run (get_tags_and_times ~user:"OCamlPro" ~repo:"opam"))
+let _ = Lwt_main.run (run (get_tags_and_times ~user:"ocaml" ~repo:"opam"))
 let _ = Lwt_main.run (run (get_tags_and_times ~user:"mirage" ~repo:"ocaml-cstruct"))

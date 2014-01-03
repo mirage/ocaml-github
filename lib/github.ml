@@ -29,6 +29,9 @@ module Scope = struct
     | `Gist -> "gist"
     | `Repo_status -> "repo_status"
     | `Delete_repo -> "delete_repo"
+    | `UserEmail -> "user_email"
+    | `UserFollow -> "user_follow"
+    | `Notifications -> "notifications"
 
   let scope_of_string x : Github_t.scope option =
     match x with
@@ -38,6 +41,9 @@ module Scope = struct
     | "gist" -> Some `Gist
     | "repo_status" -> Some `Repo_status
     | "delete_repo" -> Some `Delete_repo
+    | "user_email" -> Some `UserEmail
+    | "user_follow" -> Some `UserFollow
+    | "notifications" -> Some `Notifications
     | _ -> None
 
   let string_of_scopes scopes =
@@ -51,7 +57,7 @@ module Scope = struct
       | Some b -> b::a
     ) [] scopes
 
-  let all = [ `User; `Public_repo; `Repo; `Gist; `Repo_status; `Delete_repo ]
+  let all = [ `User; `Public_repo; `Repo; `Gist; `Repo_status; `Delete_repo; `UserEmail; `UserFollow; `Notifications ]
 end
 
 module URI = struct

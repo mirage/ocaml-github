@@ -1,6 +1,6 @@
 OASISFormat: 0.3
 Name:        github
-Version:     0.6.1
+Version:     0.7.0
 Synopsis:    Github API interface
 Authors:     Anil Madhavapeddy, David Sheets
 License:     ISC
@@ -86,6 +86,14 @@ Executable list_tags
 Executable list_milestones
   Path:               lib_test
   MainIs:             milestones.ml
+  Custom:             true
+  CompiledObject:     best
+  Install:            false
+  BuildDepends:       cohttp.lwt, lwt.syntax, github, atdgen
+
+Executable releases
+  Path:               lib_test
+  MainIs:             releases.ml
   Custom:             true
   CompiledObject:     best
   Install:            false

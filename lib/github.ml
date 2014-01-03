@@ -159,6 +159,12 @@ module URI = struct
   let issue_comment ~user ~repo ~comment_id =
     Uri.of_string (Printf.sprintf "%s/repos/%s/%s/issues/comments/%d" api user repo comment_id)
 
+  let repo_releases ~user ~repo =
+    Uri.of_string (Printf.sprintf "%s/repos/%s/%s/releases" api user repo)
+
+  let repo_release ~user ~repo ~num =
+    Uri.of_string (Printf.sprintf "%s/repos/%s/%s/releases/%d" api user repo num)
+    
 end 
 
 module C = Cohttp
@@ -523,6 +529,33 @@ module Milestone = struct
     let body = string_of_update_milestone milestone in
     API.patch ?token ~body ~uri ~expected_code:`OK (fun b -> return (milestone_of_string b))
 end
+
+module Release = struct
+  open Lwt
+
+  let for_repo ?token ~user ~repo () =
+    API.get ?token ~uri:(URI.repo_releases ~user ~repo) 
+      (fun b -> return (releases_of_string b))
+
+  let get ?token ~user ~repo ~num () =
+    let uri = URI.repo_release ~user ~repo ~num in
+    API.get ?token ~uri (fun b -> return (release_of_string b))
+
+  let delete ?token ~user ~repo ~num () =
+    let uri = URI.repo_release ~user ~repo ~num in
+    API.delete ?token ~uri (fun _ -> return ())
+
+  let create ?token ~user ~repo ~release () =
+    let uri = URI.repo_releases ~user ~repo in
+    let body = string_of_new_release release in
+    API.post ?token ~body ~uri ~expected_code:`Created (fun b -> return (release_of_string b))
+
+  let update ?token ~user ~repo ~release ~num () =
+    let uri = URI.repo_release ~user ~repo ~num in
+    let body = string_of_update_release release in
+    API.patch ?token ~body ~uri ~expected_code:`OK (fun b -> return (release_of_string b))
+end
+
 
 module Issue = struct
   open Lwt

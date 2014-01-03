@@ -1,8 +1,9 @@
-0.6.2 (trunk):
+0.7.0 (trunk):
 * Add a User.repos call to list a users repositories.
 * Change repo type such that the field 'pushed_at' is now an option type.
 * Accept optional page argument in Pull, Milestone, and Issue.
 * Add `UserEmail`, `UserFollow` and `Notifications` scopes.
+* Add `Releases` module to handle the release management addition to GitHub.
 
 0.6.1 (2013-06-21):
 * Abstract `Github_cookie_jar.t` and add `Github_cookie_jar.jar_path` accessor.

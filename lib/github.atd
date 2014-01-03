@@ -470,3 +470,40 @@ type new_status = {
   ?target_url: string option;
   ?description: string option;
 } <ocaml field_prefix="new_status_">
+
+type release = {
+  id: int;
+  tag_name: string;
+  ?target_commitish: string option; 
+  name: string;
+  body: string;
+  draft: bool;
+  prerelease: bool;
+  created_at: string;
+  published_at: string;
+  url: string;
+  html_url: string;
+  assets_url: string;
+  upload_url: string;
+} <ocaml field_prefix="release_">
+
+type releases = release list
+
+type new_release = {
+  tag_name: string;
+  target_commitish: string;
+  name: string;
+  body: string;
+  draft: bool;
+  prerelease: bool;
+} <ocaml field_prefix="new_release_">
+
+type update_release = {
+  ?tag_name: string option;
+  ?target_commitish: string option;
+  ?name: string option;
+  ?body: string option;
+  ?draft: bool option;
+  ?prerelease: bool option;
+} <ocaml field_prefix="update_release_">
+

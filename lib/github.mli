@@ -226,6 +226,31 @@ module Milestone : sig
     unit -> Github_t.milestone Monad.t
 end
 
+module Release : sig
+  val for_repo:
+    ?token:Token.t ->
+    user:string -> repo:string -> unit -> Github_t.releases Monad.t
+
+  val get:
+    ?token:Token.t ->
+    user:string -> repo:string -> num:int -> unit -> Github_t.release Monad.t
+
+  val create :
+    ?token:Token.t ->
+    user:string -> repo:string ->
+    release:Github_t.new_release -> unit -> Github_t.release Monad.t
+
+  val delete:
+    ?token:Token.t ->
+    user:string -> repo:string -> num:int -> unit -> unit Monad.t
+
+  val update :
+    ?token:Token.t ->
+    user:string -> repo:string ->
+    release:Github_t.update_release -> num:int ->
+    unit -> Github_t.release Monad.t
+end
+
 module Issue: sig
   val for_repo :
     ?token:Token.t -> ?creator:string -> ?mentioned:string ->

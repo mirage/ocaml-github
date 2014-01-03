@@ -1,5 +1,5 @@
-Library
-=======
+GitHub APIv3 OCaml Library
+==========================
 
 This library provides an OCaml interface to the Github JSON API.  It is not
 yet complete, but look in `lib/github.atd` for the specification that has
@@ -10,6 +10,11 @@ There are several tests in `lib_test` for small bits of functionality, and for
 the authenticated ones you will need to edit `lib_test/config.ml` with suitable
 auth information.  Use the `get_token` test to obtain an oAuth token for the
 config file.
+
+Two environment variables will cause more debugging to be output:
+
+    GITHUB_DEBUG=1   # API calls output to stderr
+    COHTTP_DEBUG=1   # even more HTTP-level debugging
 
 Cookie jar
 ==========

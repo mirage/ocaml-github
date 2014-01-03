@@ -18,6 +18,14 @@
 
 let user_agent = "ocaml-github" (* TODO: add version from build system *)
 
+let log_active = try Unix.getenv "GITHUB_DEBUG" <> "0" with _ -> false
+
+let log fmt =
+  Printf.ksprintf (fun s ->
+    match log_active with
+    | false -> ()
+    | true  -> prerr_endline (">>> GitHub: " ^ s)) fmt
+
 (* Authorization Scopes *)
 module Scope = struct
 
@@ -279,14 +287,14 @@ module API = struct
    * to be disabled (to satisfy Github, which returns 411 Length Required
    * to a chunked-encoding POST request). *)
   let lwt_req {Monad.uri; meth; headers; body} =
-    Printf.eprintf "%s\n%!" (Uri.to_string uri);
+    log "Requesting %s" (Uri.to_string uri);
     CL.Client.call ~headers ?body ~chunked:false meth uri
 
   let request resp_handlers req =
     match_lwt (lwt_req req) with
     | None -> Lwt.return Monad.(error No_response)
     | Some response -> begin
-      Printf.eprintf "Github response code %s\n%!"
+      log "Response code %s\n%!"
         (C.Code.string_of_status (CL.Response.status (fst response)));
       handle_response response resp_handlers
     end

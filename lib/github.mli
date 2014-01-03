@@ -1,5 +1,5 @@
 (*
- * Copyright (c) 2012 Anil Madhavapeddy <anil@recoil.org>
+ * Copyright (c) 2012-2014 Anil Madhavapeddy <anil@recoil.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -15,9 +15,11 @@
  *
  *)
 
-(* All API requests are bound through this monad. The [run] function
- * will unpack an API response into an Lwt thread that will hold the
- * ultimate response. *)
+(** GitHub APIv3 client library *)
+
+(** All API requests are bound through this monad. The [run] function
+    will unpack an API response into an Lwt thread that will hold the
+    ultimate response. *)
 module Monad : sig
   type 'a t
   val bind : 'a t -> ('a -> 'b t) -> 'b t
@@ -27,7 +29,7 @@ module Monad : sig
   val (>>) : 'a t -> 'b t -> 'b t
 end
 
-(* Authorization scopes; http://developer.github.com/v3/oauth/ *)
+(** Authorization scopes; http://developer.github.com/v3/oauth/ *)
 module Scope : sig
   val string_of_scope : Github_t.scope -> string
   val scope_of_string : string -> Github_t.scope option
@@ -36,7 +38,7 @@ module Scope : sig
   val all : Github_t.scope list
 end
 
-(* Access token to the API, usually obtained via a user oAuth *)
+(** Access token to the API, usually obtained via a user oAuth *)
 module Token : sig
   type t
 
@@ -55,10 +57,9 @@ module Token : sig
   val to_string : t -> string
 end
 
-(* Generic API accessor function, not normally used directly, but useful in case you
- * wish to call an API call that isn't wrapped in the rest of the library (i.e. most
- * of them at the moment!)
- *)
+(** Generic API accessor function, not normally used directly, but useful in case you
+    wish to call an API call that isn't wrapped in the rest of the library (i.e. most
+    of them at the moment!) *)
 module API : sig
   val get : 
     ?expected_code:Cohttp.Code.status_code ->
@@ -105,9 +106,9 @@ module API : sig
   val set_token : Token.t -> unit Monad.t
 end
 
-(* Various useful URI generation functions, normally for displaying on a web-page.
- * The [authorize] function is the entry URL for your users, and the [token] URI
- * is the URI used to convert the result into a concrete access token *)
+(** Useful URI generation functions, normally for displaying on a web-page.
+    The {!authorize} function is the entry URL for your users, and the {!token}
+    is the URI used to convert the result into a concrete access token. *)
 module URI : sig
   val authorizations : Uri.t
   val authorize : ?scopes:Github_t.scope list -> ?redirect_uri:Uri.t ->

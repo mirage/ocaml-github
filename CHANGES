@@ -5,6 +5,7 @@
 * Add `UserEmail`, `UserFollow` and `Notifications` scopes.
 * Add `Releases` module to handle the release management addition to GitHub.
 * Add `GITHUB_DEBUG` environment variable to make debugging output optional.
+* Regenerate build files with OASIS 0.4.1.
 
 0.6.1 (2013-06-21):
 * Abstract `Github_cookie_jar.t` and add `Github_cookie_jar.jar_path` accessor.

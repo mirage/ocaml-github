@@ -1,4 +1,4 @@
-0.7.0 (trunk):
+0.7.0 (2014-01-03):
 * Add a User.repos call to list a users repositories.
 * Change repo type such that the field 'pushed_at' is now an option type.
 * Accept optional page argument in Pull, Milestone, and Issue.

@@ -18,11 +18,12 @@
 
 let user_agent = "ocaml-github" (* TODO: add version from build system *)
 
-let log_active = try Unix.getenv "GITHUB_DEBUG" <> "0" with _ -> false
+let log_active =
+  ref (try Unix.getenv "GITHUB_DEBUG" <> "0" with _ -> false)
 
 let log fmt =
   Printf.ksprintf (fun s ->
-    match log_active with
+    match !log_active with
     | false -> ()
     | true  -> prerr_endline (">>> GitHub: " ^ s)) fmt
 

@@ -270,12 +270,21 @@ module API = struct
 
   (* Use the highest precedence handler that matches the response. *)
   let rec handle_response response = function
-    | (p, handler)::more -> if p response then begin
-      try_lwt
-        lwt r = Lwt.bind (CLB.string_of_body (snd response)) handler in
-        Lwt.return (Monad.response r)
-      with exn -> Lwt.return (Monad.(error (Bad_response exn)))
-      end else handle_response response more
+    | (p, handler)::more ->
+      if not (p response) then handle_response response more
+      else begin
+        let bad_response exn = Lwt.return (Monad.(error (Bad_response exn))) in
+        try_lwt
+          lwt body = CLB.string_of_body (snd response) in
+          (* use a second try_lwt to be able to log the body in case of failure *)
+          try_lwt
+            lwt r = handler body in
+            Lwt.return (Monad.response r)
+          with exn ->
+            log "response body: %S" body;
+            bad_response exn
+        with exn -> bad_response exn
+      end
     | [] ->
         let envelope, message = response in
         if CL.Response.status envelope = `Unprocessable_entity

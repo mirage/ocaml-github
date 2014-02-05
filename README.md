@@ -16,6 +16,10 @@ Two environment variables will cause more debugging to be output:
     GITHUB_DEBUG=1   # API calls output to stderr
     COHTTP_DEBUG=1   # even more HTTP-level debugging
 
+If using the bindings from the toplevel, you can also set `Github.log_active`
+to `true` to get the same effect as setting the `GITHUB_DEBUG` environment
+variable.
+
 Cookie jar
 ==========
 

@@ -370,3 +370,8 @@ module Tag : sig
     user:string -> repo:string ->
     unit -> (string * string) list Monad.t
 end
+
+(** [log_active] activates debug messages
+
+    set by default when the environment variable GITHUB_DEBUG is set to 1 *)
+val log_active : bool ref

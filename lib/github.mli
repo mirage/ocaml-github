@@ -26,7 +26,6 @@ module Monad : sig
   val return : 'a -> 'a t
   val run : 'a t -> 'a Lwt.t
   val (>>=) : 'a t -> ('a -> 'b t) -> 'b t
-  val (>>) : 'a t -> 'b t -> 'b t
 end
 
 (** Authorization scopes; http://developer.github.com/v3/oauth/ *)

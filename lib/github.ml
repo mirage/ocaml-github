@@ -266,8 +266,6 @@ module Monad = struct
     | _, Error e -> fail (Failure (error_to_string e))
 
   let (>>=) = bind
-
-  let (>>) a b = a >>= fun _ -> b
 end
 
 module API = struct

@@ -1,6 +1,7 @@
 0.7.1 (trunk):
 * Log response bodies in the event of an API parsing failure. (#29)
 * Expose `log_active` as a reference so it can be used from the toplevel. (#30)
+* Add `Github.URI.pull_raw_diff` to point to the location of a pull request diff.
 
 0.7.0 (2014-01-03):
 * Add a User.repos call to list a users repositories.

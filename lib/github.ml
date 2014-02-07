@@ -147,6 +147,9 @@ module URI = struct
   let pull ~user ~repo ~num =
     Uri.of_string (Printf.sprintf "%s/repos/%s/%s/pulls/%d" api user repo num)
 
+  let pull_diff_text ~user ~repo ~num =
+    Uri.of_string (Printf.sprintf "%s/repos/%s/%s/pull/%d.diff" api user repo num)
+
   let pull_commits ~user ~repo ~num =
     Uri.of_string (Printf.sprintf "%s/repos/%s/%s/pulls/%d/commits" api user repo num)
 

@@ -74,7 +74,7 @@ module Resp = struct
 end
 
 (* main callback function *)
-let callback con_id ~body req =
+let callback con_id req body =
   let uri = Request.uri req in
   let path = Uri.path uri in
   printf "%s %s [%s]\n%!" (Code.string_of_method (Request.meth req)) path 

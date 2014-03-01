@@ -2,8 +2,8 @@ open Lwt
 open Printf
 
 let token = Config.access_token
-let user = "ocamllabs"
-let repo = "rwo-comments"
+let user = "ocaml"
+let repo = "opam"
 
 let t =
   let open Github.Monad in

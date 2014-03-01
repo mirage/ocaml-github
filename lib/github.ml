@@ -271,13 +271,13 @@ end
 module API = struct
 
   (* Use the highest precedence handler that matches the response. *)
-  let rec handle_response response = function
+  let rec handle_response (envelope,body as response) = function
     | (p, handler)::more ->
       if not (p response) then handle_response response more
       else begin
         let bad_response exn = Lwt.return (Monad.(error (Bad_response exn))) in
         try_lwt
-          lwt body = CLB.string_of_body (snd response) in
+          lwt body = CLB.to_string body in
           (* use a second try_lwt to be able to log the body in case of failure *)
           try_lwt
             lwt r = handler body in
@@ -288,10 +288,9 @@ module API = struct
         with exn -> bad_response exn
       end
     | [] ->
-        let envelope, message = response in
         if CL.Response.status envelope = `Unprocessable_entity
-        then lwt body = CLB.string_of_body message in
-             Lwt.return Monad.(error (Semantic (Github_j.message_of_string body)))
+        then lwt message = CLB.to_string body in
+             Lwt.return Monad.(error (Semantic (Github_j.message_of_string message)))
         else Lwt.return Monad.(error (Generic envelope))
 
   (* Force chunked-encoding
@@ -299,23 +298,20 @@ module API = struct
    * to a chunked-encoding POST request). *)
   let lwt_req {Monad.uri; meth; headers; body} =
     log "Requesting %s" (Uri.to_string uri);
-    CL.Client.call ~headers ?body ~chunked:false meth uri
+    CL.Client.call ~headers ~body ~chunked:false meth uri
 
   let request resp_handlers req =
-    match_lwt (lwt_req req) with
-    | None -> Lwt.return Monad.(error No_response)
-    | Some response -> begin
-      log "Response code %s\n%!"
-        (C.Code.string_of_status (CL.Response.status (fst response)));
-      handle_response response resp_handlers
-    end
+    lwt response = lwt_req req in
+    log "Response code %s\n%!"
+      (C.Code.string_of_status (CL.Response.status (fst response)));
+    handle_response response resp_handlers
 
   (* A simple response pattern that matches on HTTP code equivalence *)
   let code_handler ~expected_code handler =
     (fun (res,_) -> CL.Response.status res = expected_code), handler
 
   (* Convert a request body into a stream *)
-  let realize_body = function None -> None | Some b -> CLB.body_of_string b
+  let realize_body = function None -> None | Some b -> Some (CLB.of_string b)
 
   (* Add the correct mime-type header *)
   let realize_headers headers = C.Header.add_opt headers "content-type" "application/json"
@@ -324,14 +320,15 @@ module API = struct
     fun state -> Lwt.return
       (state,
        (Monad.(request ?token ?params
-                 {meth; uri; headers=realize_headers headers; body=None})
+                 {meth; uri; headers=realize_headers headers; body=CLB.empty})
           (request [code_handler ~expected_code fn])))
 
   let effectful meth ?headers ?body ?token ~expected_code ~uri fn =
+    let body = match body with None -> CLB.empty | Some b -> CLB.of_string b in
     fun state -> Lwt.return
       (state,
        (Monad.(request ?token
-                 {meth; uri; headers=realize_headers headers; body=realize_body body})
+                 {meth; uri; headers=realize_headers headers; body })
           (request [code_handler ~expected_code fn])))
 
   let get ?(expected_code=`OK) = idempotent `GET ~expected_code
@@ -359,7 +356,7 @@ module Token = struct
   open Lwt
   type t = string
 
-  let create ?(scopes=[`Repo]) ?note ?note_url ?client_id ?client_secret ~user ~pass () =
+  let create ?(scopes=[`Repo]) ?(note="ocaml-github") ?note_url ?client_id ?client_secret ~user ~pass () =
     let req = { auth_req_scopes=scopes; auth_req_note=note; auth_req_note_url=note_url;
      auth_req_client_id=client_id; auth_req_client_secret=client_secret } in
     let body = string_of_auth_req req in
@@ -387,16 +384,14 @@ module Token = struct
    *)
   let of_code ~client_id ~client_secret ~code () =
     let uri = URI.token ~client_id ~client_secret ~code () in
-    match_lwt CL.Client.post uri with
-    |None -> return None
-    |Some (res, body) -> begin
-      lwt body = CLB.string_of_body body in
+    CL.Client.post uri 
+    >>= fun (res, body) ->
+      lwt body = CLB.to_string body in
       try
         let form = Uri.query_of_encoded body in
         return (Some (List.(hd (assoc "access_token" form))))
       with _ ->
         return None
-    end
 
   let of_auth x = x.auth_token
   let of_string x = x
@@ -504,7 +499,7 @@ module Pull = struct
     fun state -> Lwt.return
       (state,
        Monad.(request ?token
-                {meth=`GET; uri; headers=API.realize_headers None; body=None})
+                {meth=`GET; uri; headers=API.realize_headers None; body=CLB.empty})
          API.(request [
            code_handler ~expected_code:`No_content (fun _ -> return true);
            code_handler ~expected_code:`Not_found  (fun _ -> return false);

@@ -28,7 +28,7 @@ type app = {
 
 type auth_req = {
   ~scopes: scope list;
-  ?note: string option;
+   note: string;
   ?note_url: string option;
   ?client_id: string option;
   ?client_secret: string option;

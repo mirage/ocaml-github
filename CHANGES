@@ -1,6 +1,7 @@
 0.8.0 (2014-03-02):
 * Port to cohttp.0.10.x interfaces.
 * Make the `note` field in oAuth token creation mandatory to reflect GitHub API.
+* Pull requests are now allowed to have `null` bodys (#31).
 
 0.7.1 (2014-02-28):
 * Log response bodies in the event of an API parsing failure. (#29)

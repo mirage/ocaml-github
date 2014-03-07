@@ -15,10 +15,20 @@ type scope = [
   | UserFollow <json name="user:follow">
   | Public_repo <json name="public_repo">
   | Repo <json name="repo">
+  | Repo_deployment <json name="repo_deployment">
   | Repo_status <json name="repo:status">
   | Delete_repo <json name="delete_repo">
   | Notifications <json name="notifications">
   | Gist <json name="gist">
+  | Read_repo_hook <json name="read:repo_hook">
+  | Write_repo_hook <json name="write:repo_hook">
+  | Admin_repo_hook <json name="admin:repo_hook">
+  | Read_org <json name="read:org">
+  | Write_org <json name="write:org">
+  | Admin_org <json name="admin:org">
+  | Read_public_key <json name="read:public_key">
+  | Write_public_key <json name="write:public_key">
+  | Admin_public_key <json name="admin:public_key">
 ]
 
 type app = {

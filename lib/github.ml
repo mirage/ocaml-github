@@ -41,6 +41,16 @@ module Scope = struct
     | `UserEmail -> "user_email"
     | `UserFollow -> "user_follow"
     | `Notifications -> "notifications"
+    | `Write_public_key -> "write:public_key"
+    | `Repo_deployment -> "repo_deployment"
+    | `Admin_org -> "admin:org"
+    | `Read_org -> "read:org"
+    | `Admin_repo_hook -> "admin:repo_hook"
+    | `Admin_public_key -> "admin:public_key"
+    | `Read_public_key -> "read:public_key"
+    | `Write_repo_hook -> "write:repo_hook"
+    | `Write_org -> "write:org"
+    | `Read_repo_hook -> "read:repo_hook"
 
   let scope_of_string x : Github_t.scope option =
     match x with
@@ -53,6 +63,16 @@ module Scope = struct
     | "user_email" -> Some `UserEmail
     | "user_follow" -> Some `UserFollow
     | "notifications" -> Some `Notifications
+    | "write:public_key" -> Some `Write_public_key
+    | "repo_deployment" -> Some `Repo_deployment
+    | "admin:org" -> Some `Admin_org
+    | "read:org" -> Some `Read_org
+    | "admin:repo_hook" -> Some `Admin_repo_hook
+    | "admin:public_key" -> Some `Admin_public_key
+    | "read:public_key" -> Some `Read_public_key
+    | "write:repo_hook" -> Some `Write_repo_hook
+    | "write:org" -> Some `Write_org
+    | "read:repo_hook" -> Some `Read_repo_hook
     | _ -> None
 
   let string_of_scopes scopes =

@@ -1,3 +1,6 @@
+0.8.1 (2014-03-07):
+* Sync to latest GitHub scopes API.
+
 0.8.0 (2014-03-02):
 * Port to cohttp.0.10.x interfaces.
 * Make the `note` field in oAuth token creation mandatory to reflect GitHub API.

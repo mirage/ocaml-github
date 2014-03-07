@@ -23,4 +23,5 @@ opam --git-version
 opam init
 opam pin cohttp git://github.com/avsm/ocaml-cohttp
 opam install ${OPAM_DEPENDS}
+eval `opam config env`
 make

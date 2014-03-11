@@ -99,6 +99,14 @@ Executable releases
   Install:            false
   BuildDepends:       cohttp.lwt, lwt.syntax, github, atdgen
 
+Executable deploy_keys
+  Path:               lib_test
+  MainIs:             deploy_keys.ml
+  Custom:             true
+  CompiledObject:     best
+  Install:            false
+  BuildDepends:       cohttp.lwt, lwt.syntax, github, atdgen
+
 Executable list_pulls
   Path:               lib_test
   MainIs:             pulls.ml

@@ -1,4 +1,5 @@
 0.8.2 (trunk):
+* Add deployment key support in the `Deploy_key` module.
 
 0.8.1 (2014-03-07):
 * Sync to latest GitHub scopes API.

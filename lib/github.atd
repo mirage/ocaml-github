@@ -517,3 +517,17 @@ type update_release = {
   ?prerelease: bool option;
 } <ocaml field_prefix="update_release_">
 
+type deploy_key = {
+  id: int;
+  key: string;
+  url: string;
+  title: string;
+} <ocaml field_prefix="deploy_key_">
+
+type deploy_keys = deploy_key list
+
+type new_deploy_key = {
+  title: string;
+  key: string;
+} <ocaml field_prefix="new_deploy_key_">
+

@@ -251,6 +251,25 @@ module Release : sig
     unit -> Github_t.release Monad.t
 end
 
+module Deploy_key : sig
+  val for_repo:
+    ?token:Token.t ->
+    user:string -> repo:string -> unit -> Github_t.deploy_keys Monad.t
+
+  val get:
+    ?token:Token.t ->
+    user:string -> repo:string -> num:int -> unit -> Github_t.deploy_key Monad.t
+
+  val create :
+    ?token:Token.t ->
+    user:string -> repo:string ->
+    new_key:Github_t.new_deploy_key -> unit -> Github_t.deploy_key Monad.t
+
+  val delete:
+    ?token:Token.t ->
+    user:string -> repo:string -> num:int -> unit -> unit Monad.t
+end
+
 module Issue: sig
   val for_repo :
     ?token:Token.t -> ?creator:string -> ?mentioned:string ->

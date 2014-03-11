@@ -196,7 +196,12 @@ module URI = struct
 
   let repo_release ~user ~repo ~num =
     Uri.of_string (Printf.sprintf "%s/repos/%s/%s/releases/%d" api user repo num)
-    
+   
+  let repo_deploy_keys ~user ~repo =
+    Uri.of_string (Printf.sprintf "%s/repos/%s/%s/keys" api user repo)
+
+  let repo_deploy_key ~user ~repo ~num =
+    Uri.of_string (Printf.sprintf "%s/repos/%s/%s/keys/%d" api user repo num)
 end 
 
 module C = Cohttp
@@ -590,6 +595,26 @@ module Release = struct
     API.patch ?token ~body ~uri ~expected_code:`OK (fun b -> return (release_of_string b))
 end
 
+module Deploy_key = struct
+  open Lwt
+
+   let for_repo ?token ~user ~repo () =
+    API.get ?token ~uri:(URI.repo_deploy_keys ~user ~repo) 
+      (fun b -> return (deploy_keys_of_string b))
+
+  let get ?token ~user ~repo ~num () =
+    let uri = URI.repo_deploy_key ~user ~repo ~num in
+    API.get ?token ~uri (fun b -> return (deploy_key_of_string b))
+
+  let delete ?token ~user ~repo ~num () =
+    let uri = URI.repo_deploy_key ~user ~repo ~num in
+    API.delete ?token ~uri (fun _ -> return ())
+
+  let create ?token ~user ~repo ~new_key () =
+    let uri = URI.repo_deploy_keys ~user ~repo in
+    let body = string_of_new_deploy_key new_key in
+    API.post ?token ~body ~uri ~expected_code:`Created (fun b -> return (deploy_key_of_string b))
+end
 
 module Issue = struct
   open Lwt

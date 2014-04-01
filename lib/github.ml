@@ -79,7 +79,7 @@ module Scope = struct
     String.concat "," (List.map string_of_scope scopes)
 
   let scopes_of_string s =
-    let scopes = Re_str.(split (regexp_string ",") s) in
+    let scopes = Stringext.split ~on:',' s in
     List.fold_left (fun a b ->
       match scope_of_string b with
       | None -> a
@@ -727,12 +727,10 @@ module Git_obj = struct
     |`Blob -> "blob"
     |`Tag -> "tag"
 
-  let split_ref =
-    let re = Re_str.regexp_string "/" in
-    fun ref ->
-      match Re_str.bounded_split re ref 3 with
-      |[_;ty;tl] -> ty, tl
-      |_ -> "", ref
+  let split_ref ref =
+    match Stringext.split ~max:3 ~on:'/' ref with
+    |[_;ty;tl] -> ty, tl
+    |_ -> "", ref
 end
 
 module Tag = struct

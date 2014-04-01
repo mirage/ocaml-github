@@ -80,7 +80,7 @@ let callback con_id req body =
   printf "%s %s [%s]\n%!" (Code.string_of_method (Request.meth req)) path 
     (String.concat "," (List.map (fun (h,v) -> sprintf "%s=%s" h (String.concat "," v)) (Uri.query uri)));
   (* normalize path to strip out ../. and such *)
-  let path_elem = Re_str.(split (regexp_string "/") (Uri.path uri)) in
+  let path_elem = Stringext.(split ~on:'/' (Uri.path uri)) in
   Resp.dispatch req path_elem 
 
 let server_t =

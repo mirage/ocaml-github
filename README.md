@@ -85,3 +85,16 @@ Your Github application can how use it via the `Github_cookie_jar` module:
     Github_t.auth_id = 236241; Github_t.auth_note = None; 
     Github_t.auth_note_url = None }
 ```
+
+Sync Release Metadata between GitHub repos
+==========================================
+
+The [Releases](https://developer.github.com/v3/repos/releases/) API in
+GitHub cannot itself be synched via Git, so this command-line tool lets
+you specify a src user/repo and destination user/repo pair, and copies
+all the releases from one to the other.
+
+```
+$ git sync-releases mirage ocaml-uri avsm ocaml-uri
+```
+

@@ -19,8 +19,6 @@ open Cmdliner
 open Printf
 open Lwt
 
-let version = "1.1.0"
-
 (* Cmdliner converter for Github scope lists *)
 let scope =
   let parse s =
@@ -136,7 +134,7 @@ let default_cmd =
     `P "$(b,--help) will show more help for each of the sub-commands above.";
     `S "BUGS";
      `P "Email bug reports to <cl-mirage@lists.cl.cam.ac.uk>, or report them online at <http://github.com/avsm/ocaml-github>."] in
-  Term.info "git-jar" ~version ~doc ~man
+  Term.info "git-jar" ~version:Jar_version.t ~doc ~man
        
 let cmds = [list_cmd; make_cmd; save_cmd; revoke_cmd]
 

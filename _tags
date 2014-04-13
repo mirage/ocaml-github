@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 069a5e31999f999ffe099bfba42dd2a0)
+# DO NOT EDIT (digest: e514a37c3aa168a7489a223e30b66441)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
@@ -54,18 +54,30 @@
 <jar/jar.{native,byte}>: pkg_yojson
 <jar/jar.{native,byte}>: use_github
 <jar/jar.{native,byte}>: use_github_unix
+<jar/*.ml{,i}>: pkg_lambda-term
+<jar/jar.{native,byte}>: custom
+# Executable git-sync-releases
+<jar/sync_releases.{native,byte}>: pkg_atdgen
+<jar/sync_releases.{native,byte}>: pkg_cmdliner
+<jar/sync_releases.{native,byte}>: pkg_cohttp
+<jar/sync_releases.{native,byte}>: pkg_cohttp.lwt
+<jar/sync_releases.{native,byte}>: pkg_lwt.syntax
+<jar/sync_releases.{native,byte}>: pkg_lwt.unix
+<jar/sync_releases.{native,byte}>: pkg_uri
+<jar/sync_releases.{native,byte}>: pkg_yojson
+<jar/sync_releases.{native,byte}>: use_github
+<jar/sync_releases.{native,byte}>: use_github_unix
 <jar/*.ml{,i}>: pkg_atdgen
 <jar/*.ml{,i}>: pkg_cmdliner
 <jar/*.ml{,i}>: pkg_cohttp
 <jar/*.ml{,i}>: pkg_cohttp.lwt
-<jar/*.ml{,i}>: pkg_lambda-term
 <jar/*.ml{,i}>: pkg_lwt.syntax
 <jar/*.ml{,i}>: pkg_lwt.unix
 <jar/*.ml{,i}>: pkg_uri
 <jar/*.ml{,i}>: pkg_yojson
 <jar/*.ml{,i}>: use_github
 <jar/*.ml{,i}>: use_github_unix
-<jar/jar.{native,byte}>: custom
+<jar/sync_releases.{native,byte}>: custom
 # Executable current_user
 <lib_test/current_user.{native,byte}>: pkg_atdgen
 <lib_test/current_user.{native,byte}>: pkg_cohttp

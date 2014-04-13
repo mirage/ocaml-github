@@ -86,15 +86,25 @@ Your Github application can how use it via the `Github_cookie_jar` module:
     Github_t.auth_note_url = None }
 ```
 
-Sync Release Metadata between GitHub repos
-==========================================
+Manipulate GitHub releases
+==========================
 
 The [Releases](https://developer.github.com/v3/repos/releases/) API in
 GitHub cannot itself be synched via Git, so this command-line tool lets
 you specify a src user/repo and destination user/repo pair, and copies
 all the releases from one to the other.
 
+The `git-sync-releases` binary can copy all the releases from one
+repository to another for you.
+
 ```
 $ git sync-releases mirage ocaml-uri avsm ocaml-uri
 ```
 
+You can also associate binary files with any release, for example to
+include pregenerated build files.  The `git upload-release` binary
+will do this for you.
+
+```
+$ git upload-release mirage ocaml-uri v1.4.0 release.tar.gz
+```

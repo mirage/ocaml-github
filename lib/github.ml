@@ -196,7 +196,12 @@ module URI = struct
 
   let repo_release ~user ~repo ~num =
     Uri.of_string (Printf.sprintf "%s/repos/%s/%s/releases/%d" api user repo num)
-   
+
+  let upload_release_asset ~user ~repo ~id =
+    Uri.of_string (
+      Printf.sprintf "https://uploads.github.com/repos/%s/%s/releases/%d/assets"
+        user repo id)
+ 
   let repo_deploy_keys ~user ~repo =
     Uri.of_string (Printf.sprintf "%s/repos/%s/%s/keys" api user repo)
 
@@ -282,13 +287,14 @@ module Monad = struct
     | state, ((Error _) as x) -> Lwt.return (state, x)
 
   let return r = fun state -> Lwt.return (state, Response r)
+  let fail err = fun state -> Lwt.return (state, Error err)
 
   let initial_state = {user_agent=None; token=None}
 
   let run th = match_lwt bind th return initial_state with
-    | _, Request (_,_) -> fail (Failure "Impossible: can't run unapplied request")
+    | _, Request (_,_) -> Lwt.fail (Failure "Impossible: can't run unapplied request")
     | _, Response r -> Lwt.return r
-    | _, Error e -> fail (Failure (error_to_string e))
+    | _, Error e -> Lwt.fail (Failure (error_to_string e))
 
   let (>>=) = bind
 end
@@ -348,11 +354,11 @@ module API = struct
                  {meth; uri; headers=realize_headers headers; body=CLB.empty})
           (request [code_handler ~expected_code fn])))
 
-  let effectful meth ?headers ?body ?token ~expected_code ~uri fn =
+  let effectful meth ?headers ?body ?token ?params ~expected_code ~uri fn =
     let body = match body with None -> CLB.empty | Some b -> CLB.of_string b in
     fun state -> Lwt.return
       (state,
-       (Monad.(request ?token
+       (Monad.(request ?token ?params
                  {meth; uri; headers=realize_headers headers; body })
           (request [code_handler ~expected_code fn])))
 
@@ -580,6 +586,18 @@ module Release = struct
     let uri = URI.repo_release ~user ~repo ~num in
     API.get ?token ~uri (fun b -> return (release_of_string b))
 
+  (** We need to download all the releases to obtain this *)
+  let get_by_tag_name ?token ~user ~repo ~tag () =
+    let open Monad in
+    for_repo ?token ~user ~repo ()
+    >>= fun rs -> begin
+     try
+        return (List.find (fun r -> r.release_tag_name = tag) rs)
+     with Not_found ->
+        let msg = Printf.sprintf "tag %s not found in repository %s/%s" tag user repo in
+        fail (Semantic {Github_t.message_message=msg; message_errors=[]})
+    end
+ 
   let delete ?token ~user ~repo ~num () =
     let uri = URI.repo_release ~user ~repo ~num in
     API.delete ?token ~uri (fun _ -> return ())
@@ -593,6 +611,12 @@ module Release = struct
     let uri = URI.repo_release ~user ~repo ~num in
     let body = string_of_update_release release in
     API.patch ?token ~body ~uri ~expected_code:`OK (fun b -> return (release_of_string b))
+
+  let upload_asset ?token ~user ~repo ~id ~filename ~content_type ~body () =
+    let headers = Cohttp.Header.init_with "content-type" content_type in
+    let params = ["name", filename] in
+    let uri = URI.upload_release_asset ~user ~repo ~id in
+    API.post ?token ~params ~headers ~body ~uri ~expected_code:`Created (fun b -> return ())
 end
 
 module Deploy_key = struct

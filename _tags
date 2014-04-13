@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: e514a37c3aa168a7489a223e30b66441)
+# DO NOT EDIT (digest: e15b48f1ccefd39908862952f2d89330)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
@@ -67,6 +67,18 @@
 <jar/sync_releases.{native,byte}>: pkg_yojson
 <jar/sync_releases.{native,byte}>: use_github
 <jar/sync_releases.{native,byte}>: use_github_unix
+<jar/sync_releases.{native,byte}>: custom
+# Executable git-upload-release
+<jar/upload_release.{native,byte}>: pkg_atdgen
+<jar/upload_release.{native,byte}>: pkg_cmdliner
+<jar/upload_release.{native,byte}>: pkg_cohttp
+<jar/upload_release.{native,byte}>: pkg_cohttp.lwt
+<jar/upload_release.{native,byte}>: pkg_lwt.syntax
+<jar/upload_release.{native,byte}>: pkg_lwt.unix
+<jar/upload_release.{native,byte}>: pkg_uri
+<jar/upload_release.{native,byte}>: pkg_yojson
+<jar/upload_release.{native,byte}>: use_github
+<jar/upload_release.{native,byte}>: use_github_unix
 <jar/*.ml{,i}>: pkg_atdgen
 <jar/*.ml{,i}>: pkg_cmdliner
 <jar/*.ml{,i}>: pkg_cohttp
@@ -77,7 +89,7 @@
 <jar/*.ml{,i}>: pkg_yojson
 <jar/*.ml{,i}>: use_github
 <jar/*.ml{,i}>: use_github_unix
-<jar/sync_releases.{native,byte}>: custom
+<jar/upload_release.{native,byte}>: custom
 # Executable current_user
 <lib_test/current_user.{native,byte}>: pkg_atdgen
 <lib_test/current_user.{native,byte}>: pkg_cohttp

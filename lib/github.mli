@@ -73,6 +73,7 @@ module API : sig
     ?headers:Cohttp.Header.t ->
     ?body:string ->
     ?token:Token.t ->
+    ?params:(string * string) list ->
     uri:Uri.t ->
     (string -> 'a Lwt.t) -> 'a Monad.t
 
@@ -89,6 +90,7 @@ module API : sig
     ?headers:Cohttp.Header.t ->
     ?body:string ->
     ?token:Token.t ->
+    ?params:(string * string) list ->
     uri:Uri.t ->
     (string -> 'a Lwt.t) -> 'a Monad.t
 
@@ -97,6 +99,7 @@ module API : sig
     ?headers:Cohttp.Header.t ->
     ?body:string ->
     ?token:Token.t ->
+    ?params:(string * string) list ->
     uri:Uri.t ->
     (string -> 'a Lwt.t) -> 'a Monad.t
 
@@ -235,6 +238,10 @@ module Release : sig
     ?token:Token.t ->
     user:string -> repo:string -> num:int -> unit -> Github_t.release Monad.t
 
+  val get_by_tag_name:
+    ?token:Token.t ->
+    user:string -> repo:string -> tag:string -> unit -> Github_t.release Monad.t
+
   val create :
     ?token:Token.t ->
     user:string -> repo:string ->
@@ -249,6 +256,14 @@ module Release : sig
     user:string -> repo:string ->
     release:Github_t.update_release -> num:int ->
     unit -> Github_t.release Monad.t
+
+  val upload_asset :
+    ?token:Token.t ->
+    user:string -> repo:string ->
+    id:int -> filename:string -> content_type:string ->
+    body:string ->
+    unit -> unit Monad.t
+    
 end
 
 module Deploy_key : sig

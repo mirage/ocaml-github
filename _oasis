@@ -1,6 +1,6 @@
 OASISFormat: 0.3
 Name:        github
-Version:     0.8.3
+Version:     0.8.4
 Synopsis:    Github API interface
 Authors:     Anil Madhavapeddy, David Sheets
 License:     ISC
@@ -54,6 +54,14 @@ Executable "git-sync-releases"
 Executable "git-upload-release"
   Path:               jar
   MainIs:             upload_release.ml
+  Custom:             true
+  CompiledObject:     best
+  Install:            true
+  BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, cmdliner
+
+Executable "git-list-releases"
+  Path:               jar
+  MainIs:             list_releases.ml
   Custom:             true
   CompiledObject:     best
   Install:            true

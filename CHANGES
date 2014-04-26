@@ -1,3 +1,6 @@
+0.8.4 (2014-04-26):
+* Add `git list-releases` to list releases in sorted Markdown format.
+
 0.8.3 (2014-04-13):
 * Add `git sync-releases` to copy release metadata between GitHub repos.
 * Add `git upload-release` to upload a binary file to a GitHub release tag.

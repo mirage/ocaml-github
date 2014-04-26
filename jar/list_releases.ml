@@ -44,11 +44,13 @@ let release_to_markdown (user,repo,r) =
   let open Github_t in
   let (_,tm) = parse_iso8601_from_github r.release_created_at in
   printf "### %s-%s: %s\n\n" repo r.release_tag_name r.release_name;
-  printf "Released on %4d-%02d-%02d ([more information](%s)). Changelog:\n\n"
-    (tm.Unix.tm_year+1900) (tm.Unix.tm_mon+1) tm.Unix.tm_mday r.release_html_url;
-  print_endline r.release_body;
-  print_endline "";
-  return ()
+  printf "Released on %4d-%02d-%02d as [%s](%s). See <https://github.com/%s/%s> for full history.\n\n"
+    (tm.Unix.tm_year+1900) (tm.Unix.tm_mon+1) tm.Unix.tm_mday r.release_tag_name r.release_html_url user repo;
+  match r.release_body with 
+   | "" -> return_unit
+   | body ->
+      printf "%s\n\n" body;
+      return ()
 
 let list_releases repos =
   let repos = List.map (fun r ->

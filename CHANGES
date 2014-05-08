@@ -1,3 +1,6 @@
+0.8.5 (2014-05-08):
+* The `master_branch` field in the `repo` is actually optional, to fix the schema.
+
 0.8.4 (2014-04-26):
 * Add `git list-releases` to list releases in sorted Markdown format.
 

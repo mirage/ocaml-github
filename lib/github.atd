@@ -275,7 +275,7 @@ type repo = {
   watchers: int;
   watchers_count: int;
   size: int;
-  master_branch: string;
+  ?master_branch: string option;
   open_issues: int;
   ?pushed_at: string option;
   created_at: string;

@@ -43,6 +43,14 @@ Executable "git-jar"
   Install:            true
   BuildDepends:       cohttp.lwt, lwt.syntax, github, github.unix, cmdliner, lambda-term
 
+Executable "git-create-release"
+  Path:               jar
+  MainIs:             create_release.ml
+  Custom:             true
+  CompiledObject:     best
+  Install:            true
+  BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, cmdliner
+
 Executable "git-sync-releases"
   Path:               jar
   MainIs:             sync_releases.ml

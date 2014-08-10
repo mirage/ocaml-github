@@ -70,55 +70,55 @@ let run user repo tag release_name target_commitish body assets content_type
 
 let cmd =
   let user =
-    let doc = "The user name on GitHub" in
+    let doc = "The user name on GitHub." in
     Arg.(required & pos 0 (some string) None & info [] ~docv:"USER" ~doc)
   in
   let repo =
-    let doc = "The repository on GitHub" in
+    let doc = "The repository on GitHub." in
     Arg.(required & pos 1 (some string) None & info [] ~docv:"REPO" ~doc)
   in
   let tag =
-    let doc = "The tag of the release on GitHub" in
+    let doc = "The tag of the release on GitHub." in
     Arg.(required & pos 2 (some string) None & info [] ~docv:"TAG" ~doc)
   in
   let release_name =
-    let doc = "The name of the release on GitHub" in
+    let doc = "The name of the release on GitHub." in
     Arg.(required & pos 3 (some string) None & info [] ~docv:"NAME" ~doc)
   in
   let target_commitish =
     let doc =
-      "Optional SHA-1 commit hash or branch name associated with a tag"
+      "Optional SHA-1 commit hash or branch name associated with a tag."
     in
     let docv = "TARGET_COMMITISH" in
     Arg.(value & opt string "master" & info ["target_commitish"] ~docv ~doc)
   in
   let body =
-    let doc = "Optional text describing the contents" in
+    let doc = "Optional text describing the contents of the release." in
     Arg.(value & opt string "" & info ["body"] ~docv:"BODY" ~doc)
   in
   let assets =
-    let doc = "Optional list of assets (files) to upload" in
+    let doc = "Optional comma-separated list of assets (files) to upload." in
     Arg.(value & opt (list string) [] & info ["assets"] ~docv:"ASSETS" ~doc)
   in
   let content_type =
     let doc = "\
       The MIME content-type of the assets.  Defaults to \
-      application/octet-stream, but something more specific is recommended.  \
+      $(i,application/octet-stream), but something more specific is recommended.  \
       Assets with mixed content types should be uploaded separately using \
-      the git-upload-release command."
+      the $(b,git-upload-release) command."
     in
     Arg.(value & opt string "application/octet-stream" & info ["content-type"]
       ~docv:"CONTENT_TYPE" ~doc)
   in
   let prerelease =
-    let doc = "Optional prerelease flag" in
+    let doc = "Optional prerelease flag (true or false)." in
     Arg.(value & opt bool false & info ["prerelease"] ~docv:"PRERELEASE" ~doc)
   in
   let draft =
-    let doc = "Optional draft flag" in
+    let doc = "Optional draft flag (true or false)." in
     Arg.(value & opt bool false & info ["draft"] ~docv:"DRAFT" ~doc)
   in
-  let doc = "create a release on GitHub" in
+  let doc = "create a software release on GitHub" in
   let man =
     [
       `S "BUGS";

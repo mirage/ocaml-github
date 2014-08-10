@@ -1,5 +1,7 @@
-0.8.6 (trunk):
-* Fix `pull_action_type` `synchronize` tag typo (#33)
+0.8.6 (2014-08-10):
+* Fix `pull_action_type` `synchronize` tag typo (#33 from Philipp Gesang).
+* Add a `git create-release` to create a GitHub release, including binary assets
+  (#32 from Markus Mottl).
 
 0.8.5 (2014-05-08):
 * The `master_branch` field in the `repo` is actually optional, to fix the schema.

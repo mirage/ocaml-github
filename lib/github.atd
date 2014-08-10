@@ -397,7 +397,7 @@ type event_type = [
 type pull_action_type = [
   | Opened <json name="opened">
   | Closed <json name="closed">
-  | Synchronize <json name="synchonize">
+  | Synchronize <json name="synchronize">
   | Reopened <json name="reopened">
 ]
 

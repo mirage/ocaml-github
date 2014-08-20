@@ -20,18 +20,9 @@ open Lwt
 open Cmdliner
 open Printf
 
-let auth = Lwt.(Lwt_main.run (
-  Github_cookie_jar.init ()
-  >>= fun jar ->
-  Github_cookie_jar.get jar "infra"
-  >|= function
-  | None -> eprintf "Use git-jar to create an `infra` cookie first."; exit 1
-  | Some t -> t))
-let token = Github.Token.of_string auth.Github_t.auth_token
-
 let ask_github fn = Github.(Monad.run (fn ()))
 
-let create_release
+let create_release ~token
       ~user ~repo ~tag ~release_name ~target_commitish ~body:new_release_body
       ~assets ~content_type ~prerelease ~draft =
   let open Github_t in
@@ -61,14 +52,15 @@ let create_release
           ~token ~user ~repo ~id ~filename ~content_type ~body) in
       return ()) assets
 
-let run user repo tag release_name target_commitish body assets content_type
-      prerelease draft =
+let run token user repo tag release_name target_commitish body assets
+    content_type prerelease draft =
   Lwt_main.run (
-    create_release
+    create_release ~token
       ~user ~repo ~tag ~release_name ~target_commitish ~body
       ~assets ~content_type ~prerelease ~draft)
 
 let cmd =
+  let cookie = Jar_cli.cookie () in
   let user =
     let doc = "The user name on GitHub." in
     Arg.(required & pos 0 (some string) None & info [] ~docv:"USER" ~doc)
@@ -125,7 +117,7 @@ let cmd =
       `P "Email bug reports to <mirageos-devel@lists.xenproject.org>."
     ]
   in
-  Term.((pure run
+  Term.((pure run $ cookie
     $ user $ repo $ tag $ release_name $ target_commitish
     $ body $ assets $ content_type $ prerelease $ draft)),
   Term.info "git-create-release" ~version:Jar_version.t ~doc ~man

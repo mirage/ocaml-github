@@ -19,18 +19,9 @@ open Lwt
 open Cmdliner
 open Printf
 
-let auth = Lwt.(Lwt_main.run (
-  Github_cookie_jar.init ()
-  >>= fun jar ->
-  Github_cookie_jar.get jar "infra"
-  >|= function
-  | None -> eprintf "Use git-jar to create an `infra` cookie first."; exit 1
-  | Some t -> t))
-let token = Github.Token.of_string auth.Github_t.auth_token
-
 let ask_github fn = Github.(Monad.run (fn ()))
 
-let sync_releases src_user src_repo dst_user dst_repo =
+let sync_releases token src_user src_repo dst_user dst_repo =
   lwt src = ask_github (Github.Release.for_repo ~token ~user:src_user ~repo:src_repo) in
   lwt dst = ask_github (Github.Release.for_repo ~token ~user:dst_user ~repo:dst_repo) in
   lwt src_tags = ask_github (Github.Repo.tags ~token ~user:src_user ~repo:src_repo) in
@@ -56,10 +47,11 @@ let sync_releases src_user src_repo dst_user dst_repo =
       return ()
     ) src
 
-let run src_user src_repo dst_user dst_repo =
-  Lwt_main.run (sync_releases src_user src_repo dst_user dst_repo)
+let run token src_user src_repo dst_user dst_repo =
+  Lwt_main.run (sync_releases token src_user src_repo dst_user dst_repo)
 
-let cmd = 
+let cmd =
+  let cookie = Jar_cli.cookie () in
   let src_user = 
     let doc = "The source user name on GitHub" in
     Arg.(required & pos 0 (some string) None & info [] ~docv:"SRC_USER" ~doc)
@@ -78,7 +70,7 @@ let cmd =
   in
   let doc = "synchronize releases between GitHub repositories" in
   let man = [ `S "BUGS"; `P "Email bug reports to <mirageos-devel@lists.xenproject.org>.";] in
-  Term.((pure run $ src_user $ src_repo $ dst_user $ dst_repo)),
+  Term.((pure run $ cookie $ src_user $ src_repo $ dst_user $ dst_repo)),
   Term.info "git-sync-releases" ~version:Jar_version.t ~doc ~man
 
 let () = match Term.eval cmd with `Error _ -> exit 1 | _ -> exit 0

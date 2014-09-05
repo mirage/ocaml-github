@@ -8,3 +8,4 @@ setup.bin
 *.byte
 *.bak
 lib_test/config.ml
+*~

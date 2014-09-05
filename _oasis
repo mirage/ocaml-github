@@ -38,7 +38,7 @@ Library github_js
   Findlibname: js
   FindlibParent: github_core
   Modules: Github_js
-  BuildDepends: lwt.syntax, lwt.unix, js_of_ocaml, js_of_ocaml.syntax, cohttp.lwt, github
+  BuildDepends: lwt.syntax, lwt, js_of_ocaml, js_of_ocaml.syntax, cohttp.lwt-core, github
 
 Executable rwo
   Path:               lib_test

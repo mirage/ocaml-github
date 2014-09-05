@@ -12,6 +12,10 @@ Flag unix
   Description: build the UNIX subpackage
   Default: true
 
+Flag js
+  Description: build the js_of_ocaml xmlHttpRequest based subpackage
+  Default: true
+
 Library github_core
   Path: lib
   Findlibname: github
@@ -26,6 +30,15 @@ Library github_unix
   FindlibParent: github_core
   Modules: Github, Github_cookie_jar
   BuildDepends: lwt.syntax, lwt.unix, cohttp.lwt, github
+
+Library github_js
+  Build$: flag(js)
+  Install$: flag(js)
+  Path: js
+  Findlibname: js
+  FindlibParent: github_core
+  Modules: Github_js
+  BuildDepends: lwt.syntax, lwt.unix, js_of_ocaml, js_of_ocaml.syntax, cohttp.lwt, github
 
 Executable rwo
   Path:               lib_test

@@ -18,7 +18,7 @@
 
 let user_agent = "ocaml-github" (* TODO: add version from build system *)
 
-module Make(CL : Github_s.CL) = struct
+module Make(CL : Cohttp_lwt.Client) = struct
 
   let log_active =
     ref (try Unix.getenv "GITHUB_DEBUG" <> "0" with _ -> false)
@@ -330,7 +330,7 @@ module Make(CL : Github_s.CL) = struct
     * to a chunked-encoding POST request). *)
     let lwt_req {Monad.uri; meth; headers; body} =
       log "Requesting %s" (Uri.to_string uri);
-      CL.Client.call ~headers ~body ~chunked:false meth uri
+      CL.call ~headers ~body ~chunked:false meth uri
 
     let request resp_handlers req =
       lwt response = lwt_req req in
@@ -416,7 +416,7 @@ module Make(CL : Github_s.CL) = struct
     *)
     let of_code ~client_id ~client_secret ~code () =
       let uri = URI.token ~client_id ~client_secret ~code () in
-      CL.Client.post uri 
+      CL.post uri 
       >>= fun (res, body) ->
         lwt body = CLB.to_string body in
         try

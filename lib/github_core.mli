@@ -16,5 +16,5 @@
  *)
 
 
-module Make(CL : Github_s.CL) : Github_s.Github
+module Make(CL : Cohttp_lwt.Client) : Github_s.Github
 

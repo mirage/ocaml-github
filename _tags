@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 5b0a52b15bcc7b01cf3892f91ae762f1)
+# DO NOT EDIT (digest: d649acb0f393762ab5eda523bb80ee8b)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
@@ -36,6 +36,7 @@
 "js/github_js.cmxs": use_github_js
 <js/*.ml{,i}>: pkg_atdgen
 <js/*.ml{,i}>: pkg_cohttp
+<js/*.ml{,i}>: pkg_cohttp.js
 <js/*.ml{,i}>: pkg_cohttp.lwt-core
 <js/*.ml{,i}>: pkg_js_of_ocaml
 <js/*.ml{,i}>: pkg_js_of_ocaml.syntax

@@ -209,6 +209,50 @@ module Make(CL : Cohttp_lwt.Client) = struct
 
     let repo_deploy_key ~user ~repo ~num =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/keys/%d" api user repo num)
+
+    (* gists (some repetition here we could factor out) *)
+    let list_users_gists ~user = 
+      Uri.of_string (Printf.sprintf "%s/users/%s/gists" api user)
+
+    let list_gists = 
+      Uri.of_string (Printf.sprintf "%s/gists" api)
+
+    let list_all_public_gists = 
+      Uri.of_string (Printf.sprintf "%s/gists/public" api)
+
+    let list_starred_gists = 
+      Uri.of_string (Printf.sprintf "%s/gists/starred" api)
+
+    let get_gist ~id = 
+      Uri.of_string (Printf.sprintf "%s/gists/%s" api id)
+
+    let create_gist = 
+      Uri.of_string (Printf.sprintf "%s/gists" api)
+
+    let edit_gist ~id =
+      Uri.of_string (Printf.sprintf "%s/gists/%s" api id)
+
+    let list_gist_commits ~id = 
+      Uri.of_string (Printf.sprintf "%s/gists/%s/commits" api id)
+
+    let star_gist ~id =
+      Uri.of_string (Printf.sprintf "%s/gists/%s/star" api id)
+
+    let unstar_gist ~id = 
+      Uri.of_string (Printf.sprintf "%s/gists/%s/star" api id)
+
+    let is_gist_starred ~id = 
+      Uri.of_string (Printf.sprintf "%s/gists/%s/star" api id)
+
+    let fork_gist ~id = 
+      Uri.of_string (Printf.sprintf "%s/gists/%s/forks" api id)
+
+    let list_gist_forks ~id = 
+      Uri.of_string (Printf.sprintf "%s/gists/%s/forks" api id)
+
+    let delete_gist ~id =
+      Uri.of_string (Printf.sprintf "%s/gists/%s" api id)
+
   end 
 
   module C = Cohttp
@@ -315,7 +359,8 @@ module Make(CL : Cohttp_lwt.Client) = struct
               lwt r = handler body in
               Lwt.return (Monad.response r)
             with exn ->
-              log "response body: %S" body;
+              (* XXX revert *)
+              log "response body:\n%s" (Yojson.Basic.pretty_to_string (Yojson.Basic.from_string body));
               bad_response exn
           with exn -> bad_response exn
         end
@@ -790,6 +835,122 @@ module Make(CL : Cohttp_lwt.Client) = struct
               |_ -> aux acc tl
           end
         in aux [] tags
+  end
+
+  module Gist = struct
+    open Lwt 
+
+    (* List gists https://developer.github.com/v3/gists/#list-gists 
+     * Parameters
+     *  since : string   A timestamp in ISO 8601 format: 
+     *                   YYYY-MM-DDTHH:MM:SSZ. Only gists updated at 
+     *                   or after this time are returned. *)
+
+    let uri_param_since uri= function
+      | None -> uri
+      | Some(date) -> Uri.add_query_param uri ("since", [date])
+
+    (* List a user’s gists:
+     * GET /users/:username/gists *)
+    let list_users ?since ?token ~user () =
+      let uri = URI.list_users_gists ~user in
+      let uri = uri_param_since uri since in
+      API.get ?token ~uri (fun b -> return (gists_of_string b))
+
+    (* List the authenticated user’s gists or if called anonymously, 
+     * this will return all public gists:
+     * GET /gists *)
+    let list ?since ?token () =
+      let uri = URI.list_gists in
+      let uri = uri_param_since uri since in
+      API.get ?token ~uri (fun b -> return (gists_of_string b))
+
+    (* List all public gists:
+     * GET /gists/public *)
+    let list_all_public ?since ?token () =
+      let uri = URI.list_all_public_gists in
+      let uri = uri_param_since uri since in
+      API.get ?token ~uri (fun b -> return (gists_of_string b))
+
+    (* List the authenticated user’s starred gists:
+     * GET /gists/starred *)
+    let list_starred ?since ~token () =
+      let uri = URI.list_starred_gists in
+      let uri = uri_param_since uri since in
+      API.get ~token ~uri (fun b -> return (gists_of_string b))
+
+    (* Get a single gist https://developer.github.com/v3/gists/#get-a-single-gist 
+     * GET /gists/:id  *)
+    let get ?token ~id () =
+      let uri = URI.get_gist ~id in
+      API.get ?token ~uri (fun b -> return (gist_of_string b))
+
+    (* Create a gist https://developer.github.com/v3/gists/#create-a-gist
+     * POST /gists 
+     * input
+     *  files       hash      Required. Files that make up this gist.
+     *  description string    A description of the gist.
+     *  public      boolean   Indicates whether the gist is public. Default: false *)
+    let create ~token ~contents () =
+      let uri = URI.create_gist in
+      let body = string_of_gist_create contents in
+      API.post ~body ~token ~uri ~expected_code:`Created (fun b -> return (gist_of_string b))
+
+    (* Edit a gist https://developer.github.com/v3/gists/#edit-a-gist
+     * PATCH /gists/:id
+     * input
+     *  description string  A description of the gist.
+     *  files       hash    Files that make up this gist.
+     *  content     string  Updated file contents.
+     *  filename    string  New name for this file. *)
+    let edit ~token ~id ~contents () = 
+      let uri = URI.edit_gist ~id in
+      let body = string_of_gist_edits contents in
+      API.patch ~body ~token ~uri ~expected_code:`OK (fun b -> return (gist_of_string b))
+
+    (* List gist commits https://developer.github.com/v3/gists/#list-gist-commits
+     * GET /gists/:id/commits *)
+    let commits ?token ~id () = 
+      let uri = URI.list_gist_commits ~id in
+      API.get ?token ~uri (fun b -> return (gist_history_list_of_string b))
+
+    (* Star a gist https://developer.github.com/v3/gists/#star-a-gist
+     * PUT /gists/:id/star
+     * Note that you’ll need to set Content-Length to zero when calling 
+     * out to this endpoint. For more information, see “HTTP verbs.” *)
+    let star ~token ~id () = 
+      let uri = URI.star_gist ~id in
+      API.put ~token ~uri ~expected_code:`No_content (fun b -> return ())
+
+    (* Unstar a gist https://developer.github.com/v3/gists/#unstar-a-gist
+     * DELETE /gists/:id/star *)
+    let unstar ~token ~id () = 
+      let uri = URI.unstar_gist ~id in
+      API.delete ~token ~uri ~expected_code:`No_content (fun b -> return ())
+
+    (* Check if a gist is starred https://developer.github.com/v3/gists/#check-if-a-gist-is-starred
+     * GET /gists/:id/star 
+     * Response if gist is starred : 204 No Content
+     * Response if gist is not starred : 404 Not Found *)
+
+    (* Fork a gist https://developer.github.com/v3/gists/#fork-a-gist
+     * POST /gists/:id/forks *)
+    let fork ~token ~id () = 
+      let uri = URI.fork_gist ~id in
+      API.post ~token ~uri ~expected_code:`Created (fun b -> return (gist_of_string b))
+
+    (* List gist forks https://developer.github.com/v3/gists/#list-gist-forks
+     * GET /gists/:id/forks *)
+    let list_forks ?token ~id () = 
+      let uri = URI.list_gist_forks ~id in
+      API.get ?token ~uri (fun b -> return (gist_forks_of_string b))
+
+    (* Delete a gist https://developer.github.com/v3/gists/#delete-a-gist
+     * DELETE /gists/:id *)
+    let delete ~token ~id () = 
+      let uri = URI.delete_gist ~id in
+      API.delete ~token ~uri ~expected_code:`No_content (fun b -> return ())
+
   end
 
 end 

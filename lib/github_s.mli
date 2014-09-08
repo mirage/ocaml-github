@@ -405,6 +405,63 @@ module type Github = sig
       unit -> (string * string) list Monad.t
   end
 
+  module Gist : sig
+    val list_users : 
+        ?since:string -> ?token:Token.t -> user:string -> unit -> 
+        Github_t.gists Monad.t
+    
+    val list : 
+      ?since:string -> ?token:Token.t -> unit -> 
+      Github_t.gists Monad.t
+    
+    val list_all_public : 
+      ?since:string -> ?token:Token.t -> unit -> 
+      Github_t.gists Monad.t
+    
+    val list_starred : 
+      ?since:string -> token:Token.t -> unit -> 
+      Github_t.gists Monad.t
+    
+    val get : 
+      ?token:Token.t -> id:string -> unit -> 
+      Github_t.gist Monad.t
+    
+    val create : 
+      token:Token.t -> contents:Github_t.gist_create -> unit -> 
+      Github_t.gist Monad.t
+
+    val edit : 
+      token:Token.t -> id:string -> 
+      contents:Github_t.gist_edits -> unit -> 
+      Github_t.gist Monad.t
+
+    val commits : 
+      ?token:Token.t -> id:string -> unit -> 
+      Github_t.gist_history_list Monad.t
+
+    val star : 
+      token:Token.t -> id:string -> unit -> 
+      unit Monad.t
+
+    val unstar : 
+      token:Token.t -> id:string -> unit -> 
+      unit Monad.t
+
+    (* is_starred *)
+
+    val fork : 
+      token:Token.t -> id:string -> unit -> 
+      Github_t.gist Monad.t
+
+    val list_forks : 
+      ?token:Token.t -> id:string -> unit -> 
+      Github_t.gist_forks Monad.t
+
+    val delete : 
+      token:Token.t -> id:string -> unit -> 
+      unit Monad.t
+  end
+
   (** [log_active] activates debug messages
 
       set by default when the environment variable GITHUB_DEBUG is set to 1 *)

@@ -55,10 +55,10 @@ module Resp = struct
   (* dispatch non-file URLs *)
   let dispatch req =
     function
-    | []
-    | ["index.html"]  ->
+    | ["";""]
+    | ["";"index.html"]  ->
         index req
-    | ["step2"] -> begin
+    | ["";"step2"] -> begin
         let uri = Request.uri req in
         let code = match Uri.get_query_param uri "code" with
           |Some hd -> hd |None -> "" in
@@ -81,15 +81,16 @@ let callback con_id req body =
     (String.concat "," (List.map (fun (h,v) -> sprintf "%s=%s" h (String.concat "," v)) (Uri.query uri)));
   (* normalize path to strip out ../. and such *)
   let path_elem = Stringext.(split ~on:'/' (Uri.path uri)) in
+  List.iter (fun p -> printf "> %s\n%!" p) path_elem;
   Resp.dispatch req path_elem 
 
 let server_t =
   let port = 8080 in
   let conn_closed con_id () = () in
-  let timeout = None in
-  let address = "0.0.0.0" in (* TODO address to option *)
   let spec = { Cohttp_lwt_unix.Server.callback; conn_closed } in
-  Cohttp_lwt_unix.Server.create ~address ~port spec
+  let ctx = Cohttp_lwt_unix_net.init () in
+  let mode = `TCP (`Port port) in
+  Cohttp_lwt_unix.Server.create ~ctx ~mode spec
 
 let _ =
   Lwt_main.run server_t

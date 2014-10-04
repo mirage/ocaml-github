@@ -2,6 +2,7 @@
 * Add `Jar_cli` module for use by applications that use the Git Jar (#34).
 * Add bindings to the Gist APIs for storing text fragments (#36).
 * Add a JavaScript port, using Cohttp and js_of_ocaml (#36).
+* Build `ocamldoc` HTML documentation by default.
 
 0.8.6 (2014-08-10):
 * Fix `pull_action_type` `synchronize` tag typo (#33 from Philipp Gesang).

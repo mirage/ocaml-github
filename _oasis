@@ -40,6 +40,14 @@ Library github_js
   Modules: Github_js
   BuildDepends: lwt.syntax, lwt, js_of_ocaml, js_of_ocaml.syntax, cohttp.lwt-core, cohttp.js, github
 
+Document "github-api"
+  Title:                GitHub API documentation
+  Type:                 ocamlbuild (0.3)
+  BuildTools+:          ocamldoc
+  Install:              true
+  XOCamlbuildPath:      lib
+  XOCamlbuildLibraries: github
+
 Executable rwo
   Path:               lib_test
   MainIs:             rwo.ml

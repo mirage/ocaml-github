@@ -19,17 +19,6 @@ open Lwt
 open Cmdliner
 open Printf
 
-let auth =
-  Lwt_main.run (
-    Github_cookie_jar.init ()
-    >>= fun jar ->
-    Github_cookie_jar.get jar "infra"
-    >|= function
-    | None -> eprintf "Use git-jar to create an `infra` cookie first."; exit 1
-    | Some t -> t
-  )
-let token = Github.Token.of_string auth.Github_t.auth_token
-
 let ask_github fn = Github.(Monad.run (fn ()))
 
 let parse_iso8601_from_github t =
@@ -52,7 +41,7 @@ let release_to_markdown (user,repo,r) =
       printf "%s\n\n" body;
       return ()
 
-let list_releases repos =
+let list_releases token repos =
   let repos = List.map (fun r ->
       match Stringext.split ~max:2 ~on:'/' r with
       | [user;repo] -> (user,repo)
@@ -67,13 +56,12 @@ let list_releases repos =
   let releases = List.sort (fun b a -> compare (rtime a) (rtime b)) releases in
   Lwt_list.iter_s release_to_markdown releases
 
-let cmd = 
-  let repos = 
-    let doc = "The repositories (in user/repo format) to scan for changelogs" in
-    Arg.(non_empty & pos_all string [] & info [] ~docv:"REPOS" ~doc) in
+let cmd =
+  let cookie = Jar_cli.cookie () in
+  let repos = Jar_cli.repos ~doc_append:" to scan for changelogs" () in
   let doc = "list releases on GitHub repositories" in
   let man = [ `S "BUGS"; `P "Email bug reports to <mirageos-devel@lists.xenproject.org>.";] in
-  Term.((pure (fun r -> Lwt_main.run (list_releases r)) $ repos)),
+  Term.((pure (fun t r -> Lwt_main.run (list_releases t r)) $ cookie $ repos)),
   Term.info "git-list-releases" ~version:Jar_version.t ~doc ~man
 
 let () = match Term.eval cmd with `Error _ -> exit 1 | _ -> exit 0

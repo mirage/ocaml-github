@@ -1,4 +1,4 @@
-0.9.0 (trunk):
+0.9.0 (2014-11-02):
 * Add `Jar_cli` module for use by applications that use the Git Jar (#34).
 * Add bindings to the Gist APIs for storing text fragments (#36).
 * Add a JavaScript port, using Cohttp and js_of_ocaml (#36).

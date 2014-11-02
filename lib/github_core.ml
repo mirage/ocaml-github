@@ -437,23 +437,23 @@ module Make(CL : Cohttp_lwt.Client) = struct
       let req = { auth_req_scopes=scopes; auth_req_note=note; auth_req_note_url=note_url;
       auth_req_client_id=client_id; auth_req_client_secret=client_secret } in
       let body = string_of_auth_req req in
-      let headers = C.Header.(add_authorization (init ()) (C.Auth.Basic (user,pass))) in
+      let headers = C.Header.(add_authorization (init ()) (`Basic (user,pass))) in
       let uri = URI.authorizations in
       API.post ~headers ~body ~uri ~expected_code:`Created (fun body -> return (auth_of_string body))
 
     let get_all ~user ~pass () =
       let uri = URI.authorizations in
-      let headers = C.Header.(add_authorization (init ()) (C.Auth.Basic (user,pass))) in
+      let headers = C.Header.(add_authorization (init ()) (`Basic (user,pass))) in
       API.get ~headers ~uri ~expected_code:`OK (fun body -> return (auths_of_string body))
 
     let get ~user ~pass ~id () =
       let uri = URI.authorization id in
-      let headers = C.Header.(add_authorization (init ()) (C.Auth.Basic (user,pass))) in
+      let headers = C.Header.(add_authorization (init ()) (`Basic (user,pass))) in
       API.get ~headers ~uri ~expected_code:`OK (fun body -> return (auth_of_string body))
 
     let delete ~user ~pass ~id () =
       let uri = URI.authorization id in
-      let headers = C.Header.(add_authorization (init ()) (C.Auth.Basic (user,pass))) in
+      let headers = C.Header.(add_authorization (init ()) (`Basic (user,pass))) in
       API.delete ~headers ~uri ~expected_code:`No_content (fun body -> return ())
 
     (* Convert a code after a user oAuth into an access token that can

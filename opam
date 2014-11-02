@@ -5,8 +5,9 @@ tags: [
   "org:xapi-project"
 ]
 build: [
-  [make "PREFIX=%{prefix}%"]
-  [make "PREFIX=%{prefix}%" "install"]
+  ["ocaml" "setup.ml" "-configure" "--%{base-unix:enable}%-unix" "--%{js_of_ocaml:enable}%-js" "--prefix" prefix]
+  ["ocaml" "setup.ml" "-build"]
+  ["ocaml" "setup.ml" "-install"]
 ]
 remove: [["ocamlfind" "remove" "github"]]
 depends: [
@@ -20,5 +21,10 @@ depends: [
   "stringext"
   "lambda-term"
   "cmdliner"
-  "js_of_ocaml" {>="2.4.0"}
+]
+depopts: [
+  "js_of_ocaml"
+]
+conflicts: [
+  "js_of_ocaml" {<"2.4.0"}
 ]

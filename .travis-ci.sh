@@ -1,10 +1,10 @@
-OPAM_DEPENDS="lwt ssl cohttp atdgen yojson cmdliner lambda-term uri stringext"
-
 case "$OCAML_VERSION,$OPAM_VERSION" in
-4.00.1,1.0.0) ppa=avsm/ocaml40+opam10 ;;
 4.00.1,1.1.0) ppa=avsm/ocaml40+opam11 ;;
-4.01.0,1.0.0) ppa=avsm/ocaml41+opam10 ;;
+4.00.1,1.2.0) ppa=avsm/ocaml40+opam12; pinx=add ;;
 4.01.0,1.1.0) ppa=avsm/ocaml41+opam11 ;;
+4.01.0,1.2.0) ppa=avsm/ocaml41+opam12; pinx=add ;;
+4.02.1,1.1.0) ppa=avsm/ocaml42+opam11 ;;
+4.02.1,1.2.0) ppa=avsm/ocaml42+opam12; pinx=add ;;
 *) echo Unknown $OCAML_VERSION,$OPAM_VERSION; exit 1 ;;
 esac
 
@@ -21,7 +21,7 @@ opam --version
 opam --git-version
 
 opam init
-opam pin cohttp git://github.com/avsm/ocaml-cohttp
-opam install ${OPAM_DEPENDS}
-eval `opam config env`
-make
+opam remote add mirage git://github.com/mirage/mirage-dev
+opam pin $pinx github .
+opam install github
+opam install js_of_ocaml

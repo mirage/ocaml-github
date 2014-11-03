@@ -493,8 +493,8 @@ type release = {
   body: string;
   draft: bool;
   prerelease: bool;
-  created_at: string;
-  published_at: string;
+  ~created_at: string;
+  ~published_at: string;
   url: string;
   html_url: string;
   assets_url: string;

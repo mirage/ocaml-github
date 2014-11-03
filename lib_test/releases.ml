@@ -42,7 +42,7 @@ let sync_releases (src_user,src_repo) (dst_user,dst_repo) =
 let t =
   let opro_releases = Github.Release.for_repo ~user:"avsm" ~repo:"ocaml-github" in
   ask_github opro_releases >|= print_releases >>
-  ask_github (Github.Release.for_repo ~user:"mirage" ~repo:"ocaml-cohttp") >|= print_releases >>
+  ask_github (Github.Release.for_repo ~user:"mirage" ~repo:"mirage") >|= print_releases >>
   (* sync_releases ("mirage","ocaml-cohttp") ("avsm","ocaml-cohttp") *)
   return ()
 

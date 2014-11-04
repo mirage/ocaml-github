@@ -80,25 +80,24 @@ type direction = [
   | Desc <json name="desc">
 ]
 
-type user = {
+type org = {
   login: string;
   id: int;
+  url: string;
   ?avatar_url: string option;
   ?gravatar_id: string option;
-  url: string;
+} <ocaml field_prefix="org_">
+
+type user = {
+  inherit org
 } <ocaml field_prefix="user_">
 
-type user_type = [
-  | User <json name="User">
-  | Organization <json name="Organization">
-]
+type linked_user = {
+  html_url: string;
+  inherit user
+} <ocaml field_prefix="linked_user_">
 
 type user_info = {
-  login: string;
-  id: int;
-  ?avatar_url: string option;
-  ?gravatar_id: string option;
-  url: string;
   ?name: string option;
   ?company: string option;
   ?blog: string option;
@@ -112,8 +111,46 @@ type user_info = {
   ~following: int;
   html_url: string;
   created_at: string;
-  ty <json name="type">: user_type;
+  updated_at: string;
+  (*ty <json name="type">: user_type;*)
+  inherit linked_user
 } <ocaml field_prefix="user_info_">
+
+type organization = {
+  name: string; (* opt? *)
+  company: string; (* opt? *)
+  blog: string; (* opt? *)
+  location: string; (* opt? *)
+  email: string; (* opt? *)
+  public_repos: int;
+  public_gists: int;
+  followers: int;
+  following: int;
+  html_url: string;
+  created_at: string;
+  (*ty <json name="type">: org_type;*)
+  inherit org
+} <ocaml field_prefix="organization_">
+
+type team = {
+  url: string;
+  name: string;
+  id: int;
+} <ocaml field_prefix="team_">
+
+type team_permission = [
+  | Pull <json name="pull">
+  | Push <json name="push">
+  | Admin <json name="admin">
+]
+
+type team_info = {
+  permission: team_permission;
+  members_count: int;
+  repos_count: int;
+  organization: org;
+  inherit team
+} <ocaml field_prefix="team_info_">
  
 type label = {
   url: string;
@@ -173,13 +210,18 @@ type issue = {
 
 type issues = issue list
 
-type issue_comment = {
+type comment = {
   id: int;
   url: string;
+  html_url: string;
   body: string;
   user: user;
   created_at: string;
   updated_at: string;
+} <ocaml field_prefix="comment_">
+
+type issue_comment = {
+  inherit comment
 } <ocaml field_prefix="issue_comment_">
 
 type issue_comments = issue_comment list
@@ -348,6 +390,224 @@ type update_pull = {
   ?state: state option;
 } <ocaml field_prefix="update_pull_">
 
+type commit_comment = {
+  ?position: int option;
+  ?line: int option;
+  ?path: string option;
+  commit_id: string;
+  inherit comment
+} <ocaml field_prefix="commit_comment_">
+
+type commit_comment_event = {
+  comment: commit_comment;
+} <ocaml field_prefix="commit_comment_event_">
+
+type ref = [
+  | Repository <json name="repository">
+  | Branch <json name="branch"> of string
+  | Tag <json name="tag"> of string
+]
+
+type create_event = {
+  ref <json constr="ref_type">: ref;
+  master_branch: string;
+  ?description: string option;
+  (* pusher_type *)
+} <ocaml field_prefix="create_event_">
+
+type delete_event = {
+  ref <json constr="ref_type">: ref;
+  (* pusher_type *)
+} <ocaml field_prefix="delete_event_">
+
+type fork_event = {
+  forkee: repo;
+} <ocaml field_prefix="fork_event_">
+
+type wiki_page_action = [
+  | Created <json name="created">
+  | Edited <json name="edited">
+]
+
+type wiki_page = {
+  name <json name="page_name">: string;
+  title: string;
+  action: wiki_page_action;
+  sha: string;
+  html_url: string;
+} <ocaml field_prefix="wiki_page_">
+
+type gollum_event = {
+  pages: wiki_page list;
+} <ocaml field_prefix="gollum_event_">
+
+type issue_comment_action = [
+  | Created <json name="created">
+]
+
+type issue_comment_event = {
+  action: issue_comment_action;
+  issue: issue;
+  comment: issue_comment;
+} <ocaml field_prefix="issue_comment_event_">
+
+type issues_action = [
+  | Assigned <json name="assigned">
+  | Unassigned <json name="unassigned">
+  | Labeled <json name="labeled">
+  | Unlabeled <json name="unlabeled">
+  | Opened <json name="opened">
+  | Closed <json name="closed">
+  | Reopened <json name="reopened">
+]
+
+type issues_event = {
+  action: issues_action;
+  issue: issue;
+  ?assignee: user_info option;
+  ?label: label option;
+} <ocaml field_prefix="issues_event_">
+
+type member_action = [
+  | Added <json name="added">
+]
+
+type member_event = {
+  action: member_action;
+  member: linked_user;
+} <ocaml field_prefix="member_event_">
+
+(* TODO: this could use constr + optional support *)
+type page_build_error = {
+  ?message: string option;
+} <ocaml field_prefix="page_build_error_">
+
+type page_build_status = [
+  | Building <json name="building">
+  | Built <json name="built">
+  | Errored <json name="errored">
+]
+
+type page_build = {
+  url: string;
+  ?status: page_build_status option;
+  error: page_build_error;
+} <ocaml field_prefix="page_build_">
+
+type page_build_event = {
+  build: page_build;
+} <ocaml field_prefix="page_build_event_">
+
+type pull_request_action = [
+  | Assigned <json name="assigned">
+  | Unassigned <json name="unassigned">
+  | Labeled <json name="labeled">
+  | Unlabeled <json name="unlabeled">
+  | Opened <json name="opened">
+  | Closed <json name="closed">
+  | Reopened <json name="reopened">
+  | Synchronize <json name="synchronize">
+]
+
+type pull_request_event = {
+  action: pull_request_action;
+  number: int;
+  pull_request: pull;
+} <ocaml field_prefix="pull_request_event_">
+
+type pull_request_review_comment_action = [
+  | Created <json name="created">
+]
+
+type pull_request_review_comment = {
+  diff_hunk: string;
+  original_position: int;
+  original_commit_id: string;
+  pull_request_url: string;
+  inherit commit_comment
+} <ocaml field_prefix="pull_request_review_comment_">
+
+type pull_request_review_comment_event = {
+  action: pull_request_review_comment_action;
+  pull_request: pull;
+  comment: pull_request_review_comment;
+} <ocaml field_prefix="pull_request_review_comment_event_">
+
+type push_event_author = {
+  name: string;
+  email: string;
+} <ocaml field_prefix="push_event_author_">
+
+type push_event_commit = {
+  url: string;
+  sha: string;
+  message: string;
+  author: push_event_author;
+  distinct: bool;
+} <ocaml field_prefix="push_event_commit_">
+
+type push_event = {
+  head: string;
+  ref: string;
+  size: int;
+  commits: push_event_commit list;
+} <ocaml field_prefix="push_event_">
+
+type release_action = [
+  | Published <json name="published">
+]
+
+type release_event = {
+  action: release_action;
+  release: release;
+} <ocaml field_prefix="release_event_">
+
+type status_branch_commit = {
+  sha: string;
+  url: string;
+} <ocaml field_prefix="status_branch_commit_">
+
+type status_branch = {
+  name: string;
+  commit: status_branch_commit;
+} <ocaml field_prefix="status_branch_">
+
+type status_event = {
+  sha: string;
+  (* name *)
+  ?target_url: string option;
+  (* context *)
+  ?description: string option;
+  state: status_state;
+  commit: commit;
+  branches: status_branch list;
+  (* created_at *)
+  (* updated_at *)
+} <ocaml field_prefix="status_event_">
+
+type team_add_info = {
+  slug: string;
+  permission: team_permission;
+  members_url: string;
+  repositories_url: string;
+  inherit team
+} <ocaml field_prefix="team_add_info_">
+
+type team_add_event = {
+  ?team: team_add_info option;
+  ?user: user option;
+  ?repository: repo option;
+  organization: org;
+} <ocaml field_prefix="team_add_event_">
+
+type watch_action = [
+  | Started <json name="started">
+]
+
+type watch_event = {
+  action: watch_action;
+} <ocaml field_prefix="watch_event_">
+
 type file = {
   ?sha: string option; (* e.g. if status is 'renamed', this is None *)
   filename: string;
@@ -398,63 +658,79 @@ type event_type = [
   | Watch <json name="watch">
 ]
 
-type pull_action_type = [
-  | Opened <json name="opened">
-  | Closed <json name="closed">
-  | Synchronize <json name="synchronize">
-  | Reopened <json name="reopened">
+type event_constr = [
+  | CommitComment <json name="CommitCommentEvent"> of commit_comment_event
+  | Create <json name="CreateEvent"> of create_event
+  | Delete <json name="DeleteEvent"> of delete_event
+  (*| Deployment <json name="deployment"> of *)
+  (*| DeploymentStatus <json name="deployment_status"> of *)
+  | Download <json name="DownloadEvent">
+  (* Deprecated but there may be a payload object... *)
+  | Follow <json name="FollowEvent">
+  (* Deprecated but there may be a payload object... *)
+  | Fork <json name="ForkEvent"> of fork_event
+  | ForkApply <json name="ForkApplyEvent">
+  (* Deprecated but there may be a payload object... *)
+  | Gist <json name="GistEvent">
+  (* Deprecated but there may be a payload object... *)
+  | Gollum <json name="GollumEvent"> of gollum_event
+  | IssueComment <json name="IssueCommentEvent"> of issue_comment_event
+  | Issues <json name="IssuesEvent"> of issues_event
+  | Member <json name="MemberEvent"> of member_event
+  (*| PageBuild <json name="page_build"> of page_build_event*)
+  | Public <json name="PublicEvent">
+  | PullRequest <json name="PullRequestEvent"> of pull_request_event
+  | PullRequestReviewComment <json name="PullRequestReviewCommentEvent">
+    of pull_request_review_comment_event
+  | Push <json name="PushEvent"> of push_event
+  | Release <json name="ReleaseEvent"> of release_event
+  | Status <json name="StatusEvent"> of status_event
+  (*| TeamAdd <json name="team_add"> of team_add_event*)
+  | Watch <json name="WatchEvent"> of watch_event
 ]
 
-type pull_action = {
-  action: pull_action_type;
-  number: int;
-  pull_request: pull;
-} <ocaml field_prefix="pull_action_">
-
-type pull_comment_action = {
-  comment: issue_comment;
-} <ocaml field_prefix="pull_comment_action_">
-
 type event = {
-  ty <json name="type">: event_type;
   public: bool;
-(*  payload  TODO: this is the event data with type determined by constructor field ty *)
+  payload <json constr="type">: event_constr;
   actor: user;
-  org: user;
+  ?org: org option;
   created_at: string;
   id: int; (* TODO: too small? *)
 } <ocaml field_prefix="event_">
 
+type events = event list
+
 type web_hook_config = {
   url: string;
   content_type: string;
-  insecure_ssl: string; (* TODO: should be bool but GitHub doesn't respect their own schema *)
+  insecure_ssl: bool;
   ?secret: string option;
 } <ocaml field_prefix="web_hook_config_">
+
+type hook_config = [
+  | Web <json name="web"> of web_hook_config
+]
 
 type hook = {
   url: string;
   updated_at: string;
   created_at: string;
-  name: string;
   events: event_type list;
   active: bool;
-  config: web_hook_config; (* TODO: determined by constructor field name *)
+  config <json constr="name">: hook_config;
   id: int;
 } <ocaml field_prefix="hook_">
 
 type hooks = hook list
 
 type new_hook = {
-  name: string;
-  config: web_hook_config; (* TODO: determined by constructor field name *)
+  config <json constr="name">: hook_config;
   events: event_type list;
   active: bool;
 } <ocaml field_prefix="new_hook_">
 
 type update_hook = {
-  name: string;
-  config: web_hook_config; (* TODO: determined by constructor field name *)
+  config <json constr="name">: hook_config;
   ?events: event_type list option;
   active: bool;
 } <ocaml field_prefix="update_hook_">

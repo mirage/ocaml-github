@@ -24,7 +24,7 @@ let repo = "opam-repository"
 let print_hooks label = Github_t.(List.iter (fun hook ->
   eprintf "%s %s hook %d created on %s %b detecting %s\n%!"
     label
-    hook.hook_name
+    (match hook.hook_config with `Web _ -> "web")
     hook.hook_id
     hook.hook_created_at
     hook.hook_active
@@ -35,13 +35,12 @@ let print_hooks label = Github_t.(List.iter (fun hook ->
 let make_web_hook_config url secret = Github_t.({
   web_hook_config_url=url;
   web_hook_config_content_type="json";
-  web_hook_config_insecure_ssl="false";
+  web_hook_config_insecure_ssl=false;
   web_hook_config_secret=secret;
 })
 
 let make_hook url events = Github_t.({
-  new_hook_name="web";
-  new_hook_config=make_web_hook_config url None;
+  new_hook_config=`Web (make_web_hook_config url None);
   new_hook_events=events;
   new_hook_active=true;
 })
@@ -66,8 +65,7 @@ let t = Github.(Monad.(run Github_t.(
   >>= fun hook ->
   print_hooks "Just:" [hook];
   Hook.update ~token ~user ~repo ~num:hook.hook_id ~hook:{
-    update_hook_name="web";
-    update_hook_config=make_web_hook_config "http://example.net/" None;
+    update_hook_config=`Web (make_web_hook_config "http://example.net/" None);
     update_hook_events=Some (`Watch::hook.hook_events);
     update_hook_active=false;
   } ()

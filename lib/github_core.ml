@@ -210,6 +210,37 @@ module Make(CL : Cohttp_lwt.Client) = struct
     let repo_deploy_key ~user ~repo ~num =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/keys/%d" api user repo num)
 
+    let repo_events ~user ~repo =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/events" api user repo)
+
+    let repo_issue_events ~user ~repo =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/issues/events"
+                       api user repo)
+
+    let public_events = Uri.of_string (Printf.sprintf "%s/events" api)
+
+    let network_events ~user ~repo =
+      Uri.of_string (Printf.sprintf "%s/networks/%s/%s/events" api user repo)
+
+    let org_events ~org =
+      Uri.of_string (Printf.sprintf "%s/orgs/%s/events" api org)
+
+    let org_member_events ~user ~org =
+      Uri.of_string (Printf.sprintf "%s/users/%s/events/orgs/%s" api user org)
+
+    let received_events ~user =
+      Uri.of_string (Printf.sprintf "%s/users/%s/received_events" api user)
+
+    let public_received_events ~user =
+      Uri.of_string (Printf.sprintf "%s/users/%s/received_events/public"
+                       api user)
+
+    let user_events ~user =
+      Uri.of_string (Printf.sprintf "%s/users/%s/events" api user)
+
+    let public_user_events ~user =
+      Uri.of_string (Printf.sprintf "%s/users/%s/events/public" api user)
+
     (* gists (some repetition here we could factor out) *)
     let list_users_gists ~user = 
       Uri.of_string (Printf.sprintf "%s/users/%s/gists" api user)
@@ -809,6 +840,50 @@ module Make(CL : Cohttp_lwt.Client) = struct
     let commit ?token ~user ~repo ~sha () =
       let uri = URI.repo_commit ~user ~repo ~sha in
       API.get ?token ~uri (fun b -> return (commit_of_string b))
+  end
+
+  module Event = struct
+    open Lwt
+
+    let for_repo ?token ~user ~repo () =
+      let uri = URI.repo_events ~user ~repo in
+      API.get ?token ~uri (fun b -> return (events_of_string b))
+
+    let for_repo_issues ?token ~user ~repo () =
+      let uri = URI.repo_issue_events ~user ~repo in
+      API.get ?token ~uri (fun b -> return (events_of_string b))
+
+    let public_events () =
+      let uri = URI.public_events in
+      API.get ~uri (fun b -> return (events_of_string b))
+
+    let for_network ?token ~user ~repo () =
+      let uri = URI.network_events ~user ~repo in
+      API.get ?token ~uri (fun b -> return (events_of_string b))
+
+    let for_org ?token ~org () =
+      let uri = URI.org_events ~org in
+      API.get ?token ~uri (fun b -> return (events_of_string b))
+
+    let for_org_member ?token ~user ~org () =
+      let uri = URI.org_member_events ~user ~org in
+      API.get ?token ~uri (fun b -> return (events_of_string b))
+
+    let received_by_user ?token ~user () =
+      let uri = URI.received_events ~user in
+      API.get ?token ~uri (fun b -> return (events_of_string b))
+
+    let public_received_by_user ?token ~user () =
+      let uri = URI.public_received_events ~user in
+      API.get ?token ~uri (fun b -> return (events_of_string b))
+
+    let for_user ?token ~user () =
+      let uri = URI.user_events ~user in
+      API.get ?token ~uri (fun b -> return (events_of_string b))
+
+    let for_user_public ?token ~user () =
+      let uri = URI.user_events ~user in
+      API.get ?token ~uri (fun b -> return (events_of_string b))
   end
 
   module Git_obj = struct

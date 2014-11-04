@@ -364,7 +364,7 @@ module type Github = sig
       repo:string -> num:int -> unit -> unit Monad.t
   end
 
-  module Repo: sig
+  module Repo : sig
     val info:
       ?token:Token.t ->
       user:string -> repo:string ->
@@ -384,6 +384,50 @@ module type Github = sig
       ?token:Token.t ->
       user:string -> repo:string -> sha:string ->
       unit -> Github_t.commit Monad.t
+  end
+
+  module Event : sig
+    val for_repo :
+      ?token:Token.t ->
+      user:string ->
+      repo:string -> unit -> Github_t.events Monad.t
+
+    val for_repo_issues :
+      ?token:Token.t ->
+      user:string ->
+      repo:string -> unit -> Github_t.events Monad.t
+
+    val public_events : unit -> Github_t.events Monad.t
+
+    val for_network :
+      ?token:Token.t ->
+      user:string ->
+      repo:string -> unit -> Github_t.events Monad.t
+
+    val for_org :
+      ?token:Token.t ->
+      org:string -> unit -> Github_t.events Monad.t
+
+    val for_org_member :
+      ?token:Token.t ->
+      user:string ->
+      org:string -> unit -> Github_t.events Monad.t
+
+    val received_by_user :
+      ?token:Token.t ->
+      user:string -> unit -> Github_t.events Monad.t
+
+    val public_received_by_user :
+      ?token:Token.t ->
+      user:string -> unit -> Github_t.events Monad.t
+
+    val for_user :
+      ?token:Token.t ->
+      user:string -> unit -> Github_t.events Monad.t
+
+    val for_user_public :
+      ?token:Token.t ->
+      user:string -> unit -> Github_t.events Monad.t
   end
 
   module Git_obj : sig

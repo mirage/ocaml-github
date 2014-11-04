@@ -266,7 +266,7 @@ module Make(CL : Cohttp_lwt.Client) = struct
     * an HTTP error. Depending on the error status code, it may
     * be retried within the monad, or a permanent failure returned *)
     type error =
-      | Generic of CL.Response.t
+      | Generic of (CL.Response.t * CLB.t)
       | Semantic of Github_t.message
       | No_response
       | Bad_response of exn
@@ -286,19 +286,29 @@ module Make(CL : Cohttp_lwt.Client) = struct
     and 'a t = state -> (state * 'a signal) Lwt.t
 
     let error_to_string = function
-      | Generic res ->
-        sprintf "HTTP Error %s\n%s\n" (C.Code.string_of_status (CL.Response.status res))
-          (String.concat "\n" (C.Header.to_lines (CL.Response.headers res)))
+      | Generic (res, body) ->
+        lwt body_s = CLB.to_string body in
+        Lwt.return
+          (sprintf "HTTP Error %s\nHeaders:\n%s\nBody:\n%s\n"
+             (C.Code.string_of_status (CL.Response.status res))
+             (String.concat "" (C.Header.to_lines (CL.Response.headers res)))
+             body_s)
       | Semantic message ->
-        sprintf "GitHub Error %s\n%s"
-          message.Github_t.message_message
-          (List.fold_left (fun s {Github_t.error_resource; error_field; error_code} ->
-            let error_field = match error_field with None -> "\"\"" | Some x -> x in
-            sprintf "%s> Resource type: %s\n  Field: %s\n  Code: %s\n"
-              s error_resource error_field error_code)
-            "" message.Github_t.message_errors)
-      | No_response -> "No response"
-      | Bad_response exn -> sprintf "Bad response: %s\n" (Printexc.to_string exn)    
+        Lwt.return
+          (sprintf "GitHub Error %s\n%s"
+             message.Github_t.message_message
+             (List.fold_left
+                (fun s {Github_t.error_resource; error_field; error_code} ->
+                  let error_field = match error_field with
+                    | None -> "\"\""
+                    | Some x -> x
+                  in
+                  sprintf "%s> Resource type: %s\n  Field: %s\n  Code: %s\n"
+                    s error_resource error_field error_code)
+                "" message.Github_t.message_errors))
+      | No_response -> Lwt.return "No response"
+      | Bad_response exn ->
+        Lwt.return (sprintf "Bad response: %s\n" (Printexc.to_string exn))
 
     let error err = Error err
     let response r = Response r
@@ -339,7 +349,8 @@ module Make(CL : Cohttp_lwt.Client) = struct
     let run th = match_lwt bind th return initial_state with
       | _, Request (_,_) -> Lwt.fail (Failure "Impossible: can't run unapplied request")
       | _, Response r -> Lwt.return r
-      | _, Error e -> Lwt.fail (Failure (error_to_string e))
+      | _, Error e -> Lwt.(error_to_string e >>= fun err ->
+                           Printf.eprintf "%s%!" err; fail (Failure err))
 
     let (>>=) = bind
   end
@@ -365,10 +376,12 @@ module Make(CL : Cohttp_lwt.Client) = struct
           with exn -> bad_response exn
         end
       | [] ->
-          if CL.Response.status envelope = `Unprocessable_entity
-          then lwt message = CLB.to_string body in
-              Lwt.return Monad.(error (Semantic (Github_j.message_of_string message)))
-          else Lwt.return Monad.(error (Generic envelope))
+        match CL.Response.status envelope with
+        | `Unprocessable_entity | `Gone ->
+          lwt message = CLB.to_string body in
+          let message = Github_j.message_of_string message in
+          Lwt.return Monad.(error (Semantic message))
+        | _ -> Lwt.return Monad.(error (Generic (envelope, body)))
 
     (* Force chunked-encoding
     * to be disabled (to satisfy Github, which returns 411 Length Required
@@ -437,24 +450,34 @@ module Make(CL : Cohttp_lwt.Client) = struct
       let req = { auth_req_scopes=scopes; auth_req_note=note; auth_req_note_url=note_url;
       auth_req_client_id=client_id; auth_req_client_secret=client_secret } in
       let body = string_of_auth_req req in
-      let headers = C.Header.(add_authorization (init ()) (`Basic (user,pass))) in
+      let headers =
+        C.Header.(add_authorization (init ()) (`Basic (user,pass)))
+      in
       let uri = URI.authorizations in
-      API.post ~headers ~body ~uri ~expected_code:`Created (fun body -> return (auth_of_string body))
+      API.post ~headers ~body ~uri ~expected_code:`Created (fun body ->
+        return (auth_of_string body))
 
     let get_all ~user ~pass () =
       let uri = URI.authorizations in
-      let headers = C.Header.(add_authorization (init ()) (`Basic (user,pass))) in
-      API.get ~headers ~uri ~expected_code:`OK (fun body -> return (auths_of_string body))
+      let headers =
+        C.Header.(add_authorization (init ()) (`Basic (user,pass)))
+      in
+      API.get ~headers ~uri ~expected_code:`OK (fun body ->
+        return (auths_of_string body))
 
     let get ~user ~pass ~id () =
       let uri = URI.authorization id in
-      let headers = C.Header.(add_authorization (init ()) (`Basic (user,pass))) in
-      API.get ~headers ~uri ~expected_code:`OK (fun body -> return (auth_of_string body))
+      let headers =
+        C.Header.(add_authorization (init ()) (`Basic (user,pass)))
+      in
+      API.get ~headers ~uri ~expected_code:`OK (fun body ->
+        return (auth_of_string body))
 
     let delete ~user ~pass ~id () =
       let uri = URI.authorization id in
       let headers = C.Header.(add_authorization (init ()) (`Basic (user,pass))) in
-      API.delete ~headers ~uri ~expected_code:`No_content (fun body -> return ())
+      API.delete ~headers ~uri ~expected_code:`No_content (fun body ->
+        return ())
 
     (* Convert a code after a user oAuth into an access token that can
     * be used in subsequent requests.

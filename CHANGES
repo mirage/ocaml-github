@@ -1,5 +1,5 @@
 0.9.2 (2014-11-09):
-* Better log error messages.
+* Better log error messages (#39).
 * Tweak Makefile to build JavaScript version by default if `js_of_ocaml` is installed.
 
 0.9.1 (2014-11-04):

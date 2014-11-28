@@ -375,6 +375,11 @@ module type Github = sig
       user:string -> repo:string ->
       unit -> Github_t.repo_tags Monad.t
 
+    val branches :
+      ?token:Token.t ->
+      user:string -> repo:string ->
+      unit -> Github_t.repo_branches Monad.t
+
     val refs :
       ?token:Token.t ->
       ?ty:string -> user:string -> repo:string ->

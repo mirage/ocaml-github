@@ -140,6 +140,9 @@ module Make(CL : Cohttp_lwt.Client) = struct
     let repo_tag ~user ~repo ~sha =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/git/tags/%s" api user repo sha)
 
+    let repo_branches ~user ~repo =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/branches" api user repo)
+
     let repo_refs ?ty ~user ~repo =
       let suffix =
         match ty with
@@ -801,6 +804,10 @@ module Make(CL : Cohttp_lwt.Client) = struct
     let tags ?token ~user ~repo () =
       let uri = URI.repo_tags ~user ~repo in
       API.get ?token ~uri (fun b -> return (repo_tags_of_string b))
+
+    let branches ?token ~user ~repo () =
+      let uri = URI.repo_branches ~user ~repo in
+      API.get ?token ~uri (fun b -> return (repo_branches_of_string b))
 
     let refs ?token ?ty ~user ~repo () =
       let uri = URI.repo_refs ?ty ~user ~repo in

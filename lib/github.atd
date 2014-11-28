@@ -202,6 +202,13 @@ type repo_tag = {
 
 type repo_tags = repo_tag list
 
+type repo_branch = {
+  name: string;
+  commit: repo_commit;
+} <ocaml field_prefix="repo_branch_">
+
+type repo_branches = repo_branch list
+
 type obj_type = [
     Blob <json name="blob">
   | Tree <json name="tree">

@@ -218,3 +218,11 @@ Executable create_statuses
   CompiledObject:     best
   Install:            false
   BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, atdgen
+
+Executable organizations
+  Path:               lib_test
+  MainIs:             organizations.ml
+  Custom:             true
+  CompiledObject:     best
+  Install:            false
+  BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, atdgen

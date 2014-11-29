@@ -479,6 +479,11 @@ module type Github = sig
       ?token:Token.t ->
       id:int ->
       unit -> Github_t.team Monad.t
+
+    val repos :
+      ?token:Token.t ->
+      id:int ->
+      unit -> Github_t.repos Monad.t
   end
 
   (** [log_active] activates debug messages

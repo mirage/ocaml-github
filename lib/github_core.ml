@@ -261,6 +261,9 @@ module Make(CL : Cohttp_lwt.Client) = struct
 
     let org_teams ~org =
       Uri.of_string (Printf.sprintf "%s/orgs/%s/teams" api org)
+
+    let team_repos ~id =
+      Uri.of_string (Printf.sprintf "%s/teams/%d/repos" api id)
   end 
 
   module C = Cohttp
@@ -1001,6 +1004,10 @@ module Make(CL : Cohttp_lwt.Client) = struct
     let get ?token ~id () =
       let uri = URI.get_team ~id in
       API.get ?token ~uri (fun b -> return (team_of_string b))
+
+    let repos ?token ~id () =
+      let uri = URI.team_repos ~id in
+      API.get ?token ~uri (fun b -> return (repos_of_string b))
   end
 end 
 

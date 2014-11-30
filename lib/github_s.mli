@@ -475,10 +475,10 @@ module type Github = sig
   end
 
   module Team : sig
-    val get :
+    val info :
       ?token:Token.t ->
       id:int ->
-      unit -> Github_t.team Monad.t
+      unit -> Github_t.team_info Monad.t
 
     val repos :
       ?token:Token.t ->

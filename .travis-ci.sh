@@ -22,6 +22,7 @@ opam --git-version
 
 opam init
 opam remote add mirage git://github.com/mirage/mirage-dev
+opam pin $pinx cohttp git://github.com/mirage/ocaml-cohttp
 opam pin $pinx github .
 opam install github
 opam install js_of_ocaml

@@ -1,4 +1,8 @@
-0.9.3 (2014-12-28):
+0.9.4 (2014-12-18):
+* Use `Bytes` instead of `String` for future `safe-string` support.
+* Use the Cohttp 0.14.0 API in the test cases.
+
+0.9.3 (2014-11-28):
 * Add `repo_branches` and `branches` query functions (#44 from Jeff Hammerbacher).
 * Improve `opam` 1.2 metadata.
 

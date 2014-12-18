@@ -30,8 +30,8 @@ Library github_unix
   Findlibname: unix
   FindlibParent: github_core
   Modules: Github, Github_cookie_jar
-  BuildDepends: lwt.syntax, lwt.unix, cohttp.lwt, github
-  XMETARequires: lwt.unix, cohttp.lwt, github
+  BuildDepends: lwt.syntax, lwt.unix, cohttp.lwt, github, bytes
+  XMETARequires: lwt.unix, cohttp.lwt, github, bytes
 
 Library github_js
   Build$: flag(js)

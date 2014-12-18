@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: c61540d01b168cb6ad7583a5152d5393)
+# DO NOT EDIT (digest: eb66c49a38b084faf4ceaa57fd12c0be)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
@@ -25,6 +25,7 @@ true: annot, bin_annot
 # Library github_unix
 "unix/github_unix.cmxs": use_github_unix
 <unix/*.ml{,i,y}>: pkg_atdgen
+<unix/*.ml{,i,y}>: pkg_bytes
 <unix/*.ml{,i,y}>: pkg_cohttp
 <unix/*.ml{,i,y}>: pkg_cohttp.lwt
 <unix/*.ml{,i,y}>: pkg_cohttp.lwt-core
@@ -48,6 +49,7 @@ true: annot, bin_annot
 <js/*.ml{,i,y}>: use_github_core
 # Executable rwo
 <lib_test/rwo.{native,byte}>: pkg_atdgen
+<lib_test/rwo.{native,byte}>: pkg_bytes
 <lib_test/rwo.{native,byte}>: pkg_cohttp
 <lib_test/rwo.{native,byte}>: pkg_cohttp.lwt
 <lib_test/rwo.{native,byte}>: pkg_cohttp.lwt-core
@@ -62,6 +64,7 @@ true: annot, bin_annot
 <lib_test/rwo.{native,byte}>: custom
 # Executable git-jar
 <jar/jar.{native,byte}>: pkg_atdgen
+<jar/jar.{native,byte}>: pkg_bytes
 <jar/jar.{native,byte}>: pkg_cmdliner
 <jar/jar.{native,byte}>: pkg_cohttp
 <jar/jar.{native,byte}>: pkg_cohttp.lwt
@@ -77,6 +80,7 @@ true: annot, bin_annot
 <jar/jar.{native,byte}>: custom
 # Executable git-create-release
 <jar/create_release.{native,byte}>: pkg_atdgen
+<jar/create_release.{native,byte}>: pkg_bytes
 <jar/create_release.{native,byte}>: pkg_cmdliner
 <jar/create_release.{native,byte}>: pkg_cohttp
 <jar/create_release.{native,byte}>: pkg_cohttp.lwt
@@ -90,6 +94,7 @@ true: annot, bin_annot
 <jar/create_release.{native,byte}>: custom
 # Executable git-sync-releases
 <jar/sync_releases.{native,byte}>: pkg_atdgen
+<jar/sync_releases.{native,byte}>: pkg_bytes
 <jar/sync_releases.{native,byte}>: pkg_cmdliner
 <jar/sync_releases.{native,byte}>: pkg_cohttp
 <jar/sync_releases.{native,byte}>: pkg_cohttp.lwt
@@ -103,6 +108,7 @@ true: annot, bin_annot
 <jar/sync_releases.{native,byte}>: custom
 # Executable git-upload-release
 <jar/upload_release.{native,byte}>: pkg_atdgen
+<jar/upload_release.{native,byte}>: pkg_bytes
 <jar/upload_release.{native,byte}>: pkg_cmdliner
 <jar/upload_release.{native,byte}>: pkg_cohttp
 <jar/upload_release.{native,byte}>: pkg_cohttp.lwt
@@ -116,6 +122,7 @@ true: annot, bin_annot
 <jar/upload_release.{native,byte}>: custom
 # Executable git-list-releases
 <jar/list_releases.{native,byte}>: pkg_atdgen
+<jar/list_releases.{native,byte}>: pkg_bytes
 <jar/list_releases.{native,byte}>: pkg_cmdliner
 <jar/list_releases.{native,byte}>: pkg_cohttp
 <jar/list_releases.{native,byte}>: pkg_cohttp.lwt
@@ -127,6 +134,7 @@ true: annot, bin_annot
 <jar/list_releases.{native,byte}>: use_github_core
 <jar/list_releases.{native,byte}>: use_github_unix
 <jar/*.ml{,i,y}>: pkg_atdgen
+<jar/*.ml{,i,y}>: pkg_bytes
 <jar/*.ml{,i,y}>: pkg_cmdliner
 <jar/*.ml{,i,y}>: pkg_cohttp
 <jar/*.ml{,i,y}>: pkg_cohttp.lwt
@@ -140,6 +148,7 @@ true: annot, bin_annot
 <jar/list_releases.{native,byte}>: custom
 # Executable current_user
 <lib_test/current_user.{native,byte}>: pkg_atdgen
+<lib_test/current_user.{native,byte}>: pkg_bytes
 <lib_test/current_user.{native,byte}>: pkg_cohttp
 <lib_test/current_user.{native,byte}>: pkg_cohttp.lwt
 <lib_test/current_user.{native,byte}>: pkg_cohttp.lwt-core
@@ -152,6 +161,7 @@ true: annot, bin_annot
 <lib_test/current_user.{native,byte}>: custom
 # Executable get_token
 <lib_test/get_token.{native,byte}>: pkg_atdgen
+<lib_test/get_token.{native,byte}>: pkg_bytes
 <lib_test/get_token.{native,byte}>: pkg_cohttp
 <lib_test/get_token.{native,byte}>: pkg_cohttp.lwt
 <lib_test/get_token.{native,byte}>: pkg_cohttp.lwt-core
@@ -164,6 +174,7 @@ true: annot, bin_annot
 <lib_test/get_token.{native,byte}>: custom
 # Executable repo_info
 <lib_test/repo_info.{native,byte}>: pkg_atdgen
+<lib_test/repo_info.{native,byte}>: pkg_bytes
 <lib_test/repo_info.{native,byte}>: pkg_cohttp
 <lib_test/repo_info.{native,byte}>: pkg_cohttp.lwt
 <lib_test/repo_info.{native,byte}>: pkg_cohttp.lwt-core
@@ -176,6 +187,7 @@ true: annot, bin_annot
 <lib_test/repo_info.{native,byte}>: custom
 # Executable list_issues
 <lib_test/issues.{native,byte}>: pkg_atdgen
+<lib_test/issues.{native,byte}>: pkg_bytes
 <lib_test/issues.{native,byte}>: pkg_cohttp
 <lib_test/issues.{native,byte}>: pkg_cohttp.lwt
 <lib_test/issues.{native,byte}>: pkg_cohttp.lwt-core
@@ -188,6 +200,7 @@ true: annot, bin_annot
 <lib_test/issues.{native,byte}>: custom
 # Executable list_tags
 <lib_test/tags.{native,byte}>: pkg_atdgen
+<lib_test/tags.{native,byte}>: pkg_bytes
 <lib_test/tags.{native,byte}>: pkg_cohttp
 <lib_test/tags.{native,byte}>: pkg_cohttp.lwt
 <lib_test/tags.{native,byte}>: pkg_cohttp.lwt-core
@@ -200,6 +213,7 @@ true: annot, bin_annot
 <lib_test/tags.{native,byte}>: custom
 # Executable list_milestones
 <lib_test/milestones.{native,byte}>: pkg_atdgen
+<lib_test/milestones.{native,byte}>: pkg_bytes
 <lib_test/milestones.{native,byte}>: pkg_cohttp
 <lib_test/milestones.{native,byte}>: pkg_cohttp.lwt
 <lib_test/milestones.{native,byte}>: pkg_cohttp.lwt-core
@@ -212,6 +226,7 @@ true: annot, bin_annot
 <lib_test/milestones.{native,byte}>: custom
 # Executable releases
 <lib_test/releases.{native,byte}>: pkg_atdgen
+<lib_test/releases.{native,byte}>: pkg_bytes
 <lib_test/releases.{native,byte}>: pkg_cohttp
 <lib_test/releases.{native,byte}>: pkg_cohttp.lwt
 <lib_test/releases.{native,byte}>: pkg_cohttp.lwt-core
@@ -224,6 +239,7 @@ true: annot, bin_annot
 <lib_test/releases.{native,byte}>: custom
 # Executable deploy_keys
 <lib_test/deploy_keys.{native,byte}>: pkg_atdgen
+<lib_test/deploy_keys.{native,byte}>: pkg_bytes
 <lib_test/deploy_keys.{native,byte}>: pkg_cohttp
 <lib_test/deploy_keys.{native,byte}>: pkg_cohttp.lwt
 <lib_test/deploy_keys.{native,byte}>: pkg_cohttp.lwt-core
@@ -236,6 +252,7 @@ true: annot, bin_annot
 <lib_test/deploy_keys.{native,byte}>: custom
 # Executable list_pulls
 <lib_test/pulls.{native,byte}>: pkg_atdgen
+<lib_test/pulls.{native,byte}>: pkg_bytes
 <lib_test/pulls.{native,byte}>: pkg_cohttp
 <lib_test/pulls.{native,byte}>: pkg_cohttp.lwt
 <lib_test/pulls.{native,byte}>: pkg_cohttp.lwt-core
@@ -248,6 +265,7 @@ true: annot, bin_annot
 <lib_test/pulls.{native,byte}>: custom
 # Executable create_issue
 <lib_test/create_issue.{native,byte}>: pkg_atdgen
+<lib_test/create_issue.{native,byte}>: pkg_bytes
 <lib_test/create_issue.{native,byte}>: pkg_cohttp
 <lib_test/create_issue.{native,byte}>: pkg_cohttp.lwt
 <lib_test/create_issue.{native,byte}>: pkg_cohttp.lwt-core
@@ -260,6 +278,7 @@ true: annot, bin_annot
 <lib_test/create_issue.{native,byte}>: custom
 # Executable create_milestone
 <lib_test/create_milestone.{native,byte}>: pkg_atdgen
+<lib_test/create_milestone.{native,byte}>: pkg_bytes
 <lib_test/create_milestone.{native,byte}>: pkg_cohttp
 <lib_test/create_milestone.{native,byte}>: pkg_cohttp.lwt
 <lib_test/create_milestone.{native,byte}>: pkg_cohttp.lwt-core
@@ -272,6 +291,7 @@ true: annot, bin_annot
 <lib_test/create_milestone.{native,byte}>: custom
 # Executable create_pull
 <lib_test/create_pull.{native,byte}>: pkg_atdgen
+<lib_test/create_pull.{native,byte}>: pkg_bytes
 <lib_test/create_pull.{native,byte}>: pkg_cohttp
 <lib_test/create_pull.{native,byte}>: pkg_cohttp.lwt
 <lib_test/create_pull.{native,byte}>: pkg_cohttp.lwt-core
@@ -284,6 +304,7 @@ true: annot, bin_annot
 <lib_test/create_pull.{native,byte}>: custom
 # Executable create_hook
 <lib_test/create_hook.{native,byte}>: pkg_atdgen
+<lib_test/create_hook.{native,byte}>: pkg_bytes
 <lib_test/create_hook.{native,byte}>: pkg_cohttp
 <lib_test/create_hook.{native,byte}>: pkg_cohttp.lwt
 <lib_test/create_hook.{native,byte}>: pkg_cohttp.lwt-core
@@ -296,6 +317,7 @@ true: annot, bin_annot
 <lib_test/create_hook.{native,byte}>: custom
 # Executable delete_all_hooks
 <lib_test/delete_all_hooks.{native,byte}>: pkg_atdgen
+<lib_test/delete_all_hooks.{native,byte}>: pkg_bytes
 <lib_test/delete_all_hooks.{native,byte}>: pkg_cohttp
 <lib_test/delete_all_hooks.{native,byte}>: pkg_cohttp.lwt
 <lib_test/delete_all_hooks.{native,byte}>: pkg_cohttp.lwt-core
@@ -308,6 +330,7 @@ true: annot, bin_annot
 <lib_test/delete_all_hooks.{native,byte}>: custom
 # Executable create_statuses
 <lib_test/create_statuses.{native,byte}>: pkg_atdgen
+<lib_test/create_statuses.{native,byte}>: pkg_bytes
 <lib_test/create_statuses.{native,byte}>: pkg_cohttp
 <lib_test/create_statuses.{native,byte}>: pkg_cohttp.lwt
 <lib_test/create_statuses.{native,byte}>: pkg_cohttp.lwt-core
@@ -318,6 +341,7 @@ true: annot, bin_annot
 <lib_test/create_statuses.{native,byte}>: use_github_core
 <lib_test/create_statuses.{native,byte}>: use_github_unix
 <lib_test/*.ml{,i,y}>: pkg_atdgen
+<lib_test/*.ml{,i,y}>: pkg_bytes
 <lib_test/*.ml{,i,y}>: pkg_cohttp
 <lib_test/*.ml{,i,y}>: pkg_cohttp.lwt
 <lib_test/*.ml{,i,y}>: pkg_cohttp.lwt-core

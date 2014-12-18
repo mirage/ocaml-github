@@ -1,4 +1,5 @@
 0.9.4 (2014-12-18):
+* Add bindings for organisation teams and repositories (#45).
 * Use `Bytes` instead of `String` for future `safe-string` support.
 * Use the Cohttp 0.14.0 API in the test cases.
 

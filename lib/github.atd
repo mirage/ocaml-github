@@ -622,4 +622,21 @@ type gist_edits = {
   files : (string * gist_edit) list <json repr="object">
 } <ocaml field_prefix="gist_edit_">
 
+type team = {
+  url: string;
+  name: string;
+  id: int;
+} <ocaml field_prefix="team_">
+
+type teams = team list
+
+type team_info = {
+  permission: string;
+  members_count: int;
+  repos_count: int;
+  organization: user;
+  inherit team
+} <ocaml field_prefix="team_info_">
+
+type team_infos = team_info list
 

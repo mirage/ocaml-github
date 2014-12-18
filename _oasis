@@ -2,7 +2,7 @@ OASISFormat: 0.3
 Name:        github
 Version:     0.9.4
 Synopsis:    Github API interface
-Authors:     Anil Madhavapeddy, David Sheets, Andy Ray
+Authors:     Anil Madhavapeddy, David Sheets, Andy Ray, Jeff Hammerbacher
 License:     ISC
 Plugins:     META (0.3)
 BuildTools: ocamlbuild
@@ -214,6 +214,14 @@ Executable delete_all_hooks
 Executable create_statuses
   Path:               lib_test
   MainIs:             create_statuses.ml
+  Custom:             true
+  CompiledObject:     best
+  Install:            false
+  BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, atdgen
+
+Executable organizations
+  Path:               lib_test
+  MainIs:             organizations.ml
   Custom:             true
   CompiledObject:     best
   Install:            false

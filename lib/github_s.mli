@@ -467,6 +467,25 @@ module type Github = sig
       unit Monad.t
   end
 
+  module Organization : sig
+    val teams :
+      ?token:Token.t ->
+      org:string ->
+      unit -> Github_t.teams Monad.t
+  end
+
+  module Team : sig
+    val info :
+      ?token:Token.t ->
+      id:int ->
+      unit -> Github_t.team_info Monad.t
+
+    val repos :
+      ?token:Token.t ->
+      id:int ->
+      unit -> Github_t.repos Monad.t
+  end
+
   (** [log_active] activates debug messages
 
       set by default when the environment variable GITHUB_DEBUG is set to 1 *)

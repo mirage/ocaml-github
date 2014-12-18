@@ -256,6 +256,14 @@ module Make(CL : Cohttp_lwt.Client) = struct
     let delete_gist ~id =
       Uri.of_string (Printf.sprintf "%s/gists/%s" api id)
 
+    let team ~id =
+      Uri.of_string (Printf.sprintf "%s/teams/%d" api id)
+
+    let org_teams ~org =
+      Uri.of_string (Printf.sprintf "%s/orgs/%s/teams" api org)
+
+    let team_repos ~id =
+      Uri.of_string (Printf.sprintf "%s/teams/%d/repos" api id)
   end 
 
   module C = Cohttp
@@ -980,8 +988,26 @@ module Make(CL : Cohttp_lwt.Client) = struct
     let delete ~token ~id () = 
       let uri = URI.delete_gist ~id in
       API.delete ~token ~uri ~expected_code:`No_content (fun b -> return ())
-
   end
 
+  module Organization = struct
+    open Lwt
+
+    let teams ?token ~org () =
+      let uri = URI.org_teams ~org in
+      API.get ?token ~uri (fun b -> return (teams_of_string b))
+  end
+
+  module Team = struct
+    open Lwt
+
+    let info ?token ~id () =
+      let uri = URI.team ~id in
+      API.get ?token ~uri (fun b -> return (team_info_of_string b))
+
+    let repos ?token ~id () =
+      let uri = URI.team_repos ~id in
+      API.get ?token ~uri (fun b -> return (repos_of_string b))
+  end
 end 
 

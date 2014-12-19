@@ -1,7 +1,10 @@
 0.9.4 (2014-12-18):
 * Add bindings for organisation teams and repositories (#45).
 * Use `Bytes` instead of `String` for future `safe-string` support.
-* Use the Cohttp 0.14.0 API in the test cases.
+* Use the Cohttp 0.14.0 API in the test cases and make them optional
+  (activate with `--enable-tests` during configure).
+* Add a `--json` option to `git-list-releases` so that it can emit
+  the release information in JSON rather than Markdown.
 
 0.9.3 (2014-11-28):
 * Add `repo_branches` and `branches` query functions (#44 from Jeff Hammerbacher).

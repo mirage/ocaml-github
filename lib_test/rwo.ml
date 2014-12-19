@@ -87,7 +87,7 @@ let callback con_id req body =
 let server_t =
   let port = 8080 in
   let conn_closed con_id = () in
-  let spec = Cohttp_lwt_unix.Server.make ~callback ~conn_closed in
+  let spec = Cohttp_lwt_unix.Server.make ~callback ~conn_closed () in
   let ctx = Cohttp_lwt_unix_net.init () in
   let mode = `TCP (`Port port) in
   Cohttp_lwt_unix.Server.create ~ctx ~mode spec

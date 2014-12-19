@@ -41,7 +41,15 @@ let release_to_markdown (user,repo,r) =
       printf "%s\n\n" body;
       return ()
 
-let list_releases token repos =
+let releases_to_json rs =
+  print_endline (
+    Github_j.string_of_release_repos (
+      List.map (fun (release_repo_user,release_repo_repo,release_repo_release) ->
+        { Github_j.release_repo_user;release_repo_repo;release_repo_release }
+      ) rs)
+  )
+  
+let list_releases token repos json =
   let repos = List.map (fun r ->
       match Stringext.split ~max:2 ~on:'/' r with
       | [user;repo] -> (user,repo)
@@ -54,14 +62,19 @@ let list_releases token repos =
   (* Sort them by tag creation date *)
   let rtime (_,_,r) = fst (parse_iso8601_from_github r.Github_t.release_created_at) in
   let releases = List.sort (fun b a -> compare (rtime a) (rtime b)) releases in
-  Lwt_list.iter_s release_to_markdown releases
+  match json with
+  | false -> Lwt_list.iter_s release_to_markdown releases
+  | true -> releases_to_json releases; return_unit
 
 let cmd =
   let cookie = Jar_cli.cookie () in
   let repos = Jar_cli.repos ~doc_append:" to scan for changelogs" () in
   let doc = "list releases on GitHub repositories" in
   let man = [ `S "BUGS"; `P "Email bug reports to <mirageos-devel@lists.xenproject.org>.";] in
-  Term.((pure (fun t r -> Lwt_main.run (list_releases t r)) $ cookie $ repos)),
+  let json =
+    let doc = "Output in JSON format." in
+    Arg.(value & flag & info ["json"] ~doc) in
+  Term.((pure (fun t r j -> Lwt_main.run (list_releases t r j )) $ cookie $ repos $ json)),
   Term.info "git-list-releases" ~version:Jar_version.t ~doc ~man
 
 let () = match Term.eval cmd with `Error _ -> exit 1 | _ -> exit 0

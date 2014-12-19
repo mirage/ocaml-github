@@ -53,6 +53,7 @@ Document "github-api"
 
 Executable rwo
   Path:               lib_test
+  Build$:             flag(tests)
   MainIs:             rwo.ml
   Custom:             true
   CompiledObject:     best

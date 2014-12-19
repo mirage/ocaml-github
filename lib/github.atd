@@ -506,6 +506,13 @@ type release = {
 
 type releases = release list
 
+type release_repo = {
+  user: string;
+  repo: string;
+  release: release;
+} <ocaml field_prefix="release_repo_">
+type release_repos = release_repo list
+
 type new_release = {
   tag_name: string;
   target_commitish: string;

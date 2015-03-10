@@ -165,6 +165,9 @@ type issue = {
   user: user;
   labels: label list;
   ~comments: int;
+  ~created_at: string;
+  ~updated_at: string;
+  ~closed_at: string option;
   ?milestone: milestone option;
   ~sort <ocaml default="`Created">: issue_sort;
   ~direction <ocaml default="`Desc">: direction;

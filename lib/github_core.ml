@@ -724,14 +724,15 @@ module Make(CL : Cohttp_lwt.Client) = struct
     open Lwt
     
     let for_repo ?token ?creator ?mentioned ?labels
-      ?(milestone=`Any) ?(state=`Open) ?(sort=`Created)
-      ?(direction=`Desc) ?(page=1) ?assignee ~user ~repo () =
+      ?milestone ?state ?(sort=`Created)
+      ?(direction=`Desc) ?page ?assignee ~user ~repo () =
       let params = Filter.([
         "direction", string_of_direction direction;
-        "page", string_of_int page;
         "sort", string_of_issue_sort sort;
-        "state", string_of_state state;
-        "milestone", string_of_milestone milestone ]) in
+      ]) in
+      let params = match page with |None -> params |Some p -> ("page", string_of_int p)::params in
+      let params = match state with |None -> params |Some s -> ("state", Filter.string_of_state s)::params in
+      let params = match milestone with |None -> params |Some m -> ("milestone", Filter.string_of_milestone m)::params in
       let params = match assignee with |None -> params |Some a -> ("assignee", Filter.string_of_user a)::params in
       let params = match creator with |None -> params |Some c -> ("creator", c)::params in
       let params = match mentioned with |None -> params |Some m -> ("mentioned", m)::params in

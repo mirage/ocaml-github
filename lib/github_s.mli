@@ -375,6 +375,11 @@ module type Github = sig
       user:string -> repo:string ->
       unit -> Github_t.repo_tags Monad.t
 
+    val branches :
+      ?token:Token.t ->
+      user:string -> repo:string ->
+      unit -> Github_t.repo_branches Monad.t
+
     val refs :
       ?token:Token.t ->
       ?ty:string -> user:string -> repo:string ->
@@ -504,6 +509,25 @@ module type Github = sig
     val delete : 
       token:Token.t -> id:string -> unit -> 
       unit Monad.t
+  end
+
+  module Organization : sig
+    val teams :
+      ?token:Token.t ->
+      org:string ->
+      unit -> Github_t.teams Monad.t
+  end
+
+  module Team : sig
+    val info :
+      ?token:Token.t ->
+      id:int ->
+      unit -> Github_t.team_info Monad.t
+
+    val repos :
+      ?token:Token.t ->
+      id:int ->
+      unit -> Github_t.repos Monad.t
   end
 
   (** [log_active] activates debug messages

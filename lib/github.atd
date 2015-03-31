@@ -138,6 +138,8 @@ type team = {
   id: int;
 } <ocaml field_prefix="team_">
 
+type teams = team list
+
 type team_permission = [
   | Pull <json name="pull">
   | Push <json name="push">
@@ -202,6 +204,9 @@ type issue = {
   user: user;
   labels: label list;
   ~comments: int;
+  ~created_at: string;
+  ~updated_at: string;
+  ~closed_at: string option;
   ?milestone: milestone option;
   ~sort <ocaml default="`Created">: issue_sort;
   ~direction <ocaml default="`Desc">: direction;
@@ -243,6 +248,13 @@ type repo_tag = {
 } <ocaml field_prefix="repo_tag_">
 
 type repo_tags = repo_tag list
+
+type repo_branch = {
+  name: string;
+  commit: repo_commit;
+} <ocaml field_prefix="repo_branch_">
+
+type repo_branches = repo_branch list
 
 type obj_type = [
     Blob <json name="blob">
@@ -779,6 +791,13 @@ type release = {
 
 type releases = release list
 
+type release_repo = {
+  user: string;
+  repo: string;
+  release: release;
+} <ocaml field_prefix="release_repo_">
+type release_repos = release_repo list
+
 type new_release = {
   tag_name: string;
   target_commitish: string;
@@ -894,5 +913,3 @@ type gist_edits = {
   description : string;
   files : (string * gist_edit) list <json repr="object">
 } <ocaml field_prefix="gist_edit_">
-
-

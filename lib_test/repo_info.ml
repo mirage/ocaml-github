@@ -11,7 +11,12 @@ let t =
     Github.Repo.info ~token ~user:"ocaml" ~repo:"opam" () >>=
     fun info ->
       eprintf "repo %s\n" info.repo_description;
-      return ()
+      Github.Repo.branches ~token ~user:"ocaml" ~repo:"opam" () >>=
+      fun branches ->
+        List.iter (fun b ->
+          eprintf "branch %s %s\n" b.repo_branch_name b.repo_branch_commit.repo_commit_sha
+        ) branches;
+        return ()
   ) in
   return ()
 

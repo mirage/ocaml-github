@@ -1,8 +1,8 @@
 OASISFormat: 0.3
 Name:        github
-Version:     0.9.1
+Version:     0.9.4
 Synopsis:    Github API interface
-Authors:     Anil Madhavapeddy, David Sheets, Andy Ray
+Authors:     Anil Madhavapeddy, David Sheets, Andy Ray, Jeff Hammerbacher
 License:     ISC
 Plugins:     META (0.3)
 BuildTools: ocamlbuild
@@ -30,8 +30,8 @@ Library github_unix
   Findlibname: unix
   FindlibParent: github_core
   Modules: Github, Github_cookie_jar
-  BuildDepends: lwt.syntax, lwt.unix, cohttp.lwt, github
-  XMETARequires: lwt.unix, cohttp.lwt, github
+  BuildDepends: lwt.syntax, lwt.unix, cohttp.lwt, github, bytes
+  XMETARequires: lwt.unix, cohttp.lwt, github, bytes
 
 Library github_js
   Build$: flag(js)
@@ -53,6 +53,7 @@ Document "github-api"
 
 Executable rwo
   Path:               lib_test
+  Build$:             flag(tests)
   MainIs:             rwo.ml
   Custom:             true
   CompiledObject:     best
@@ -214,6 +215,14 @@ Executable delete_all_hooks
 Executable create_statuses
   Path:               lib_test
   MainIs:             create_statuses.ml
+  Custom:             true
+  CompiledObject:     best
+  Install:            false
+  BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, atdgen
+
+Executable organizations
+  Path:               lib_test
+  MainIs:             organizations.ml
   Custom:             true
   CompiledObject:     best
   Install:            false

@@ -1,6 +1,8 @@
 .PHONY: all clean install build
 PREFIX ?= /usr/local
 
+JS ?= $(shell if ocamlfind query js_of_ocaml >/dev/null 2>&1; then echo --enable-js; fi)
+
 all: build doc
 
 setup.bin: setup.ml
@@ -8,7 +10,7 @@ setup.bin: setup.ml
 	rm -f setup.cmx setup.cmi setup.o setup.cmo
 
 setup.data: setup.bin
-	./setup.bin -configure --prefix $(PREFIX)
+	./setup.bin -configure $(JS) --prefix $(PREFIX)
 
 build: setup.data setup.bin
 	./setup.bin -build -j 4 -classic-display

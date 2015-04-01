@@ -100,6 +100,14 @@ Executable "git-list-releases"
   Install:            true
   BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, cmdliner
 
+Executable "git-list-events"
+  Path:               jar
+  MainIs:             list_events.ml
+  Custom:             true
+  CompiledObject:     best
+  Install:            true
+  BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, cmdliner
+
 Executable current_user
   Path:               lib_test
   MainIs:             current_user.ml

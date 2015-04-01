@@ -18,8 +18,8 @@ depends: [
   "uri" {>= "1.5.0"}
   "cohttp" {>= "0.14.0"}
   "lwt" {>= "2.4.3"}
-  "atdgen" {>= "1.2.3"}
-  "yojson" {>= "1.1.6"}
+  "atdgen" {>= "1.5.0"}
+  "yojson" {>= "1.2.0"}
   "stringext"
   "lambda-term"
   "cmdliner"

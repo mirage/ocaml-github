@@ -10,7 +10,11 @@ let t =
     run (
     Github.Repo.info ~token ~user:"ocaml" ~repo:"opam" () >>=
     fun info ->
-      eprintf "repo %s\n" info.repo_description;
+      let descr = match info.repo_description with
+      | Some descr -> descr
+      | None -> ""
+      in
+      eprintf "repo %s\n" descr;
       Github.Repo.branches ~token ~user:"ocaml" ~repo:"opam" () >>=
       fun branches ->
         List.iter (fun b ->

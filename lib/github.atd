@@ -313,7 +313,7 @@ type repo = {
   owner: user;
   name: string;
   full_name: string;
-  description: string;
+  ?description: string option;
   ~private: bool;
   fork: bool;
   url: string;
@@ -784,7 +784,7 @@ type release = {
   id: int;
   tag_name: string;
   ?target_commitish: string option; 
-  name: string;
+  ?name: string option;
   body: string;
   draft: bool;
   prerelease: bool;
@@ -808,7 +808,7 @@ type release_repos = release_repo list
 type new_release = {
   tag_name: string;
   target_commitish: string;
-  name: string;
+  ?name: string option;
   body: string;
   draft: bool;
   prerelease: bool;

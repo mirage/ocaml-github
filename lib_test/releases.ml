@@ -3,10 +3,16 @@ open Printf
 
 let token = Config.access_token
 
+let name_of_release = Github_t.(function
+  | { release_name=Some name } -> name
+  | { release_name=None      } -> "NULL"
+)
+
 let print_releases m =
   List.iter (fun m ->
       let open Github_t in
-      eprintf "release %d: %s (%s)\n%!" m.release_id m.release_name m.release_created_at
+      let name = name_of_release m in
+      eprintf "release %d: %s (%s)\n%!" m.release_id name m.release_created_at
     ) m;
   eprintf "--\n%!"
 
@@ -25,7 +31,7 @@ let sync_releases (src_user,src_repo) (dst_user,dst_repo) =
       printf "%s %s %s %b %b\n" 
         r.release_tag_name 
         sha
-        r.release_name r.release_draft r.release_prerelease;
+        (name_of_release r) r.release_draft r.release_prerelease;
       let release = { 
         new_release_tag_name=r.release_tag_name;
         new_release_target_commitish=sha;

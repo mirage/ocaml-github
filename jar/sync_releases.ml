@@ -30,10 +30,11 @@ let sync_releases token src_user src_repo dst_user dst_repo =
       let tag = List.find (fun x -> x.repo_tag_name = r.release_tag_name) src_tags in
       let target = match r.release_target_commitish with None -> "master" | Some t -> t in
       let sha = tag.repo_tag_commit.repo_commit_sha in
+      let name = match r.release_name with Some name -> name | None -> "NULL" in
       printf "%s %s %s %b %b\n" 
         r.release_tag_name 
         sha
-        r.release_name r.release_draft r.release_prerelease;
+        name r.release_draft r.release_prerelease;
       let release = { 
         new_release_tag_name=r.release_tag_name;
         new_release_target_commitish=sha;

@@ -75,7 +75,7 @@ let cmd =
   in
   let release_name =
     let doc = "The name of the release on GitHub." in
-    Arg.(required & pos 3 (some string) None & info [] ~docv:"NAME" ~doc)
+    Arg.(value & pos 3 (some string) None & info [] ~docv:"NAME" ~doc)
   in
   let target_commitish =
     let doc =

@@ -701,12 +701,19 @@ type event_constr = [
   | Watch <json name="WatchEvent"> of watch_event
 ]
 
+type event_repo = {
+  id: int; (* TODO: too small? *)
+  name: string;
+  url: string;
+} <ocaml field_prefix="event_repo_">
+
 type event = {
   public: bool;
   payload <json tag_field="type">: event_constr;
   actor: user;
   ?org: org option;
   created_at: string;
+  repo: event_repo;
   id: int; (* TODO: too small? *)
 } <ocaml field_prefix="event_">
 

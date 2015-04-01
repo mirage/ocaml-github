@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: d64c60b6cab0f10303a478bc47dc7761)
+# DO NOT EDIT (digest: cabe55a0f712391c9321e7e8c98cf260)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
@@ -133,6 +133,20 @@ true: annot, bin_annot
 <jar/list_releases.{native,byte}>: pkg_yojson
 <jar/list_releases.{native,byte}>: use_github_core
 <jar/list_releases.{native,byte}>: use_github_unix
+<jar/list_releases.{native,byte}>: custom
+# Executable git-list-events
+<jar/list_events.{native,byte}>: pkg_atdgen
+<jar/list_events.{native,byte}>: pkg_bytes
+<jar/list_events.{native,byte}>: pkg_cmdliner
+<jar/list_events.{native,byte}>: pkg_cohttp
+<jar/list_events.{native,byte}>: pkg_cohttp.lwt
+<jar/list_events.{native,byte}>: pkg_cohttp.lwt-core
+<jar/list_events.{native,byte}>: pkg_lwt.syntax
+<jar/list_events.{native,byte}>: pkg_lwt.unix
+<jar/list_events.{native,byte}>: pkg_uri
+<jar/list_events.{native,byte}>: pkg_yojson
+<jar/list_events.{native,byte}>: use_github_core
+<jar/list_events.{native,byte}>: use_github_unix
 <jar/*.ml{,i,y}>: pkg_atdgen
 <jar/*.ml{,i,y}>: pkg_bytes
 <jar/*.ml{,i,y}>: pkg_cmdliner
@@ -145,7 +159,7 @@ true: annot, bin_annot
 <jar/*.ml{,i,y}>: pkg_yojson
 <jar/*.ml{,i,y}>: use_github_core
 <jar/*.ml{,i,y}>: use_github_unix
-<jar/list_releases.{native,byte}>: custom
+<jar/list_events.{native,byte}>: custom
 # Executable current_user
 <lib_test/current_user.{native,byte}>: pkg_atdgen
 <lib_test/current_user.{native,byte}>: pkg_bytes

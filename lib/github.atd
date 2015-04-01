@@ -421,14 +421,14 @@ type ref = [
 ]
 
 type create_event = {
-  ref <json constr="ref_type">: ref;
+  ref <json tag_field="ref_type">: ref;
   master_branch: string;
   ?description: string option;
   (* pusher_type *)
 } <ocaml field_prefix="create_event_">
 
 type delete_event = {
-  ref <json constr="ref_type">: ref;
+  ref <json tag_field="ref_type">: ref;
   (* pusher_type *)
 } <ocaml field_prefix="delete_event_">
 
@@ -703,7 +703,7 @@ type event_constr = [
 
 type event = {
   public: bool;
-  payload <json constr="type">: event_constr;
+  payload <json tag_field="type">: event_constr;
   actor: user;
   ?org: org option;
   created_at: string;
@@ -729,20 +729,20 @@ type hook = {
   created_at: string;
   events: event_type list;
   active: bool;
-  config <json constr="name">: hook_config;
+  config <json tag_field="name">: hook_config;
   id: int;
 } <ocaml field_prefix="hook_">
 
 type hooks = hook list
 
 type new_hook = {
-  config <json constr="name">: hook_config;
+  config <json tag_field="name">: hook_config;
   events: event_type list;
   active: bool;
 } <ocaml field_prefix="new_hook_">
 
 type update_hook = {
-  config <json constr="name">: hook_config;
+  config <json tag_field="name">: hook_config;
   ?events: event_type list option;
   active: bool;
 } <ocaml field_prefix="update_hook_">

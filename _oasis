@@ -235,3 +235,11 @@ Executable organizations
   CompiledObject:     best
   Install:            false
   BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, atdgen
+
+Executable parse_events
+  Path:               lib_test
+  MainIs:             parse_events.ml
+  Custom:             true
+  CompiledObject:     best
+  Install:            false
+  BuildDepends:       cohttp.lwt, github, cmdliner

@@ -1,3 +1,78 @@
+1.0.0 (trunk):
+* Changes marked with ! are type changes (not including field additions)
+* ! repo type has been renamed repository
+* ! repos type has been renamed repositories
+* ! User.repos is now User.repositories
+* ! Team.repos is now Team.repositories
+* ! repository_description is now optional
+* ! release_name is now optional
+* ! release_body is now optional
+* ! new_release_name is now optional
+* ! new_release_body is now optional
+* ! branch_user is now optional
+* ! user_info_ty field removed in favor of specific user and organization types
+* ! user_type type has been removed
+* ! team_info_permission is now a variant type instead of a string
+* ! team_info_organization is now an org rather than a user
+* ! event_org field is now an org option rather than a user
+* ! web_hook_config_insecure_ssl is now a bool rather than a string
+* ! hook_config is now a hook_config rather than a web_hook_config
+* ! new_hook_config is now a hook_config rather than a web_hook_config
+* ! update_hook_config is now a hook_config rather than a web_hook_config
+* Atdgen >=1.5.0 and Yojson >=1.2.0 are now required for tag_field support
+* Event submodule added with a variety of event sources
+* A new jar command, git-list-events, has been added to print events for a repo
+* A new test binary, parse_events, has been added which downloads and
+  parses archive event data
+* organization type added
+* user and organization now inherit from org
+* user_info_updated_at field added
+* user_info_html_url field added
+* issue_created_at, issue_updated_at, issue_closed_at added (#50,#51
+  from Michael Grünewald)
+* comment type added
+* issue_comment_html_url field added
+* commit_comment type added
+* commit_comment_event type added
+* ref type added
+* create_event type added
+* delete_event type added
+* fork_event type added
+* wiki_page_action type added
+* wiki_page type added
+* gollum_event added
+* issue_comment_action type added
+* issue_comment_event type added
+* issues_action type added
+* issues_event type added
+* member_action type added
+* member_event type added
+* page_build_error type added
+* page_build_status type added
+* page_build type added
+* page_build_event type added
+* pull_request_action type added
+* pull_reqest_event type added
+* pull_request_review_comment_action type added
+* pull_request_review_comment type added
+* pull_request_review_comment_event type added
+* push_event_author type added
+* push_event_commit type added
+* push_event type added
+* release_action type added
+* release_event type added
+* status_branch_commit type added
+* status_branch type added
+* status_event type added
+* team_add_info type added
+* team_add_event type added
+* watch_action type added
+* watch_event type added
+* event_constr type added
+* event_payload field added
+* events type added
+* hook_config type added
+
 0.9.4 (2014-12-18):
 * Add bindings for organisation teams and repositories (#45).
 * Use `Bytes` instead of `String` for future `safe-string` support.

@@ -329,9 +329,7 @@ type repository = {
   svn_url: string;
   ?mirror_url: string option;
   ~homepage: string;
-  forks: int;
   forks_count: int;
-  watchers: int;
   watchers_count: int;
   size: int;
   ?master_branch: string option;

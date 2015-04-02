@@ -4,6 +4,7 @@
 * ! Token.{create,get_all,get,delete} now return _ auth_continuation Monad.t
 * ! repo type has been renamed repository
 * ! repos type has been renamed repositories
+* ! repository_{forks,watchers} field removed. Use {forks,watchers}_count.
 * ! User.repos is now User.repositories
 * ! Team.repos is now Team.repositories
 * ! repository_description is now optional

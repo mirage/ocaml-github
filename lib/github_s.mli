@@ -132,8 +132,8 @@ module type Github = sig
 
     val info : ?token:Token.t -> login:string -> unit -> Github_t.user_info Monad.t
 
-    val repos:
-      user:string -> ?page:int -> unit -> Github_t.repos Monad.t
+    val repositories:
+      user:string -> ?page:int -> unit -> Github_t.repositories Monad.t
   end
 
   module Filter : sig
@@ -368,7 +368,7 @@ module type Github = sig
     val info:
       ?token:Token.t ->
       user:string -> repo:string ->
-      unit -> Github_t.repo Monad.t
+      unit -> Github_t.repository Monad.t
 
     val tags :
       ?token:Token.t ->
@@ -524,10 +524,10 @@ module type Github = sig
       id:int ->
       unit -> Github_t.team_info Monad.t
 
-    val repos :
+    val repositories :
       ?token:Token.t ->
       id:int ->
-      unit -> Github_t.repos Monad.t
+      unit -> Github_t.repositories Monad.t
   end
 
   (** [log_active] activates debug messages

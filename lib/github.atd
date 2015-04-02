@@ -153,7 +153,9 @@ type team_info = {
   organization: org;
   inherit team
 } <ocaml field_prefix="team_info_">
- 
+
+type team_infos = team_info list
+
 type label = {
   url: string;
   name: string;
@@ -309,14 +311,17 @@ type commit = {
 type commits = commit list
 
 type repo = {
-  id: int;
-  owner: user;
+  id: int; (* TODO: too small? *)
   name: string;
+  url: string;
+} <ocaml field_prefix="repo_">
+
+type repository = {
+  owner: user;
   full_name: string;
   ?description: string option;
   ~private: bool;
   fork: bool;
-  url: string;
   html_url: string;
   clone_url: string;
   git_url: string;
@@ -338,16 +343,17 @@ type repo = {
   has_issues: bool;
   has_wiki: bool;
   has_downloads: bool;
-} <ocaml field_prefix="repo_">
+  inherit repo
+} <ocaml field_prefix="repository_">
 
-type repos = repo list
+type repositories = repository list
 
 type branch = {
   label: string;
   ref: string;
   sha: string;
   ?user: user option;
-  ?repo: repo option;
+  ?repo: repository option;
 } <ocaml field_prefix="branch_">
 
 type link = {
@@ -433,7 +439,7 @@ type delete_event = {
 } <ocaml field_prefix="delete_event_">
 
 type fork_event = {
-  forkee: repo;
+  forkee: repository;
 } <ocaml field_prefix="fork_event_">
 
 type wiki_page_action = [
@@ -608,7 +614,7 @@ type team_add_info = {
 type team_add_event = {
   ?team: team_add_info option;
   ?user: user option;
-  ?repository: repo option;
+  ?repository: repository option;
   organization: org;
 } <ocaml field_prefix="team_add_event_">
 
@@ -701,19 +707,13 @@ type event_constr = [
   | Watch <json name="WatchEvent"> of watch_event
 ]
 
-type event_repo = {
-  id: int; (* TODO: too small? *)
-  name: string;
-  url: string;
-} <ocaml field_prefix="event_repo_">
-
 type event = {
   public: bool;
   payload <json tag_field="type">: event_constr;
   actor: user;
   ?org: org option;
   created_at: string;
-  repo: event_repo;
+  repo: repo;
   id: int; (* TODO: too small? *)
 } <ocaml field_prefix="event_">
 

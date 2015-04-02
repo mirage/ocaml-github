@@ -40,7 +40,7 @@ let string_of_status_state = Github_j.string_of_status_state
 let print_event event =
   let open Github_t in
   let user, repo =
-    match Stringext.split ~max:2 ~on:'/' event.event_repo.event_repo_name with
+    match Stringext.split ~max:2 ~on:'/' event.event_repo.repo_name with
     | user::repo::_ -> user, repo
     | [_] | [] -> failwith "nonsense repo name"
   in
@@ -63,8 +63,8 @@ let print_event event =
     printf "DeleteEvent on tag %s/%s %s\n%!" user repo tag
   | `Download -> printf "DownloadEvent deprecated\n%!"
   | `Follow -> printf "FollowEvent deprecated\n%!"
-  | `Fork { fork_event_forkee = { repo_full_name } } ->
-    printf "ForkEvent on %s/%s to %s\n%!" user repo repo_full_name
+  | `Fork { fork_event_forkee = { repository_full_name } } ->
+    printf "ForkEvent on %s/%s to %s\n%!" user repo repository_full_name
   | `ForkApply -> printf "ForkApplyEvent deprecated\n%!"
   | `Gist -> printf "GistEvent deprecated\n%!"
   | `Gollum { gollum_event_pages } ->

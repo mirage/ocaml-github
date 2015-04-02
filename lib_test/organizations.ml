@@ -12,11 +12,14 @@ let t =
   let first_team = List.hd teams in
   let get_first_team = Github.Team.info ~token:token ~id:first_team.team_id in
   ask_github get_first_team >>= fun team ->
-  eprintf "team %d: %s (%s)\n%!" team.team_info_id team.team_info_name team.team_info_url;
-  let get_team_repos = Github.Team.repos ~token:token ~id:team.team_info_id in
+  eprintf "team %d: %s (%s)\n%!"
+    team.team_info_id team.team_info_name team.team_info_url;
+  let get_team_repos =
+    Github.Team.repositories ~token:token ~id:team.team_info_id
+  in
   ask_github get_team_repos >>= fun repos ->
   let first_repo = List.hd repos in
-  eprintf "repo %d: %s\n%!" first_repo.repo_id first_repo.repo_name;
+  eprintf "repo %d: %s\n%!" first_repo.repository_id first_repo.repository_name;
   return ()
 
 let _ = Lwt_main.run t

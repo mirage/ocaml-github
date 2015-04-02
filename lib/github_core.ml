@@ -551,10 +551,10 @@ module Make(CL : Cohttp_lwt.Client) = struct
       let uri = URI.user ~login () in
       API.get ?token ~uri (fun body -> return (user_info_of_string body))
 
-    let repos ~user ?(page=1) () =
+    let repositories ~user ?(page=1) () =
       let uri = URI.user_repos ~user in
       let params = ["page",string_of_int page] in
-      API.get ~uri ~params (fun b -> return (repos_of_string b))
+      API.get ~uri ~params (fun b -> return (repositories_of_string b))
 
   end
 
@@ -838,7 +838,7 @@ module Make(CL : Cohttp_lwt.Client) = struct
 
     let info ?token ~user ~repo () =
       let uri = URI.repo ~user ~repo in
-      API.get ?token ~uri (fun b -> return (repo_of_string b))
+      API.get ?token ~uri (fun b -> return (repository_of_string b))
 
     let tags ?token ~user ~repo () =
       let uri = URI.repo_tags ~user ~repo in
@@ -1080,9 +1080,9 @@ module Make(CL : Cohttp_lwt.Client) = struct
       let uri = URI.team ~id in
       API.get ?token ~uri (fun b -> return (team_info_of_string b))
 
-    let repos ?token ~id () =
+    let repositories ?token ~id () =
       let uri = URI.team_repos ~id in
-      API.get ?token ~uri (fun b -> return (repos_of_string b))
+      API.get ?token ~uri (fun b -> return (repositories_of_string b))
   end
 end 
 

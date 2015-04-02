@@ -1,0 +1,17 @@
+EXT lwt
+
+PKG lwt
+PKG cmdliner
+PKG stringext
+PKG cohttp
+PKG yojson
+
+S lib
+S lib_test
+S jar
+S unix
+
+B _build/lib
+B _build/lib_test
+B _build/jar
+B _build/unix

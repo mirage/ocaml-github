@@ -397,8 +397,13 @@ module Make(CL : Cohttp_lwt.Client) = struct
     let (>>=) = bind
   end
 
-  module API = struct
+  type 'a auth_continuation =
+    | Result of 'a
+    | Auth of string * (string -> 'a auth_continuation Monad.t)
 
+  type 'a handler = (CL.Response.t * CLB.t -> bool) * (string -> 'a Lwt.t)
+
+  module API = struct
     (* Use the highest precedence handler that matches the response. *)
     let rec handle_response (envelope,body as response) = function
       | (p, handler)::more ->
@@ -448,30 +453,37 @@ module Make(CL : Cohttp_lwt.Client) = struct
     (* Add the correct mime-type header *)
     let realize_headers headers = C.Header.add_opt headers "content-type" "application/json"
 
-    let idempotent meth ?headers ?token ?params ~expected_code ~uri fn =
+    let idempotent
+        meth ?headers ?token ?params ~fail_handlers ~expected_code ~uri fn =
       fun state -> Lwt.return
         (state,
-        (Monad.(request ?token ?params
-                  {meth; uri; headers=realize_headers headers; body=CLB.empty})
-            (request [code_handler ~expected_code fn])))
+         (Monad.(request ?token ?params
+                   {meth; uri; headers=realize_headers headers; body=CLB.empty})
+            (request ((code_handler ~expected_code fn)::fail_handlers))))
 
-    let effectful meth ?headers ?body ?token ?params ~expected_code ~uri fn =
+    let effectful
+        meth ?headers ?body ?token ?params ~fail_handlers ~expected_code ~uri fn =
       let body = match body with None -> CLB.empty | Some b -> CLB.of_string b in
       fun state -> Lwt.return
         (state,
         (Monad.(request ?token ?params
                   {meth; uri; headers=realize_headers headers; body })
-            (request [code_handler ~expected_code fn])))
+            (request ((code_handler ~expected_code fn)::fail_handlers))))
 
-    let get ?(expected_code=`OK) = idempotent `GET ~expected_code
+    let get ?(fail_handlers=[]) ?(expected_code=`OK) =
+      idempotent `GET ~fail_handlers ~expected_code
 
-    let post ~expected_code = effectful `POST ~expected_code
+    let post ?(fail_handlers=[]) ~expected_code =
+      effectful `POST ~fail_handlers ~expected_code
 
-    let patch ~expected_code = effectful `PATCH ~expected_code
+    let patch ?(fail_handlers=[]) ~expected_code =
+      effectful `PATCH ~fail_handlers ~expected_code
 
-    let put ~expected_code = effectful `PUT ~expected_code
+    let put ?(fail_handlers=[]) ~expected_code =
+      effectful `PUT ~fail_handlers ~expected_code
 
-    let delete ?(expected_code=`No_content) = idempotent `DELETE ~expected_code
+    let delete ?(fail_handlers=[]) ?(expected_code=`No_content) =
+      idempotent `DELETE ~fail_handlers ~expected_code
 
     let set_user_agent user_agent = fun state ->
       Monad.(Lwt.return ({state with user_agent=Some user_agent}, Response ()))
@@ -488,38 +500,79 @@ module Make(CL : Cohttp_lwt.Client) = struct
     open Lwt
     type t = string
 
-    let create ?(scopes=[`Repo]) ?(note="ocaml-github") ?note_url ?client_id ?client_secret ~user ~pass () =
-      let req = { auth_req_scopes=scopes; auth_req_note=note; auth_req_note_url=note_url;
-      auth_req_client_id=client_id; auth_req_client_secret=client_secret } in
+    let two_factor_auth_handler repeat headers =
+      let mode = ref "" in
+      (fun (res,_) ->
+         CL.Response.status res = `Unauthorized
+         &&
+         match C.Header.get (CL.Response.headers res) "x-github-otp" with
+         | None -> false
+         | Some v ->
+           let required = String.sub v 0 10 in
+           if required = "required; "
+           then (mode := (Stringext.string_after v 10); true)
+           else false
+      ), (fun _ ->
+        return (Auth (!mode, (fun code ->
+          repeat (C.Header.replace headers "x-github-otp" code)
+        )))
+      )
+
+    let create ?(scopes=[`Repo]) ?(note="ocaml-github") ?note_url ?client_id
+        ?client_secret ~user ~pass () =
+      let req = {
+        auth_req_scopes=scopes; auth_req_note=note; auth_req_note_url=note_url;
+        auth_req_client_id=client_id; auth_req_client_secret=client_secret;
+      } in
       let body = string_of_auth_req req in
       let headers =
         C.Header.(add_authorization (init ()) (`Basic (user,pass)))
       in
       let uri = URI.authorizations in
-      API.post ~headers ~body ~uri ~expected_code:`Created (fun body ->
-        return (auth_of_string body))
+      let rec send headers =
+        let fail_handlers = [two_factor_auth_handler send headers] in
+        API.post ~headers ~body ~uri ~fail_handlers ~expected_code:`Created
+          (fun body -> return (Result (auth_of_string body)))
+      in
+      send headers
 
     let get_all ~user ~pass () =
       let uri = URI.authorizations in
       let headers =
         C.Header.(add_authorization (init ()) (`Basic (user,pass)))
       in
-      API.get ~headers ~uri ~expected_code:`OK (fun body ->
-        return (auths_of_string body))
+      let rec send headers =
+        let fail_handlers = [two_factor_auth_handler send headers] in
+        API.get ~headers ~uri ~fail_handlers ~expected_code:`OK (fun body ->
+          return (Result (auths_of_string body))
+        )
+      in
+      send headers
 
     let get ~user ~pass ~id () =
       let uri = URI.authorization id in
       let headers =
         C.Header.(add_authorization (init ()) (`Basic (user,pass)))
       in
-      API.get ~headers ~uri ~expected_code:`OK (fun body ->
-        return (auth_of_string body))
+      let rec send headers =
+        let fail_handlers = [two_factor_auth_handler send headers] in
+        API.get ~headers ~uri ~fail_handlers ~expected_code:`OK (fun body ->
+          return (Result (auth_of_string body))
+        )
+      in
+      send headers
 
     let delete ~user ~pass ~id () =
       let uri = URI.authorization id in
-      let headers = C.Header.(add_authorization (init ()) (`Basic (user,pass))) in
-      API.delete ~headers ~uri ~expected_code:`No_content (fun body ->
-        return ())
+      let headers =
+        C.Header.(add_authorization (init ()) (`Basic (user,pass)))
+      in
+      let rec send headers =
+        let fail_handlers = [two_factor_auth_handler send headers] in
+        API.delete ~headers ~uri ~fail_handlers ~expected_code:`No_content
+          (fun body -> return (Result ()))
+      in
+      send headers
 
     (* Convert a code after a user oAuth into an access token that can
     * be used in subsequent requests.

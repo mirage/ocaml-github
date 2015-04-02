@@ -1,5 +1,7 @@
 1.0.0 (trunk):
 * Changes marked with ! are type changes (not including field additions)
+* ! API.{get,post,delete,patch,put} now take optional fail_handlers
+* ! Token.{create,get_all,get,delete} now return _ auth_continuation Monad.t
 * ! repo type has been renamed repository
 * ! repos type has been renamed repositories
 * ! User.repos is now User.repositories
@@ -20,6 +22,8 @@
 * ! new_hook_config is now a hook_config rather than a web_hook_config
 * ! update_hook_config is now a hook_config rather than a web_hook_config
 * Atdgen >=1.5.0 and Yojson >=1.2.0 are now required for tag_field support
+* git-jar now supports 2FA (#38)
+* Github.{auth_continuation,handler} type added
 * Event submodule added with a variety of event sources
 * A new jar command, git-list-events, has been added to print events for a repo
 * A new test binary, parse_events, has been added which downloads and

@@ -1,11 +1,17 @@
 open Lwt
 open Printf
 
-let t =
-  let r = Github.Token.create ~user:Config.user ~pass:Config.pass ~note:"get_token via ocaml-github" () in
-  lwt auth = Github.Monad.run r in
-  let token = Github.Token.of_auth auth in
-  prerr_endline (Github.Token.to_string token);
-  return ()
+let t = Github.(
+  let r = Token.create ~user:Config.user ~pass:Config.pass ~note:"get_token via ocaml-github" () in
+  Monad.run r
+  >>= function
+  | Result auth ->
+    let token = Token.of_auth auth in
+    prerr_endline (Token.to_string token);
+    return ()
+  | Auth (_,_) -> fail_with "get_token doesn't support 2fa, yet"
+)
 
-let _ = Lwt_main.run t
+;;
+
+Lwt_main.run t

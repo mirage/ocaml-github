@@ -28,13 +28,28 @@ let scope =
   let print f s = Format.pp_print_string f (Github.Scope.string_of_scope s) in
   parse, print
 
+let rec complete_2fa = Github.(function
+  | Result auths -> return auths
+  | Auth (mode, c) ->
+    Lwt_io.printf "Enter 2FA code from '%s': " mode
+    >>= fun () ->
+    Lwt_io.(read_line stdin)
+    >>= fun code ->
+    Github.Monad.run (c code)
+    >>= complete_2fa
+)
+
 (* Command definitions *)
 let list_auth user pass =
   let open Github_t in
   Lwt_main.run (
-    lwt jar = Github_cookie_jar.init () in
-    lwt pass = Passwd.get pass in
-    lwt auths = Github.Monad.run (Github.Token.get_all ~user ~pass ()) in
+    Github_cookie_jar.init ()
+    >>= fun jar ->
+    Passwd.get pass
+    >>= fun (pass : string) ->
+    Github.(Monad.run (Token.get_all ~user ~pass ()))
+    >>= complete_2fa
+    >>= fun auths ->
     lwt local = Github_cookie_jar.get_all jar in
     printf "%-13s | %-8s | %-40s | %-10s\n" "Cookie Name" "ID" "Application" "Note";
     printf "%s\n" (String.make 80 '-');
@@ -59,8 +74,14 @@ let list_auth user pass =
 let make_auth user pass scopes note note_url client_id client_secret =
   let open Github_t in
   Lwt_main.run (
-    lwt pass = Passwd.get pass in
-    lwt auth = Github.Monad.run (Github.Token.create ~scopes ~note ?note_url ?client_id ?client_secret ~user ~pass ()) in
+    Passwd.get pass
+    >>= fun pass ->
+    Github.Monad.run
+      (Github.Token.create
+         ~scopes ~note ?note_url ?client_id ?client_secret ~user ~pass ()
+      )
+    >>= complete_2fa
+    >>= fun auth ->
     Printf.printf "Created token %d: %s\n" auth.auth_id (Github.Token.(to_string (of_auth auth)));
     return ()
   )
@@ -68,9 +89,13 @@ let make_auth user pass scopes note note_url client_id client_secret =
 let save_auth user pass id name =
   let open Github_t in
   Lwt_main.run (
-    lwt jar = Github_cookie_jar.init () in
-    lwt pass = Passwd.get pass in
-    lwt auth = Github.Monad.run (Github.Token.get ~user ~pass ~id ()) in
+    Github_cookie_jar.init ()
+    >>= fun jar ->
+    Passwd.get pass
+    >>= fun pass ->
+    Github.Monad.run (Github.Token.get ~user ~pass ~id ())
+    >>= complete_2fa
+    >>= fun auth ->
     lwt _ = Github_cookie_jar.save jar ~name ~auth in
     return ()
   )
@@ -78,9 +103,13 @@ let save_auth user pass id name =
 let revoke_auth user pass id =
   let open Github_t in
   Lwt_main.run (
-    lwt jar = Github_cookie_jar.init () in
-    lwt pass = Passwd.get pass in
-    lwt () = Github.Monad.run (Github.Token.delete ~user ~pass ~id ()) in
+    Github_cookie_jar.init ()
+    >>= fun jar ->
+    Passwd.get pass
+    >>= fun pass ->
+    Github.Monad.run (Github.Token.delete ~user ~pass ~id ())
+    >>= complete_2fa
+    >>= fun () ->
     lwt local = Github_cookie_jar.get_all jar in
     lwt _ = Lwt_list.fold_left_s (fun jar (name,a) ->
       if a.auth_id = id then

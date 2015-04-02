@@ -17,7 +17,6 @@
 
 (** GitHub APIv3 client library *)
 module type Github = sig
-
   (** All API requests are bound through this monad. The [run] function
       will unpack an API response into an Lwt thread that will hold the
       ultimate response. *)
@@ -28,6 +27,16 @@ module type Github = sig
     val run : 'a t -> 'a Lwt.t
     val (>>=) : 'a t -> ('a -> 'b t) -> 'b t
   end
+
+  (** Some results may require 2-factor authentication. [Result]
+      values do not. [Auth] values contain the mode of 2FA and the
+      continuation to be executed when the code is known. *)
+  type 'a auth_continuation =
+    | Result of 'a
+    | Auth of string * (string -> 'a auth_continuation Monad.t)
+
+  type 'a handler =
+    (Cohttp.Response.t * Cohttp_lwt_body.t -> bool) * (string -> 'a Lwt.t)
 
   (** Authorization scopes; http://developer.github.com/v3/oauth/ *)
   module Scope : sig
@@ -44,24 +53,29 @@ module type Github = sig
 
     val of_code: client_id:string -> client_secret:string -> code:string -> unit -> t option Lwt.t
 
-    val create : ?scopes:Github_t.scope list -> ?note:string -> ?note_url:string ->
-      ?client_id:string -> ?client_secret:string ->
-      user:string -> pass:string -> unit -> Github_t.auth Monad.t
+    val create : ?scopes:Github_t.scope list -> ?note:string ->
+      ?note_url:string -> ?client_id:string -> ?client_secret:string ->
+      user:string -> pass:string -> unit ->
+      Github_t.auth auth_continuation Monad.t
 
-    val get_all : user:string -> pass:string -> unit -> Github_t.auths Monad.t
-    val get : user:string -> pass:string -> id:int -> unit -> Github_t.auth Monad.t
-    val delete : user:string -> pass:string -> id:int -> unit -> unit Monad.t
+    val get_all : user:string -> pass:string -> unit ->
+      Github_t.auths auth_continuation Monad.t
+    val get : user:string -> pass:string -> id:int -> unit ->
+      Github_t.auth auth_continuation Monad.t
+    val delete : user:string -> pass:string -> id:int -> unit ->
+      unit auth_continuation Monad.t
 
     val of_auth : Github_t.auth -> t
     val of_string : string -> t
     val to_string : t -> string
   end
 
-  (** Generic API accessor function, not normally used directly, but useful in case you
-      wish to call an API call that isn't wrapped in the rest of the library (i.e. most
-      of them at the moment!) *)
+  (** Generic API accessor function, not normally used directly, but
+      useful in case you wish to call an API call that isn't wrapped
+      in the rest of the library (i.e. most of them at the moment!) *)
   module API : sig
-    val get : 
+    val get :
+      ?fail_handlers:'a handler list ->
       ?expected_code:Cohttp.Code.status_code ->
       ?headers:Cohttp.Header.t -> 
       ?token:Token.t -> 
@@ -69,7 +83,8 @@ module type Github = sig
       uri:Uri.t -> 
       (string -> 'a Lwt.t) -> 'a Monad.t
 
-    val post : 
+    val post :
+      ?fail_handlers:'a handler list ->
       expected_code:Cohttp.Code.status_code ->
       ?headers:Cohttp.Header.t ->
       ?body:string ->
@@ -78,7 +93,8 @@ module type Github = sig
       uri:Uri.t ->
       (string -> 'a Lwt.t) -> 'a Monad.t
 
-    val delete : 
+    val delete :
+      ?fail_handlers:'a handler list ->
       ?expected_code:Cohttp.Code.status_code ->
       ?headers:Cohttp.Header.t -> 
       ?token:Token.t -> 
@@ -86,7 +102,8 @@ module type Github = sig
       uri:Uri.t -> 
       (string -> 'a Lwt.t) -> 'a Monad.t
 
-    val patch : 
+    val patch :
+      ?fail_handlers:'a handler list ->
       expected_code:Cohttp.Code.status_code ->
       ?headers:Cohttp.Header.t ->
       ?body:string ->
@@ -96,6 +113,7 @@ module type Github = sig
       (string -> 'a Lwt.t) -> 'a Monad.t
 
     val put :
+      ?fail_handlers:'a handler list ->
       expected_code:Cohttp.Code.status_code ->
       ?headers:Cohttp.Header.t ->
       ?body:string ->

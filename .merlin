@@ -5,6 +5,7 @@ PKG cmdliner
 PKG stringext
 PKG cohttp
 PKG yojson
+PKG zed
 
 S lib
 S lib_test

@@ -86,7 +86,7 @@ let cmd =
   in
   let body =
     let doc = "Optional text describing the contents of the release." in
-    Arg.(value & opt string "" & info ["body"] ~docv:"BODY" ~doc)
+    Arg.(value & opt (some string) None & info ["body"] ~docv:"BODY" ~doc)
   in
   let assets =
     let doc = "Optional comma-separated list of assets (files) to upload." in

@@ -29,6 +29,8 @@
 * A new jar command, git-list-events, has been added to print events for a repo
 * A new test binary, parse_events, has been added which downloads and
   parses archive event data
+* Fixed bug in Issue.for_repo preventing listing of issues without
+  milestone (#49,#53 Michael Grünewald)
 * organization type added
 * user and organization now inherit from org
 * user_info_updated_at field added

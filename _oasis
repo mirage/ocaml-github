@@ -108,6 +108,14 @@ Executable "git-list-events"
   Install:            true
   BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, cmdliner
 
+Executable "git-list-issues"
+  Path:               jar
+  MainIs:             list_issues.ml
+  Custom:             true
+  CompiledObject:     best
+  Install:            true
+  BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, cmdliner
+
 Executable current_user
   Path:               lib_test
   MainIs:             current_user.ml

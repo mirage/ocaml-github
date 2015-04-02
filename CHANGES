@@ -31,6 +31,7 @@
   parses archive event data
 * Fixed bug in Issue.for_repo preventing listing of issues without
   milestone (#49,#53 Michael Grünewald)
+* A new jar command, git-list-issues, has been added to print issues for a repo
 * organization type added
 * user and organization now inherit from org
 * user_info_updated_at field added

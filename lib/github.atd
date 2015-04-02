@@ -346,7 +346,7 @@ type branch = {
   label: string;
   ref: string;
   sha: string;
-  user: user;
+  ?user: user option;
   ?repo: repo option;
 } <ocaml field_prefix="branch_">
 

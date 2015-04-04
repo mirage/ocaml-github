@@ -612,12 +612,13 @@ module Make(CL : Cohttp_lwt.Client) = struct
   end
 
   module Filter = struct
-    type state = [ `Open | `Closed ]
+    type state = [ `All | `Open | `Closed ]
     let string_of_state (s:state) =
       match s with
+      |`All -> "all"
       |`Open -> "open"
       |`Closed -> "closed"
-    
+
     type milestone_sort = [ `Due_date | `Completeness ]
     let string_of_sort (s:milestone_sort) =
       match s with

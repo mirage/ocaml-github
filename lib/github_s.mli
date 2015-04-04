@@ -137,7 +137,7 @@ module type Github = sig
   end
 
   module Filter : sig
-    type state = [ `Open | `Closed ]
+    type state = [ `All | `Open | `Closed ]
     type milestone_sort = [ `Due_date | `Completeness ]
     type issue_sort = [ `Created | `Updated | `Comments ]
     type direction = [ `Asc | `Desc ]

@@ -32,7 +32,9 @@
 * Fixed bug in Issue.for_repo preventing listing of issues without
   milestone (#49,#53 Michael Grünewald)
 * A new jar command, git-list-issues, has been added to print issues for a repo
-* Filter.state now includes `All constructor
+* Filter.state now includes `All constructor (#59,#62 Michael Grünewald)
+* pull_ref type added from which pull now inherits
+* issue_pull_request optional field of pull_ref type added
 * organization type added
 * user and organization now inherit from org
 * user_info_updated_at field added

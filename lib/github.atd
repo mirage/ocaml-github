@@ -213,6 +213,7 @@ type issue = {
   ~sort <ocaml default="`Created">: issue_sort;
   ~direction <ocaml default="`Desc">: direction;
   ?mentioned: string list option;
+  ?pull_request: pull_ref option;
 } <ocaml field_prefix="issue_">
 
 type issues = issue list
@@ -365,11 +366,14 @@ type pull_links = {
   review_comments: link;
 } <ocaml field_prefix="pull_">
 
-type pull = {
+type pull_ref = {
   url: string;
   html_url: string;
   diff_url: string;
   patch_url: string;
+} <ocaml field_prefix="pull_ref_">
+
+type pull = {
   issue_url: string;
   number: int;
   ~state <ocaml default="`Open">: state;
@@ -383,6 +387,7 @@ type pull = {
   base: branch;
   links <json name="_links">: pull_links;
   user: user;
+  inherit pull_ref
 } <ocaml field_prefix="pull_">
 
 type pulls = pull list

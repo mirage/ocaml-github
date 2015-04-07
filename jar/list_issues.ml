@@ -48,7 +48,7 @@ let print_issue user repo issue =
   );
   return_unit
 
-let list_issues token repos ~all ~closed =
+let list_issues token repos ~all ~closed ~prs ~issues =
   let repos = List.map (fun r ->
     match Stringext.split ~max:2 ~on:'/' r with
     | [user;repo] -> (user,repo)
@@ -59,25 +59,41 @@ let list_issues token repos ~all ~closed =
     let state = if all then `All else if closed then `Closed else `Open in
     ask_github (Github.Issue.for_repo ~token ~state ~user ~repo)
     >>= fun r ->
-    Lwt_list.iter_s (print_issue user repo) r
+    Lwt_list.iter_s (fun i -> match i with
+      | { T.issue_pull_request=None } when issues -> print_issue user repo i
+      | { T.issue_pull_request=Some _ } when prs -> print_issue user repo i
+      | _ -> return_unit
+    ) r
   ) repos
 
 let cmd =
   let cookie = Jar_cli.cookie () in
-  let repos = Jar_cli.repos ~doc_append:" to list issues" () in
-  let docv = "show only closed issues" in
-  let doc = "CLOSED" in
+  let repos = Jar_cli.repos ~doc_append:" to list issues and PRs" () in
+
+  let doc = "show only closed issues" in
+  let docv = "CLOSED" in
   let closed = Arg.(value & flag & info ["closed"] ~docv ~doc) in
-  let docv = "show all issues" in
-  let doc = "ALL" in
+  let doc = "show all issues" in
+  let docv = "ALL" in
   let all = Arg.(value & flag & info ["all"] ~docv ~doc) in
+
+  let doc = "show PRs" in
+  let docv = "PRS" in
+  let no_prs = Arg.(value & flag & info ["prs"] ~docv ~doc) in
+  let doc = "show regular (non-PR) issues" in
+  let docv = "ISSUES" in
+  let no_issues = Arg.(value & flag & info ["issues"] ~docv ~doc) in
+
   let doc = "list issues on GitHub repositories (open only by default)" in
   let man = [
     `S "BUGS";
     `P "Email bug reports to <mirageos-devel@lists.xenproject.org>.";
   ] in
-  Term.((pure (fun t r all closed -> Lwt_main.run (list_issues t r ~all ~closed))
-         $ cookie $ repos $ all $ closed)),
+  Term.((pure (fun t r all closed prs_flag issues_flag ->
+    let prs = prs_flag || (not issues_flag) in
+    let issues = issues_flag || (not prs_flag) in
+    Lwt_main.run (list_issues t r ~all ~closed ~prs ~issues)
+  ) $ cookie $ repos $ all $ closed $ no_prs $ no_issues)),
   Term.info "git-list-issues" ~version:Jar_version.t ~doc ~man
 
 let () = match Term.eval cmd with `Error _ -> exit 1 | _ -> exit 0

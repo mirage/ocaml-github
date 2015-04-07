@@ -48,7 +48,7 @@ let print_issue user repo issue =
   );
   return_unit
 
-let list_issues token repos ~closed =
+let list_issues token repos ~all ~closed =
   let repos = List.map (fun r ->
     match Stringext.split ~max:2 ~on:'/' r with
     | [user;repo] -> (user,repo)
@@ -56,7 +56,7 @@ let list_issues token repos ~closed =
   ) repos in
   (* Get the issues per repo *)
   Lwt_list.iter_s (fun (user,repo) ->
-    let state = if closed then `Closed else `Open in
+    let state = if all then `All else if closed then `Closed else `Open in
     ask_github (Github.Issue.for_repo ~token ~state ~user ~repo)
     >>= fun r ->
     Lwt_list.iter_s (print_issue user repo) r
@@ -64,17 +64,20 @@ let list_issues token repos ~closed =
 
 let cmd =
   let cookie = Jar_cli.cookie () in
-  let repos = Jar_cli.repos ~doc_append:" to list open issues" () in
+  let repos = Jar_cli.repos ~doc_append:" to list issues" () in
   let docv = "show only closed issues" in
   let doc = "CLOSED" in
   let closed = Arg.(value & flag & info ["closed"] ~docv ~doc) in
-  let doc = "list issues on GitHub repositories" in
+  let docv = "show all issues" in
+  let doc = "ALL" in
+  let all = Arg.(value & flag & info ["all"] ~docv ~doc) in
+  let doc = "list issues on GitHub repositories (open only by default)" in
   let man = [
     `S "BUGS";
     `P "Email bug reports to <mirageos-devel@lists.xenproject.org>.";
   ] in
-  Term.((pure (fun t r closed -> Lwt_main.run (list_issues t r ~closed))
-         $ cookie $ repos $ closed)),
+  Term.((pure (fun t r all closed -> Lwt_main.run (list_issues t r ~all ~closed))
+         $ cookie $ repos $ all $ closed)),
   Term.info "git-list-issues" ~version:Jar_version.t ~doc ~man
 
 let () = match Term.eval cmd with `Error _ -> exit 1 | _ -> exit 0

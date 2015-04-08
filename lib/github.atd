@@ -331,7 +331,8 @@ type repository = {
   ?mirror_url: string option;
   ~homepage: string;
   forks_count: int;
-  watchers_count: int;
+  subscribers_count: int;
+  stargazers_count: int;
   size: int;
   ?master_branch: string option;
   open_issues: int;

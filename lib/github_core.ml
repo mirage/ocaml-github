@@ -165,6 +165,7 @@ module Make(CL : Cohttp_lwt.Client) = struct
       Uri.with_query' r ([
         "q", q;
         "order",direction;
+        "per_page",string_of_int 100;
       ]@(match sort with None -> [] | Some s -> ["sort",s]))
 
     let hook ~user ~repo ~num =

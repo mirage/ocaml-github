@@ -158,9 +158,35 @@ module type Github = sig
     type state = [ `All | `Open | `Closed ]
     type milestone_sort = [ `Due_date | `Completeness ]
     type issue_sort = [ `Created | `Updated | `Comments ]
+    type repo_sort = [ `Stars | `Forks | `Updated ]
     type direction = [ `Asc | `Desc ]
     type milestone = [ `Any | `None | `Num of int ]
     type user = [ `Any | `None | `Login of string ]
+    type 'a range = [
+      | `Range of 'a option * 'a option
+      | `Lt of 'a
+      | `Lte of 'a
+      | `Eq of 'a
+      | `Gte of 'a
+      | `Gt of 'a
+    ]
+    type repo_field = [
+      | `Name
+      | `Description
+      | `Readme
+    ]
+    type date = string
+    type qualifier = [
+      | `In of repo_field list
+      | `Size of int range
+      | `Stars of int range
+      | `Forks of int range
+      | `Fork of [ `True | `Only ]
+      | `Created of date range
+      | `Pushed of date range
+      | `User of string
+      | `Language of string
+    ]
   end
 
   module Pull : sig
@@ -407,6 +433,14 @@ module type Github = sig
       ?token:Token.t ->
       user:string -> repo:string -> sha:string ->
       unit -> Github_t.commit Monad.t
+
+    val search :
+      ?token:Token.t ->
+      ?sort:Filter.repo_sort ->
+      ?direction:Filter.direction ->
+      qualifiers:Filter.qualifier list ->
+      keywords:string list ->
+      unit -> Github_t.repository_search Monad.t
   end
 
   module Event : sig

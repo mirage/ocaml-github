@@ -160,6 +160,13 @@ module Make(CL : Cohttp_lwt.Client) = struct
     let repo_hooks ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/hooks" api user repo)
 
+    let repo_search ~q ?sort ~direction () =
+      let r = Uri.of_string (Printf.sprintf "%s/search/repositories" api) in
+      Uri.with_query' r ([
+        "q", q;
+        "order",direction;
+      ]@(match sort with None -> [] | Some s -> ["sort",s]))
+
     let hook ~user ~repo ~num =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/hooks/%d" api user repo num)
 
@@ -632,6 +639,13 @@ module Make(CL : Cohttp_lwt.Client) = struct
       |`Updated -> "updated"
       |`Comments -> "comments"
 
+    type repo_sort = [ `Stars | `Forks | `Updated ]
+    let string_of_repo_sort (s:repo_sort) =
+      match s with
+      |`Stars -> "stars"
+      |`Forks -> "forks"
+      |`Updated -> "updated"
+
     type direction = [ `Asc | `Desc ]
     let string_of_direction (d:direction) =
       match d with
@@ -651,6 +665,62 @@ module Make(CL : Cohttp_lwt.Client) = struct
       |`Any -> "*"
       |`None -> "none"
       |`Login u -> u
+
+    type 'a range = [
+      | `Range of 'a option * 'a option
+      | `Lt of 'a
+      | `Lte of 'a
+      | `Eq of 'a
+      | `Gte of 'a
+      | `Gt of 'a
+    ]
+    let string_of_range str_fn (r:'a range) =
+      match r with
+      |`Range (None,None) -> "*..*"
+      |`Range (Some l,None) -> (str_fn l)^"..*"
+      |`Range (None,Some u) -> "*.."^(str_fn u)
+      |`Range (Some l,Some u) -> (str_fn l)^".."^(str_fn u)
+      |`Lt k -> "<"^(str_fn k)
+      |`Lte k -> "<="^(str_fn k)
+      |`Eq k -> str_fn k
+      |`Gte k -> ">="^(str_fn k)
+      |`Gt k -> ">"^(str_fn k)
+
+    type repo_field = [
+      | `Name
+      | `Description
+      | `Readme
+    ]
+    let string_of_repo_field = function
+      |`Name -> "name"
+      |`Description -> "description"
+      |`Readme -> "readme"
+
+    type date = string
+
+    type qualifier = [
+      | `In of repo_field list
+      | `Size of int range
+      | `Stars of int range
+      | `Forks of int range
+      | `Fork of [ `True | `Only ]
+      | `Created of date range
+      | `Pushed of date range
+      | `User of string
+      | `Language of string
+    ]
+    let string_of_qualifier = function
+      |`In fields ->
+        "in:"^(String.concat "," (List.map string_of_repo_field fields))
+      |`Size r  -> "size:" ^(string_of_range string_of_int r)
+      |`Stars r -> "stars:"^(string_of_range string_of_int r)
+      |`Forks r -> "forks:"^(string_of_range string_of_int r)
+      |`Fork `True -> "fork:true"
+      |`Fork `Only -> "fork:only"
+      |`Created r -> "created:"^(string_of_range (fun x -> x) r)
+      |`Pushed  r -> "pushed:" ^(string_of_range (fun x -> x) r)
+      |`User u -> "user:"^u
+      |`Language l -> "language:"^l
   end
 
   module Pull = struct
@@ -931,6 +1001,17 @@ module Make(CL : Cohttp_lwt.Client) = struct
     let commit ?token ~user ~repo ~sha () =
       let uri = URI.repo_commit ~user ~repo ~sha in
       API.get ?token ~uri (fun b -> return (commit_of_string b))
+
+    let search ?token ?sort ?(direction=`Desc) ~qualifiers ~keywords () =
+      let qs = List.rev_map Filter.string_of_qualifier qualifiers in
+      let q = String.concat " " (List.rev_append qs keywords) in
+      let sort = match sort with
+        | Some sort -> Some (Filter.string_of_repo_sort sort)
+        | None -> None
+      in
+      let direction = Filter.string_of_direction direction in
+      let uri = URI.repo_search ~q ?sort ~direction () in
+      API.get ?token ~uri (fun b -> return (repository_search_of_string b))
   end
 
   module Event = struct

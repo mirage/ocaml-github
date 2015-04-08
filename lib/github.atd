@@ -350,6 +350,12 @@ type repository = {
 
 type repositories = repository list
 
+type repository_search = {
+  total_count: int;
+  incomplete_results: bool;
+  items: repositories;
+} <ocaml field_prefix="repository_search_">
+
 type branch = {
   label: string;
   ref: string;

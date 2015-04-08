@@ -4,7 +4,9 @@
 * ! Token.{create,get_all,get,delete} now return _ auth_continuation Monad.t
 * ! repo type has been renamed repository
 * ! repos type has been renamed repositories
-* ! repository_{forks,watchers} field removed. Use {forks,stargazers}_count.
+* ! repository_forks field renamed to repository_forks_count.
+* ! repository_watchers field renamed to repository_stargazers_count.
+* ! repository_open_issues field renamed to repository_open_issues_count.
 * ! User.repos is now User.repositories
 * ! Team.repos is now Team.repositories
 * ! repository_description is now optional
@@ -41,7 +43,9 @@
 * user_info_html_url field added
 * issue_created_at, issue_updated_at, issue_closed_at added (#50,#51
   from Michael Grünewald)
-* repository_subscribers_count field added (called "watchers")
+* repository_subscribers_count field added (the new "watchers")
+* repository_language field added
+* repository_has_pages field added
 * comment type added
 * issue_comment_html_url field added
 * commit_comment type added

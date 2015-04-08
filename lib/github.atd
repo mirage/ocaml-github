@@ -330,12 +330,13 @@ type repository = {
   svn_url: string;
   ?mirror_url: string option;
   ~homepage: string;
+  ?language: string option;
   forks_count: int;
-  subscribers_count: int;
+  ?subscribers_count: int option;
   stargazers_count: int;
   size: int;
   ?master_branch: string option;
-  open_issues: int;
+  open_issues_count: int;
   ?pushed_at: string option;
   created_at: string;
   updated_at: string;
@@ -343,6 +344,7 @@ type repository = {
   has_issues: bool;
   has_wiki: bool;
   has_downloads: bool;
+  has_pages: bool;
   inherit repo
 } <ocaml field_prefix="repository_">
 

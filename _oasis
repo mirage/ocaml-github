@@ -116,6 +116,14 @@ Executable "git-list-issues"
   Install:            true
   BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, cmdliner
 
+Executable "git-search"
+  Path:               jar
+  MainIs:             search.ml
+  Custom:             true
+  CompiledObject:     best
+  Install:            true
+  BuildDepends:       cohttp.lwt, github.unix, cmdliner
+
 Executable current_user
   Path:               lib_test
   MainIs:             current_user.ml

@@ -160,13 +160,8 @@ module Make(CL : Cohttp_lwt.Client) = struct
     let repo_hooks ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/hooks" api user repo)
 
-    let repo_search ~q ?sort ~direction () =
-      let r = Uri.of_string (Printf.sprintf "%s/search/repositories" api) in
-      Uri.with_query' r ([
-        "q", q;
-        "order",direction;
-        "per_page",string_of_int 100;
-      ]@(match sort with None -> [] | Some s -> ["sort",s]))
+    let repo_search () =
+      Uri.of_string (Printf.sprintf "%s/search/repositories" api)
 
     let hook ~user ~repo ~num =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/hooks/%d" api user repo num)
@@ -1011,8 +1006,15 @@ module Make(CL : Cohttp_lwt.Client) = struct
         | None -> None
       in
       let direction = Filter.string_of_direction direction in
-      let uri = URI.repo_search ~q ?sort ~direction () in
-      API.get ?token ~uri (fun b -> return (repository_search_of_string b))
+      let uri = URI.repo_search () in
+      let params = [
+        "q", q;
+        "order",direction;
+        "per_page",string_of_int 100;
+      ]@(match sort with None -> [] | Some s -> ["sort",s]) in
+      API.get ?token ~params ~uri (fun b ->
+        return (repository_search_of_string b)
+      )
   end
 
   module Event = struct

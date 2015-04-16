@@ -400,11 +400,45 @@ module Make(CL : Cohttp_lwt.Client) = struct
     let (>>=) = bind
   end
 
+  module Stream = struct
+    type 'a t = {
+      buffer : 'a list;
+      refill : (unit -> 'a t Lwt.t) option;
+    }
+    type 'a parse = string -> 'a list Lwt.t
+
+    let empty = { buffer = []; refill = None }
+
+    let rec next = Lwt.(function
+      | { buffer=[]; refill=None } -> return None
+      | { buffer=[]; refill=Some refill } -> refill () >>= next
+      | { buffer=h::buffer; refill } ->
+        return (Some (h, { buffer; refill }))
+    )
+
+    let map f s =
+      let rec refill s () = Lwt.(
+        next s
+        >>= function
+        | None -> return empty
+        | Some (v,s) ->
+          f v
+          >>= function
+          | [] -> refill s ()
+          | buffer ->
+            return { buffer; refill = Some (refill s) }
+      ) in {
+        buffer = [];
+        refill = Some (refill s);
+      }
+  end
+
   type 'a auth_continuation =
     | Result of 'a
     | Auth of string * (string -> 'a auth_continuation Monad.t)
 
-  type 'a handler = (CL.Response.t * CLB.t -> bool) * (string -> 'a Lwt.t)
+  type 'a parse = string -> 'a Lwt.t
+  type 'a handler = (CL.Response.t * CLB.t -> bool) * 'a
 
   module API = struct
     (* Use the highest precedence handler that matches the response. *)
@@ -414,13 +448,13 @@ module Make(CL : Cohttp_lwt.Client) = struct
         else begin
           let bad_response exn = Lwt.return (Monad.(error (Bad_response exn))) in
           try_lwt
-            lwt body = CLB.to_string body in
             (* use a second try_lwt to be able to log the body in case of failure *)
             try_lwt
-              lwt r = handler body in
+              lwt r = handler response in
               Lwt.return (Monad.response r)
             with exn ->
               (* XXX revert *)
+              lwt body = CLB.to_string body in
               log "response body:\n%s" (Yojson.Basic.pretty_to_string (Yojson.Basic.from_string body));
               bad_response exn
           with exn -> bad_response exn
@@ -464,17 +498,69 @@ module Make(CL : Cohttp_lwt.Client) = struct
                    {meth; uri; headers=realize_headers headers; body=CLB.empty})
             (request ((code_handler ~expected_code fn)::fail_handlers))))
 
+    let just_body (_,body) = CLB.to_string body
+
     let effectful
         meth ?headers ?body ?token ?params ~fail_handlers ~expected_code ~uri fn =
       let body = match body with None -> CLB.empty | Some b -> CLB.of_string b in
+      let fn x = Lwt.(just_body x >>= fn) in
+      let fail_handlers = List.map (fun (p,fn) ->
+        p,Lwt.(fun x -> just_body x >>= fn)
+      ) fail_handlers in
       fun state -> Lwt.return
         (state,
         (Monad.(request ?token ?params
                   {meth; uri; headers=realize_headers headers; body })
             (request ((code_handler ~expected_code fn)::fail_handlers))))
 
-    let get ?(fail_handlers=[]) ?(expected_code=`OK) =
-      idempotent `GET ~fail_handlers ~expected_code
+    let map_fail_handlers f fhs = List.map (fun (p,fn) ->
+      p, f fn;
+    ) fhs
+
+    let get
+        ?(fail_handlers=[]) ?(expected_code=`OK) ?headers ?token ?params ~uri fn =
+      let fail_handlers =
+        map_fail_handlers Lwt.(fun f x -> just_body x >>= f) fail_handlers
+      in
+      idempotent `GET ~fail_handlers ~expected_code ?headers ?token ?params ~uri
+        Lwt.(fun x -> just_body x >>= fn)
+
+    let rec next_link base = Cohttp.Link.(function
+    | { context; arc = { Arc.relation; }; target }::_
+      when context = Uri.of_string "" && List.mem Rel.next relation ->
+      Some (Uri.resolve "" base target)
+    | _::rest -> next_link base rest
+    | [] -> None
+    )
+
+    let get_stream (type a)
+        ?(fail_handlers:a Stream.parse handler list=[])
+        ?(expected_code:Cohttp.Code.status_code=`OK)
+        ?(headers:Cohttp.Header.t option) ?(token:string option) ?(params:(string * string) list option) ~(uri:Uri.t) (fn : a Stream.parse) =
+      let fail_handlers =
+        map_fail_handlers Lwt.(fun f x ->
+          just_body x
+          >>= f >>= fun buffer ->
+          return { Stream.buffer; refill=None }
+        ) fail_handlers
+      in
+      let request ~uri f =
+        idempotent
+          `GET ?headers ?token ?params ~fail_handlers ~expected_code ~uri f
+      in
+      let rec f (envelope, body) = Lwt.(
+        CLB.to_string body
+        >>= fun body ->
+        let refill = Some (fun () ->
+          let links = Cohttp.(Header.get_links envelope.Response.headers) in
+          match next_link uri links with
+          | None -> return Stream.empty
+          | Some uri -> Monad.run (request ~uri f)
+        ) in
+        fn body >>= fun buffer ->
+        return { Stream.buffer; refill }
+      ) in
+      request ~uri f
 
     let post ?(fail_handlers=[]) ~expected_code =
       effectful `POST ~fail_handlers ~expected_code
@@ -485,8 +571,14 @@ module Make(CL : Cohttp_lwt.Client) = struct
     let put ?(fail_handlers=[]) ~expected_code =
       effectful `PUT ~fail_handlers ~expected_code
 
-    let delete ?(fail_handlers=[]) ?(expected_code=`No_content) =
-      idempotent `DELETE ~fail_handlers ~expected_code
+    let delete
+        ?(fail_handlers=[]) ?(expected_code=`No_content) ?headers ?token ?params
+        ~uri fn =
+      let fail_handlers =
+        map_fail_handlers Lwt.(fun f x -> just_body x >>= f) fail_handlers
+      in
+      idempotent `DELETE ~fail_handlers ~expected_code ?headers ?token ?params
+        ~uri Lwt.(fun x -> just_body x >>= fn)
 
     let set_user_agent user_agent = fun state ->
       Monad.(Lwt.return ({state with user_agent=Some user_agent}, Response ()))

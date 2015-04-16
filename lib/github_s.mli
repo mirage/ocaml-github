@@ -28,6 +28,12 @@ module type Github = sig
     val (>>=) : 'a t -> ('a -> 'b t) -> 'b t
   end
 
+  module Stream : sig
+    type 'a t
+    type 'a parse = string -> 'a list Lwt.t
+    val next : 'a t -> ('a * 'a t) option Lwt.t
+  end
+
   (** Some results may require 2-factor authentication. [Result]
       values do not. [Auth] values contain the mode of 2FA and the
       continuation to be executed when the code is known. *)
@@ -35,8 +41,9 @@ module type Github = sig
     | Result of 'a
     | Auth of string * (string -> 'a auth_continuation Monad.t)
 
+  type +'a parse = string -> 'a Lwt.t
   type 'a handler =
-    (Cohttp.Response.t * Cohttp_lwt_body.t -> bool) * (string -> 'a Lwt.t)
+    (Cohttp.Response.t * Cohttp_lwt_body.t -> bool) * 'a
 
   (** Authorization scopes; http://developer.github.com/v3/oauth/ *)
   module Scope : sig
@@ -75,16 +82,25 @@ module type Github = sig
       in the rest of the library (i.e. most of them at the moment!) *)
   module API : sig
     val get :
-      ?fail_handlers:'a handler list ->
+      ?fail_handlers:'a parse handler list ->
       ?expected_code:Cohttp.Code.status_code ->
       ?headers:Cohttp.Header.t -> 
       ?token:Token.t -> 
       ?params:(string * string) list ->
       uri:Uri.t -> 
-      (string -> 'a Lwt.t) -> 'a Monad.t
+      'a parse -> 'a Monad.t
+
+    val get_stream :
+      ?fail_handlers:'a Stream.parse handler list ->
+      ?expected_code:Cohttp.Code.status_code ->
+      ?headers:Cohttp.Header.t ->
+      ?token:Token.t ->
+      ?params:(string * string) list ->
+      uri:Uri.t ->
+      'a Stream.parse -> 'a Stream.t Monad.t
 
     val post :
-      ?fail_handlers:'a handler list ->
+      ?fail_handlers:'a parse handler list ->
       expected_code:Cohttp.Code.status_code ->
       ?headers:Cohttp.Header.t ->
       ?body:string ->
@@ -94,7 +110,7 @@ module type Github = sig
       (string -> 'a Lwt.t) -> 'a Monad.t
 
     val delete :
-      ?fail_handlers:'a handler list ->
+      ?fail_handlers:'a parse handler list ->
       ?expected_code:Cohttp.Code.status_code ->
       ?headers:Cohttp.Header.t -> 
       ?token:Token.t -> 
@@ -103,7 +119,7 @@ module type Github = sig
       (string -> 'a Lwt.t) -> 'a Monad.t
 
     val patch :
-      ?fail_handlers:'a handler list ->
+      ?fail_handlers:'a parse handler list ->
       expected_code:Cohttp.Code.status_code ->
       ?headers:Cohttp.Header.t ->
       ?body:string ->
@@ -113,7 +129,7 @@ module type Github = sig
       (string -> 'a Lwt.t) -> 'a Monad.t
 
     val put :
-      ?fail_handlers:'a handler list ->
+      ?fail_handlers:'a parse handler list ->
       expected_code:Cohttp.Code.status_code ->
       ?headers:Cohttp.Header.t ->
       ?body:string ->

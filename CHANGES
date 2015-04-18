@@ -91,6 +91,7 @@
 * hook_config type added
 
 * Add Gist manipulation support (#48)
+* Retrieve issues regardless of their state (#62 from Michael Grünewald)
 
 0.9.4 (2014-12-18):
 * Add bindings for organisation teams and repositories (#45).

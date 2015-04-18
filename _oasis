@@ -1,6 +1,6 @@
 OASISFormat: 0.4
 Name:        github
-Version:     0.9.5
+Version:     1.0.0
 Synopsis:    Github API interface
 Authors:     Anil Madhavapeddy, David Sheets, Andy Ray, Jeff Hammerbacher
 License:     ISC

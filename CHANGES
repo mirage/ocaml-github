@@ -90,6 +90,8 @@
 * events type added
 * hook_config type added
 
+* Add Gist manipulation support (#48)
+
 0.9.4 (2014-12-18):
 * Add bindings for organisation teams and repositories (#45).
 * Use `Bytes` instead of `String` for future `safe-string` support.

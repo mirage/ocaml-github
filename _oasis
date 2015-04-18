@@ -1,10 +1,10 @@
-OASISFormat: 0.3
+OASISFormat: 0.4
 Name:        github
-Version:     0.9.4
+Version:     0.9.5
 Synopsis:    Github API interface
 Authors:     Anil Madhavapeddy, David Sheets, Andy Ray, Jeff Hammerbacher
 License:     ISC
-Plugins:     META (0.3)
+Plugins:     META (0.4)
 BuildTools: ocamlbuild
 PostConfCommand: ./init_config.sh
 
@@ -123,6 +123,14 @@ Executable "git-search"
   CompiledObject:     best
   Install:            true
   BuildDepends:       cohttp.lwt, github.unix, cmdliner
+
+Executable "git-gist"
+  Path:               gist
+  MainIs:             gist.ml
+  Custom:             true
+  CompiledObject:     best
+  Install:            true
+  BuildDepends:       cohttp.lwt, lwt.syntax, github, github.unix, cmdliner, lambda-term
 
 Executable current_user
   Path:               lib_test

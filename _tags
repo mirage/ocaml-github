@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: bab1577745038d8f78cb12119003ed08)
+# DO NOT EDIT (digest: bc7cc41819173c4a4ab180d6eb4f2556)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
@@ -188,6 +188,34 @@ true: annot, bin_annot
 <jar/*.ml{,i,y}>: use_github_core
 <jar/*.ml{,i,y}>: use_github_unix
 <jar/search.{native,byte}>: custom
+# Executable git-gist
+<gist/gist.{native,byte}>: pkg_atdgen
+<gist/gist.{native,byte}>: pkg_bytes
+<gist/gist.{native,byte}>: pkg_cmdliner
+<gist/gist.{native,byte}>: pkg_cohttp
+<gist/gist.{native,byte}>: pkg_cohttp.lwt
+<gist/gist.{native,byte}>: pkg_cohttp.lwt-core
+<gist/gist.{native,byte}>: pkg_lambda-term
+<gist/gist.{native,byte}>: pkg_lwt.syntax
+<gist/gist.{native,byte}>: pkg_lwt.unix
+<gist/gist.{native,byte}>: pkg_uri
+<gist/gist.{native,byte}>: pkg_yojson
+<gist/gist.{native,byte}>: use_github_core
+<gist/gist.{native,byte}>: use_github_unix
+<gist/*.ml{,i,y}>: pkg_atdgen
+<gist/*.ml{,i,y}>: pkg_bytes
+<gist/*.ml{,i,y}>: pkg_cmdliner
+<gist/*.ml{,i,y}>: pkg_cohttp
+<gist/*.ml{,i,y}>: pkg_cohttp.lwt
+<gist/*.ml{,i,y}>: pkg_cohttp.lwt-core
+<gist/*.ml{,i,y}>: pkg_lambda-term
+<gist/*.ml{,i,y}>: pkg_lwt.syntax
+<gist/*.ml{,i,y}>: pkg_lwt.unix
+<gist/*.ml{,i,y}>: pkg_uri
+<gist/*.ml{,i,y}>: pkg_yojson
+<gist/*.ml{,i,y}>: use_github_core
+<gist/*.ml{,i,y}>: use_github_unix
+<gist/gist.{native,byte}>: custom
 # Executable current_user
 <lib_test/current_user.{native,byte}>: pkg_atdgen
 <lib_test/current_user.{native,byte}>: pkg_bytes
@@ -421,5 +449,5 @@ true: annot, bin_annot
 <lib_test/parse_events.{native,byte}>: custom
 # OASIS_STOP
 <lib/*>: std_json
-true: annot, bin_annot, principal, strict_sequence, debug
+true: principal, strict_sequence, debug
 true: warn(@5@8@10@11@12@14@23@24@26@29)

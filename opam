@@ -19,7 +19,7 @@ depends: [
   "ssl"
   "uri" {>= "1.5.0"}
   "cohttp" {>= "0.14.0"}
-  "lwt" {>= "2.4.3"}
+  "lwt" {>= "2.4.7"}
   "atdgen" {>= "1.5.0"}
   "yojson" {>= "1.2.0"}
   "stringext"

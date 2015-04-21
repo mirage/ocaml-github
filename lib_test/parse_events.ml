@@ -39,7 +39,7 @@ let download_hour_file file_name =
   let status = Response.status resp in
   let status_s = Code.string_of_status status in
   if not (Code.is_success (Code.code_of_status status))
-  then fail_with (sprintf "Retrieving %s got status %s" uri_s status_s)
+  then fail (Failure (sprintf "Retrieving %s got status %s" uri_s status_s))
   else Lwt_io.(with_file ~mode:output gz_name (fun oc ->
     Lwt_stream.iter_s (write oc) (Cohttp_lwt_body.to_stream body)
   )) >>= fun () ->
@@ -47,7 +47,7 @@ let download_hour_file file_name =
     Lwt_unix.system gunzip
     >>= Unix.(function
       | WEXITED 0 -> return file_name
-      | _ -> fail_with (gunzip^" failed")
+      | _ -> fail (Failure (gunzip^" failed"))
     )
 
 let save_hour ({ year; month; day; hour }) =

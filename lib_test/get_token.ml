@@ -9,7 +9,7 @@ let t = Github.(
     let token = Token.of_auth auth in
     prerr_endline (Token.to_string token);
     return ()
-  | Auth (_,_) -> fail_with "get_token doesn't support 2fa, yet"
+  | Auth (_,_) -> fail (Failure "get_token doesn't support 2fa, yet")
 )
 
 ;;

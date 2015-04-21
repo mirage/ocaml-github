@@ -355,6 +355,10 @@ module type Github = sig
     val create_comment :
       ?token:Token.t -> user:string -> repo:string ->
       issue_number:int -> body:string -> unit -> Github_t.issue_comment Monad.t
+
+    val is_issue : Github_t.issue -> bool
+
+    val is_pull : Github_t.issue -> bool
   end
 
   module Status : sig

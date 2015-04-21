@@ -935,6 +935,10 @@ module Make(CL : Cohttp_lwt.Client) = struct
       let body = string_of_new_issue_comment { new_issue_comment_body=body } in
       let uri = URI.issue_comments ~user ~repo ~issue_number in
       API.post ~body ?token ~uri ~expected_code:`Created (fun b -> return (issue_comment_of_string b))
+
+    let is_issue = function { issue_pull_request = None } -> true | _ -> false
+
+    let is_pull = function { issue_pull_request = None } -> false | _ -> true
   end
 
   module Status = struct

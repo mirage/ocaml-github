@@ -32,8 +32,8 @@ let invalid_names = Re.(List.map compile [
 let jar_path { jar_path } = jar_path
 
 let file_kind_match path ~reg ~dir ~other = Lwt_unix.(
-  lwt stats = stat path in
-  match stats.st_kind with
+  stat path
+  >>= fun { st_kind } -> match st_kind with
     | S_REG -> reg ()
     | S_DIR -> dir ()
     | S_CHR | S_BLK | S_LNK | S_FIFO | S_SOCK -> other ()
@@ -64,10 +64,11 @@ let rec init ?jar_path () =
 (* Save an authentication token to disk, under the [name]
  * file in the jar *)
 let save ({ jar_path } as jar) ~name ~auth =
-  lwt () = if List.exists (fun re -> Re.execp re name) invalid_names then
-    fail (InvalidName name)
-  else
-    return () in
+  (if List.exists (fun re -> Re.execp re name) invalid_names then
+     fail (InvalidName name)
+   else
+     return ()
+  ) >>= fun () ->
   let rec backup_path ?(dirok=false) name =
     let fullname = Filename.concat jar_path name in
     let backup () =
@@ -80,21 +81,26 @@ let save ({ jar_path } as jar) ~name ~auth =
       printf "Github cookie jar: backing up\n%s -> %s\n" fullname fullback;
       Lwt_unix.rename fullname fullback
     in
-    try_lwt file_kind_match fullname
-      ~reg:backup
-      ~dir:(if dirok then return else backup)
-      ~other:backup
-    with
+    catch (fun () ->
+      file_kind_match fullname
+        ~reg:backup
+        ~dir:(if dirok then return else backup)
+        ~other:backup
+    ) (function
       | Unix.Unix_error (Unix.ENOENT, _, _)
-      | Unix.Unix_error (Unix.ENOTDIR, _, _) -> begin
-      match Filename.dirname name with
+      | Unix.Unix_error (Unix.ENOTDIR, _, _) ->
+        begin match Filename.dirname name with
         | "." -> return ()
         | parent -> backup_path ~dirok:true parent
-    end
+        end
+      | exn -> fail exn
+    )
   in
-  lwt () = backup_path name in
+  backup_path name
+  >>= fun () ->
   let fullname = Filename.concat jar_path name in
-  lwt () = mkdir_p (Filename.dirname fullname) in
+  mkdir_p (Filename.dirname fullname)
+  >>= fun () ->
   let fout = open_out fullname in
   fprintf fout "%s" (Github_j.string_of_auth auth);
   close_out fout;
@@ -106,7 +112,8 @@ let delete jar ~name =
   if List.exists (fun re -> Re.execp re name) invalid_names then
     fail (InvalidName name)
   else
-    lwt () = Lwt_unix.unlink (Filename.concat jar.jar_path name) in
+    Lwt_unix.unlink (Filename.concat jar.jar_path name)
+    >>= fun () ->
     return jar
 
 (* Read a JSON auth file in and parse it *)
@@ -114,8 +121,9 @@ let read_auth_file { jar_path } name =
   let fname = Filename.concat jar_path name in
   Lwt_io.with_file ~mode:Lwt_io.input fname
     (fun ic ->
-      lwt buf = Lwt_stream.fold_s (fun b a -> return (a^b)) (Lwt_io.read_lines ic) "" in
-      return (Github_j.auth_of_string buf)
+       Lwt_stream.fold_s (fun b a -> return (a^b)) (Lwt_io.read_lines ic) ""
+       >>= fun buf ->
+       return (Github_j.auth_of_string buf)
     )
 
 (* Retrieve all the cookies *)
@@ -129,10 +137,12 @@ let get_all ({ jar_path } as jar) =
         let ident = Filename.concat dir b in
         file_kind_match path
           ~reg:(fun () ->
-            lwt auth = read_auth_file jar ident in
+            read_auth_file jar ident
+            >>= fun auth ->
             return ((ident,auth)::a))
           ~dir:(fun () ->
-            lwt sub = traverse ident in
+            traverse ident
+            >>= fun sub ->
             return (sub@a))
           ~other:(fun () -> return a)
     end
@@ -141,7 +151,8 @@ let get_all ({ jar_path } as jar) =
 
 (* Get one cookie by name *)
 let get ({ jar_path } as jar) ~name =
-  try_lwt
-    lwt auth = read_auth_file jar name in
+  catch (fun () ->
+    read_auth_file jar name
+    >>= fun auth ->
     return (Some auth)
-  with _ -> return None
+  ) (fun _ -> return_none)

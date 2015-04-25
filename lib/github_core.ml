@@ -387,6 +387,8 @@ module Make(CL : Cohttp_lwt.Client) = struct
       | state, ((Error _) as x) -> Lwt.return (state, x)
 
     let return r = fun state -> Lwt.return (state, Response r)
+    let map f m = bind m (fun x -> return (f x))
+
     let fail err = fun state -> Lwt.return (state, Error err)
 
     let initial_state = {user_agent=None; token=None}
@@ -398,6 +400,10 @@ module Make(CL : Cohttp_lwt.Client) = struct
                            Printf.eprintf "%s%!" err; fail (Failure err))
 
     let (>>=) = bind
+    let (>|=) m f = map f m
+
+    let embed lw =
+      Lwt.(fun state -> lw >>= (fun v -> return (state, Response v)))
   end
 
   module Stream = struct

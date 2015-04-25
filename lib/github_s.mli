@@ -22,10 +22,14 @@ module type Github = sig
       ultimate response. *)
   module Monad : sig
     type 'a t
-    val bind : 'a t -> ('a -> 'b t) -> 'b t
     val return : 'a -> 'a t
-    val run : 'a t -> 'a Lwt.t
+    val bind : 'a t -> ('a -> 'b t) -> 'b t
+    val map : ('a -> 'b) -> 'a t -> 'b t
     val (>>=) : 'a t -> ('a -> 'b t) -> 'b t
+    val (>|=) : 'a t -> ('a -> 'b) -> 'b t
+
+    val run : 'a t -> 'a Lwt.t
+    val embed : 'a Lwt.t -> 'a t
   end
 
   module Stream : sig

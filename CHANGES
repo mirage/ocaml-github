@@ -27,6 +27,7 @@
 * ! new_hook_config is now a hook_config rather than a web_hook_config
 * ! update_hook_config is now a hook_config rather than a web_hook_config
 * Atdgen >=1.5.0 and Yojson >=1.2.0 are now required for tag_field support
+* Monad.map, Monad.(>|=), and Monad.embed : 'a Lwt.t -> 'a Monad.t added
 * Add Stream module and API.get_stream function for paginated responses (#46)
 * git-jar now supports 2FA (#38)
 * Github.{auth_continuation,handler} type added

@@ -161,10 +161,11 @@ module type Github = sig
   end
 
   module User : sig
-    val current_info : token:Token.t -> unit -> Github_t.user_info Monad.t
+    val current_info : ?token:Token.t -> unit -> Github_t.user_info Monad.t
     (** Return the currently logged in user *)
 
-    val info : ?token:Token.t -> login:string -> unit -> Github_t.user_info Monad.t
+    val info :
+      ?token:Token.t -> user:string -> unit -> Github_t.user_info Monad.t
 
     val repositories:
       user:string -> ?page:int -> unit -> Github_t.repositories Monad.t

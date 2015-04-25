@@ -117,8 +117,8 @@ module Make(CL : Cohttp_lwt.Client) = struct
     let authorization ~id =
       Uri.of_string (Printf.sprintf "%s/authorizations/%d" api id)
 
-    let user ?login () =
-      match login with
+    let user ?user () =
+      match user with
       |None -> Uri.of_string (Printf.sprintf "%s/user" api)
       |Some u -> Uri.of_string (Printf.sprintf "%s/users/%s" api u)
 
@@ -691,12 +691,12 @@ module Make(CL : Cohttp_lwt.Client) = struct
   module User = struct
     open Lwt
 
-    let current_info ~token () =
+    let current_info ?token () =
       let uri = URI.user () in
-      API.get ~token ~uri (fun body -> return (user_info_of_string body))
+      API.get ?token ~uri (fun body -> return (user_info_of_string body))
 
-    let info ?token ~login () =
-      let uri = URI.user ~login () in
+    let info ?token ~user () =
+      let uri = URI.user ~user () in
       API.get ?token ~uri (fun body -> return (user_info_of_string body))
 
     let repositories ~user ?(page=1) () =

@@ -2,6 +2,8 @@
 * Changes marked with ! are type changes (not including field additions)
 * ! API.{get,post,delete,patch,put} now take optional fail_handlers
 * ! Token.{create,get_all,get,delete} now return _ auth_continuation Monad.t
+* ! User.current_info ~token argument was made optional ?token
+* ! User.info ~login argument was renamed to User.info ~user
 * ! repo type has been renamed repository
 * ! repos type has been renamed repositories
 * ! repository_forks field renamed to repository_forks_count.

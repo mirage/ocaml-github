@@ -26,13 +26,13 @@ let get_hooks = Github.Hook.for_repo ~user ~repo ()
 let t = Github.(Monad.(run Github_t.(
   API.set_user_agent "delete_all_hooks"
   >>= fun () -> API.set_token token
-  >>= fun () -> get_hooks
+  >>= fun () -> Stream.to_list get_hooks
   >>= fun hooks ->
   printf "Present: %d hooks\n" (List.length hooks);
   List.fold_left (fun m h ->
     m >>= fun () -> Hook.delete ~user ~repo ~num:h.hook_id ()
   ) (return ()) hooks
-  >>= fun () -> get_hooks
+  >>= fun () -> Stream.to_list get_hooks
   >>= fun hooks ->
   printf "Present: %d hooks\n" (List.length hooks);
   return ()

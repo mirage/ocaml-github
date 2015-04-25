@@ -45,8 +45,7 @@ let print_issue user repo issue =
    | `Closed -> match issue_closed_at with
      | Some timestamp -> printf "  Closed at %s\n" timestamp
      | None -> printf "  Closed timestamp missing!"
-  );
-  return_unit
+  )
 
 let list_issues token repos ~all ~closed ~prs ~issues =
   let repos = List.map (fun r ->
@@ -57,13 +56,14 @@ let list_issues token repos ~all ~closed ~prs ~issues =
   (* Get the issues per repo *)
   Lwt_list.iter_s (fun (user,repo) ->
     let state = if all then `All else if closed then `Closed else `Open in
-    ask_github (Github.Issue.for_repo ~token ~state ~user ~repo)
-    >>= fun r ->
-    Lwt_list.iter_s (fun i -> match i with
-      | { T.issue_pull_request=None } when issues -> print_issue user repo i
-      | { T.issue_pull_request=Some _ } when prs -> print_issue user repo i
-      | _ -> return_unit
-    ) r
+    Github.(Monad.(run (
+      let issues_s = Issue.for_repo ~token ~state ~user ~repo () in
+      Stream.to_list issues_s (* TODO: bound?!?! *)
+      >>= fun list -> return (List.iter (fun i -> match i with
+        | { T.issue_pull_request=None } when issues -> print_issue user repo i
+        | { T.issue_pull_request=Some _ } when prs -> print_issue user repo i
+        | _ -> ()
+      ) list))))
   ) repos
 
 let cmd =

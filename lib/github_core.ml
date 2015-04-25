@@ -409,13 +409,13 @@ module Make(CL : Cohttp_lwt.Client) = struct
   module Stream = struct
     type 'a t = {
       buffer : 'a list;
-      refill : (unit -> 'a t Lwt.t) option;
+      refill : (unit -> 'a t Monad.t) option;
     }
     type 'a parse = string -> 'a list Lwt.t
 
     let empty = { buffer = []; refill = None }
 
-    let rec next = Lwt.(function
+    let rec next = Monad.(function
       | { buffer=[]; refill=None } -> return None
       | { buffer=[]; refill=Some refill } -> refill () >>= next
       | { buffer=h::buffer; refill } ->
@@ -423,7 +423,7 @@ module Make(CL : Cohttp_lwt.Client) = struct
     )
 
     let map f s =
-      let rec refill s () = Lwt.(
+      let rec refill s () = Monad.(
         next s
         >>= function
         | None -> return empty
@@ -437,6 +437,31 @@ module Make(CL : Cohttp_lwt.Client) = struct
         buffer = [];
         refill = Some (refill s);
       }
+
+    let rec find p s = Monad.(
+      next s
+      >>= function
+      | None -> return None
+      | Some (n,s) as c -> if p n then return c else find p s
+    )
+
+    let rec iter f s = Monad.(
+      next s
+      >>= function
+      | None -> return ()
+      | Some (v,s) -> f v >>= fun () -> iter f s
+    )
+
+    let to_list s =
+      let rec aux lst s = Monad.(
+        next s
+        >>= function
+        | None -> return (List.rev lst)
+        | Some (v,s) -> aux (v::lst) s
+      ) in
+      aux [] s
+
+    let of_list buffer = { buffer; refill=None; }
   end
 
   type 'a auth_continuation =
@@ -560,13 +585,16 @@ module Make(CL : Cohttp_lwt.Client) = struct
         let refill = Some (fun () ->
           let links = Cohttp.(Header.get_links envelope.Response.headers) in
           match next_link uri links with
-          | None -> return Stream.empty
-          | Some uri -> Monad.run (request ~uri f)
+          | None -> Monad.return Stream.empty
+          | Some uri -> request ~uri f
         ) in
         fn body >>= fun buffer ->
         return { Stream.buffer; refill }
       ) in
-      request ~uri f
+      {
+        Stream.buffer = [];
+        refill = Some (fun () -> request ~uri f);
+      }
 
     let post ?(fail_handlers=[]) ~expected_code =
       effectful `POST ~fail_handlers ~expected_code
@@ -705,10 +733,11 @@ module Make(CL : Cohttp_lwt.Client) = struct
       let uri = URI.user ~user () in
       API.get ?token ~uri (fun body -> return (user_info_of_string body))
 
-    let repositories ~user ?(page=1) () =
+    let repositories ?token ~user () =
       let uri = URI.user_repos ~user in
-      let params = ["page",string_of_int page] in
-      API.get ~uri ~params (fun b -> return (repositories_of_string b))
+      API.get_stream ?token ~uri (fun b ->
+        return (repositories_of_string b)
+      )
 
   end
 
@@ -820,11 +849,11 @@ module Make(CL : Cohttp_lwt.Client) = struct
   module Pull = struct
     open Lwt
 
-    let for_repo ?(state=`Open) ?token ?(page=1) ~user ~repo () =
+    let for_repo ?(state=`Open) ?token ~user ~repo () =
       let params = Filter.([
         "state", string_of_state state;
-        "page", string_of_int page ]) in
-      API.get ?token ~params ~uri:(URI.repo_pulls ~user ~repo)
+      ]) in
+      API.get_stream ?token ~params ~uri:(URI.repo_pulls ~user ~repo)
         (fun b -> return (pulls_of_string b))
 
     let get ?token ~user ~repo ~num () =
@@ -848,11 +877,11 @@ module Make(CL : Cohttp_lwt.Client) = struct
 
     let list_commits ?token ~user ~repo ~num () =
       let uri = URI.pull_commits ~user ~repo ~num in
-      API.get ?token ~uri (fun b -> return (commits_of_string b))
+      API.get_stream ?token ~uri (fun b -> return (commits_of_string b))
 
     let list_files ?token ~user ~repo ~num () =
       let uri = URI.pull_files ~user ~repo ~num in
-      API.get ?token ~uri (fun b -> return (files_of_string b))
+      API.get_stream ?token ~uri (fun b -> return (files_of_string b))
 
     let is_merged ?token ~user ~repo ~num () =
       let uri = URI.pull_merge ~user ~repo ~num in
@@ -875,14 +904,13 @@ module Make(CL : Cohttp_lwt.Client) = struct
   module Milestone = struct
     open Lwt
 
-    let for_repo ?(state=`Open) ?(sort=`Due_date) ?(direction=`Desc) ?(page=1)
-        ?token ~user ~repo () =
+    let for_repo ?(state=`Open) ?(sort=`Due_date) ?(direction=`Desc) ?token
+        ~user ~repo () =
       let params = Filter.([
         "direction", string_of_direction direction;
-        "page", string_of_int page;
         "sort", string_of_milestone_sort sort;
         "state", string_of_state state ]) in
-      API.get ?token ~params ~uri:(URI.repo_milestones ~user ~repo) 
+      API.get_stream ?token ~params ~uri:(URI.repo_milestones ~user ~repo)
         (fun b -> return (milestones_of_string b))
 
     let get ?token ~user ~repo ~num () =
@@ -908,25 +936,26 @@ module Make(CL : Cohttp_lwt.Client) = struct
     open Lwt
 
     let for_repo ?token ~user ~repo () =
-      API.get ?token ~uri:(URI.repo_releases ~user ~repo) 
+      API.get_stream ?token ~uri:(URI.repo_releases ~user ~repo)
         (fun b -> return (releases_of_string b))
 
     let get ?token ~user ~repo ~num () =
       let uri = URI.repo_release ~user ~repo ~num in
       API.get ?token ~uri (fun b -> return (release_of_string b))
 
-    (** We need to download all the releases to obtain this *)
+    (** We need to stream down releases until we find the target *)
     let get_by_tag_name ?token ~user ~repo ~tag () =
       let open Monad in
-      for_repo ?token ~user ~repo ()
-      >>= fun rs -> begin
-      try
-          return (List.find (fun r -> r.release_tag_name = tag) rs)
-      with Not_found ->
-          let msg = Printf.sprintf "tag %s not found in repository %s/%s" tag user repo in
-          fail (Semantic {Github_t.message_message=msg; message_errors=[]})
-      end
-  
+      let releases = for_repo ?token ~user ~repo () in
+      Stream.find (fun r -> r.release_tag_name = tag) releases
+      >>= function
+      | Some (r,_) -> return r
+      | None ->
+        let msg =
+          Printf.sprintf "tag %s not found in repository %s/%s" tag user repo
+        in
+        fail (Semantic {Github_t.message_message=msg; message_errors=[]})
+
     let delete ?token ~user ~repo ~num () =
       let uri = URI.repo_release ~user ~repo ~num in
       API.delete ?token ~uri (fun _ -> return ())
@@ -974,15 +1003,11 @@ module Make(CL : Cohttp_lwt.Client) = struct
     
     let for_repo ?token ?creator ?mentioned ?labels
       ?milestone ?state ?(sort=`Created)
-      ?(direction=`Desc) ?page ?assignee ~user ~repo () =
+      ?(direction=`Desc) ?assignee ~user ~repo () =
       let params = Filter.([
         "direction", string_of_direction direction;
         "sort", string_of_issue_sort sort;
       ]) in
-      let params = match page with
-        | None -> params
-        | Some p -> ("page", string_of_int p)::params
-      in
       let params = match state with
         | None -> params
         | Some s -> ("state", Filter.string_of_state s)::params
@@ -1008,7 +1033,7 @@ module Make(CL : Cohttp_lwt.Client) = struct
         | Some l -> ("labels",String.concat "," l)::params
       in
       let uri = URI.repo_issues ~user ~repo in
-      API.get ?token ~params ~uri (fun b -> return (issues_of_string b))
+      API.get_stream ?token ~params ~uri (fun b -> return (issues_of_string b))
 
     let create ?token ~user ~repo ~issue () =
       let body = string_of_new_issue issue in
@@ -1022,7 +1047,7 @@ module Make(CL : Cohttp_lwt.Client) = struct
 
     let comments ?token ~user ~repo ~issue_number () =
       let uri = URI.issue_comments ~user ~repo ~issue_number in
-      API.get ?token ~uri (fun b -> return (issue_comments_of_string b))
+      API.get_stream ?token ~uri (fun b -> return (issue_comments_of_string b))
 
     let create_comment ?token ~user ~repo ~issue_number ~body () =
       let body = string_of_new_issue_comment { new_issue_comment_body=body } in
@@ -1048,7 +1073,7 @@ module Make(CL : Cohttp_lwt.Client) = struct
 
     let for_repo ?token ~user ~repo () =
       let uri = URI.repo_hooks ~user ~repo in
-      API.get ?token ~uri (fun b -> return (hooks_of_string b))
+      API.get_stream ?token ~uri (fun b -> return (hooks_of_string b))
 
     let get ?token ~user ~repo ~num () =
       let uri = URI.hook ~user ~repo ~num in
@@ -1082,15 +1107,15 @@ module Make(CL : Cohttp_lwt.Client) = struct
 
     let tags ?token ~user ~repo () =
       let uri = URI.repo_tags ~user ~repo in
-      API.get ?token ~uri (fun b -> return (repo_tags_of_string b))
+      API.get_stream ?token ~uri (fun b -> return (repo_tags_of_string b))
 
     let branches ?token ~user ~repo () =
       let uri = URI.repo_branches ~user ~repo in
-      API.get ?token ~uri (fun b -> return (repo_branches_of_string b))
+      API.get_stream ?token ~uri (fun b -> return (repo_branches_of_string b))
 
     let refs ?token ?ty ~user ~repo () =
       let uri = URI.repo_refs ?ty ~user ~repo in
-      API.get ?token ~uri (fun b -> return (git_refs_of_string b))
+      API.get_stream ?token ~uri (fun b -> return (git_refs_of_string b))
 
     let commit ?token ~user ~repo ~sha () =
       let uri = URI.repo_commit ~user ~repo ~sha in
@@ -1110,8 +1135,8 @@ module Make(CL : Cohttp_lwt.Client) = struct
         "order",direction;
         "per_page",string_of_int 100;
       ]@(match sort with None -> [] | Some s -> ["sort",s]) in
-      API.get ?token ~params ~uri (fun b ->
-        return (repository_search_of_string b)
+      API.get_stream ?token ~params ~uri (fun b ->
+        return [repository_search_of_string b]
       )
   end
 
@@ -1120,43 +1145,43 @@ module Make(CL : Cohttp_lwt.Client) = struct
 
     let for_repo ?token ~user ~repo () =
       let uri = URI.repo_events ~user ~repo in
-      API.get ?token ~uri (fun b -> return (events_of_string b))
+      API.get_stream ?token ~uri (fun b -> return (events_of_string b))
 
     let for_repo_issues ?token ~user ~repo () =
       let uri = URI.repo_issue_events ~user ~repo in
-      API.get ?token ~uri (fun b -> return (events_of_string b))
+      API.get_stream ?token ~uri (fun b -> return (events_of_string b))
 
     let public_events () =
       let uri = URI.public_events in
-      API.get ~uri (fun b -> return (events_of_string b))
+      API.get_stream ~uri (fun b -> return (events_of_string b))
 
     let for_network ?token ~user ~repo () =
       let uri = URI.network_events ~user ~repo in
-      API.get ?token ~uri (fun b -> return (events_of_string b))
+      API.get_stream ?token ~uri (fun b -> return (events_of_string b))
 
     let for_org ?token ~org () =
       let uri = URI.org_events ~org in
-      API.get ?token ~uri (fun b -> return (events_of_string b))
+      API.get_stream ?token ~uri (fun b -> return (events_of_string b))
 
     let for_org_member ?token ~user ~org () =
       let uri = URI.org_member_events ~user ~org in
-      API.get ?token ~uri (fun b -> return (events_of_string b))
+      API.get_stream ?token ~uri (fun b -> return (events_of_string b))
 
     let received_by_user ?token ~user () =
       let uri = URI.received_events ~user in
-      API.get ?token ~uri (fun b -> return (events_of_string b))
+      API.get_stream ?token ~uri (fun b -> return (events_of_string b))
 
     let public_received_by_user ?token ~user () =
       let uri = URI.public_received_events ~user in
-      API.get ?token ~uri (fun b -> return (events_of_string b))
+      API.get_stream ?token ~uri (fun b -> return (events_of_string b))
 
     let for_user ?token ~user () =
       let uri = URI.user_events ~user in
-      API.get ?token ~uri (fun b -> return (events_of_string b))
+      API.get_stream ?token ~uri (fun b -> return (events_of_string b))
 
     let for_user_public ?token ~user () =
       let uri = URI.user_events ~user in
-      API.get ?token ~uri (fun b -> return (events_of_string b))
+      API.get_stream ?token ~uri (fun b -> return (events_of_string b))
   end
 
   module Git_obj = struct
@@ -1185,27 +1210,21 @@ module Make(CL : Cohttp_lwt.Client) = struct
     * name and time for each tag.  If annotated, this is explicit,
     * and otherwise it uses the last commit *)
     let get_tags_and_times ?token ~user ~repo () =
-      Repo.refs ?token ~ty:"tags" ~user ~repo () >>=
-      fun tags ->
-        let rec aux acc = function
-          | [] -> return acc
-          | hd :: tl -> begin
-              let _,name = Git_obj.split_ref hd.git_ref_name in
-              let sha = hd.git_ref_obj.obj_sha in
-              match hd.git_ref_obj.obj_ty with
-              |`Commit -> (* lightweight tag, so get commit info *)
-                Repo.commit ?token ~user ~repo ~sha () >>=
-                fun c ->
-                  let acc = (name, c.commit_git.git_commit_author.info_date) :: acc in
-                  aux acc tl
-              |`Tag ->
-                tag ?token ~user ~repo ~sha () >>=
-                fun t ->
-                  let acc = (name, t.tag_tagger.info_date) :: acc in
-                  aux acc tl
-              |_ -> aux acc tl
-          end
-        in aux [] tags
+      let tags = Repo.refs ?token ~ty:"tags" ~user ~repo () in
+      Stream.map (fun hd ->
+        let _,name = Git_obj.split_ref hd.git_ref_name in
+        let sha = hd.git_ref_obj.obj_sha in
+        match hd.git_ref_obj.obj_ty with
+        |`Commit -> (* lightweight tag, so get commit info *)
+          Repo.commit ?token ~user ~repo ~sha ()
+          >>= fun c ->
+          return [name, c.commit_git.git_commit_author.info_date]
+        |`Tag ->
+          tag ?token ~user ~repo ~sha ()
+          >>= fun t ->
+          return [name, t.tag_tagger.info_date]
+        |_ -> return []
+      ) tags
   end
 
   module Gist = struct
@@ -1283,7 +1302,7 @@ module Make(CL : Cohttp_lwt.Client) = struct
      * GET /gists/:id/commits *)
     let commits ?token ~id () = 
       let uri = URI.list_gist_commits ~id in
-      API.get ?token ~uri (fun b -> return (gist_history_list_of_string b))
+      API.get_stream ?token ~uri (fun b -> return (gist_history_list_of_string b))
 
     (* Star a gist https://developer.github.com/v3/gists/#star-a-gist
      * PUT /gists/:id/star
@@ -1314,7 +1333,7 @@ module Make(CL : Cohttp_lwt.Client) = struct
      * GET /gists/:id/forks *)
     let list_forks ?token ~id () = 
       let uri = URI.list_gist_forks ~id in
-      API.get ?token ~uri (fun b -> return (gist_forks_of_string b))
+      API.get_stream ?token ~uri (fun b -> return (gist_forks_of_string b))
 
     (* Delete a gist https://developer.github.com/v3/gists/#delete-a-gist
      * DELETE /gists/:id *)
@@ -1328,7 +1347,7 @@ module Make(CL : Cohttp_lwt.Client) = struct
 
     let teams ?token ~org () =
       let uri = URI.org_teams ~org in
-      API.get ?token ~uri (fun b -> return (teams_of_string b))
+      API.get_stream ?token ~uri (fun b -> return (teams_of_string b))
   end
 
   module Team = struct
@@ -1340,7 +1359,7 @@ module Make(CL : Cohttp_lwt.Client) = struct
 
     let repositories ?token ~id () =
       let uri = URI.team_repos ~id in
-      API.get ?token ~uri (fun b -> return (repositories_of_string b))
+      API.get_stream ?token ~uri (fun b -> return (repositories_of_string b))
   end
 end 
 

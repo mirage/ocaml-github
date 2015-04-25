@@ -19,12 +19,20 @@ open Lwt
 open Cmdliner
 open Printf
 
-let ask_github fn = Github.(Monad.run (fn ()))
-
 let sync_releases token src_user src_repo dst_user dst_repo =
-  lwt src = ask_github (Github.Release.for_repo ~token ~user:src_user ~repo:src_repo) in
-  lwt dst = ask_github (Github.Release.for_repo ~token ~user:dst_user ~repo:dst_repo) in
-  lwt src_tags = ask_github (Github.Repo.tags ~token ~user:src_user ~repo:src_repo) in
+  lwt src = Github.(Monad.(run (
+    let releases = Release.for_repo ~token ~user:src_user ~repo:src_repo () in
+    Stream.to_list releases
+  ))) in
+  (* TODO: unused?? *)
+  lwt dst = Github.(Monad.(run (
+    let releases = Release.for_repo ~token ~user:dst_user ~repo:dst_repo () in
+    Stream.to_list releases
+  ))) in
+  lwt src_tags = Github.(Monad.(run (
+    let releases = Repo.tags ~token ~user:src_user ~repo:src_repo () in
+    Stream.to_list releases
+  ))) in
   let open Github_t in
   Lwt_list.iter_s (fun r ->
       let tag = List.find (fun x -> x.repo_tag_name = r.release_tag_name) src_tags in
@@ -47,7 +55,9 @@ let sync_releases token src_user src_repo dst_user dst_repo =
         new_release_prerelease=r.release_prerelease;
       } in
       print_endline (Github_j.string_of_new_release release);
-      lwt _r = ask_github (Github.Release.create ~token ~user:dst_user ~repo:dst_repo ~release) in
+      lwt _r = Github.(Monad.(run (
+        Release.create ~token ~user:dst_user ~repo:dst_repo ~release ()
+      ))) in
       return ()
     ) src
 

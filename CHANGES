@@ -4,6 +4,24 @@
 * ! Token.{create,get_all,get,delete} now return _ auth_continuation Monad.t
 * ! User.current_info ~token argument was made optional ?token
 * ! User.info ~login argument was renamed to User.info ~user
+* ! User.repositories now accepts optional ?token and does not accept ?page
+* ! Pull.for_repo does not accept ?page and now returns pull Stream.t
+* ! Pull.list_commits now returns commit Stream.t
+* ! Pull.list_files now returns file Stream.t
+* ! Milestone.for_repo does not accept ?page
+* ! Milestone.for_repo now returns milestone Stream.t
+* ! Release.for_repo now returns release Stream.t
+* ! Issue.for_repo does not accept ?page and now returns issue Stream.t
+* ! Issue.comments now returns issue_comment Stream.t
+* ! Hook.for_repo now returns hook Stream.t
+* ! Repo.tags now returns repo_tag Stream.t
+* ! Repo.branches now returns repo_branch Stream.t
+* ! Repo.refs now returns git_ref Stream.t
+* ! Tag.get_tags_and_times now returns (string * string) Stream.t
+* ! Gist.commits now returns gist_history Stream.t
+* ! Gist.list_forks now returns git_fork Stream.t
+* ! Organization.teams now returns team Stream.t
+* ! Team.repositories now returns repository Stream.t
 * ! repo type has been renamed repository
 * ! repos type has been renamed repositories
 * ! repository_forks field renamed to repository_forks_count.
@@ -27,6 +45,7 @@
 * ! new_hook_config is now a hook_config rather than a web_hook_config
 * ! update_hook_config is now a hook_config rather than a web_hook_config
 * Atdgen >=1.5.0 and Yojson >=1.2.0 are now required for tag_field support
+* Cohttp >=0.17.0 is now required for Link header support
 * Monad.map, Monad.(>|=), and Monad.embed : 'a Lwt.t -> 'a Monad.t added
 * Add Stream module and API.get_stream function for paginated responses (#46)
 * git-jar now supports 2FA (#38)

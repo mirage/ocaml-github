@@ -19,8 +19,6 @@ open Lwt
 open Cmdliner
 open Printf
 
-let ask_github fn = Github.(Monad.run (fn ()))
-
 let string_of_wiki_page_action = function
   | `Created -> "Created"
   | `Edited -> "Edited"
@@ -124,7 +122,10 @@ let list_events token repos =
   ) repos in
   (* Get the events per repo *)
   lwt events = Lwt_list.fold_left_s (fun a (user,repo) ->
-    lwt r = ask_github (Github.Event.for_repo ~token ~user ~repo) in
+    lwt r = Github.(Monad.(run (
+      let events = Event.for_repo ~token ~user ~repo () in
+      Stream.to_list events (* TODO: bound!??! *)
+    ))) in
     return (r @ a)) [] repos in
   Lwt_list.iter_s print_event events
 

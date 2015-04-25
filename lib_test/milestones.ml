@@ -10,27 +10,35 @@ let print_milestones m =
   ) m;
   eprintf "--\n%!"
  
-let t =
-  let opro_milestones = Github.Milestone.for_repo ~user:"ocaml" ~repo:"opam" in
-  Github.(Monad.run (opro_milestones ~state:`Closed ())) >|= print_milestones >>
-  Github.(Monad.run (opro_milestones ~state:`Closed ~direction:`Asc ())) >|= print_milestones >>
-  Github.(Monad.run (Milestone.for_repo ~sort:`Completeness ~direction:`Asc ~user:"mxcl" ~repo:"homebrew" ())) >|= print_milestones >>
-  Github.(Monad.run (Milestone.for_repo ~sort:`Completeness ~direction:`Desc ~user:"mxcl" ~repo:"homebrew" ())) >|= print_milestones >>
+let t = Github.(Monad.(run (
+  let opro_milestones = Milestone.for_repo ~user:"ocaml" ~repo:"opam" in
+  let milestones = opro_milestones ~state:`Closed () in
+  Stream.to_list milestones
+  >|= print_milestones >>= fun () ->
+  let milestones = opro_milestones ~state:`Closed ~direction:`Asc () in
+  Stream.to_list milestones
+  >|= print_milestones >>= fun () ->
+  let milestones = Milestone.for_repo
+      ~sort:`Completeness ~direction:`Asc ~user:"mxcl" ~repo:"homebrew" ()
+  in Stream.to_list milestones
+  >|= print_milestones >>= fun () ->
+  let milestones = Milestone.for_repo
+      ~sort:`Completeness ~direction:`Desc ~user:"mxcl" ~repo:"homebrew" ()
+  in Stream.to_list milestones
+  >|= print_milestones >>= fun () ->
   let user = "mxcl" in
   let repo = "homebrew" in
-  Github.(Monad.(run (
-    Milestone.for_repo ~sort:`Completeness ~direction:`Desc ~token ~user ~repo ()
-    >>= fun milestones ->
-      let rec iterate =
-        function
-        |[] -> return ()
-        |hd::tl ->
-           Milestone.get ~token ~user ~repo ~num:hd.Github_t.milestone_number ()
-           >>= fun m ->
-            eprintf "Inside monad: milestone %d: %s\n" m.Github_t.milestone_number m.Github_t.milestone_title;
-            iterate tl
-      in 
-      iterate milestones
-  )))
+  API.set_token token >>= fun () ->
+  let milestones = Milestone.for_repo
+      ~sort:`Completeness ~direction:`Desc ~user ~repo ()
+  in Stream.iter (fun { Github_t.milestone_number = num } ->
+    Milestone.get ~user ~repo ~num ()
+    >>= fun { Github_t.milestone_title } ->
+    eprintf "Inside monad: milestone %d: %s\n" num milestone_title;
+    return ()
+  ) milestones
+)))
 
-let _ = Lwt_main.run t
+;;
+
+Lwt_main.run t

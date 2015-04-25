@@ -3,40 +3,42 @@ open Printf
 
 let token = None (* Some Config.access_token *)
 
-let print_pulls pl =
-  List.iter (fun p ->
+let print_pulls pl = Github.(Monad.(
+  Stream.iter (fun p ->
     let open Github_t in
-    eprintf "pull request %d: %s (%s)\n%!" p.pull_number p.pull_title p.pull_created_at
-  ) pl;
-  eprintf "--\n%!"
+    eprintf "pull request %d: %s (%s)\n%!"
+      p.pull_number p.pull_title p.pull_created_at;
+    return ()
+  ) pl
+  >>= fun () ->
+  eprintf "--\n%!";
+  return ()
+))
  
-let t =
+let t = Github.(Monad.(run (
   let user = "ocaml" in
   let repo = "opam" in
-  let opam_repo_pulls = Github.Pull.for_repo ~user ~repo ~page:2 in
-  Github.(Monad.run (opam_repo_pulls ~state:`Open ())) >|= print_pulls >>
-  Github.(Monad.run (opam_repo_pulls ~state:`Closed ())) >|= print_pulls >>
-  Github.(Monad.(run (
-    opam_repo_pulls ()
-    >>= fun pulls ->
-    let rec iterate = function
-      | [] -> return ()
-      | hd::tl ->
-          Pull.get ?token ~user ~repo ~num:hd.Github_t.pull_number ()
-          >>= fun p ->
-          eprintf "Inside monad: pull %d: %s\n%!" p.Github_t.pull_number p.Github_t.pull_title;
-          Pull.list_commits ?token ~user ~repo ~num:hd.Github_t.pull_number ()
-          >>= fun commits -> List.iter (fun commit ->
-            eprintf "    %s\n" commit.Github_t.commit_sha
-          ) commits;
-          eprintf "---------\n%!";
-          Pull.list_files ?token ~user ~repo ~num:hd.Github_t.pull_number ()
-          >>= fun files -> List.iter (fun file ->
-            eprintf "    %s\n" file.Github_t.file_filename
-          ) files;
-          iterate tl
-    in
-    iterate pulls
-  )))
+  let opam_repo_pulls = Pull.for_repo ~user ~repo in
+  return (opam_repo_pulls ~state:`Open ()) >>= print_pulls >>= fun () ->
+  return (opam_repo_pulls ~state:`Closed ()) >>= print_pulls >>= fun () ->
+  return (opam_repo_pulls ())
+  >>= Stream.iter (fun hd ->
+    Pull.get ?token ~user ~repo ~num:hd.Github_t.pull_number ()
+    >>= fun p ->
+    eprintf "Inside monad: pull %d: %s\n%!" p.Github_t.pull_number p.Github_t.pull_title;
+    return (Pull.list_commits ?token ~user ~repo ~num:hd.Github_t.pull_number ())
+    >>= Stream.iter (fun commit ->
+      eprintf "    %s\n" commit.Github_t.commit_sha; return ()
+    )
+    >>= fun () ->
+    eprintf "---------\n%!";
+    return (Pull.list_files ?token ~user ~repo ~num:hd.Github_t.pull_number ())
+    >>= Stream.iter (fun file ->
+      eprintf "    %s\n" file.Github_t.file_filename; return ()
+    )
+  )
+)))
 
-let _ = Lwt_main.run t
+;;
+
+Lwt_main.run t

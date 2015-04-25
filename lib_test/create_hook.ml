@@ -21,7 +21,7 @@ let token = Config.access_token
 let user = "ocamlot"
 let repo = "opam-repository"
 
-let print_hooks label = Github_t.(List.iter (fun hook ->
+let print_hooks label = Github_t.(Github.(Stream.iter (fun hook ->
   eprintf "%s %s hook %d created on %s %b detecting %s\n%!"
     label
     (match hook.hook_config with `Web _ -> "web")
@@ -29,8 +29,9 @@ let print_hooks label = Github_t.(List.iter (fun hook ->
     hook.hook_created_at
     hook.hook_active
     (List.fold_left (fun s ev -> s^(Github_j.string_of_event_type ev)^" ")
-       "" hook.hook_events)
-))
+       "" hook.hook_events);
+  Monad.return ()
+)))
 
 let make_web_hook_config url secret = Github_t.({
   web_hook_config_url=url;
@@ -49,45 +50,43 @@ let get_hooks = Github.Hook.for_repo ~token ~user ~repo ()
 
 let t = Github.(Monad.(run Github_t.(
   API.set_user_agent "create_hook"
-  >>= fun () -> get_hooks
-  >>= fun hooks ->
-  print_hooks "Present:" hooks;
+  >>= fun () ->
+  print_hooks "Present:" get_hooks
+  >>= fun () ->
   let hook = make_hook "http://example.com/" [`Push; `PullRequest; `Status] in
   Hook.create ~token ~user ~repo ~hook ()
-  >>= fun hook_a ->
-  print_hooks "Created:" [hook_a];
+  >>= fun hook_a -> print_hooks "Created:" (Stream.of_list [hook_a])
+  >>= fun () ->
   let hook = make_hook "http://example.org/"
     [`CommitComment; `IssueComment; `PullRequestReviewComment] in
   Hook.create ~token ~user ~repo ~hook ()
-  >>= fun hook_b ->
-  print_hooks "Created:" [hook_b];
+  >>= fun hook_b -> print_hooks "Created:" (Stream.of_list [hook_b])
+  >>= fun () ->
   Hook.get ~token ~user ~repo ~num:hook_b.hook_id ()
-  >>= fun hook ->
-  print_hooks "Just:" [hook];
+  >>= fun hook -> print_hooks "Just:" (Stream.of_list [hook])
+  >>= fun () ->
   Hook.update ~token ~user ~repo ~num:hook.hook_id ~hook:{
     update_hook_config=`Web (make_web_hook_config "http://example.net/" None);
     update_hook_events=Some (`Watch::hook.hook_events);
     update_hook_active=false;
   } ()
-  >>= fun hook ->
-  print_hooks "Updated:" [hook];
+  >>= fun hook -> print_hooks "Updated:" (Stream.of_list [hook])
+  >>= fun () ->
   API.set_user_agent "lib_test/create_hook.ml"
-  >>= fun () -> get_hooks
-  >>= fun hooks ->
-  print_hooks "Retrieved:" hooks;
+  >>= fun () ->
+  print_hooks "Retrieved:" get_hooks
+  >>= fun () ->
   Hook.delete ~token ~user ~repo ~num:hook.hook_id ()
+  >>= fun () -> print_hooks "Deleted:" (Stream.of_list [hook])
   >>= fun () ->
-  print_hooks "Deleted:" [hook];
-  get_hooks
-  >>= fun hooks ->
-  print_hooks "Retrieved:" hooks;
+  print_hooks "Retrieved:" get_hooks
+  >>= fun () ->
   Hook.delete ~token ~user ~repo ~num:hook_a.hook_id ()
+  >>= fun () -> print_hooks "Deleted:" (Stream.of_list [hook_a])
   >>= fun () ->
-  print_hooks "Deleted:" [hook_a];
-  get_hooks
-  >>= fun hooks ->
-  print_hooks "Present:" hooks;
-  return ()
+  print_hooks "Present:" get_hooks
 )))
 
-let _ = Lwt_main.run t
+;;
+
+Lwt_main.run t

@@ -26,8 +26,6 @@ let help_sections = [
   `P "Email bug reports to <mirageos-devel@lists.xenproject.org>.";
 ]
 
-let ask_github fn = Github.(Monad.run (fn ()))
-
 let print_repository ({
   T.repository_full_name;
   repository_description;
@@ -50,13 +48,19 @@ let search token ?language ?sort keywords =
     | None -> basic_qs
     | Some lang -> (`Language lang)::basic_qs
   in
-  ask_github (Github.Repo.search ~token ?sort ~qualifiers ~keywords)
-  >>= fun ({ T.repository_search_items; repository_search_total_count }) ->
-  Lwt_io.printf "%d results returned of %d total\n\n"
-    (List.length repository_search_items)
-    repository_search_total_count
-  >>= fun () ->
-  Lwt_list.iter_s print_repository repository_search_items
+  Github.(Monad.(run (
+    let results = Repo.search ~token ?sort ~qualifiers ~keywords () in
+    Stream.next results (* TODO: option for count? *)
+    >>= function
+    | Some ({ T.repository_search_items; repository_search_total_count }, _) ->
+      embed (Lwt_io.printf "%d results returned of %d total\n\n"
+               (List.length repository_search_items)
+               repository_search_total_count)
+      >>= fun () ->
+      embed (Lwt_list.iter_s print_repository repository_search_items)
+    | None ->
+      embed (Lwt_io.printf "No more results.\n\n")
+  )))
 
 let repo_cmd =
   let cookie = Jar_cli.cookie () in

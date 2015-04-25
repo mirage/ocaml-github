@@ -19,8 +19,6 @@ open Lwt
 open Cmdliner
 open Printf
 
-let ask_github fn = Github.(Monad.run (fn ()))
-
 let parse_iso8601_from_github t =
   (** This parses just a subset of ISO8601 that GitHub returns: 
         e.g. 2014-02-21T13:39:04Z *)
@@ -59,8 +57,11 @@ let list_releases token repos json =
     ) repos in
   (* Get the releases per repo *)
   lwt releases = Lwt_list.fold_left_s (fun a (user,repo) -> 
-      lwt r = ask_github (Github.Release.for_repo ~token ~user ~repo) in
-      return ((List.map (fun r -> (user,repo,r)) r) @ a)) [] repos in
+    lwt r = Github.(Monad.(run (
+      let releases = Release.for_repo ~token ~user ~repo () in
+      Stream.to_list releases
+    ))) in
+    return ((List.map (fun r -> (user,repo,r)) r) @ a)) [] repos in
   (* Sort them by tag creation date *)
   let rtime (_,_,r) = fst (parse_iso8601_from_github r.Github_t.release_created_at) in
   let releases = List.sort (fun b a -> compare (rtime a) (rtime b)) releases in

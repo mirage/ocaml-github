@@ -35,7 +35,27 @@ module type Github = sig
   module Stream : sig
     type 'a t
     type 'a parse = string -> 'a list Lwt.t
-    val next : 'a t -> ('a * 'a t) option Lwt.t
+
+    (** [next s] is the next element of the stream and a stream
+        continuation if one exists. *)
+    val next : 'a t -> ('a * 'a t) option Monad.t
+
+    (** [map f s] is the lazy stream of [f] applied to elements of [s]
+        as they are demanded. *)
+    val map : ('a -> 'b list Monad.t) -> 'a t -> 'b t
+
+    (** [find p s] is the first value in [s] satisfying [p] if one
+        exists and a stream continuation. *)
+    val find : ('a -> bool) -> 'a t -> ('a * 'a t) option Monad.t
+
+    (** [iter f s] is after the application of [f] to each element of [s]. *)
+    val iter : ('a -> unit Monad.t) -> 'a t -> unit Monad.t
+
+    (** [to_list s] is a list with each element of [s]. *)
+    val to_list : 'a t -> 'a list Monad.t
+
+    (** [of_list l] is a stream with each element of [l]. *)
+    val of_list : 'a list -> 'a t
   end
 
   (** Some results may require 2-factor authentication. [Result]
@@ -101,7 +121,7 @@ module type Github = sig
       ?token:Token.t ->
       ?params:(string * string) list ->
       uri:Uri.t ->
-      'a Stream.parse -> 'a Stream.t Monad.t
+      'a Stream.parse -> 'a Stream.t
 
     val post :
       ?fail_handlers:'a parse handler list ->
@@ -171,8 +191,9 @@ module type Github = sig
     val info :
       ?token:Token.t -> user:string -> unit -> Github_t.user_info Monad.t
 
-    val repositories:
-      user:string -> ?page:int -> unit -> Github_t.repositories Monad.t
+    val repositories :
+      ?token:Token.t ->
+      user:string -> unit -> Github_t.repository Stream.t
   end
 
   module Filter : sig
@@ -214,9 +235,8 @@ module type Github = sig
     val for_repo :
       ?state:Filter.state ->
       ?token:Token.t ->
-      ?page:int ->
       user:string ->
-      repo:string -> unit -> Github_t.pulls Monad.t
+      repo:string -> unit -> Github_t.pull Stream.t
 
     val get :
       ?token:Token.t ->
@@ -246,12 +266,12 @@ module type Github = sig
     val list_commits :
       ?token:Token.t ->
       user:string ->
-      repo:string -> num:int -> unit -> Github_t.commits Monad.t
+      repo:string -> num:int -> unit -> Github_t.commit Stream.t
 
     val list_files :
       ?token:Token.t ->
       user:string ->
-      repo:string -> num:int -> unit -> Github_t.files Monad.t
+      repo:string -> num:int -> unit -> Github_t.file Stream.t
 
     val is_merged :
       ?token:Token.t ->
@@ -271,9 +291,8 @@ module type Github = sig
       ?state:Filter.state ->
       ?sort:Filter.milestone_sort ->
       ?direction:Filter.direction ->
-      ?page:int ->
       ?token:Token.t ->
-      user:string -> repo:string -> unit -> Github_t.milestones Monad.t
+      user:string -> repo:string -> unit -> Github_t.milestone Stream.t
 
     val get:
       ?token:Token.t ->
@@ -298,7 +317,7 @@ module type Github = sig
   module Release : sig
     val for_repo:
       ?token:Token.t ->
-      user:string -> repo:string -> unit -> Github_t.releases Monad.t
+      user:string -> repo:string -> unit -> Github_t.release Stream.t
 
     val get:
       ?token:Token.t ->
@@ -329,7 +348,7 @@ module type Github = sig
       id:int -> filename:string -> content_type:string ->
       body:string ->
       unit -> unit Monad.t
-      
+
   end
 
   module Deploy_key : sig
@@ -356,9 +375,9 @@ module type Github = sig
       ?token:Token.t -> ?creator:string -> ?mentioned:string ->
       ?labels:string list -> ?milestone:Filter.milestone ->
       ?state:Filter.state -> ?sort:Filter.issue_sort ->
-      ?direction:Filter.direction -> ?page:int ->
+      ?direction:Filter.direction ->
       ?assignee:Filter.user ->
-      user:string -> repo:string -> unit -> Github_t.issues Monad.t
+      user:string -> repo:string -> unit -> Github_t.issue Stream.t
 
     val create :
       ?token:Token.t -> user:string -> repo:string ->
@@ -371,7 +390,7 @@ module type Github = sig
 
     val comments :
       ?token:Token.t -> user:string -> repo:string ->
-      issue_number:int -> unit -> Github_t.issue_comments Monad.t
+      issue_number:int -> unit -> Github_t.issue_comment Stream.t
 
     val create_comment :
       ?token:Token.t -> user:string -> repo:string ->
@@ -398,7 +417,7 @@ module type Github = sig
     val for_repo :
       ?token:Token.t ->
       user:string ->
-      repo:string -> unit -> Github_t.hooks Monad.t
+      repo:string -> unit -> Github_t.hook Stream.t
 
     val get :
       ?token:Token.t ->
@@ -438,17 +457,17 @@ module type Github = sig
     val tags :
       ?token:Token.t ->
       user:string -> repo:string ->
-      unit -> Github_t.repo_tags Monad.t
+      unit -> Github_t.repo_tag Stream.t
 
     val branches :
       ?token:Token.t ->
       user:string -> repo:string ->
-      unit -> Github_t.repo_branches Monad.t
+      unit -> Github_t.repo_branch Stream.t
 
     val refs :
       ?token:Token.t ->
       ?ty:string -> user:string -> repo:string ->
-      unit -> Github_t.git_refs Monad.t
+      unit -> Github_t.git_ref Stream.t
 
     val commit :
       ?token:Token.t ->
@@ -461,51 +480,51 @@ module type Github = sig
       ?direction:Filter.direction ->
       qualifiers:Filter.qualifier list ->
       keywords:string list ->
-      unit -> Github_t.repository_search Monad.t
+      unit -> Github_t.repository_search Stream.t
   end
 
   module Event : sig
     val for_repo :
       ?token:Token.t ->
       user:string ->
-      repo:string -> unit -> Github_t.events Monad.t
+      repo:string -> unit -> Github_t.event Stream.t
 
     val for_repo_issues :
       ?token:Token.t ->
       user:string ->
-      repo:string -> unit -> Github_t.events Monad.t
+      repo:string -> unit -> Github_t.event Stream.t
 
-    val public_events : unit -> Github_t.events Monad.t
+    val public_events : unit -> Github_t.event Stream.t
 
     val for_network :
       ?token:Token.t ->
       user:string ->
-      repo:string -> unit -> Github_t.events Monad.t
+      repo:string -> unit -> Github_t.event Stream.t
 
     val for_org :
       ?token:Token.t ->
-      org:string -> unit -> Github_t.events Monad.t
+      org:string -> unit -> Github_t.event Stream.t
 
     val for_org_member :
       ?token:Token.t ->
       user:string ->
-      org:string -> unit -> Github_t.events Monad.t
+      org:string -> unit -> Github_t.event Stream.t
 
     val received_by_user :
       ?token:Token.t ->
-      user:string -> unit -> Github_t.events Monad.t
+      user:string -> unit -> Github_t.event Stream.t
 
     val public_received_by_user :
       ?token:Token.t ->
-      user:string -> unit -> Github_t.events Monad.t
+      user:string -> unit -> Github_t.event Stream.t
 
     val for_user :
       ?token:Token.t ->
-      user:string -> unit -> Github_t.events Monad.t
+      user:string -> unit -> Github_t.event Stream.t
 
     val for_user_public :
       ?token:Token.t ->
-      user:string -> unit -> Github_t.events Monad.t
+      user:string -> unit -> Github_t.event Stream.t
   end
 
   module Git_obj : sig
@@ -524,13 +543,13 @@ module type Github = sig
     val get_tags_and_times :
       ?token:Token.t ->
       user:string -> repo:string ->
-      unit -> (string * string) list Monad.t
+      unit -> (string * string) Stream.t
   end
 
   module Gist : sig
     val list_users : 
-        ?since:string -> ?token:Token.t -> user:string -> unit -> 
-        Github_t.gists Monad.t
+      ?since:string -> ?token:Token.t -> user:string -> unit ->
+      Github_t.gists Monad.t
     
     val list : 
       ?since:string -> ?token:Token.t -> unit -> 
@@ -559,7 +578,7 @@ module type Github = sig
 
     val commits : 
       ?token:Token.t -> id:string -> unit -> 
-      Github_t.gist_history_list Monad.t
+      Github_t.gist_history Stream.t
 
     val star : 
       token:Token.t -> id:string -> unit -> 
@@ -577,7 +596,7 @@ module type Github = sig
 
     val list_forks : 
       ?token:Token.t -> id:string -> unit -> 
-      Github_t.gist_forks Monad.t
+      Github_t.gist_fork Stream.t
 
     val delete : 
       token:Token.t -> id:string -> unit -> 
@@ -588,7 +607,7 @@ module type Github = sig
     val teams :
       ?token:Token.t ->
       org:string ->
-      unit -> Github_t.teams Monad.t
+      unit -> Github_t.team Stream.t
   end
 
   module Team : sig
@@ -600,7 +619,7 @@ module type Github = sig
     val repositories :
       ?token:Token.t ->
       id:int ->
-      unit -> Github_t.repositories Monad.t
+      unit -> Github_t.repository Stream.t
   end
 
   (** [log_active] activates debug messages

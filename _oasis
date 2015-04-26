@@ -43,9 +43,9 @@ Library github_js
   BuildDepends: lwt.syntax, lwt, js_of_ocaml, js_of_ocaml.syntax, cohttp.lwt-core, cohttp.js, github
   XMETARequires: lwt, js_of_ocaml, cohttp.lwt-core, cohttp.js, github
 
-Document "github-api"
+Document "api"
   Title:                GitHub API documentation
-  Type:                 ocamlbuild (0.3)
+  Type:                 ocamlbuild (0.4)
   BuildTools+:          ocamldoc
   Install:              true
   XOCamlbuildPath:      lib

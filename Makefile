@@ -30,3 +30,5 @@ reinstall: setup.bin
 clean:
 	ocamlbuild -clean
 	rm -f setup.data setup.log setup.bin
+
+include mk/Makefile.github

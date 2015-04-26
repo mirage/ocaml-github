@@ -49,7 +49,9 @@
 * Monad.map, Monad.(>|=), and Monad.embed : 'a Lwt.t -> 'a Monad.t added
 * Add Stream module and API.get_stream function for paginated responses (#46)
 * git-jar now supports 2FA (#38)
-* Github.{auth_continuation,handler} type added
+* Github.auth_continuation type added
+* Github.handler type added
+* Github.Message exception added and raised when GitHub returns an API error
 * Event submodule added with a variety of event sources
 * A new jar command, git-list-events, has been added to print events for a repo
 * A new test binary, parse_events, has been added which downloads and

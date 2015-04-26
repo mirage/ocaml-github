@@ -20,6 +20,8 @@ let user_agent = "ocaml-github" (* TODO: add version from build system *)
 
 module Make(CL : Cohttp_lwt.Client) = struct
 
+  exception Message of Github_t.message
+
   let log_active =
     ref (try Unix.getenv "GITHUB_DEBUG" <> "0" with _ -> false)
 
@@ -330,6 +332,19 @@ module Make(CL : Cohttp_lwt.Client) = struct
       | Error of error
     and 'a t = state -> (state * 'a signal) Lwt.t
 
+    let string_of_message message =
+      sprintf "GitHub Error %s\n%s"
+        message.Github_t.message_message
+        (List.fold_left
+           (fun s {Github_t.error_resource; error_field; error_code} ->
+              let error_field = match error_field with
+                | None -> "\"\""
+                | Some x -> x
+              in
+              sprintf "%s> Resource type: %s\n  Field: %s\n  Code: %s\n"
+                s error_resource error_field error_code)
+           "" message.Github_t.message_errors)
+
     let error_to_string = function
       | Generic (res, body) ->
         CLB.to_string body >>= fun body_s ->
@@ -338,19 +353,7 @@ module Make(CL : Cohttp_lwt.Client) = struct
              (C.Code.string_of_status (CL.Response.status res))
              (String.concat "" (C.Header.to_lines (CL.Response.headers res)))
              body_s)
-      | Semantic message ->
-        Lwt.return
-          (sprintf "GitHub Error %s\n%s"
-             message.Github_t.message_message
-             (List.fold_left
-                (fun s {Github_t.error_resource; error_field; error_code} ->
-                  let error_field = match error_field with
-                    | None -> "\"\""
-                    | Some x -> x
-                  in
-                  sprintf "%s> Resource type: %s\n  Field: %s\n  Code: %s\n"
-                    s error_resource error_field error_code)
-                "" message.Github_t.message_errors))
+      | Semantic message -> Lwt.return (string_of_message message)
       | No_response -> Lwt.return "No response"
       | Bad_response exn ->
         Lwt.return (sprintf "Bad response: %s\n" (Printexc.to_string exn))
@@ -397,6 +400,7 @@ module Make(CL : Cohttp_lwt.Client) = struct
     let run th = bind th return initial_state >>= function
       | _, Request (_,_) -> Lwt.fail (Failure "Impossible: can't run unapplied request")
       | _, Response r -> Lwt.return r
+      | _, Error (Semantic msg) -> Lwt.(fail (Message msg))
       | _, Error e -> Lwt.(error_to_string e >>= fun err ->
                            Printf.eprintf "%s%!" err; fail (Failure err))
 
@@ -627,6 +631,8 @@ module Make(CL : Cohttp_lwt.Client) = struct
 
     let set_token token = fun state ->
       Monad.(Lwt.return ({state with token=Some token}, Response ()))
+
+    let string_of_message = Monad.string_of_message
 
   end
 

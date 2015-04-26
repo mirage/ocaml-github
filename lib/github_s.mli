@@ -17,6 +17,8 @@
 
 (** GitHub APIv3 client library *)
 module type Github = sig
+  exception Message of Github_t.message
+
   (** All API requests are bound through this monad. The [run] function
       will unpack an API response into an Lwt thread that will hold the
       ultimate response. *)
@@ -165,6 +167,8 @@ module type Github = sig
     val set_user_agent : string -> unit Monad.t
 
     val set_token : Token.t -> unit Monad.t
+
+    val string_of_message : Github_t.message -> string
   end
 
   (** Useful URI generation functions, normally for displaying on a web-page.

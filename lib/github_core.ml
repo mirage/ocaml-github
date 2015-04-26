@@ -332,7 +332,7 @@ module Make(CL : Cohttp_lwt.Client) = struct
 
     let error_to_string = function
       | Generic (res, body) ->
-        lwt body_s = CLB.to_string body in
+        CLB.to_string body >>= fun body_s ->
         Lwt.return
           (sprintf "HTTP Error %s\nHeaders:\n%s\nBody:\n%s\n"
              (C.Code.string_of_status (CL.Response.status res))
@@ -379,10 +379,11 @@ module Make(CL : Cohttp_lwt.Client) = struct
               | None -> uri
       }
 
-    let rec bind x fn = fun state -> match_lwt x state with
+    let rec bind x fn = fun state -> x state >>= function
       | state, Request (req, reqfn) ->
-          lwt r = reqfn (prepare_request state req) in
-          bind (fun state -> Lwt.return (state, r)) fn state
+        reqfn (prepare_request state req)
+        >>= fun r ->
+        bind (fun state -> Lwt.return (state, r)) fn state
       | state, Response r -> fn r state
       | state, ((Error _) as x) -> Lwt.return (state, x)
 
@@ -393,7 +394,7 @@ module Make(CL : Cohttp_lwt.Client) = struct
 
     let initial_state = {user_agent=None; token=None}
 
-    let run th = match_lwt bind th return initial_state with
+    let run th = bind th return initial_state >>= function
       | _, Request (_,_) -> Lwt.fail (Failure "Impossible: can't run unapplied request")
       | _, Response r -> Lwt.return r
       | _, Error e -> Lwt.(error_to_string e >>= fun err ->
@@ -473,30 +474,35 @@ module Make(CL : Cohttp_lwt.Client) = struct
 
   module API = struct
     (* Use the highest precedence handler that matches the response. *)
-    let rec handle_response (envelope,body as response) = function
+    let rec handle_response (envelope,body as response) = Lwt.(function
       | (p, handler)::more ->
         if not (p response) then handle_response response more
         else begin
-          let bad_response exn = Lwt.return (Monad.(error (Bad_response exn))) in
-          try_lwt
+          let bad_response exn = return (Monad.(error (Bad_response exn))) in
+          catch (fun () ->
             (* use a second try_lwt to be able to log the body in case of failure *)
-            try_lwt
-              lwt r = handler response in
-              Lwt.return (Monad.response r)
-            with exn ->
+            catch (fun () ->
+              handler response
+              >>= fun r ->
+              return (Monad.response r)
+            ) (fun exn ->
               (* XXX revert *)
-              lwt body = CLB.to_string body in
+              CLB.to_string body
+              >>= fun body ->
               log "response body:\n%s" (Yojson.Basic.pretty_to_string (Yojson.Basic.from_string body));
               bad_response exn
-          with exn -> bad_response exn
+            )
+          ) bad_response
         end
       | [] ->
         match CL.Response.status envelope with
         | `Unprocessable_entity | `Gone ->
-          lwt message = CLB.to_string body in
+          CLB.to_string body
+          >>= fun message ->
           let message = Github_j.message_of_string message in
-          Lwt.return Monad.(error (Semantic message))
-        | _ -> Lwt.return Monad.(error (Generic (envelope, body)))
+          return Monad.(error (Semantic message))
+        | _ -> return Monad.(error (Generic (envelope, body)))
+    )
 
     (* Force chunked-encoding
     * to be disabled (to satisfy Github, which returns 411 Length Required
@@ -505,11 +511,13 @@ module Make(CL : Cohttp_lwt.Client) = struct
       log "Requesting %s" (Uri.to_string uri);
       CL.call ~headers ~body ~chunked:false meth uri
 
-    let request resp_handlers req =
-      lwt response = lwt_req req in
+    let request resp_handlers req = Lwt.(
+      lwt_req req
+      >>= fun response ->
       log "Response code %s\n%!"
         (C.Code.string_of_status (CL.Response.status (fst response)));
       handle_response response resp_handlers
+    )
 
     (* A simple response pattern that matches on HTTP code equivalence *)
     let code_handler ~expected_code handler =
@@ -710,12 +718,13 @@ module Make(CL : Cohttp_lwt.Client) = struct
       let uri = URI.token ~client_id ~client_secret ~code () in
       CL.post uri 
       >>= fun (res, body) ->
-        lwt body = CLB.to_string body in
-        try
-          let form = Uri.query_of_encoded body in
-          return (Some (List.(hd (assoc "access_token" form))))
-        with _ ->
-          return None
+      CLB.to_string body
+      >>= fun body ->
+      try
+        let form = Uri.query_of_encoded body in
+        return (Some (List.(hd (assoc "access_token" form))))
+      with _ ->
+        return None
 
     let of_auth x = x.auth_token
     let of_string x = x

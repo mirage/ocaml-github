@@ -1,0 +1,24 @@
+<html><head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Index of module types" rel=Appendix href="index_module_types.html">
+<link title="Github_s" rel="Chapter" href="Github_s.html">
+<link title="Github_core" rel="Chapter" href="Github_core.html">
+<link title="Github_j" rel="Chapter" href="Github_j.html">
+<link title="Github_t" rel="Chapter" href="Github_t.html"><title>Github_s.Github.Tag</title>
+</head>
+<body>
+<code class="code"><span class="keyword">sig</span><br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;tag&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;?token:<span class="constructor">Github_s</span>.<span class="constructor">Github</span>.<span class="constructor">Token</span>.t&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;user:string&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;repo:string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;sha:string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Github_t</span>.tag&nbsp;<span class="constructor">Github_s</span>.<span class="constructor">Github</span>.<span class="constructor">Monad</span>.t<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;get_tags_and_times&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;?token:<span class="constructor">Github_s</span>.<span class="constructor">Github</span>.<span class="constructor">Token</span>.t&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;user:string&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;repo:string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;(string&nbsp;*&nbsp;string)&nbsp;<span class="constructor">Github_s</span>.<span class="constructor">Github</span>.<span class="constructor">Stream</span>.t<br>
+<span class="keyword">end</span></code></body></html>

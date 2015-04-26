@@ -1,0 +1,756 @@
+<html><head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Index of module types" rel=Appendix href="index_module_types.html">
+<link title="Github_s" rel="Chapter" href="Github_s.html">
+<link title="Github_core" rel="Chapter" href="Github_core.html">
+<link title="Github_j" rel="Chapter" href="Github_j.html">
+<link title="Github_t" rel="Chapter" href="Github_t.html"><title>Github_t</title>
+</head>
+<body>
+<code class="code"><span class="keyword">sig</span><br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;wiki_page_action&nbsp;=&nbsp;[&nbsp;<span class="keywordsign">`</span><span class="constructor">Created</span>&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Edited</span>&nbsp;]<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;wiki_page&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;wiki_page_name&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;wiki_page_title&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;wiki_page_action&nbsp;:&nbsp;<span class="constructor">Github_t</span>.wiki_page_action;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;wiki_page_sha&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;wiki_page_html_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;web_hook_config&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;web_hook_config_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;web_hook_config_content_type&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;web_hook_config_insecure_ssl&nbsp;:&nbsp;bool;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;web_hook_config_secret&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;watch_action&nbsp;=&nbsp;[&nbsp;<span class="keywordsign">`</span><span class="constructor">Started</span>&nbsp;]<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;watch_event&nbsp;=&nbsp;{&nbsp;watch_event_action&nbsp;:&nbsp;<span class="constructor">Github_t</span>.watch_action;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;user_info&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;user_info_name&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;user_info_company&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;user_info_blog&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;user_info_location&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;user_info_email&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;user_info_hireable&nbsp;:&nbsp;bool;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;user_info_bio&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;user_info_public_repos&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;user_info_public_gists&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;user_info_followers&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;user_info_following&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;user_info_created_at&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;user_info_updated_at&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;user_info_html_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;user_info_login&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;user_info_id&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;user_info_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;user_info_avatar_url&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;user_info_gravatar_id&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;user&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;user_login&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;user_id&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;user_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;user_avatar_url&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;user_gravatar_id&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;update_release&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;update_release_tag_name&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;update_release_target_commitish&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;update_release_name&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;update_release_body&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;update_release_draft&nbsp;:&nbsp;bool&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;update_release_prerelease&nbsp;:&nbsp;bool&nbsp;option;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;state&nbsp;=&nbsp;[&nbsp;<span class="keywordsign">`</span><span class="constructor">Closed</span>&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Open</span>&nbsp;]<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;update_pull&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;update_pull_title&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;update_pull_body&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;update_pull_state&nbsp;:&nbsp;<span class="constructor">Github_t</span>.state&nbsp;option;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;update_milestone&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;update_milestone_title&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;update_milestone_state&nbsp;:&nbsp;<span class="constructor">Github_t</span>.state&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;update_milestone_description&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;update_milestone_due_on&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;hook_config&nbsp;=&nbsp;[&nbsp;<span class="keywordsign">`</span><span class="constructor">Web</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="constructor">Github_t</span>.web_hook_config&nbsp;]<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;event_type&nbsp;=<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;<span class="keywordsign">`</span><span class="constructor">CommitComment</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Create</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Delete</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Deployment</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">DeploymentStatus</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Download</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Follow</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Fork</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">ForkApply</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Gist</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Gollum</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">IssueComment</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Issues</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Member</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">PageBuild</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Public</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">PullRequest</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">PullRequestReviewComment</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Push</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Release</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Status</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">TeamAdd</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Watch</span>&nbsp;]<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;update_hook&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;update_hook_config&nbsp;:&nbsp;<span class="constructor">Github_t</span>.hook_config;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;update_hook_events&nbsp;:&nbsp;<span class="constructor">Github_t</span>.event_type&nbsp;list&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;update_hook_active&nbsp;:&nbsp;bool;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;team&nbsp;=&nbsp;{&nbsp;team_url&nbsp;:&nbsp;string;&nbsp;team_name&nbsp;:&nbsp;string;&nbsp;team_id&nbsp;:&nbsp;int;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;teams&nbsp;=&nbsp;<span class="constructor">Github_t</span>.team&nbsp;list<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;team_permission&nbsp;=&nbsp;[&nbsp;<span class="keywordsign">`</span><span class="constructor">Admin</span>&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Pull</span>&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Push</span>&nbsp;]<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;org&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;org_login&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;org_id&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;org_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;org_avatar_url&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;org_gravatar_id&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;team_info&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;team_info_permission&nbsp;:&nbsp;<span class="constructor">Github_t</span>.team_permission;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;team_info_members_count&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;team_info_repos_count&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;team_info_organization&nbsp;:&nbsp;<span class="constructor">Github_t</span>.org;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;team_info_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;team_info_name&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;team_info_id&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;team_infos&nbsp;=&nbsp;<span class="constructor">Github_t</span>.team_info&nbsp;list<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;team_add_info&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;team_add_info_slug&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;team_add_info_permission&nbsp;:&nbsp;<span class="constructor">Github_t</span>.team_permission;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;team_add_info_members_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;team_add_info_repositories_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;team_add_info_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;team_add_info_name&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;team_add_info_id&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;repository&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repository_owner&nbsp;:&nbsp;<span class="constructor">Github_t</span>.user;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repository_full_name&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repository_description&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repository_private&nbsp;:&nbsp;bool;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repository_fork&nbsp;:&nbsp;bool;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repository_html_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repository_clone_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repository_git_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repository_ssh_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repository_svn_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repository_mirror_url&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repository_homepage&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repository_language&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repository_forks_count&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repository_subscribers_count&nbsp;:&nbsp;int&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repository_stargazers_count&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repository_size&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repository_master_branch&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repository_open_issues_count&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repository_pushed_at&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repository_created_at&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repository_updated_at&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repository_organization&nbsp;:&nbsp;<span class="constructor">Github_t</span>.user&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repository_has_issues&nbsp;:&nbsp;bool;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repository_has_wiki&nbsp;:&nbsp;bool;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repository_has_downloads&nbsp;:&nbsp;bool;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repository_has_pages&nbsp;:&nbsp;bool;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repository_id&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repository_name&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repository_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;team_add_event&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;team_add_event_team&nbsp;:&nbsp;<span class="constructor">Github_t</span>.team_add_info&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;team_add_event_user&nbsp;:&nbsp;<span class="constructor">Github_t</span>.user&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;team_add_event_repository&nbsp;:&nbsp;<span class="constructor">Github_t</span>.repository&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;team_add_event_organization&nbsp;:&nbsp;<span class="constructor">Github_t</span>.org;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;obj_type&nbsp;=&nbsp;[&nbsp;<span class="keywordsign">`</span><span class="constructor">Blob</span>&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Commit</span>&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Tag</span>&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Tree</span>&nbsp;]<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;obj&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;obj_ty&nbsp;:&nbsp;<span class="constructor">Github_t</span>.obj_type;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;obj_sha&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;obj_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;info&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;info_date&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;info_email&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;info_name&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;tag&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tag_obj&nbsp;:&nbsp;<span class="constructor">Github_t</span>.obj;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tag_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tag_sha&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tag_tag&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tag_message&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tag_tagger&nbsp;:&nbsp;<span class="constructor">Github_t</span>.info;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;status_state&nbsp;=&nbsp;[&nbsp;<span class="keywordsign">`</span><span class="constructor">Error</span>&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Failure</span>&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Pending</span>&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Success</span>&nbsp;]<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;status&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;status_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;status_updated_at&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;status_created_at&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;status_id&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;status_state&nbsp;:&nbsp;<span class="constructor">Github_t</span>.status_state;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;status_target_url&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;status_description&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;status_creator&nbsp;:&nbsp;<span class="constructor">Github_t</span>.user;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;statuses&nbsp;=&nbsp;<span class="constructor">Github_t</span>.status&nbsp;list<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;status_branch_commit&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;status_branch_commit_sha&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;status_branch_commit_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;status_branch&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;status_branch_name&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;status_branch_commit&nbsp;:&nbsp;<span class="constructor">Github_t</span>.status_branch_commit;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;git_commit&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;git_commit_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;git_commit_author&nbsp;:&nbsp;<span class="constructor">Github_t</span>.info;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;git_commit_message&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;commit&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;commit_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;commit_sha&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;commit_git&nbsp;:&nbsp;<span class="constructor">Github_t</span>.git_commit;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;commit_author&nbsp;:&nbsp;<span class="constructor">Github_t</span>.user&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;commit_committer&nbsp;:&nbsp;<span class="constructor">Github_t</span>.user&nbsp;option;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;status_event&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;status_event_sha&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;status_event_target_url&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;status_event_description&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;status_event_state&nbsp;:&nbsp;<span class="constructor">Github_t</span>.status_state;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;status_event_commit&nbsp;:&nbsp;<span class="constructor">Github_t</span>.commit;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;status_event_branches&nbsp;:&nbsp;<span class="constructor">Github_t</span>.status_branch&nbsp;list;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;scope&nbsp;=<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;<span class="keywordsign">`</span><span class="constructor">Admin_org</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Admin_public_key</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Admin_repo_hook</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Delete_repo</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Gist</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Notifications</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Public_repo</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Read_org</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Read_public_key</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Read_repo_hook</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Repo</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Repo_deployment</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Repo_status</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">User</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">UserEmail</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">UserFollow</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Write_org</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Write_public_key</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Write_repo_hook</span>&nbsp;]<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;repositories&nbsp;=&nbsp;<span class="constructor">Github_t</span>.repository&nbsp;list<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;repository_search&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repository_search_total_count&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repository_search_incomplete_results&nbsp;:&nbsp;bool;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repository_search_items&nbsp;:&nbsp;<span class="constructor">Github_t</span>.repositories;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;repo_commit&nbsp;=&nbsp;{&nbsp;repo_commit_sha&nbsp;:&nbsp;string;&nbsp;repo_commit_url&nbsp;:&nbsp;string;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;repo_tag&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repo_tag_name&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repo_tag_commit&nbsp;:&nbsp;<span class="constructor">Github_t</span>.repo_commit;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repo_tag_zipball_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repo_tag_tarball_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;repo_tags&nbsp;=&nbsp;<span class="constructor">Github_t</span>.repo_tag&nbsp;list<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;repo_branch&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repo_branch_name&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;repo_branch_commit&nbsp;:&nbsp;<span class="constructor">Github_t</span>.repo_commit;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;repo_branches&nbsp;=&nbsp;<span class="constructor">Github_t</span>.repo_branch&nbsp;list<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;repo&nbsp;=&nbsp;{&nbsp;repo_id&nbsp;:&nbsp;int;&nbsp;repo_name&nbsp;:&nbsp;string;&nbsp;repo_url&nbsp;:&nbsp;string;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;release&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;release_id&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;release_tag_name&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;release_target_commitish&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;release_name&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;release_body&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;release_draft&nbsp;:&nbsp;bool;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;release_prerelease&nbsp;:&nbsp;bool;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;release_created_at&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;release_published_at&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;release_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;release_html_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;release_assets_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;release_upload_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;releases&nbsp;=&nbsp;<span class="constructor">Github_t</span>.release&nbsp;list<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;release_repo&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;release_repo_user&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;release_repo_repo&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;release_repo_release&nbsp;:&nbsp;<span class="constructor">Github_t</span>.release;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;release_repos&nbsp;=&nbsp;<span class="constructor">Github_t</span>.release_repo&nbsp;list<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;release_action&nbsp;=&nbsp;[&nbsp;<span class="keywordsign">`</span><span class="constructor">Published</span>&nbsp;]<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;release_event&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;release_event_action&nbsp;:&nbsp;<span class="constructor">Github_t</span>.release_action;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;release_event_release&nbsp;:&nbsp;<span class="constructor">Github_t</span>.release;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;ref&nbsp;=&nbsp;[&nbsp;<span class="keywordsign">`</span><span class="constructor">Branch</span>&nbsp;<span class="keyword">of</span>&nbsp;string&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Repository</span>&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Tag</span>&nbsp;<span class="keyword">of</span>&nbsp;string&nbsp;]<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;push_event_author&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;push_event_author_name&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;push_event_author_email&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;push_event_commit&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;push_event_commit_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;push_event_commit_sha&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;push_event_commit_message&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;push_event_commit_author&nbsp;:&nbsp;<span class="constructor">Github_t</span>.push_event_author;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;push_event_commit_distinct&nbsp;:&nbsp;bool;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;push_event&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;push_event_head&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;push_event_ref&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;push_event_size&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;push_event_commits&nbsp;:&nbsp;<span class="constructor">Github_t</span>.push_event_commit&nbsp;list;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;link&nbsp;=&nbsp;{&nbsp;href&nbsp;:&nbsp;string;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;pull_links&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_self&nbsp;:&nbsp;<span class="constructor">Github_t</span>.link;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_html&nbsp;:&nbsp;<span class="constructor">Github_t</span>.link;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_comments&nbsp;:&nbsp;<span class="constructor">Github_t</span>.link;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_review_comments&nbsp;:&nbsp;<span class="constructor">Github_t</span>.link;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;branch&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;branch_label&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;branch_ref&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;branch_sha&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;branch_user&nbsp;:&nbsp;<span class="constructor">Github_t</span>.user&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;branch_repo&nbsp;:&nbsp;<span class="constructor">Github_t</span>.repository&nbsp;option;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;pull&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_issue_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_number&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_state&nbsp;:&nbsp;<span class="constructor">Github_t</span>.state;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_title&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_body&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_created_at&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_updated_at&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_closed_at&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_merged_at&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_head&nbsp;:&nbsp;<span class="constructor">Github_t</span>.branch;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_base&nbsp;:&nbsp;<span class="constructor">Github_t</span>.branch;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_links&nbsp;:&nbsp;<span class="constructor">Github_t</span>.pull_links;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_user&nbsp;:&nbsp;<span class="constructor">Github_t</span>.user;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_html_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_diff_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_patch_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;pulls&nbsp;=&nbsp;<span class="constructor">Github_t</span>.pull&nbsp;list<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;pull_request_review_comment_action&nbsp;=&nbsp;[&nbsp;<span class="keywordsign">`</span><span class="constructor">Created</span>&nbsp;]<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;pull_request_review_comment&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_request_review_comment_diff_hunk&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_request_review_comment_original_position&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_request_review_comment_original_commit_id&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_request_review_comment_pull_request_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_request_review_comment_position&nbsp;:&nbsp;int&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_request_review_comment_line&nbsp;:&nbsp;int&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_request_review_comment_path&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_request_review_comment_commit_id&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_request_review_comment_id&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_request_review_comment_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_request_review_comment_html_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_request_review_comment_body&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_request_review_comment_user&nbsp;:&nbsp;<span class="constructor">Github_t</span>.user;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_request_review_comment_created_at&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_request_review_comment_updated_at&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;pull_request_review_comment_event&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_request_review_comment_event_action&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Github_t</span>.pull_request_review_comment_action;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_request_review_comment_event_pull_request&nbsp;:&nbsp;<span class="constructor">Github_t</span>.pull;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_request_review_comment_event_comment&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Github_t</span>.pull_request_review_comment;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;pull_request_action&nbsp;=<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;<span class="keywordsign">`</span><span class="constructor">Assigned</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Closed</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Labeled</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Opened</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Reopened</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Synchronize</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Unassigned</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Unlabeled</span>&nbsp;]<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;pull_request_event&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_request_event_action&nbsp;:&nbsp;<span class="constructor">Github_t</span>.pull_request_action;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_request_event_number&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_request_event_pull_request&nbsp;:&nbsp;<span class="constructor">Github_t</span>.pull;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;pull_ref&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_ref_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_ref_html_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_ref_diff_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pull_ref_patch_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;page_build_status&nbsp;=&nbsp;[&nbsp;<span class="keywordsign">`</span><span class="constructor">Building</span>&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Built</span>&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Errored</span>&nbsp;]<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;page_build_error&nbsp;=&nbsp;{&nbsp;page_build_error_message&nbsp;:&nbsp;string&nbsp;option;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;page_build&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;page_build_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;page_build_status&nbsp;:&nbsp;<span class="constructor">Github_t</span>.page_build_status&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;page_build_error&nbsp;:&nbsp;<span class="constructor">Github_t</span>.page_build_error;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;page_build_event&nbsp;=&nbsp;{&nbsp;page_build_event_build&nbsp;:&nbsp;<span class="constructor">Github_t</span>.page_build;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;organization&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;organization_name&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;organization_company&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;organization_blog&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;organization_location&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;organization_email&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;organization_public_repos&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;organization_public_gists&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;organization_followers&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;organization_following&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;organization_html_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;organization_created_at&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;organization_login&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;organization_id&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;organization_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;organization_avatar_url&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;organization_gravatar_id&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;new_status&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;new_status_state&nbsp;:&nbsp;<span class="constructor">Github_t</span>.status_state;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;new_status_target_url&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;new_status_description&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;new_release&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;new_release_tag_name&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;new_release_target_commitish&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;new_release_name&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;new_release_body&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;new_release_draft&nbsp;:&nbsp;bool;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;new_release_prerelease&nbsp;:&nbsp;bool;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;new_pull_issue&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;new_pull_issue_issue&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;new_pull_issue_base&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;new_pull_issue_head&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;new_pull&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;new_pull_title&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;new_pull_body&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;new_pull_base&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;new_pull_head&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;new_milestone&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;new_milestone_title&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;new_milestone_state&nbsp;:&nbsp;<span class="constructor">Github_t</span>.state;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;new_milestone_description&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;new_milestone_due_on&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;new_issue_comment&nbsp;=&nbsp;{&nbsp;new_issue_comment_body&nbsp;:&nbsp;string;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;new_issue&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;new_issue_title&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;new_issue_body&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;new_issue_assignee&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;new_issue_milestone&nbsp;:&nbsp;int&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;new_issue_labels&nbsp;:&nbsp;string&nbsp;list;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;new_hook&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;new_hook_config&nbsp;:&nbsp;<span class="constructor">Github_t</span>.hook_config;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;new_hook_events&nbsp;:&nbsp;<span class="constructor">Github_t</span>.event_type&nbsp;list;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;new_hook_active&nbsp;:&nbsp;bool;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;new_deploy_key&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;new_deploy_key_title&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;new_deploy_key_key&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;milestone&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;milestone_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;milestone_number&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;milestone_state&nbsp;:&nbsp;<span class="constructor">Github_t</span>.state;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;milestone_title&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;milestone_description&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;milestone_creator&nbsp;:&nbsp;<span class="constructor">Github_t</span>.user&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;milestone_open_issues&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;milestone_closed_issues&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;milestone_created_at&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;milestone_due_on&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;milestones&nbsp;=&nbsp;<span class="constructor">Github_t</span>.milestone&nbsp;list<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;milestone_sort&nbsp;=&nbsp;[&nbsp;<span class="keywordsign">`</span><span class="constructor">Completeness</span>&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Due_date</span>&nbsp;]<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;error&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;error_resource&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;error_field&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;error_code&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;message&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;message_message&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;message_errors&nbsp;:&nbsp;<span class="constructor">Github_t</span>.error&nbsp;list;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;merge_request&nbsp;=&nbsp;{&nbsp;merge_commit_message&nbsp;:&nbsp;string&nbsp;option;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;merge&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;merge_sha&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;merge_merged&nbsp;:&nbsp;bool;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;merge_message&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;member_action&nbsp;=&nbsp;[&nbsp;<span class="keywordsign">`</span><span class="constructor">Added</span>&nbsp;]<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;linked_user&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;linked_user_html_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;linked_user_login&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;linked_user_id&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;linked_user_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;linked_user_avatar_url&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;linked_user_gravatar_id&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;member_event&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;member_event_action&nbsp;:&nbsp;<span class="constructor">Github_t</span>.member_action;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;member_event_member&nbsp;:&nbsp;<span class="constructor">Github_t</span>.linked_user;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;label&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;label_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;label_name&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;label_color&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;issues_action&nbsp;=<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;<span class="keywordsign">`</span><span class="constructor">Assigned</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Closed</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Labeled</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Opened</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Reopened</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Unassigned</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Unlabeled</span>&nbsp;]<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;issue_sort&nbsp;=&nbsp;[&nbsp;<span class="keywordsign">`</span><span class="constructor">Comments</span>&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Created</span>&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Updated</span>&nbsp;]<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;direction&nbsp;=&nbsp;[&nbsp;<span class="keywordsign">`</span><span class="constructor">Asc</span>&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Desc</span>&nbsp;]<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;issue&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;issue_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;issue_html_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;issue_number&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;issue_state&nbsp;:&nbsp;<span class="constructor">Github_t</span>.state;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;issue_title&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;issue_body&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;issue_user&nbsp;:&nbsp;<span class="constructor">Github_t</span>.user;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;issue_labels&nbsp;:&nbsp;<span class="constructor">Github_t</span>.label&nbsp;list;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;issue_comments&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;issue_created_at&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;issue_updated_at&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;issue_closed_at&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;issue_milestone&nbsp;:&nbsp;<span class="constructor">Github_t</span>.milestone&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;issue_sort&nbsp;:&nbsp;<span class="constructor">Github_t</span>.issue_sort;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;issue_direction&nbsp;:&nbsp;<span class="constructor">Github_t</span>.direction;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;issue_mentioned&nbsp;:&nbsp;string&nbsp;list&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;issue_pull_request&nbsp;:&nbsp;<span class="constructor">Github_t</span>.pull_ref&nbsp;option;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;issues_event&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;issues_event_action&nbsp;:&nbsp;<span class="constructor">Github_t</span>.issues_action;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;issues_event_issue&nbsp;:&nbsp;<span class="constructor">Github_t</span>.issue;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;issues_event_assignee&nbsp;:&nbsp;<span class="constructor">Github_t</span>.user_info&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;issues_event_label&nbsp;:&nbsp;<span class="constructor">Github_t</span>.label&nbsp;option;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;issues&nbsp;=&nbsp;<span class="constructor">Github_t</span>.issue&nbsp;list<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;issue_comment&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;issue_comment_id&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;issue_comment_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;issue_comment_html_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;issue_comment_body&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;issue_comment_user&nbsp;:&nbsp;<span class="constructor">Github_t</span>.user;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;issue_comment_created_at&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;issue_comment_updated_at&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;issue_comments&nbsp;=&nbsp;<span class="constructor">Github_t</span>.issue_comment&nbsp;list<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;issue_comment_action&nbsp;=&nbsp;[&nbsp;<span class="keywordsign">`</span><span class="constructor">Created</span>&nbsp;]<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;issue_comment_event&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;issue_comment_event_action&nbsp;:&nbsp;<span class="constructor">Github_t</span>.issue_comment_action;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;issue_comment_event_issue&nbsp;:&nbsp;<span class="constructor">Github_t</span>.issue;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;issue_comment_event_comment&nbsp;:&nbsp;<span class="constructor">Github_t</span>.issue_comment;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;hook&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;hook_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;hook_updated_at&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;hook_created_at&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;hook_events&nbsp;:&nbsp;<span class="constructor">Github_t</span>.event_type&nbsp;list;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;hook_active&nbsp;:&nbsp;bool;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;hook_config&nbsp;:&nbsp;<span class="constructor">Github_t</span>.hook_config;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;hook_id&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;hooks&nbsp;=&nbsp;<span class="constructor">Github_t</span>.hook&nbsp;list<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;gollum_event&nbsp;=&nbsp;{&nbsp;gollum_event_pages&nbsp;:&nbsp;<span class="constructor">Github_t</span>.wiki_page&nbsp;list;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;git_ref&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;git_ref_name&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;git_ref_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;git_ref_obj&nbsp;:&nbsp;<span class="constructor">Github_t</span>.obj;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;git_refs&nbsp;=&nbsp;<span class="constructor">Github_t</span>.git_ref&nbsp;list<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;change_status&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;change_statusdeletions&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;change_statusadditions&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;change_statustotal&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;gist_history&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_historyurl&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_historyversion&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_historyuser&nbsp;:&nbsp;<span class="constructor">Github_t</span>.user;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_historychange_status&nbsp;:&nbsp;<span class="constructor">Github_t</span>.change_status;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_historycommitted_at&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;gist_history_list&nbsp;=&nbsp;<span class="constructor">Github_t</span>.gist_history&nbsp;list<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;gist_fork&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_fork_user&nbsp;:&nbsp;<span class="constructor">Github_t</span>.user;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_fork_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_fork_id&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_fork_created_at&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_fork_updated_at&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;gist_file&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_file_size&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_file_raw_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_file_ty&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_file_truncated&nbsp;:&nbsp;bool&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_file_language&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_file_content&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;gist_files&nbsp;=&nbsp;(string&nbsp;*&nbsp;<span class="constructor">Github_t</span>.gist_file)&nbsp;list<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;gist&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_forks_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_commits_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_id&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_description&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_public&nbsp;:&nbsp;bool;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_owner&nbsp;:&nbsp;<span class="constructor">Github_t</span>.user;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_user&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_files&nbsp;:&nbsp;<span class="constructor">Github_t</span>.gist_files;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_comments&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_comments_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_html_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_git_pull_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_git_push_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_created_at&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_updated_at&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_forks&nbsp;:&nbsp;<span class="constructor">Github_t</span>.gist_fork&nbsp;list&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_history&nbsp;:&nbsp;<span class="constructor">Github_t</span>.gist_history_list&nbsp;option;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;gists&nbsp;=&nbsp;<span class="constructor">Github_t</span>.gist&nbsp;list<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;gist_forks&nbsp;=&nbsp;<span class="constructor">Github_t</span>.gist_fork&nbsp;list<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;gist_edit&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_edit_content&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_edit_filename&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;gist_edits&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_edit_description&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_edit_files&nbsp;:&nbsp;(string&nbsp;*&nbsp;<span class="constructor">Github_t</span>.gist_edit)&nbsp;list;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;gist_create_content&nbsp;=&nbsp;{&nbsp;gist_create_content&nbsp;:&nbsp;string;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;gist_create_contents&nbsp;=&nbsp;(string&nbsp;*&nbsp;<span class="constructor">Github_t</span>.gist_create_content)&nbsp;list<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;gist_create&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_create_description&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_create_public&nbsp;:&nbsp;bool;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gist_create_files&nbsp;:&nbsp;<span class="constructor">Github_t</span>.gist_create_contents;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;fork_event&nbsp;=&nbsp;{&nbsp;fork_event_forkee&nbsp;:&nbsp;<span class="constructor">Github_t</span>.repository;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;file&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file_sha&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file_filename&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file_status&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file_additions&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file_deletions&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file_changes&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file_blob_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file_raw_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file_patch&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;files&nbsp;=&nbsp;<span class="constructor">Github_t</span>.file&nbsp;list<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;delete_event&nbsp;=&nbsp;{&nbsp;delete_event_ref&nbsp;:&nbsp;<span class="constructor">Github_t</span>.ref;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;create_event&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;create_event_ref&nbsp;:&nbsp;<span class="constructor">Github_t</span>.ref;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;create_event_master_branch&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;create_event_description&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;commit_comment&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;commit_comment_position&nbsp;:&nbsp;int&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;commit_comment_line&nbsp;:&nbsp;int&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;commit_comment_path&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;commit_comment_commit_id&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;commit_comment_id&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;commit_comment_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;commit_comment_html_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;commit_comment_body&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;commit_comment_user&nbsp;:&nbsp;<span class="constructor">Github_t</span>.user;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;commit_comment_created_at&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;commit_comment_updated_at&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;commit_comment_event&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;commit_comment_event_comment&nbsp;:&nbsp;<span class="constructor">Github_t</span>.commit_comment;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;event_constr&nbsp;=<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[&nbsp;<span class="keywordsign">`</span><span class="constructor">CommitComment</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="constructor">Github_t</span>.commit_comment_event<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Create</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="constructor">Github_t</span>.create_event<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Delete</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="constructor">Github_t</span>.delete_event<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Download</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Follow</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Fork</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="constructor">Github_t</span>.fork_event<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">ForkApply</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Gist</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Gollum</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="constructor">Github_t</span>.gollum_event<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">IssueComment</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="constructor">Github_t</span>.issue_comment_event<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Issues</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="constructor">Github_t</span>.issues_event<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Member</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="constructor">Github_t</span>.member_event<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Public</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">PullRequest</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="constructor">Github_t</span>.pull_request_event<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">PullRequestReviewComment</span>&nbsp;<span class="keyword">of</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Github_t</span>.pull_request_review_comment_event<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Push</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="constructor">Github_t</span>.push_event<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Release</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="constructor">Github_t</span>.release_event<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Status</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="constructor">Github_t</span>.status_event<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Watch</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="constructor">Github_t</span>.watch_event&nbsp;]<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;event&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;event_public&nbsp;:&nbsp;bool;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;event_payload&nbsp;:&nbsp;<span class="constructor">Github_t</span>.event_constr;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;event_actor&nbsp;:&nbsp;<span class="constructor">Github_t</span>.user;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;event_org&nbsp;:&nbsp;<span class="constructor">Github_t</span>.org&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;event_created_at&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;event_repo&nbsp;:&nbsp;<span class="constructor">Github_t</span>.repo;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;event_id&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;events&nbsp;=&nbsp;<span class="constructor">Github_t</span>.event&nbsp;list<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;deploy_key&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;deploy_key_id&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;deploy_key_key&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;deploy_key_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;deploy_key_title&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;deploy_keys&nbsp;=&nbsp;<span class="constructor">Github_t</span>.deploy_key&nbsp;list<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;commits&nbsp;=&nbsp;<span class="constructor">Github_t</span>.commit&nbsp;list<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;comment&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;comment_id&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;comment_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;comment_html_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;comment_body&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;comment_user&nbsp;:&nbsp;<span class="constructor">Github_t</span>.user;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;comment_created_at&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;comment_updated_at&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;app&nbsp;=&nbsp;{&nbsp;app_name&nbsp;:&nbsp;string;&nbsp;app_url&nbsp;:&nbsp;string;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;auth&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;auth_scopes&nbsp;:&nbsp;<span class="constructor">Github_t</span>.scope&nbsp;list;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;auth_token&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;auth_app&nbsp;:&nbsp;<span class="constructor">Github_t</span>.app;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;auth_url&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;auth_id&nbsp;:&nbsp;int;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;auth_note&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;auth_note_url&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;auths&nbsp;=&nbsp;<span class="constructor">Github_t</span>.auth&nbsp;list<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;auth_req&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;auth_req_scopes&nbsp;:&nbsp;<span class="constructor">Github_t</span>.scope&nbsp;list;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;auth_req_note&nbsp;:&nbsp;string;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;auth_req_note_url&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;auth_req_client_id&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;auth_req_client_secret&nbsp;:&nbsp;string&nbsp;option;<br>
+&nbsp;&nbsp;}<br>
+<span class="keyword">end</span></code></body></html>

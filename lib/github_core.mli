@@ -15,6 +15,10 @@
  *
  *)
 
+(** Portable functor to the GitHub API.
+
+    The [Cohttp_lwt.Client] interface can be satisfied by a normal
+    [Cohttp_lwt_unix.Client], but also by the JavaScript Cohttp
+    client for use in a browser. *)
 
 module Make(CL : Cohttp_lwt.Client) : Github_s.Github
-

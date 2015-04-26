@@ -61,6 +61,7 @@
 * Filter.state now includes `All constructor (#59,#62 Michael Grünewald)
 * pull_ref type added from which pull now inherits
 * issue_pull_request optional field of pull_ref type added
+* Issue.is_issue and Issue.is_pull added to distinguish issues from PRs
 * organization type added
 * user and organization now inherit from org
 * user_info_updated_at field added

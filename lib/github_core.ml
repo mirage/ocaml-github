@@ -333,17 +333,16 @@ module Make(CL : Cohttp_lwt.Client) = struct
     and 'a t = state -> (state * 'a signal) Lwt.t
 
     let string_of_message message =
-      sprintf "GitHub Error %s\n%s"
-        message.Github_t.message_message
-        (List.fold_left
-           (fun s {Github_t.error_resource; error_field; error_code} ->
-              let error_field = match error_field with
-                | None -> "\"\""
-                | Some x -> x
-              in
-              sprintf "%s> Resource type: %s\n  Field: %s\n  Code: %s\n"
-                s error_resource error_field error_code)
-           "" message.Github_t.message_errors)
+      message.Github_t.message_message^
+      (List.fold_left
+         (fun s {Github_t.error_resource; error_field; error_code} ->
+            let error_field = match error_field with
+              | None -> "\"\""
+              | Some x -> x
+            in
+            sprintf "%s\n> Resource type: %s\n  Field: %s\n  Code: %s"
+              s error_resource error_field error_code)
+         "" message.Github_t.message_errors)
 
     let error_to_string = function
       | Generic (res, body) ->
@@ -353,7 +352,8 @@ module Make(CL : Cohttp_lwt.Client) = struct
              (C.Code.string_of_status (CL.Response.status res))
              (String.concat "" (C.Header.to_lines (CL.Response.headers res)))
              body_s)
-      | Semantic message -> Lwt.return (string_of_message message)
+      | Semantic message ->
+        Lwt.return ("GitHub API error: "^string_of_message message)
       | No_response -> Lwt.return "No response"
       | Bad_response exn ->
         Lwt.return (sprintf "Bad response: %s\n" (Printexc.to_string exn))

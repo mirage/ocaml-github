@@ -23,13 +23,13 @@ variable.
 Cookie jar
 ==========
 
-Applications that use this library will need to save authentication tokens
+Applications that use this library will need to save authorization tokens
 locally, and the `Github_cookie_jar` module in the `unix/` directory helps
-handle this more naturally.  It maps an authentication token onto a local
+handle this more naturally.  It maps an authorization token onto a local
 application name, which can then query that token at runtime and use it in
 Github API calls.
 
-The tokens are all stored in `$HOME/.github/<name>`, where `<name>` is the
+The tokens are all stored in `$HOME/.github/jar/<name>`, where `<name>` is the
 local name of the application.
 
 A `git-jar` command is also installed to add, remove and list the contents
@@ -41,33 +41,23 @@ $ git jar
 
 ...will display the man page.
 
-```console
-$ git jar show avsm
-Enter Github password: **********                                                                                                                                                                                                                                               
-Cookie Name | ID       | Application                              | Note      
-----------------------------------------------------------------------------------
-   <remote> | 236241   | Real World OCaml                         |           
-   <remote> | 340988   | Travis                                   |           
-```
-
-Note that the cookies are all current remote.  To save the Real World OCaml one
-to local storage so that an application can use it, just do:
 
 ```console
-$ git jar save avsm 236241 rwo
-Enter Github password: **********                                                                                                                                                                                                                                               
-Github cookie jar: created /Users/avsm/.github/jar/rwo
+$ git jar make avsm rwo
+Enter Github password: **********
+Enter 2FA code from 'app': 172217
+Github cookie jar: created /home/avsm/.github/jar/rwo
+Created token rwo (236241): <token>
 ```
-
-This will now show up in the `show` command as a local cookie:
 
 ```console
 $ git jar show avsm
-Enter Github password: **********                                                                                                                                                                                                                                               
+Enter Github password: **********
+Enter 2FA code from 'app': 001221
 Cookie Name | ID       | Application                              | Note      
 ----------------------------------------------------------------------------------
-        rwo | 236241   | Real World OCaml                         |           
-   <remote> | 340988   | Travis                                   |           
+        rwo | 236241   | Real World OCaml (API)                   |
+   <remote> | 340988   | Travis                                   |
 ```
 
 Your Github application can how use it via the `Github_cookie_jar` module:

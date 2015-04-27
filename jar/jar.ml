@@ -73,7 +73,7 @@ let list_auth user pass =
     return ()
   )
 
-let make_auth user pass scopes note note_url client_id client_secret =
+let make_auth user pass scopes note note_url client_id client_secret fingerprint =
   let open Github_t in
   Lwt_main.run (
     Passwd.get pass
@@ -81,7 +81,8 @@ let make_auth user pass scopes note note_url client_id client_secret =
     Github.Monad.run
       (complete_2fa
          (Github.Token.create
-            ~scopes ~note ?note_url ?client_id ?client_secret ~user ~pass
+            ~scopes ~note ?note_url ?client_id ?client_secret ?fingerprint
+            ~user ~pass
          )
       )
     >>= fun auth ->
@@ -97,9 +98,13 @@ let save_auth user pass id name =
     Passwd.get pass
     >>= fun pass ->
     Github.Monad.run (complete_2fa (Github.Token.get ~user ~pass ~id))
-    >>= fun auth ->
-    lwt _ = Github_cookie_jar.save jar ~name ~auth in
-    return ()
+    >>= function
+    | Some auth ->
+      lwt _ = Github_cookie_jar.save jar ~name ~auth in
+      return ()
+    | None ->
+      Lwt_io.eprintf "GitHub token id %d not found.\n" id
+      >>= fun () -> exit 1
   )
 
 let revoke_auth user pass id =
@@ -140,7 +145,11 @@ let make_cmd =
   let note_url = Arg.(value & opt (some string) None & info ["url"] ~docv:"URL" ~doc:"URL to record beside the authorization token") in
   let client_id = Arg.(value & opt (some string) None & info ["client-id"] ~docv:"CLIENT_ID" ~doc:"Optional oAuth client id to register this token with an application.") in
   let client_secret = Arg.(value & opt (some string) None & info ["client-secret"] ~docv:"CLIENT_SECRET" ~doc:"Optional oAuth client secret to register this token with an application.") in
-  Term.(pure make_auth $ user $ pass $ scopes $ note $ note_url $ client_id $ client_secret),
+  let fingerprint = Arg.(value & opt (some string) None & info ["fingerprint"]
+                           ~docv:"FINGERPRINT" ~doc:"Unique token fingerprint") in
+  Term.(pure make_auth
+        $ user $ pass
+        $ scopes $ note $ note_url $ client_id $ client_secret $ fingerprint),
   Term.info "make" ~doc:"create a new Github authorization token remotely."
 
 let save_cmd =

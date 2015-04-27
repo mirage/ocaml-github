@@ -662,9 +662,10 @@ module Make(CL : Cohttp_lwt.Client) = struct
         | Some code -> C.Header.replace headers "x-github-otp" code
 
     let create ?(scopes=[`Repo]) ?(note="ocaml-github") ?note_url ?client_id
-        ?client_secret ?otp ~user ~pass () =
+        ?client_secret ?fingerprint ?otp ~user ~pass () =
       let req = {
         auth_req_scopes=scopes; auth_req_note=note; auth_req_note_url=note_url;
+        auth_req_fingerprint=fingerprint;
         auth_req_client_id=client_id; auth_req_client_secret=client_secret;
       } in
       let body = string_of_auth_req req in
@@ -691,9 +692,13 @@ module Make(CL : Cohttp_lwt.Client) = struct
       let headers =
         add_otp C.Header.(add_authorization (init ()) (`Basic (user,pass))) otp
       in
-      let fail_handlers = [two_factor_auth_handler ()] in
+      let fail_handlers = [
+        two_factor_auth_handler ();
+        API.code_handler ~expected_code:`Not_found
+          (fun _ -> return (Result None));
+      ] in
       API.get ~headers ~uri ~fail_handlers ~expected_code:`OK (fun body ->
-        return (Result (auth_of_string body))
+        return (Result (Some (auth_of_string body)))
       )
 
     let delete ?otp ~user ~pass ~id () =

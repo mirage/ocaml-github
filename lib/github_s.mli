@@ -87,14 +87,14 @@ module type Github = sig
 
     val create : ?scopes:Github_t.scope list -> ?note:string ->
       ?note_url:string -> ?client_id:string -> ?client_secret:string ->
-      ?otp:string ->
+      ?fingerprint:string -> ?otp:string ->
       user:string -> pass:string -> unit ->
       Github_t.auth authorization Monad.t
 
     val get_all : ?otp:string -> user:string -> pass:string -> unit ->
       Github_t.auths authorization Monad.t
     val get : ?otp:string -> user:string -> pass:string -> id:int -> unit ->
-      Github_t.auth authorization Monad.t
+      Github_t.auth option authorization Monad.t
     val delete : ?otp:string -> user:string -> pass:string -> id:int -> unit ->
       unit authorization Monad.t
 

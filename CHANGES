@@ -3,6 +3,8 @@
 * ! API.{get,post,delete,patch,put} now take optional fail_handlers
 * ! Token.{create,get_all,get,delete} now return _ authorization Monad.t
 * ! Token.{create,get_all,get,delete} now have additional ?otp:string argument
+* ! Token.create now has additional ?fingerprint:string argument
+* ! Token.get now returns auth option authorization Monad.t
 * ! User.current_info ~token argument was made optional ?token
 * ! User.info ~login argument was renamed to User.info ~user
 * ! User.repositories now accepts optional ?token and does not accept ?page
@@ -49,6 +51,7 @@
 * Cohttp >=0.17.0 is now required for Link header support
 * Monad.map, Monad.(>|=), and Monad.embed : 'a Lwt.t -> 'a Monad.t added
 * Add Stream module and API.get_stream function for paginated responses (#46)
+* Fix git-jar token file permissions security vulnerability
 * git-jar now supports 2FA (#38)
 * Github.authorization type added
 * Github.handler type added

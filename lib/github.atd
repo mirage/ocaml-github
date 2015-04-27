@@ -42,6 +42,7 @@ type auth_req = {
   ?note_url: string option;
   ?client_id: string option;
   ?client_secret: string option;
+  ?fingerprint: string option;
 } <ocaml field_prefix="auth_req_">
 
 type auth = {

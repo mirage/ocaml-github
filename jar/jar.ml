@@ -169,5 +169,10 @@ let default_cmd =
 let cmds = [list_cmd; make_cmd; save_cmd; revoke_cmd]
 
 let () =
-  match Term.eval_choice default_cmd cmds with 
-  | `Error _ -> exit 1 | _ -> exit 0
+  try
+    match Term.eval_choice ~catch:false default_cmd cmds with
+    | `Error _ -> exit 1 | _ -> exit 0
+  with
+  | Github.Message m ->
+    eprintf "GitHub API error: %s\n" (Github.API.string_of_message m);
+    exit 1

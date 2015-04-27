@@ -61,11 +61,10 @@ module type Github = sig
   end
 
   (** Some results may require 2-factor authentication. [Result]
-      values do not. [Auth] values contain the mode of 2FA and the
-      continuation to be executed when the code is known. *)
-  type 'a auth_continuation =
+      values do not. [Two_factor] values contain the mode of 2FA. *)
+  type 'a authorization =
     | Result of 'a
-    | Auth of string * (string -> 'a auth_continuation Monad.t)
+    | Two_factor of string
 
   type +'a parse = string -> 'a Lwt.t
   type 'a handler =
@@ -88,15 +87,16 @@ module type Github = sig
 
     val create : ?scopes:Github_t.scope list -> ?note:string ->
       ?note_url:string -> ?client_id:string -> ?client_secret:string ->
+      ?otp:string ->
       user:string -> pass:string -> unit ->
-      Github_t.auth auth_continuation Monad.t
+      Github_t.auth authorization Monad.t
 
-    val get_all : user:string -> pass:string -> unit ->
-      Github_t.auths auth_continuation Monad.t
-    val get : user:string -> pass:string -> id:int -> unit ->
-      Github_t.auth auth_continuation Monad.t
-    val delete : user:string -> pass:string -> id:int -> unit ->
-      unit auth_continuation Monad.t
+    val get_all : ?otp:string -> user:string -> pass:string -> unit ->
+      Github_t.auths authorization Monad.t
+    val get : ?otp:string -> user:string -> pass:string -> id:int -> unit ->
+      Github_t.auth authorization Monad.t
+    val delete : ?otp:string -> user:string -> pass:string -> id:int -> unit ->
+      unit authorization Monad.t
 
     val of_auth : Github_t.auth -> t
     val of_string : string -> t

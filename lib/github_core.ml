@@ -469,9 +469,9 @@ module Make(CL : Cohttp_lwt.Client) = struct
     let of_list buffer = { buffer; refill=None; }
   end
 
-  type 'a auth_continuation =
+  type 'a authorization =
     | Result of 'a
-    | Auth of string * (string -> 'a auth_continuation Monad.t)
+    | Two_factor of string
 
   type 'a parse = string -> 'a Lwt.t
   type 'a handler = (CL.Response.t * CLB.t -> bool) * 'a
@@ -643,7 +643,7 @@ module Make(CL : Cohttp_lwt.Client) = struct
     open Lwt
     type t = string
 
-    let two_factor_auth_handler repeat headers =
+    let two_factor_auth_handler () =
       let mode = ref "" in
       (fun (res,_) ->
          CL.Response.status res = `Unauthorized
@@ -655,67 +655,55 @@ module Make(CL : Cohttp_lwt.Client) = struct
            if required = "required; "
            then (mode := (Stringext.string_after v 10); true)
            else false
-      ), (fun _ ->
-        return (Auth (!mode, (fun code ->
-          repeat (C.Header.replace headers "x-github-otp" code)
-        )))
-      )
+      ), (fun _ -> return (Two_factor !mode))
+
+    let add_otp headers = function
+        | None -> headers
+        | Some code -> C.Header.replace headers "x-github-otp" code
 
     let create ?(scopes=[`Repo]) ?(note="ocaml-github") ?note_url ?client_id
-        ?client_secret ~user ~pass () =
+        ?client_secret ?otp ~user ~pass () =
       let req = {
         auth_req_scopes=scopes; auth_req_note=note; auth_req_note_url=note_url;
         auth_req_client_id=client_id; auth_req_client_secret=client_secret;
       } in
       let body = string_of_auth_req req in
       let headers =
-        C.Header.(add_authorization (init ()) (`Basic (user,pass)))
+        add_otp C.Header.(add_authorization (init ()) (`Basic (user,pass))) otp
       in
       let uri = URI.authorizations in
-      let rec send headers =
-        let fail_handlers = [two_factor_auth_handler send headers] in
-        API.post ~headers ~body ~uri ~fail_handlers ~expected_code:`Created
-          (fun body -> return (Result (auth_of_string body)))
-      in
-      send headers
+      let fail_handlers = [two_factor_auth_handler ()] in
+      API.post ~headers ~body ~uri ~fail_handlers ~expected_code:`Created
+        (fun body -> return (Result (auth_of_string body)))
 
-    let get_all ~user ~pass () =
+    let get_all ?otp ~user ~pass () =
       let uri = URI.authorizations in
       let headers =
-        C.Header.(add_authorization (init ()) (`Basic (user,pass)))
+        add_otp C.Header.(add_authorization (init ()) (`Basic (user,pass))) otp
       in
-      let rec send headers =
-        let fail_handlers = [two_factor_auth_handler send headers] in
-        API.get ~headers ~uri ~fail_handlers ~expected_code:`OK (fun body ->
-          return (Result (auths_of_string body))
-        )
-      in
-      send headers
+      let fail_handlers = [two_factor_auth_handler ()] in
+      API.get ~headers ~uri ~fail_handlers ~expected_code:`OK (fun body ->
+        return (Result (auths_of_string body))
+      )
 
-    let get ~user ~pass ~id () =
+    let get ?otp ~user ~pass ~id () =
       let uri = URI.authorization id in
       let headers =
-        C.Header.(add_authorization (init ()) (`Basic (user,pass)))
+        add_otp C.Header.(add_authorization (init ()) (`Basic (user,pass))) otp
       in
-      let rec send headers =
-        let fail_handlers = [two_factor_auth_handler send headers] in
-        API.get ~headers ~uri ~fail_handlers ~expected_code:`OK (fun body ->
-          return (Result (auth_of_string body))
-        )
-      in
-      send headers
+      let fail_handlers = [two_factor_auth_handler ()] in
+      API.get ~headers ~uri ~fail_handlers ~expected_code:`OK (fun body ->
+        return (Result (auth_of_string body))
+      )
 
-    let delete ~user ~pass ~id () =
+    let delete ?otp ~user ~pass ~id () =
       let uri = URI.authorization id in
       let headers =
-        C.Header.(add_authorization (init ()) (`Basic (user,pass)))
+        add_otp C.Header.(add_authorization (init ()) (`Basic (user,pass))) otp
       in
-      let rec send headers =
-        let fail_handlers = [two_factor_auth_handler send headers] in
-        API.delete ~headers ~uri ~fail_handlers ~expected_code:`No_content
-          (fun body -> return (Result ()))
-      in
-      send headers
+      let fail_handlers = [two_factor_auth_handler ()] in
+      API.delete ~headers ~uri ~fail_handlers ~expected_code:`No_content
+        (fun body -> return (Result ()))
 
     (* Convert a code after a user oAuth into an access token that can
     * be used in subsequent requests.

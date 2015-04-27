@@ -79,22 +79,25 @@ let get_auth_token_from_jar auth_id =
   return code
 
 (* TODO factor out 2FA code *)
-let rec complete_2fa = Github.(function
+let complete_2fa c =
+  let rec try_again f = Github.(Monad.(f () >>= function
   | Result auths -> return auths
-  | Auth (mode, c) ->
-    Lwt_io.printf "Enter 2FA code from '%s': " mode
+  | Two_factor mode ->
+    embed (Lwt_io.printf "Enter 2FA code from '%s': " mode)
     >>= fun () ->
-    Lwt_io.(read_line stdin)
-    >>= fun code ->
-    Github.Monad.run (c code)
-    >>= complete_2fa
-)
+    embed (Lwt_io.(read_line stdin))
+    >>= fun otp ->
+    let otp = Some otp in
+    try_again (c ?otp)
+  )) in
+  let otp = None in
+  try_again (c ?otp)
 
 (* find a personal access token with either the given name, 
  * or the first one to include Gist scope *)
 let get_personal_access_token_from_github user pass token_name = 
   lwt pass = Passwd.get pass in
-  lwt tokens = M.run (G.Token.get_all ~user ~pass ()) >>= complete_2fa in
+  lwt tokens = M.run (complete_2fa (G.Token.get_all ~user ~pass)) in
   lwt code = 
     try 
       match token_name with

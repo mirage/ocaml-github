@@ -51,6 +51,9 @@
 * Cohttp >=0.17.0 is now required for Link header support
 * Monad.map, Monad.(>|=), and Monad.embed : 'a Lwt.t -> 'a Monad.t added
 * Add Stream module and API.get_stream function for paginated responses (#46)
+* `git-jar save` removed after Authorizations API response changes of 2015-04-20
+* `git-jar make` now requires a cookie name and defaults to that for token note
+* `git-jar revoke` now accepts either a cookie name or a token ID
 * Fix git-jar token file permissions security vulnerability
 * git-jar now supports 2FA (#38)
 * Github.authorization type added

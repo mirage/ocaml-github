@@ -101,9 +101,10 @@ let save ({ jar_path } as jar) ~name ~auth =
   let fullname = Filename.concat jar_path name in
   mkdir_p (Filename.dirname fullname)
   >>= fun () ->
-  let fout = open_out fullname in
-  fprintf fout "%s" (Github_j.string_of_auth auth);
-  close_out fout;
+  let auth_fd = Unix.(openfile fullname [O_CREAT; O_TRUNC; O_WRONLY] 0o600) in
+  let auth_oc = Unix.out_channel_of_descr auth_fd in
+  fprintf auth_oc "%s" (Github_j.string_of_auth auth);
+  close_out auth_oc;
   printf "Github cookie jar: created %s\n" fullname;
   return jar
 
@@ -119,6 +120,11 @@ let delete jar ~name =
 (* Read a JSON auth file in and parse it *)
 let read_auth_file { jar_path } name =
   let fname = Filename.concat jar_path name in
+  let { Unix.st_perm } = Unix.stat fname in
+  let safe_perm = 0o7770 land st_perm in
+  begin if safe_perm <> st_perm
+    then Unix.chmod fname safe_perm
+  end;
   Lwt_io.with_file ~mode:Lwt_io.input fname
     (fun ic ->
        Lwt_stream.fold_s (fun b a -> return (a^b)) (Lwt_io.read_lines ic) ""

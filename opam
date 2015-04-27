@@ -2,8 +2,10 @@ opam-version: "1.2"
 name: "github"
 version: "1.0.0"
 maintainer: "anil@recoil.org"
-homepage: "https://github.com/avsm/ocaml-github"
-dev-repo: "https://github.com/avsm/ocaml-github.git"
+authors: [ "Anil Madhavapeddy" "David Sheets" "Andy Ray" "Jeff Hammerbacher" ]
+homepage: "https://github.com/mirage/ocaml-github"
+bug-reports: "https://github.com/mirage/ocaml-github/issues"
+dev-repo: "https://github.com/mirage/ocaml-github.git"
 tags: [
   "org:mirage"
   "org:xapi-project"
@@ -11,9 +13,13 @@ tags: [
 build: [
   ["ocaml" "setup.ml" "-configure" "--%{base-unix:enable}%-unix" "--%{js_of_ocaml:enable}%-js" "--prefix" prefix]
   ["ocaml" "setup.ml" "-build"]
+]
+install: [
   ["ocaml" "setup.ml" "-install"]
 ]
-remove: [["ocamlfind" "remove" "github"]]
+remove: [
+  ["ocamlfind" "remove" "github"]
+]
 depends: [
   "ocamlfind"
   "ssl"
@@ -25,6 +31,7 @@ depends: [
   "stringext"
   "lambda-term"
   "cmdliner"
+  "base-unix"
 ]
 depopts: [
   "js_of_ocaml"

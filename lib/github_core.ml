@@ -534,7 +534,8 @@ module Make(CL : Cohttp_lwt.Client) = struct
     let realize_body = function None -> None | Some b -> Some (CLB.of_string b)
 
     (* Add the correct mime-type header *)
-    let realize_headers headers = C.Header.add_opt headers "content-type" "application/json"
+    let realize_headers headers =
+      C.Header.add_opt headers "accept" "application/vnd.github.v3+json"
 
     let idempotent
         meth ?headers ?token ?params ~fail_handlers ~expected_code ~uri fn =

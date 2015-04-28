@@ -108,6 +108,8 @@ module type Github = sig
       useful in case you wish to call an API call that isn't wrapped
       in the rest of the library (i.e. most of them at the moment!) *)
   module API : sig
+    val code_handler : expected_code:Cohttp.Code.status_code -> 'a -> 'a handler
+
     val get :
       ?fail_handlers:'a parse handler list ->
       ?expected_code:Cohttp.Code.status_code ->

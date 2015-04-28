@@ -503,7 +503,7 @@ module Make(CL : Cohttp_lwt.Client) = struct
         end
       | [] ->
         match CL.Response.status envelope with
-        | `Unprocessable_entity | `Gone | `Unauthorized ->
+        | `Unprocessable_entity | `Gone | `Unauthorized | `Forbidden ->
           CLB.to_string body
           >>= fun message ->
           let message = Github_j.message_of_string message in

@@ -27,9 +27,10 @@
 * ! Team.repositories now returns repository Stream.t
 * ! repo type has been renamed repository
 * ! repos type has been renamed repositories
-* ! repository_forks field renamed to repository_forks_count.
-* ! repository_watchers field renamed to repository_stargazers_count.
-* ! repository_open_issues field renamed to repository_open_issues_count.
+* ! repository_forks field renamed to repository_forks_count
+* ! repository_watchers field renamed to repository_stargazers_count
+* ! repository_open_issues field renamed to repository_open_issues_count
+* ! repository_master_branch field renamed to repository_default_branch
 * ! User.repos is now User.repositories
 * ! Team.repos is now Team.repositories
 * ! repository_description is now optional

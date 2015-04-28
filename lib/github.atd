@@ -336,7 +336,7 @@ type repository = {
   ?subscribers_count: int option;
   stargazers_count: int;
   size: int;
-  ?master_branch: string option;
+  ?default_branch: string option;
   open_issues_count: int;
   ?pushed_at: string option;
   created_at: string;

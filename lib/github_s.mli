@@ -171,6 +171,14 @@ module type Github = sig
 
     val set_token : Token.t -> unit Monad.t
 
+    val get_rate : ?token:Token.t -> unit -> Github_t.rate Monad.t
+
+    val get_rate_limit : ?token:Token.t -> unit -> int Monad.t
+
+    val get_rate_remaining : ?token:Token.t -> unit -> int Monad.t
+
+    val get_rate_reset : ?token:Token.t -> unit -> int Monad.t
+
     val string_of_message : Github_t.message -> string
   end
 

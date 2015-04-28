@@ -9,6 +9,21 @@ type message = {
   ~errors <ocaml default="[]">: error list;
 } <ocaml field_prefix="message_">
 
+type rate = {
+  limit: int;
+  remaining: int;
+  reset: int;
+} <ocaml field_prefix="rate_">
+
+type rate_resources = {
+  core: rate;
+  search: rate;
+} <ocaml field_prefix="rate_resources_">
+
+type rate_limit = {
+  resources: rate_resources;
+} <ocaml field_prefix="rate_limit_">
+
 type scope = [
   | User <json name="user">
   | UserEmail <json name="user:email">

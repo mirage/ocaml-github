@@ -31,6 +31,16 @@ module Make(CL : Cohttp_lwt.Client) = struct
       | false -> ()
       | true  -> prerr_endline (">>> GitHub: " ^ s)) fmt
 
+  type rate = Core | Search
+  type rates = {
+    core   : Github_t.rate option;
+    search : Github_t.rate option;
+  }
+
+  let empty_rates = { core = None; search = None }
+
+  let rate_table : (string option,rates) Hashtbl.t = Hashtbl.create 4
+
   (* Authorization Scopes *)
   module Scope = struct
 
@@ -112,6 +122,9 @@ module Make(CL : Cohttp_lwt.Client) = struct
       Uri.with_query' uri q
 
     let api = "https://api.github.com"
+
+    let rate_limit =
+      Uri.of_string (Printf.sprintf "%s/rate_limit" api)
 
     let authorizations =
       Uri.of_string (Printf.sprintf "%s/authorizations" api)
@@ -511,16 +524,40 @@ module Make(CL : Cohttp_lwt.Client) = struct
         | _ -> return Monad.(error (Generic (envelope, body)))
     )
 
+    let update_rate_table rate ?token response =
+      let headers = CL.Response.headers response in
+      match C.Header.get headers "x-ratelimit-limit",
+            C.Header.get headers "x-ratelimit-remaining",
+            C.Header.get headers "x-ratelimit-reset"
+      with
+      | Some limit_s, Some remaining_s, Some reset_s ->
+        let v =
+          try Hashtbl.find rate_table token with Not_found -> empty_rates
+        in
+        let rate_limit = int_of_string limit_s in
+        let rate_remaining = int_of_string remaining_s in
+        let rate_reset = int_of_string reset_s in
+        let new_rate =
+          Some { Github_t.rate_limit; rate_remaining; rate_reset }
+        in
+        let new_rates = match rate with
+          | Core -> { v with core = new_rate }
+          | Search -> { v with search = new_rate }
+        in
+        Hashtbl.replace rate_table token new_rates
+      | _ -> ()
+
     (* Force chunked-encoding
-    * to be disabled (to satisfy Github, which returns 411 Length Required
-    * to a chunked-encoding POST request). *)
+     * to be disabled (to satisfy Github, which returns 411 Length Required
+     * to a chunked-encoding POST request). *)
     let lwt_req {Monad.uri; meth; headers; body} =
       log "Requesting %s" (Uri.to_string uri);
       CL.call ~headers ~body ~chunked:false meth uri
 
-    let request resp_handlers req = Lwt.(
+    let request ?(rate=Core) ?token resp_handlers req = Lwt.(
       lwt_req req
       >>= fun response ->
+      update_rate_table rate ?token (fst response);
       log "Response code %s\n%!"
         (C.Code.string_of_status (CL.Response.status (fst response)));
       handle_response response resp_handlers
@@ -543,7 +580,7 @@ module Make(CL : Cohttp_lwt.Client) = struct
         (state,
          (Monad.(request ?token ?params
                    {meth; uri; headers=realize_headers headers; body=CLB.empty})
-            (request ((code_handler ~expected_code fn)::fail_handlers))))
+            (request ?token ((code_handler ~expected_code fn)::fail_handlers))))
 
     let just_body (_,body) = CLB.to_string body
 
@@ -635,6 +672,48 @@ module Make(CL : Cohttp_lwt.Client) = struct
 
     let set_token token = fun state ->
       Monad.(Lwt.return ({state with token=Some token}, Response ()))
+
+    let request_rate_limit ?token () = Monad.(
+      let open Github_t in
+      let uri = URI.rate_limit in
+      get ?token ~uri (fun b -> Lwt.return (Github_j.rate_limit_of_string b))
+      >>= fun { rate_limit_resources } ->
+      let rates = {
+        core = Some rate_limit_resources.rate_resources_core;
+        search = Some rate_limit_resources.rate_resources_search;
+      } in
+      Hashtbl.replace rate_table token rates;
+      return rates
+    )
+
+    let cached_rates ?token () =
+      try Monad.return (Hashtbl.find rate_table token)
+      with Not_found -> request_rate_limit ?token ()
+
+    let get_rate ?token () = Monad.(
+      cached_rates ?token ()
+      >>= fun rates ->
+      let rec get_rate = function
+        | { core = None } -> request_rate_limit ?token () >>= get_rate
+        | { core = Some rate } -> return rate
+      in
+      get_rate rates
+    )
+
+    let get_rate_limit ?token () = Monad.(
+      get_rate ?token ()
+      >>= fun { Github_t.rate_limit } -> return rate_limit
+    )
+
+    let get_rate_remaining ?token () = Monad.(
+      get_rate ?token ()
+      >>= fun { Github_t.rate_remaining } -> return rate_remaining
+    )
+
+    let get_rate_reset ?token () = Monad.(
+      get_rate ?token ()
+      >>= fun { Github_t.rate_reset } -> return rate_reset
+    )
 
     let string_of_message = Monad.string_of_message
 

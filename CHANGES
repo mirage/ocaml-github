@@ -62,6 +62,10 @@
 * Add API.code_handler to make creating fail_handlers easier
 * Github.Message exception added and raised when GitHub returns an API error
 * Add API.string_of_message for human consumption of structured errors
+* Add API.get_rate to retrieve possibly cached rate-limit information
+* Add API.get_rate_limit to retrieve the possibly cached query quota
+* Add API.get_rate_remaining to retrieve the possibly cached query quota remaining
+* Add API.get_rate_reset to retrieve the possibly cached quota expiry
 * Add Repo.fork to create fork of a repository to the present user or given org
 * Add Repo.forks to list the forks of a given repository
 * Event submodule added with a variety of event sources

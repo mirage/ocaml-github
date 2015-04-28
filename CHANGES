@@ -60,6 +60,8 @@
 * Github.handler type added
 * Github.Message exception added and raised when GitHub returns an API error
 * API.string_of_message added for human consumption of structured errors
+* Add Repo.fork to create fork of a repository to the present user or given org
+* Add Repo.forks to list the forks of a given repository
 * Event submodule added with a variety of event sources
 * A new jar command, git-list-events, has been added to print events for a repo
 * A new test binary, parse_events, has been added which downloads and

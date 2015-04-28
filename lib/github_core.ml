@@ -130,6 +130,9 @@ module Make(CL : Cohttp_lwt.Client) = struct
     let repo ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s" api user repo) 
 
+    let repo_forks ~user ~repo =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/forks" api user repo)
+
     let repo_issues ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/issues" api user repo) 
 
@@ -1116,6 +1119,20 @@ module Make(CL : Cohttp_lwt.Client) = struct
     let info ?token ~user ~repo () =
       let uri = URI.repo ~user ~repo in
       API.get ?token ~uri (fun b -> return (repository_of_string b))
+
+    let fork ?token ?organization ~user ~repo () =
+      let uri = URI.repo_forks ~user ~repo in
+      let params = match organization with
+        | None -> []
+        | Some org -> ["organization",org]
+      in
+      API.post ~expected_code:`Accepted ?token ~params ~uri (fun b ->
+        return (repository_of_string b)
+      )
+
+    let forks ?token ~user ~repo () =
+      let uri = URI.repo_forks ~user ~repo in
+      API.get_stream ?token ~uri (fun b -> return (repositories_of_string b))
 
     let tags ?token ~user ~repo () =
       let uri = URI.repo_tags ~user ~repo in

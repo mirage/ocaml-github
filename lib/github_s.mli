@@ -457,10 +457,21 @@ module type Github = sig
   end
 
   module Repo : sig
-    val info:
+    val info :
       ?token:Token.t ->
       user:string -> repo:string ->
       unit -> Github_t.repository Monad.t
+
+    val fork :
+      ?token:Token.t ->
+      ?organization:string ->
+      user:string -> repo:string ->
+      unit -> Github_t.repository Monad.t
+
+    val forks :
+      ?token:Token.t ->
+      user:string -> repo:string ->
+      unit -> Github_t.repository Stream.t
 
     val tags :
       ?token:Token.t ->

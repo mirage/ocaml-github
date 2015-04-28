@@ -179,7 +179,7 @@ module type Github = sig
 
     val set_token : Token.t -> unit Monad.t
 
-    val get_rate : ?token:Token.t -> unit -> Github_t.rate Monad.t
+    val get_rate : ?rate:rate -> ?token:Token.t -> unit -> Github_t.rate Monad.t
 
     val get_rate_limit : ?token:Token.t -> unit -> int Monad.t
 
@@ -205,6 +205,12 @@ module type Github = sig
     val repo_pulls : user:string -> repo:string -> Uri.t
     val repo_milestones : user:string -> repo:string -> Uri.t
     val milestone : user:string -> repo:string -> num:int -> Uri.t
+  end
+
+  module Rate_limit : sig
+    val all : ?token:Token.t -> unit -> Github_t.rate_resources Monad.t
+    val for_core : ?token:Token.t -> unit -> Github_t.rate Monad.t
+    val for_search : ?token:Token.t -> unit -> Github_t.rate Monad.t
   end
 
   module User : sig

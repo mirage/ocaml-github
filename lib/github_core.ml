@@ -679,31 +679,43 @@ module Make(CL : Cohttp_lwt.Client) = struct
     let set_token token = fun state ->
       Monad.(Lwt.return ({state with token=Some token}, Response ()))
 
+    let rates_of_resources rate_limit_resources = {
+      core = Some rate_limit_resources.Github_t.rate_resources_core;
+      search = Some rate_limit_resources.Github_t.rate_resources_search;
+    }
+
     let request_rate_limit ?token () = Monad.(
-      let open Github_t in
       let uri = URI.rate_limit in
       get ?token ~uri (fun b -> Lwt.return (Github_j.rate_limit_of_string b))
-      >>= fun { rate_limit_resources } ->
-      let rates = {
-        core = Some rate_limit_resources.rate_resources_core;
-        search = Some rate_limit_resources.rate_resources_search;
-      } in
+      >>= fun { Github_t.rate_limit_resources } ->
+      let rates = rates_of_resources rate_limit_resources in
       Hashtbl.replace rate_table token rates;
-      return rates
+      return rate_limit_resources
     )
 
     let cached_rates ?token () =
       try Monad.return (Hashtbl.find rate_table token)
-      with Not_found -> request_rate_limit ?token ()
+      with Not_found ->
+        Monad.map rates_of_resources (request_rate_limit ?token ())
 
-    let get_rate ?token () = Monad.(
+    let get_rate ?(rate=Core) ?token () = Monad.(
       cached_rates ?token ()
       >>= fun rates ->
-      let rec get_rate = function
-        | { core = None } -> request_rate_limit ?token () >>= get_rate
+      let rec get_core_rate = function
+        | { core = None } ->
+          Monad.map rates_of_resources (request_rate_limit ?token ())
+          >>= get_core_rate
         | { core = Some rate } -> return rate
       in
-      get_rate rates
+      let rec get_search_rate = function
+        | { search = None } ->
+          Monad.map rates_of_resources (request_rate_limit ?token ())
+          >>= get_search_rate
+        | { search = Some rate } -> return rate
+      in
+      match rate with
+      | Core -> get_core_rate rates
+      | Search -> get_search_rate rates
     )
 
     let get_rate_limit ?token () = Monad.(
@@ -727,6 +739,21 @@ module Make(CL : Cohttp_lwt.Client) = struct
 
   open Github_t
   open Github_j
+
+  module Rate_limit = struct
+    open Monad
+
+    let all ?token () = API.request_rate_limit ?token ()
+
+    let for_core ?token () =
+      all ?token ()
+      >>= fun { rate_resources_core } -> return rate_resources_core
+
+    let for_search ?token () =
+      all ?token ()
+      >>= fun { rate_resources_search } -> return rate_resources_search
+
+  end
 
   module Token = struct
     open Lwt

@@ -68,9 +68,10 @@
 * Add API.get_rate_limit to retrieve the possibly cached query quota
 * Add API.get_rate_remaining to retrieve the possibly cached query quota remaining
 * Add API.get_rate_reset to retrieve the possibly cached quota expiry
+* Add Rate_limit module to perform explicit rate limit requests
 * Add Repo.fork to create fork of a repository to the present user or given org
 * Add Repo.forks to list the forks of a given repository
-* Event submodule added with a variety of event sources
+* Add Event module with a variety of event sources
 * A new jar command, git-list-events, has been added to print events for a repo
 * A new test binary, parse_events, has been added which downloads and
   parses archive event data

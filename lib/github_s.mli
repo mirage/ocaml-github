@@ -61,6 +61,8 @@ module type Github = sig
     val of_list : 'a list -> 'a t
   end
 
+  type rate = Core | Search
+
   (** Some results may require 2-factor authentication. [Result]
       values do not. [Two_factor] values contain the mode of 2FA. *)
   type 'a authorization =
@@ -111,6 +113,7 @@ module type Github = sig
     val code_handler : expected_code:Cohttp.Code.status_code -> 'a -> 'a handler
 
     val get :
+      ?rate:rate ->
       ?fail_handlers:'a parse handler list ->
       ?expected_code:Cohttp.Code.status_code ->
       ?headers:Cohttp.Header.t -> 
@@ -120,6 +123,7 @@ module type Github = sig
       'a parse -> 'a Monad.t
 
     val get_stream :
+      ?rate:rate ->
       ?fail_handlers:'a Stream.parse handler list ->
       ?expected_code:Cohttp.Code.status_code ->
       ?headers:Cohttp.Header.t ->
@@ -129,6 +133,7 @@ module type Github = sig
       'a Stream.parse -> 'a Stream.t
 
     val post :
+      ?rate:rate ->
       ?fail_handlers:'a parse handler list ->
       expected_code:Cohttp.Code.status_code ->
       ?headers:Cohttp.Header.t ->
@@ -139,6 +144,7 @@ module type Github = sig
       (string -> 'a Lwt.t) -> 'a Monad.t
 
     val delete :
+      ?rate:rate ->
       ?fail_handlers:'a parse handler list ->
       ?expected_code:Cohttp.Code.status_code ->
       ?headers:Cohttp.Header.t -> 
@@ -148,6 +154,7 @@ module type Github = sig
       (string -> 'a Lwt.t) -> 'a Monad.t
 
     val patch :
+      ?rate:rate ->
       ?fail_handlers:'a parse handler list ->
       expected_code:Cohttp.Code.status_code ->
       ?headers:Cohttp.Header.t ->
@@ -158,6 +165,7 @@ module type Github = sig
       (string -> 'a Lwt.t) -> 'a Monad.t
 
     val put :
+      ?rate:rate ->
       ?fail_handlers:'a parse handler list ->
       expected_code:Cohttp.Code.status_code ->
       ?headers:Cohttp.Header.t ->

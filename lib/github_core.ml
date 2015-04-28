@@ -178,7 +178,7 @@ module Make(CL : Cohttp_lwt.Client) = struct
     let repo_hooks ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/hooks" api user repo)
 
-    let repo_search () =
+    let repo_search =
       Uri.of_string (Printf.sprintf "%s/search/repositories" api)
 
     let hook ~user ~repo ~num =
@@ -554,7 +554,7 @@ module Make(CL : Cohttp_lwt.Client) = struct
       log "Requesting %s" (Uri.to_string uri);
       CL.call ~headers ~body ~chunked:false meth uri
 
-    let request ?(rate=Core) ?token resp_handlers req = Lwt.(
+    let request ~rate ~token resp_handlers req = Lwt.(
       lwt_req req
       >>= fun response ->
       update_rate_table rate ?token (fst response);
@@ -574,18 +574,21 @@ module Make(CL : Cohttp_lwt.Client) = struct
     let realize_headers headers =
       C.Header.add_opt headers "accept" "application/vnd.github.v3+json"
 
-    let idempotent
-        meth ?headers ?token ?params ~fail_handlers ~expected_code ~uri fn =
+    let idempotent meth
+        ?(rate=Core) ?headers ?token ?params ~fail_handlers ~expected_code ~uri
+        fn =
       fun state -> Lwt.return
         (state,
          (Monad.(request ?token ?params
                    {meth; uri; headers=realize_headers headers; body=CLB.empty})
-            (request ?token ((code_handler ~expected_code fn)::fail_handlers))))
+            (request ~rate ~token
+               ((code_handler ~expected_code fn)::fail_handlers))))
 
     let just_body (_,body) = CLB.to_string body
 
-    let effectful
-        meth ?headers ?body ?token ?params ~fail_handlers ~expected_code ~uri fn =
+    let effectful meth
+        ?(rate=Core) ?headers ?body ?token ?params
+        ~fail_handlers ~expected_code ~uri fn =
       let body = match body with None -> CLB.empty | Some b -> CLB.of_string b in
       let fn x = Lwt.(just_body x >>= fn) in
       let fail_handlers = List.map (fun (p,fn) ->
@@ -595,19 +598,20 @@ module Make(CL : Cohttp_lwt.Client) = struct
         (state,
         (Monad.(request ?token ?params
                   {meth; uri; headers=realize_headers headers; body })
-            (request ((code_handler ~expected_code fn)::fail_handlers))))
+           (request ~rate ~token
+              ((code_handler ~expected_code fn)::fail_handlers))))
 
     let map_fail_handlers f fhs = List.map (fun (p,fn) ->
       p, f fn;
     ) fhs
 
-    let get
+    let get ?rate
         ?(fail_handlers=[]) ?(expected_code=`OK) ?headers ?token ?params ~uri fn =
       let fail_handlers =
         map_fail_handlers Lwt.(fun f x -> just_body x >>= f) fail_handlers
       in
-      idempotent `GET ~fail_handlers ~expected_code ?headers ?token ?params ~uri
-        Lwt.(fun x -> just_body x >>= fn)
+      idempotent `GET ?rate ~fail_handlers ~expected_code ?headers ?token ?params
+        ~uri Lwt.(fun x -> just_body x >>= fn)
 
     let rec next_link base = Cohttp.Link.(function
     | { context; arc = { Arc.relation; }; target }::_
@@ -618,6 +622,7 @@ module Make(CL : Cohttp_lwt.Client) = struct
     )
 
     let get_stream (type a)
+        ?rate
         ?(fail_handlers:a Stream.parse handler list=[])
         ?(expected_code:Cohttp.Code.status_code=`OK)
         ?(headers:Cohttp.Header.t option) ?(token:string option) ?(params:(string * string) list option) ~(uri:Uri.t) (fn : a Stream.parse) =
@@ -629,7 +634,7 @@ module Make(CL : Cohttp_lwt.Client) = struct
         ) fail_handlers
       in
       let request ~uri f =
-        idempotent
+        idempotent ?rate
           `GET ?headers ?token ?params ~fail_handlers ~expected_code ~uri f
       in
       let rec f (envelope, body) = Lwt.(
@@ -649,22 +654,23 @@ module Make(CL : Cohttp_lwt.Client) = struct
         refill = Some (fun () -> request ~uri f);
       }
 
-    let post ?(fail_handlers=[]) ~expected_code =
-      effectful `POST ~fail_handlers ~expected_code
+    let post ?rate ?(fail_handlers=[]) ~expected_code =
+      effectful `POST ?rate ~fail_handlers ~expected_code
 
-    let patch ?(fail_handlers=[]) ~expected_code =
-      effectful `PATCH ~fail_handlers ~expected_code
+    let patch ?rate ?(fail_handlers=[]) ~expected_code =
+      effectful `PATCH ?rate ~fail_handlers ~expected_code
 
-    let put ?(fail_handlers=[]) ~expected_code =
-      effectful `PUT ~fail_handlers ~expected_code
+    let put ?rate ?(fail_handlers=[]) ~expected_code =
+      effectful `PUT ?rate ~fail_handlers ~expected_code
 
-    let delete
+    let delete ?rate
         ?(fail_handlers=[]) ?(expected_code=`No_content) ?headers ?token ?params
         ~uri fn =
       let fail_handlers =
         map_fail_handlers Lwt.(fun f x -> just_body x >>= f) fail_handlers
       in
-      idempotent `DELETE ~fail_handlers ~expected_code ?headers ?token ?params
+      idempotent `DELETE ?rate
+        ~fail_handlers ~expected_code ?headers ?token ?params
         ~uri Lwt.(fun x -> just_body x >>= fn)
 
     let set_user_agent user_agent = fun state ->
@@ -976,14 +982,11 @@ module Make(CL : Cohttp_lwt.Client) = struct
 
     let is_merged ?token ~user ~repo ~num () =
       let uri = URI.pull_merge ~user ~repo ~num in
-      fun state -> Lwt.return
-        (state,
-        Monad.(request ?token
-                  {meth=`GET; uri; headers=API.realize_headers None; body=CLB.empty})
-          API.(request [
-            code_handler ~expected_code:`No_content (fun _ -> return true);
-            code_handler ~expected_code:`Not_found  (fun _ -> return false);
-          ]))
+      let fail_handlers = [
+        API.code_handler ~expected_code:`Not_found  (fun _ -> return false);
+      ] in
+      API.get ?token ~uri ~expected_code:`No_content ~fail_handlers
+        (fun _ -> return true)
 
     let merge ?token ~user ~repo ~num ?merge_commit_message () =
       let uri = URI.pull_merge ~user ~repo ~num in
@@ -1238,13 +1241,13 @@ module Make(CL : Cohttp_lwt.Client) = struct
         | None -> None
       in
       let direction = Filter.string_of_direction direction in
-      let uri = URI.repo_search () in
+      let uri = URI.repo_search in
       let params = [
         "q", q;
         "order",direction;
         "per_page",string_of_int 100;
       ]@(match sort with None -> [] | Some s -> ["sort",s]) in
-      API.get_stream ?token ~params ~uri (fun b ->
+      API.get_stream ~rate:Search ?token ~params ~uri (fun b ->
         return [repository_search_of_string b]
       )
   end

@@ -44,49 +44,50 @@ module Make(CL : Cohttp_lwt.Client) = struct
   (* Authorization Scopes *)
   module Scope = struct
 
-    let string_of_scope (x:Github_t.scope) =
-      match x with
+    let string_of_scope (x : Github_t.scope) = match x with
       | `User -> "user"
+      | `User_email -> "user:email"
+      | `User_follow -> "user:follow"
       | `Public_repo -> "public_repo"
       | `Repo -> "repo"
-      | `Gist -> "gist"
-      | `Repo_status -> "repo_status"
-      | `Delete_repo -> "delete_repo"
-      | `UserEmail -> "user_email"
-      | `UserFollow -> "user_follow"
-      | `Notifications -> "notifications"
-      | `Write_public_key -> "write:public_key"
       | `Repo_deployment -> "repo_deployment"
-      | `Admin_org -> "admin:org"
-      | `Read_org -> "read:org"
-      | `Admin_repo_hook -> "admin:repo_hook"
-      | `Admin_public_key -> "admin:public_key"
-      | `Read_public_key -> "read:public_key"
-      | `Write_repo_hook -> "write:repo_hook"
-      | `Write_org -> "write:org"
+      | `Repo_status -> "repo:status"
+      | `Delete_repo -> "delete_repo"
+      | `Notifications -> "notifications"
+      | `Gist -> "gist"
       | `Read_repo_hook -> "read:repo_hook"
+      | `Write_repo_hook -> "write:repo_hook"
+      | `Admin_repo_hook -> "admin:repo_hook"
+      | `Admin_org_hook -> "admin:org_hook"
+      | `Read_org -> "read:org"
+      | `Write_org -> "write:org"
+      | `Admin_org -> "admin:org"
+      | `Read_public_key -> "read:public_key"
+      | `Write_public_key -> "write:public_key"
+      | `Admin_public_key -> "admin:public_key"
 
     let scope_of_string x : Github_t.scope option =
       match x with
       | "user" -> Some `User
+      | "user_email" -> Some `User_email
+      | "user_follow" -> Some `User_follow
       | "public_repo" -> Some `Public_repo
       | "repo" -> Some `Repo
-      | "gist" -> Some `Gist
+      | "repo_deployment" -> Some `Repo_deployment
       | "repo_status" -> Some `Repo_status
       | "delete_repo" -> Some `Delete_repo
-      | "user_email" -> Some `UserEmail
-      | "user_follow" -> Some `UserFollow
       | "notifications" -> Some `Notifications
-      | "write:public_key" -> Some `Write_public_key
-      | "repo_deployment" -> Some `Repo_deployment
-      | "admin:org" -> Some `Admin_org
-      | "read:org" -> Some `Read_org
-      | "admin:repo_hook" -> Some `Admin_repo_hook
-      | "admin:public_key" -> Some `Admin_public_key
-      | "read:public_key" -> Some `Read_public_key
-      | "write:repo_hook" -> Some `Write_repo_hook
-      | "write:org" -> Some `Write_org
+      | "gist" -> Some `Gist
       | "read:repo_hook" -> Some `Read_repo_hook
+      | "write:repo_hook" -> Some `Write_repo_hook
+      | "admin:repo_hook" -> Some `Admin_repo_hook
+      | "admin:org_hook" -> Some `Admin_org_hook
+      | "read:org" -> Some `Read_org
+      | "write:org" -> Some `Write_org
+      | "admin:org" -> Some `Admin_org
+      | "read:public_key" -> Some `Read_public_key
+      | "write:public_key" -> Some `Write_public_key
+      | "admin:public_key" -> Some `Admin_public_key
       | _ -> None
 
     let string_of_scopes scopes =
@@ -100,7 +101,10 @@ module Make(CL : Cohttp_lwt.Client) = struct
         | Some b -> b::a
       ) [] scopes
 
-    let all = [ `User; `Public_repo; `Repo; `Gist; `Repo_status; `Delete_repo; `UserEmail; `UserFollow; `Notifications ]
+    let all = [
+      `User; `Public_repo; `Repo; `Delete_repo; `Gist;
+      `Admin_repo_hook; `Admin_org; `Admin_org_hook; `Admin_public_key;
+    ]
   end
 
   module URI = struct

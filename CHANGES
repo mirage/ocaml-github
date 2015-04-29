@@ -27,6 +27,9 @@
 * ! Gist.list_forks now returns git_fork Stream.t
 * ! Organization.teams now returns team Stream.t
 * ! Team.repositories now returns repository Stream.t
+* ! user:email scope constructor UserEmail has been renamed User_email
+* ! user:follow scope constructor UserFollow has been renamed User_follow
+* ! scope constructor `Admin_org_hook added
 * ! repo type has been renamed repository
 * ! repos type has been renamed repositories
 * ! repository_forks field renamed to repository_forks_count

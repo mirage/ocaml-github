@@ -3,6 +3,11 @@
 * ! Monad.bind now accepts a function first and then a Monad.t
 * ! API.{get,post,delete,patch,put} now take optional fail_handlers
 * ! API.{get,post,delete,patch,put} now take optional rate classification
+* ! Scope.scope_of_string was renamed Scope.of_string
+* ! Scope.string_of_scope was renamed Scope.to_string
+* ! Scope.scopes_of_string was renamed Scope.list_of_string
+* ! Scope.list_of_string returns a scope list option for unparseable scopes
+* ! Scope.string_of_scopes was renamed Scope.list_to_string
 * ! Token.{create,get_all,get,delete} now return _ authorization Monad.t
 * ! Token.{create,get_all,get,delete} now have additional ?otp:string argument
 * ! Token.create now has additional ?fingerprint:string argument
@@ -73,6 +78,7 @@
 * Add API.get_rate_remaining to retrieve the possibly cached query quota remaining
 * Add API.get_rate_reset to retrieve the possibly cached quota expiry
 * Add Rate_limit module to perform explicit rate limit requests
+* Add Scope.max which contains a minimal set of scopes for maximum privilege
 * Add Repo.fork to create fork of a repository to the present user or given org
 * Add Repo.forks to list the forks of a given repository
 * Add Event module with a variety of event sources

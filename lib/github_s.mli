@@ -86,11 +86,30 @@ module type Github = sig
 
   (** Authorization scopes; http://developer.github.com/v3/oauth/ *)
   module Scope : sig
-    val string_of_scope : Github_t.scope -> string
-    val scope_of_string : string -> Github_t.scope option
-    val string_of_scopes : Github_t.scope list -> string
-    val scopes_of_string : string -> Github_t.scope list
+    val to_string : Github_t.scope -> string
+    (** [to_string scope] is the string GitHub uses to indicate
+        the scope constructor [scope]. *)
+
+    val of_string : string -> Github_t.scope option
+    (** [scope_of_string scope] is the constructor corresponding to
+        the GitHub scope constructor [scope] if one exists. *)
+
+    val list_to_string : Github_t.scope list -> string
+    (** [string_of_scopes scopes] is the serialization for a list of
+        scopes [scopes] which GitHub accepts as a set of scopes in its
+        API. *)
+
+    val list_of_string : string -> Github_t.scope list option
+    (** [scopes_of_string scopes] are the scope constructors
+        corresponding to the serialized list of constructors
+        [scopes]. *)
+
     val all : Github_t.scope list
+    (** [all] is a list containing every scope constructor known. *)
+
+    val max : Github_t.scope list
+    (** [max] is a list containing the mimimum scope constructors
+        needed to enable full privilege. *)
   end
 
   (** Access token to the API, usually obtained via a user oAuth *)

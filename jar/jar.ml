@@ -22,10 +22,10 @@ open Lwt
 (* Cmdliner converter for Github scope lists *)
 let scope =
   let parse s =
-    match Github.Scope.scope_of_string s with
+    match Github.Scope.of_string s with
     |None -> `Error "unknown scope"
     |Some s -> `Ok s in
-  let print f s = Format.pp_print_string f (Github.Scope.string_of_scope s) in
+  let print f s = Format.pp_print_string f (Github.Scope.to_string s) in
   parse, print
 
 let complete_2fa c =
@@ -144,7 +144,7 @@ let list_cmd =
 
 let make_cmd =
   let scopes =
-    let doc = Printf.sprintf "Comma delimited list of repository scopes. Can be: %s" (Github.Scope.(string_of_scopes all)) in
+    let doc = Printf.sprintf "Comma delimited list of repository scopes. Can be: %s" (Github.Scope.(list_to_string all)) in
     Arg.(value & opt (list scope) [] & info ["s";"scopes"] ~docv:"SCOPES" ~doc) in
   let note = Arg.(
     value & opt (some string) None & info ["note"] ~docv:"NOTE"

@@ -44,7 +44,7 @@ module Make(CL : Cohttp_lwt.Client) = struct
   (* Authorization Scopes *)
   module Scope = struct
 
-    let string_of_scope (x : Github_t.scope) = match x with
+    let to_string (x : Github_t.scope) = match x with
       | `User -> "user"
       | `User_email -> "user:email"
       | `User_follow -> "user:follow"
@@ -66,7 +66,7 @@ module Make(CL : Cohttp_lwt.Client) = struct
       | `Write_public_key -> "write:public_key"
       | `Admin_public_key -> "admin:public_key"
 
-    let scope_of_string x : Github_t.scope option =
+    let of_string x : Github_t.scope option =
       match x with
       | "user" -> Some `User
       | "user_email" -> Some `User_email
@@ -90,18 +90,28 @@ module Make(CL : Cohttp_lwt.Client) = struct
       | "admin:public_key" -> Some `Admin_public_key
       | _ -> None
 
-    let string_of_scopes scopes =
-      String.concat "," (List.map string_of_scope scopes)
+    let list_to_string scopes =
+      String.concat "," (List.map to_string scopes)
 
-    let scopes_of_string s =
+    let list_of_string s =
       let scopes = Stringext.split ~on:',' s in
       List.fold_left (fun a b ->
-        match scope_of_string b with
-        | None -> a
-        | Some b -> b::a
-      ) [] scopes
+        match a, of_string b with
+        | None, _ -> None
+        | Some _, None -> None
+        | Some a, Some b -> Some (b::a)
+      ) (Some []) scopes
 
     let all = [
+      `User; `User_email; `User_follow;
+      `Public_repo; `Repo; `Repo_deployment; `Repo_status; `Delete_repo;
+      `Notifications; `Gist;
+      `Read_repo_hook; `Write_repo_hook; `Admin_repo_hook;
+      `Admin_org_hook; `Read_org; `Write_org; `Admin_org;
+      `Read_public_key; `Write_public_key; `Admin_public_key;
+    ]
+
+    let max = [
       `User; `Public_repo; `Repo; `Delete_repo; `Gist;
       `Admin_repo_hook; `Admin_org; `Admin_org_hook; `Admin_public_key;
     ]
@@ -113,7 +123,7 @@ module Make(CL : Cohttp_lwt.Client) = struct
       let uri = Uri.of_string entry_uri in
       let q = ["client_id", client_id ] in
       let q = match scopes with
-      |Some scopes -> ("scope", Scope.string_of_scopes scopes) :: q
+      |Some scopes -> ("scope", Scope.list_to_string scopes) :: q
       |None -> q in
       let q = match redirect_uri with
       |Some uri -> ("redirect_uri", Uri.to_string uri) :: q 

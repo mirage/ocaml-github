@@ -18,11 +18,17 @@
 
 (** GitHub APIv3 client library *)
 module type Github = sig
-  exception Message of Github_t.message
 
-  (** All API requests are bound through this monad. The [run] function
-      will unpack an API response into an Lwt thread that will hold the
-      ultimate response. *)
+  (** {4 API Concepts} *)
+
+  exception Message of Cohttp.Code.status_code * Github_t.message
+  (** [Message] may be raised by any API call when the GitHub service
+      returns an unexpected response code. Typical reasons for this
+      exception are insufficient permissions or missing resources. *)
+
+  (** All API requests are bound through this monad which encapsulates
+      an Lwt cooperative thread and includes some state which may be
+      set via {!API} functions. *)
   module Monad : sig
     type 'a t
     val return : 'a -> 'a t

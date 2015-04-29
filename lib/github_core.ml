@@ -20,7 +20,7 @@ let user_agent = "ocaml-github" (* TODO: add version from build system *)
 
 module Make(CL : Cohttp_lwt.Client) = struct
 
-  exception Message of Github_t.message
+  exception Message of Cohttp.Code.status_code * Github_t.message
 
   let log_active =
     ref (try Unix.getenv "GITHUB_DEBUG" <> "0" with _ -> false)
@@ -330,7 +330,7 @@ module Make(CL : Cohttp_lwt.Client) = struct
     * be retried within the monad, or a permanent failure returned *)
     type error =
       | Generic of (CL.Response.t * CLB.t)
-      | Semantic of Github_t.message
+      | Semantic of C.Code.status_code * Github_t.message
       | No_response
       | Bad_response of exn
     type request = {
@@ -368,7 +368,7 @@ module Make(CL : Cohttp_lwt.Client) = struct
              (C.Code.string_of_status (CL.Response.status res))
              (String.concat "" (C.Header.to_lines (CL.Response.headers res)))
              body_s)
-      | Semantic message ->
+      | Semantic (_,message) ->
         Lwt.return ("GitHub API error: "^string_of_message message)
       | No_response -> Lwt.return "No response"
       | Bad_response exn ->
@@ -416,7 +416,7 @@ module Make(CL : Cohttp_lwt.Client) = struct
     let run th = bind return th initial_state >>= function
       | _, Request (_,_) -> Lwt.fail (Failure "Impossible: can't run unapplied request")
       | _, Response r -> Lwt.return r
-      | _, Error (Semantic msg) -> Lwt.(fail (Message msg))
+      | _, Error (Semantic (status,msg)) -> Lwt.(fail (Message (status,msg)))
       | _, Error e -> Lwt.(error_to_string e >>= fun err ->
                            Printf.eprintf "%s%!" err; fail (Failure err))
 
@@ -515,12 +515,13 @@ module Make(CL : Cohttp_lwt.Client) = struct
           ) bad_response
         end
       | [] ->
-        match CL.Response.status envelope with
+        let status = CL.Response.status envelope in
+        match status with
         | `Unprocessable_entity | `Gone | `Unauthorized | `Forbidden ->
           CLB.to_string body
           >>= fun message ->
           let message = Github_j.message_of_string message in
-          return Monad.(error (Semantic message))
+          return Monad.(error (Semantic (status,message)))
         | _ -> return Monad.(error (Generic (envelope, body)))
     )
 
@@ -1075,7 +1076,8 @@ module Make(CL : Cohttp_lwt.Client) = struct
         let msg =
           Printf.sprintf "tag %s not found in repository %s/%s" tag user repo
         in
-        fail (Semantic {Github_t.message_message=msg; message_errors=[]})
+        let msg = {Github_t.message_message=msg; message_errors=[]} in
+        fail (Semantic (`Not_found,msg))
 
     let delete ?token ~user ~repo ~num () =
       let uri = URI.repo_release ~user ~repo ~num in

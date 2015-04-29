@@ -198,6 +198,6 @@ let () =
     match Term.eval_choice ~catch:false default_cmd cmds with
     | `Error _ -> exit 1 | _ -> exit 0
   with
-  | Github.Message m ->
+  | Github.Message (_,m) ->
     eprintf "GitHub API error: %s\n" (Github.API.string_of_message m);
     exit 1

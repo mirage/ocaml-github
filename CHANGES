@@ -1,5 +1,6 @@
 1.0.0 (trunk):
 * Changes marked with ! are type changes (not including field additions)
+* ! Monad.bind now accepts a function first and then a Monad.t
 * ! API.{get,post,delete,patch,put} now take optional fail_handlers
 * ! API.{get,post,delete,patch,put} now take optional rate classification
 * ! Token.{create,get_all,get,delete} now return _ authorization Monad.t

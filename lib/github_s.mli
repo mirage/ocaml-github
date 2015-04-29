@@ -26,7 +26,12 @@ module type Github = sig
   module Monad : sig
     type 'a t
     val return : 'a -> 'a t
-    val bind : 'a t -> ('a -> 'b t) -> 'b t
+    (** [return x] is the value [x] wrapped in a state-sensitive Lwt thread. *)
+
+    val bind : ('a -> 'b t) -> 'a t -> 'b t
+    (** [bind m f] is the eventual value of [f] applied to the
+        contents of [m]. Its argument order is designed for currying. *)
+
     val map : ('a -> 'b) -> 'a t -> 'b t
     val (>>=) : 'a t -> ('a -> 'b t) -> 'b t
     val (>|=) : 'a t -> ('a -> 'b) -> 'b t

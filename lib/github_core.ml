@@ -398,29 +398,29 @@ module Make(CL : Cohttp_lwt.Client) = struct
               | None -> uri
       }
 
-    let rec bind x fn = fun state -> x state >>= function
+    let rec bind fn x = fun state -> x state >>= function
       | state, Request (req, reqfn) ->
         reqfn (prepare_request state req)
         >>= fun r ->
-        bind (fun state -> Lwt.return (state, r)) fn state
+        bind fn (fun state -> Lwt.return (state, r)) state
       | state, Response r -> fn r state
       | state, ((Error _) as x) -> Lwt.return (state, x)
 
     let return r = fun state -> Lwt.return (state, Response r)
-    let map f m = bind m (fun x -> return (f x))
+    let map f m = bind (fun x -> return (f x)) m
 
     let fail err = fun state -> Lwt.return (state, Error err)
 
     let initial_state = {user_agent=None; token=None}
 
-    let run th = bind th return initial_state >>= function
+    let run th = bind return th initial_state >>= function
       | _, Request (_,_) -> Lwt.fail (Failure "Impossible: can't run unapplied request")
       | _, Response r -> Lwt.return r
       | _, Error (Semantic msg) -> Lwt.(fail (Message msg))
       | _, Error e -> Lwt.(error_to_string e >>= fun err ->
                            Printf.eprintf "%s%!" err; fail (Failure err))
 
-    let (>>=) = bind
+    let (>>=) m f = bind f m
     let (>|=) m f = map f m
 
     let embed lw =

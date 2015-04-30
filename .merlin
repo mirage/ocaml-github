@@ -6,6 +6,7 @@ PKG stringext
 PKG cohttp
 PKG yojson
 PKG zed
+PKG lambda-term
 
 S lib
 S lib_test

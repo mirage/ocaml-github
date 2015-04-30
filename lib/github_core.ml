@@ -292,35 +292,20 @@ module Make(CL : Cohttp_lwt.Client) = struct
     let list_starred_gists = 
       Uri.of_string (Printf.sprintf "%s/gists/starred" api)
 
-    let get_gist ~id = 
-      Uri.of_string (Printf.sprintf "%s/gists/%s" api id)
-
-    let create_gist = 
+    let gists =
       Uri.of_string (Printf.sprintf "%s/gists" api)
 
-    let edit_gist ~id =
-      Uri.of_string (Printf.sprintf "%s/gists/%s" api id)
+    let gist ~num =
+      Uri.of_string (Printf.sprintf "%s/gists/%s" api num)
 
-    let list_gist_commits ~id = 
-      Uri.of_string (Printf.sprintf "%s/gists/%s/commits" api id)
+    let gist_commits ~num =
+      Uri.of_string (Printf.sprintf "%s/gists/%s/commits" api num)
 
-    let star_gist ~id =
-      Uri.of_string (Printf.sprintf "%s/gists/%s/star" api id)
+    let gist_star ~num =
+      Uri.of_string (Printf.sprintf "%s/gists/%s/star" api num)
 
-    let unstar_gist ~id = 
-      Uri.of_string (Printf.sprintf "%s/gists/%s/star" api id)
-
-    let is_gist_starred ~id = 
-      Uri.of_string (Printf.sprintf "%s/gists/%s/star" api id)
-
-    let fork_gist ~id = 
-      Uri.of_string (Printf.sprintf "%s/gists/%s/forks" api id)
-
-    let list_gist_forks ~id = 
-      Uri.of_string (Printf.sprintf "%s/gists/%s/forks" api id)
-
-    let delete_gist ~id =
-      Uri.of_string (Printf.sprintf "%s/gists/%s" api id)
+    let gist_forks ~num =
+      Uri.of_string (Printf.sprintf "%s/gists/%s/forks" api num)
 
     let team ~id =
       Uri.of_string (Printf.sprintf "%s/teams/%d" api id)
@@ -1239,6 +1224,21 @@ module Make(CL : Cohttp_lwt.Client) = struct
       API.post ?token ~uri ~expected_code:`No_content (fun b -> return ())
   end
 
+  module Git_obj = struct
+
+    let type_to_string (o:obj_type)=
+      match o with
+      |`Tree -> "tree"
+      |`Commit -> "commit"
+      |`Blob -> "blob"
+      |`Tag -> "tag"
+
+    let split_ref ref =
+      match Stringext.split ~max:3 ~on:'/' ref with
+      |[_;ty;tl] -> ty, tl
+      |_ -> "", ref
+  end
+
   module Repo = struct
     open Lwt
 
@@ -1275,6 +1275,35 @@ module Make(CL : Cohttp_lwt.Client) = struct
     let commit ?token ~user ~repo ~sha () =
       let uri = URI.repo_commit ~user ~repo ~sha in
       API.get ?token ~uri (fun b -> return (commit_of_string b))
+
+    let get_tag ?token ~user ~repo ~sha () =
+      let uri = URI.repo_tag ~user ~repo ~sha in
+      API.get ?token ~uri (fun b -> return (tag_of_string b))
+
+    (* Retrieve a list of SHA hashes for tags, and obtain a
+    * name and time for each tag.  If annotated, this is explicit,
+    * and otherwise it uses the last commit *)
+    let get_tags_and_times ?token ~user ~repo () =
+      let open Monad in
+      let tags = refs ?token ~ty:"tags" ~user ~repo () in
+      Stream.map (fun hd ->
+        let _,name = Git_obj.split_ref hd.git_ref_name in
+        let sha = hd.git_ref_obj.obj_sha in
+        match hd.git_ref_obj.obj_ty with
+        |`Commit -> (* lightweight tag, so get commit info *)
+          commit ?token ~user ~repo ~sha ()
+          >>= fun c ->
+          return [name, c.commit_git.git_commit_author.info_date]
+        |`Tag ->
+          get_tag ?token ~user ~repo ~sha ()
+          >>= fun t ->
+          return [name, t.tag_tagger.info_date]
+        |_ -> return []
+      ) tags
+
+    let tags ?token ~user ~repo () =
+      let uri = URI.repo_tags ~user ~repo in
+      API.get_stream ?token ~uri (fun b -> return (repo_tags_of_string b))
 
     let search ?token ?sort ?(direction=`Desc) ~qualifiers ~keywords () =
       let qs = List.rev_map Filter.string_of_qualifier qualifiers in
@@ -1339,49 +1368,6 @@ module Make(CL : Cohttp_lwt.Client) = struct
       API.get_stream ?token ~uri (fun b -> return (events_of_string b))
   end
 
-  module Git_obj = struct
-
-    let obj_type_to_string (o:obj_type)=
-      match o with
-      |`Tree -> "tree"
-      |`Commit -> "commit"
-      |`Blob -> "blob"
-      |`Tag -> "tag"
-
-    let split_ref ref =
-      match Stringext.split ~max:3 ~on:'/' ref with
-      |[_;ty;tl] -> ty, tl
-      |_ -> "", ref
-  end
-
-  module Tag = struct
-    open Monad
-
-    let tag ?token ~user ~repo ~sha () =
-      let uri = URI.repo_tag ~user ~repo ~sha in
-      API.get ?token ~uri (fun b -> Lwt.return (tag_of_string b))
-
-    (* Retrieve a list of SHA hashes for tags, and obtain a
-    * name and time for each tag.  If annotated, this is explicit,
-    * and otherwise it uses the last commit *)
-    let get_tags_and_times ?token ~user ~repo () =
-      let tags = Repo.refs ?token ~ty:"tags" ~user ~repo () in
-      Stream.map (fun hd ->
-        let _,name = Git_obj.split_ref hd.git_ref_name in
-        let sha = hd.git_ref_obj.obj_sha in
-        match hd.git_ref_obj.obj_ty with
-        |`Commit -> (* lightweight tag, so get commit info *)
-          Repo.commit ?token ~user ~repo ~sha ()
-          >>= fun c ->
-          return [name, c.commit_git.git_commit_author.info_date]
-        |`Tag ->
-          tag ?token ~user ~repo ~sha ()
-          >>= fun t ->
-          return [name, t.tag_tagger.info_date]
-        |_ -> return []
-      ) tags
-  end
-
   module Gist = struct
     open Lwt 
 
@@ -1391,43 +1377,43 @@ module Make(CL : Cohttp_lwt.Client) = struct
      *                   YYYY-MM-DDTHH:MM:SSZ. Only gists updated at 
      *                   or after this time are returned. *)
 
-    let uri_param_since uri= function
+    let uri_param_since uri = function
       | None -> uri
-      | Some(date) -> Uri.add_query_param uri ("since", [date])
+      | Some date -> Uri.add_query_param uri ("since", [date])
 
     (* List a user’s gists:
      * GET /users/:username/gists *)
-    let list_users ?since ?token ~user () =
+    let for_user ?token ?since ~user () =
       let uri = URI.list_users_gists ~user in
       let uri = uri_param_since uri since in
-      API.get ?token ~uri (fun b -> return (gists_of_string b))
+      API.get_stream ?token ~uri (fun b -> return (gists_of_string b))
 
     (* List the authenticated user’s gists or if called anonymously, 
      * this will return all public gists:
      * GET /gists *)
-    let list ?since ?token () =
-      let uri = URI.list_gists in
+    let all ?token ?since () =
+      let uri = URI.gists in
       let uri = uri_param_since uri since in
-      API.get ?token ~uri (fun b -> return (gists_of_string b))
+      API.get_stream ?token ~uri (fun b -> return (gists_of_string b))
 
     (* List all public gists:
      * GET /gists/public *)
-    let list_all_public ?since ?token () =
+    let all_public ?token ?since () =
       let uri = URI.list_all_public_gists in
       let uri = uri_param_since uri since in
-      API.get ?token ~uri (fun b -> return (gists_of_string b))
+      API.get_stream ?token ~uri (fun b -> return (gists_of_string b))
 
     (* List the authenticated user’s starred gists:
      * GET /gists/starred *)
-    let list_starred ?since ~token () =
+    let starred ?token ?since () =
       let uri = URI.list_starred_gists in
       let uri = uri_param_since uri since in
-      API.get ~token ~uri (fun b -> return (gists_of_string b))
+      API.get_stream ?token ~uri (fun b -> return (gists_of_string b))
 
     (* Get a single gist https://developer.github.com/v3/gists/#get-a-single-gist 
      * GET /gists/:id  *)
-    let get ?token ~id () =
-      let uri = URI.get_gist ~id in
+    let get ?token ~num () =
+      let uri = URI.gist ~num in
       API.get ?token ~uri (fun b -> return (gist_of_string b))
 
     (* Create a gist https://developer.github.com/v3/gists/#create-a-gist
@@ -1436,10 +1422,10 @@ module Make(CL : Cohttp_lwt.Client) = struct
      *  files       hash      Required. Files that make up this gist.
      *  description string    A description of the gist.
      *  public      boolean   Indicates whether the gist is public. Default: false *)
-    let create ~token ~contents () =
-      let uri = URI.create_gist in
-      let body = string_of_gist_create contents in
-      API.post ~body ~token ~uri ~expected_code:`Created (fun b -> return (gist_of_string b))
+    let create ?token ~gist () =
+      let uri = URI.gists in
+      let body = string_of_new_gist gist in
+      API.post ~body ?token ~uri ~expected_code:`Created (fun b -> return (gist_of_string b))
 
     (* Edit a gist https://developer.github.com/v3/gists/#edit-a-gist
      * PATCH /gists/:id
@@ -1448,30 +1434,30 @@ module Make(CL : Cohttp_lwt.Client) = struct
      *  files       hash    Files that make up this gist.
      *  content     string  Updated file contents.
      *  filename    string  New name for this file. *)
-    let edit ~token ~id ~contents () = 
-      let uri = URI.edit_gist ~id in
-      let body = string_of_gist_edits contents in
-      API.patch ~body ~token ~uri ~expected_code:`OK (fun b -> return (gist_of_string b))
+    let update ?token ~num ~gist () =
+      let uri = URI.gist ~num in
+      let body = string_of_update_gist gist in
+      API.patch ~body ?token ~uri ~expected_code:`OK (fun b -> return (gist_of_string b))
 
     (* List gist commits https://developer.github.com/v3/gists/#list-gist-commits
      * GET /gists/:id/commits *)
-    let commits ?token ~id () = 
-      let uri = URI.list_gist_commits ~id in
-      API.get_stream ?token ~uri (fun b -> return (gist_history_list_of_string b))
+    let commits ?token ~num () =
+      let uri = URI.gist_commits ~num in
+      API.get_stream ?token ~uri (fun b -> return (gist_commits_of_string b))
 
     (* Star a gist https://developer.github.com/v3/gists/#star-a-gist
      * PUT /gists/:id/star
      * Note that you’ll need to set Content-Length to zero when calling 
      * out to this endpoint. For more information, see “HTTP verbs.” *)
-    let star ~token ~id () = 
-      let uri = URI.star_gist ~id in
-      API.put ~token ~uri ~expected_code:`No_content (fun b -> return ())
+    let star ?token ~num () =
+      let uri = URI.gist_star ~num in
+      API.put ?token ~uri ~expected_code:`No_content (fun b -> return ())
 
     (* Unstar a gist https://developer.github.com/v3/gists/#unstar-a-gist
      * DELETE /gists/:id/star *)
-    let unstar ~token ~id () = 
-      let uri = URI.unstar_gist ~id in
-      API.delete ~token ~uri ~expected_code:`No_content (fun b -> return ())
+    let unstar ?token ~num () =
+      let uri = URI.gist_star ~num in
+      API.delete ?token ~uri ~expected_code:`No_content (fun b -> return ())
 
     (* Check if a gist is starred https://developer.github.com/v3/gists/#check-if-a-gist-is-starred
      * GET /gists/:id/star 
@@ -1480,21 +1466,21 @@ module Make(CL : Cohttp_lwt.Client) = struct
 
     (* Fork a gist https://developer.github.com/v3/gists/#fork-a-gist
      * POST /gists/:id/forks *)
-    let fork ~token ~id () = 
-      let uri = URI.fork_gist ~id in
-      API.post ~token ~uri ~expected_code:`Created (fun b -> return (gist_of_string b))
+    let fork ?token ~num () =
+      let uri = URI.gist_forks ~num in
+      API.post ?token ~uri ~expected_code:`Created (fun b -> return (gist_of_string b))
 
     (* List gist forks https://developer.github.com/v3/gists/#list-gist-forks
      * GET /gists/:id/forks *)
-    let list_forks ?token ~id () = 
-      let uri = URI.list_gist_forks ~id in
+    let forks ?token ~num () =
+      let uri = URI.gist_forks ~num in
       API.get_stream ?token ~uri (fun b -> return (gist_forks_of_string b))
 
     (* Delete a gist https://developer.github.com/v3/gists/#delete-a-gist
      * DELETE /gists/:id *)
-    let delete ~token ~id () = 
-      let uri = URI.delete_gist ~id in
-      API.delete ~token ~uri ~expected_code:`No_content (fun b -> return ())
+    let delete ?token ~num () =
+      let uri = URI.gist ~num in
+      API.delete ?token ~uri ~expected_code:`No_content (fun b -> return ())
   end
 
   module Organization = struct

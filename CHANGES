@@ -13,7 +13,7 @@
 * ! Token.create now has additional ?fingerprint:string argument
 * ! Token.get now returns auth option authorization Monad.t
 * ! User.current_info ~token argument was made optional ?token
-* ! User.info ~login argument was renamed to User.info ~user
+* ! User.info ~login argument was renamed to ~user
 * ! User.repositories now accepts optional ?token and does not accept ?page
 * ! Pull.for_repo does not accept ?page and now returns pull Stream.t
 * ! Pull.list_commits now returns commit Stream.t
@@ -27,11 +27,35 @@
 * ! Repo.tags now returns repo_tag Stream.t
 * ! Repo.branches now returns repo_branch Stream.t
 * ! Repo.refs now returns git_ref Stream.t
-* ! Tag.get_tags_and_times now returns (string * string) Stream.t
-* ! Gist.commits now returns gist_history Stream.t
-* ! Gist.list_forks now returns git_fork Stream.t
+* ! Tag.get_tags_and_times was renamed Repo.get_tags_and_times
+* ! Repo.get_tags_and_times now returns (string * string) Stream.t
+* ! Tag.tag was renamed Repo.get_tag
+* ! Gist.list_users was renamed Gist.for_user and now returns gist Stream.t
+* ! Gist.list was renamed Gist.all and now returns gist Stream.t
+* ! Gist.list_all_public was renamed Gist.all_public and now returns gist Stream.t
+* ! Gist.list_starred was renamed Gist.starred
+* ! Gist.starred ~token argument was made optional ?token
+* ! Gist.starred now returns gist Stream.t
+* ! Gist.get ~id argument was renamed to ~num
+* ! Gist.create ~token argument was made optional ?token
+* ! Gist.create ~contents argument was renamed to ~gist
+* ! Gist.edit was renamed Gist.update
+* ! Gist.update signature now has s/~token/?token/ s/~id/~num/ s/~contents/~gist/
+* ! Gist.commits ~id argument was renamed to ~num
+* ! Gist.commits now returns gist_commit Stream.t
+* ! Gist.star ~token argument was made optional ?token
+* ! Gist.star ~id argument was renamed to ~num
+* ! Gist.unstar ~token argument was made optional ?token
+* ! Gist.unstar ~id argument was renamed to ~num
+* ! Gist.fork ~token argument was made optional ?token
+* ! Gist.fork ~id argument was renamed to ~num
+* ! Gist.list_forks was renamed Gist.forks and now returns gist_fork Stream.t
+* ! Gist.forks ~id argument was renamed to ~num
+* ! Gist.delete ~token argument was made optional ?token
+* ! Gist.delete ~id argument was renamed to ~num
 * ! Organization.teams now returns team Stream.t
 * ! Team.repositories now returns repository Stream.t
+* ! Git_obj.obj_type_to_string was renamed Git_obj.type_to_string
 * ! user:email scope constructor UserEmail has been renamed User_email
 * ! user:follow scope constructor UserFollow has been renamed User_follow
 * ! scope constructor `Admin_org_hook added
@@ -58,6 +82,23 @@
 * ! hook_config is now a hook_config rather than a web_hook_config
 * ! new_hook_config is now a hook_config rather than a web_hook_config
 * ! update_hook_config is now a hook_config rather than a web_hook_config
+* ! change_statusdeletions field renamed to change_status_deletions
+* ! change_statusadditions field renamed to change_status_additions
+* ! change_statustotal field renamed to change_status_total
+* ! gist_history type has been renamed gist_commit
+* ! gist_historyurl field renamed to gist_commit_url
+* ! gist_historyversion field renamed to gist_commit_version
+* ! gist_historyuser field renamed to gist_commit_user
+* ! gist_historychange_status field renamed to gist_commit_change_status
+* ! gist_historycommitted_at field renamed to gist_commit_commited_at
+* ! gist_history_list type has been renamed gist_commits
+* ! gist_create_content type has been renamed new_gist_content (+ fields)
+* ! gist_create_contents type has been renamed new_gist_contents
+* ! gist_create type has been renamed new_gist (+ fields)
+* ! gist_edit type has been renamed update_gist_file
+* ! gist_edit_content field renamed to update_gist_file_content
+* ! gist_edit_filename field renamed to update_gist_file_name
+* ! gist_edits type has been renamed update_gist (+ fields)
 * Atdgen >=1.5.0 and Yojson >=1.2.0 are now required for tag_field support
 * Cohttp >=0.17.0 is now required for Link header support
 * Monad.map, Monad.(>|=), and Monad.embed : 'a Lwt.t -> 'a Monad.t added

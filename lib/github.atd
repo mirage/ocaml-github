@@ -866,86 +866,84 @@ type new_deploy_key = {
   key: string;
 } <ocaml field_prefix="new_deploy_key_">
 
-(* GIST related datatypes *)
-
 type gist_file = {
-  size : int;
-  raw_url : string;
+  size: int;
+  raw_url: string;
   ty <json name="type">: string;
-  ?truncated : bool option;
-  ?language : string option;
-  ?content : string option;
+  ?truncated: bool option;
+  ?language: string option;
+  ?content: string option;
 } <ocaml field_prefix="gist_file_">
 
 type gist_files = (string * gist_file) list <json repr="object">
 
 type gist_fork = {
-  user : user;
-  url : string;
-  id : int;
-  created_at : string;
-  updated_at : string;
+  user: user;
+  url: string;
+  id: int;
+  created_at: string;
+  updated_at: string;
 } <ocaml field_prefix="gist_fork_">
 
 type gist_forks = gist_fork list
 
 type change_status = {
-  deletions : int;
-  additions : int;
-  total : int;
-} <ocaml field_prefix="change_status">
+  deletions: int;
+  additions: int;
+  total: int;
+} <ocaml field_prefix="change_status_">
 
-type gist_history = {
-  url : string;
-  version : string;
-  user : user;
-  change_status : change_status;
-  committed_at : string;
-} <ocaml field_prefix="gist_history">
+type gist_commit = {
+  url: string;
+  version: string;
+  user: user;
+  change_status: change_status;
+  committed_at: string;
+} <ocaml field_prefix="gist_commit_">
 
-type gist_history_list = gist_history list
+type gist_commits = gist_commit list
 
 type gist = {
-  url : string;
-  forks_url : string;
-  commits_url : string;
-  id : string;
-  ?description : string option;
-  public : bool;
-  owner : user;
-  ?user : string option;
-  files : gist_files;
-  comments : int;
-  comments_url : string;
-  html_url : string;
-  git_pull_url : string;
-  git_push_url : string;
-  created_at : string;
-  updated_at : string;
-  ?forks : gist_fork list option;
-  ?history : gist_history_list option;
+  url: string;
+  forks_url: string;
+  commits_url: string;
+  id: string;
+  ?description: string option;
+  public: bool;
+  owner: user;
+  ?user: string option;
+  files: gist_files;
+  comments: int;
+  comments_url: string;
+  html_url: string;
+  git_pull_url: string;
+  git_push_url: string;
+  created_at: string;
+  updated_at: string;
+  ?forks: gist_fork list option;
+  ?history: gist_commits option;
 } <ocaml field_prefix="gist_">
 
 type gists = gist list
 
-type gist_create_content = {
-  content : string;
-} <ocaml field_prefix="gist_create_">
+type new_gist_content = {
+  content: string;
+} <ocaml field_prefix="new_gist_">
 
-type gist_create_contents = (string * gist_create_content) list <json repr="object">
+type new_gist_contents = (string * new_gist_content) list <json repr="object">
 
-type gist_create = {
-  description : string;
-  public : bool;
-  files : gist_create_contents;
-} <ocaml field_prefix="gist_create_">
+type new_gist = {
+  files: new_gist_contents;
+  description: string;
+  public: bool;
+} <ocaml field_prefix="new_gist_">
 
-type gist_edit = {
-  ?content : string option;
-  ?filename : string option;
-} <ocaml field_prefix="gist_edit_">
+type update_gist_file = {
+  ?content: string option;
+  ?name <json name="filename">: string option;
+} <ocaml field_prefix="update_gist_file_">
 
-type gist_edits = {
-  description : string;
-  files : (string * gist_edit) list <json repr="object">
-} <ocaml field_prefix="gist_edit_">
+type update_gist = {
+  description: string;
+  files: (string * update_gist) list <json repr="object">
+} <ocaml field_prefix="update_gist_">

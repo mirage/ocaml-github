@@ -527,11 +527,29 @@ module type Github = sig
       ?token:Token.t ->
       user:string -> repo:string ->
       unit -> Github_t.repository Stream.t
+    (** [forks ?sort ~user ~repo ()] is a stream of all repositories
+        forked from [user]/[repo] sorted by [?sort] (default [`Newest]). *)
+
+    val get_tag :
+      ?token:Token.t ->
+      user:string -> repo:string -> sha:string ->
+      unit -> Github_t.tag Monad.t
+    (** [get_tag ~user ~repo ~sha ()] is the annotated tag object with
+        SHA [sha] in [user]/[repo]. *)
 
     val tags :
       ?token:Token.t ->
       user:string -> repo:string ->
       unit -> Github_t.repo_tag Stream.t
+    (** [tags ~user ~repo ()] is a stream of all tags in repo [user]/[repo]. *)
+
+    val get_tags_and_times :
+      ?token:Token.t ->
+      user:string -> repo:string ->
+      unit -> (string * string) Stream.t
+    (** [get_tags_and_times ~user ~repo ()] is a stream of pairs of
+        tag names and creation times for all lightweight and annotated
+        tags in [user]/[repo]. *)
 
     val branches :
       ?token:Token.t ->
@@ -601,80 +619,88 @@ module type Github = sig
       user:string -> unit -> Github_t.event Stream.t
   end
 
-  module Git_obj : sig
-    val obj_type_to_string : Github_t.obj_type -> string
-
-    (** Split a [ref] like "refs/tags/foo/bar" into ("tags","foo/bar") *)
-    val split_ref : string -> string * string
-  end
-
-  module Tag : sig
-    val tag :
-      ?token:Token.t ->
-      user:string -> repo:string -> sha:string ->
-      unit -> Github_t.tag Monad.t
-
-    val get_tags_and_times :
-      ?token:Token.t ->
-      user:string -> repo:string ->
-      unit -> (string * string) Stream.t
-  end
-
+  (** The [Gist] module provides access to the GitHub
+      {{:https://developer.github.com/v3/gists/}gist API}. *)
   module Gist : sig
-    val list_users : 
-      ?since:string -> ?token:Token.t -> user:string -> unit ->
-      Github_t.gists Monad.t
-    
-    val list : 
-      ?since:string -> ?token:Token.t -> unit -> 
-      Github_t.gists Monad.t
-    
-    val list_all_public : 
-      ?since:string -> ?token:Token.t -> unit -> 
-      Github_t.gists Monad.t
-    
-    val list_starred : 
-      ?since:string -> token:Token.t -> unit -> 
-      Github_t.gists Monad.t
-    
-    val get : 
-      ?token:Token.t -> id:string -> unit -> 
-      Github_t.gist Monad.t
-    
-    val create : 
-      token:Token.t -> contents:Github_t.gist_create -> unit -> 
-      Github_t.gist Monad.t
+    val for_user :
+      ?token:Token.t ->
+      ?since:string -> user:string -> unit -> Github_t.gist Stream.t
+    (** [for_user ?since ~user ()] is a stream of gists that belong to
+        [user]. If [?since] is an ISO 8601 timestamp, only gists
+        updated since this time are returned. *)
 
-    val edit : 
-      token:Token.t -> id:string -> 
-      contents:Github_t.gist_edits -> unit -> 
-      Github_t.gist Monad.t
+    val all :
+      ?token:Token.t ->
+      ?since:string -> unit -> Github_t.gist Stream.t
+    (** [all ?since ()] is a stream of all of the gists for the
+        current token's user or all public gists if invoked without a
+        current token. If [?since] is an ISO 8601 timestamp, only gists
+        updated since this time are returned. *)
 
-    val commits : 
-      ?token:Token.t -> id:string -> unit -> 
-      Github_t.gist_history Stream.t
+    val all_public :
+      ?token:Token.t ->
+      ?since:string -> unit -> Github_t.gist Stream.t
+    (** [all_public ?since ()] is a stream of all of the public gists
+        for the current token's user or all public gists if invoked
+        without a current token. If [?since] is an ISO 8601 timestamp, only gists
+        updated since this time are returned. *)
 
-    val star : 
-      token:Token.t -> id:string -> unit -> 
-      unit Monad.t
+    val starred :
+      ?token:Token.t ->
+      ?since:string -> unit -> Github_t.gist Stream.t
+    (** [starred ?since ()] is a stream of all starred gists for the
+        current token's user. If [?since] is an ISO 8601 timestamp, only gists
+        updated since this time are returned. *)
 
-    val unstar : 
-      token:Token.t -> id:string -> unit -> 
-      unit Monad.t
+    val get :
+      ?token:Token.t ->
+      num:string -> unit -> Github_t.gist Monad.t
+    (** [get ~num ()] is the gist [num]. *)
+
+    val create :
+      ?token:Token.t ->
+      gist:Github_t.new_gist -> unit -> Github_t.gist Monad.t
+    (** [create ~gist ()] is a newly created gist described by [gist]. *)
+
+    val update :
+      ?token:Token.t ->
+      num:string -> gist:Github_t.update_gist -> unit -> Github_t.gist Monad.t
+    (** [update ~num ~gist ()] is the updated gist [num] as described
+        by [gist]. *)
+
+    val commits :
+      ?token:Token.t ->
+      num:string -> unit -> Github_t.gist_commit Stream.t
+    (** [commits ~num ()] is a stream of commits for gist [num]. *)
+
+    val star :
+      ?token:Token.t ->
+      num:string -> unit -> unit Monad.t
+    (** [star ~num ()] is activated after gist [num] is marked as
+        starred by the current token's user. *)
+
+    val unstar :
+      ?token:Token.t ->
+      num:string -> unit -> unit Monad.t
+    (** [unstar ~num ()] is activated after gist [num] is marked as
+        not starred by the current token's user. *)
 
     (* is_starred *)
 
-    val fork : 
-      token:Token.t -> id:string -> unit -> 
-      Github_t.gist Monad.t
+    val fork :
+      ?token:Token.t ->
+      num:string -> unit -> Github_t.gist Monad.t
+    (** [fork ~num ()] is a newly forked gist from gist [num]. *)
 
-    val list_forks : 
-      ?token:Token.t -> id:string -> unit -> 
-      Github_t.gist_fork Stream.t
+    val forks :
+      ?token:Token.t ->
+      num:string -> unit -> Github_t.gist_fork Stream.t
+    (** [forks ~num ()] is a stream of forks of gist [num]. *)
 
-    val delete : 
-      token:Token.t -> id:string -> unit -> 
-      unit Monad.t
+    val delete :
+      ?token:Token.t ->
+      num:string -> unit -> unit Monad.t
+    (** [delete ~num ()] is activated after gist [num] has been deleted. *)
   end
 
   module Organization : sig
@@ -696,11 +722,19 @@ module type Github = sig
       unit -> Github_t.repository Stream.t
   end
 
-  (** [log_active] activates debug messages
+  (** {4 Utility Modules} *)
 
-      set by default when the environment variable GITHUB_DEBUG is set to 1 *)
-  val log_active : bool ref
+  (** The [Git_obj] module contains utility functions for working with
+      git concepts. *)
+  module Git_obj : sig
+    val type_to_string : Github_t.obj_type -> string
+    (** [type_to_string type] is the string name of object type [type]. *)
 
+    val split_ref : string -> string * string
+    (** [split_ref ref] is the pair of ref directory and ref
+        name. E.g. if [ref] is "refs/tags/foo/bar" then [split_ref
+        ref] is ("tags","foo/bar"). *)
+  end
 end
 
 

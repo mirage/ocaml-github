@@ -12,6 +12,6 @@ let print_deploy_keys m =
  
 let t =
   let k = Github.Deploy_key.for_repo ~token ~user:"mirage" ~repo:"mirage-www-deployment" in
-  Github.(Monad.run (k ())) >|= print_deploy_keys
+  Github.(Monad.run (Stream.to_list (k ()))) >|= print_deploy_keys
 
 let _ = Lwt_main.run t

@@ -28,7 +28,7 @@ let t =
     }) in
     Status.create ~token ~user ~repo ~sha:sha_a ~status ()
     >>= fun status ->
-    Status.for_sha ~token ~user ~repo ~sha:sha_a ()
+    Stream.to_list (Status.for_ref ~token ~user ~repo ~git_ref:sha_a ())
     >>= fun statuses ->
     print_statuses statuses;
     let status = Github_t.({
@@ -38,7 +38,7 @@ let t =
     }) in
     Status.create ~token ~user ~repo ~sha:sha_a ~status ()
     >>= fun status ->
-    Status.for_sha ~token ~user ~repo ~sha:sha_a ()
+    Stream.to_list (Status.for_ref ~token ~user ~repo ~git_ref:sha_a ())
     >>= fun statuses ->
     print_statuses statuses;
     return ()

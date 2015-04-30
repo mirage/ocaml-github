@@ -3,6 +3,10 @@
 * ! Monad.bind now accepts a function first and then a Monad.t
 * ! API.{get,post,delete,patch,put} now take optional fail_handlers
 * ! API.{get,post,delete,patch,put} now take optional rate classification
+* ! URI.authorize now requires ~state argument to protect against CSRF.
+* ! URI.repo_issue ~issue_number argument was renamed to ~num
+* ! URI.issue_comments ~issue_number argument was renamed to ~num
+* ! URI.issue_comment ~commit_id argument was renamed to ~num
 * ! Scope.scope_of_string was renamed Scope.of_string
 * ! Scope.string_of_scope was renamed Scope.to_string
 * ! Scope.scopes_of_string was renamed Scope.list_of_string
@@ -21,8 +25,15 @@
 * ! Milestone.for_repo does not accept ?page
 * ! Milestone.for_repo now returns milestone Stream.t
 * ! Release.for_repo now returns release Stream.t
+* ! Release.upload_asset ~id argument was renamed to ~num
+* ! Deploy_key.for_repo now returns deploy_key Stream.t
 * ! Issue.for_repo does not accept ?page and now returns issue Stream.t
+* ! Issue.update ~issue_number argument was renamed to ~num
+* ! Issue.comments ~issue_number argument was renamed to ~num
+* ! Issue.create_comment ~issue_number argument was renamed to ~num
 * ! Issue.comments now returns issue_comment Stream.t
+* ! Status.for_sha was renamed Status.for_ref and now returns status Stream.t
+* ! Status.for_ref ~sha argument was renamed to ~git_ref
 * ! Hook.for_repo now returns hook Stream.t
 * ! Repo.tags now returns repo_tag Stream.t
 * ! Repo.branches now returns repo_branch Stream.t
@@ -122,6 +133,7 @@
 * Add Scope.max which contains a minimal set of scopes for maximum privilege
 * Add Repo.fork to create fork of a repository to the present user or given org
 * Add Repo.forks to list the forks of a given repository
+* Filter.forks_sort type added
 * Add Event module with a variety of event sources
 * A new jar command, git-list-events, has been added to print events for a repo
 * A new test binary, parse_events, has been added which downloads and

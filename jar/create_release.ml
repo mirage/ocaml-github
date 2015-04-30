@@ -40,16 +40,16 @@ let create_release ~token
     ask_github (
       Github.Release.create ~token ~user ~repo ~release:new_release)
   in
-  let id = release.release_id in
+  let num = release.release_id in
   Lwt_list.iter_s (fun filename ->
     lwt len = Lwt_io.file_length filename >|= Int64.to_int in
     let body = Bytes.create len in
     Lwt_io.with_file ~mode:Lwt_io.input filename
       (fun ic -> Lwt_io.read_into_exactly ic body 0 len)
     >>= fun () ->
-      lwt a = ask_github (
+      lwt _a = ask_github (
         Github.Release.upload_asset
-          ~token ~user ~repo ~id ~filename ~content_type ~body) in
+          ~token ~user ~repo ~num ~filename ~content_type ~body) in
       return ()) assets
 
 let run token user repo tag release_name target_commitish body assets

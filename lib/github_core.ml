@@ -118,10 +118,10 @@ module Make(CL : Cohttp_lwt.Client) = struct
   end
 
   module URI = struct
-    let authorize ?scopes ?redirect_uri ~client_id () =
+    let authorize ?scopes ?redirect_uri ~client_id ~state () =
       let entry_uri = "https://github.com/login/oauth/authorize" in
       let uri = Uri.of_string entry_uri in
-      let q = ["client_id", client_id ] in
+      let q = [ "client_id", client_id; "state", state ] in
       let q = match scopes with
       |Some scopes -> ("scope", Scope.list_to_string scopes) :: q
       |None -> q in
@@ -163,8 +163,8 @@ module Make(CL : Cohttp_lwt.Client) = struct
     let repo_issues ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/issues" api user repo) 
 
-    let repo_issue ~user ~repo ~issue_number =
-      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/issues/%d" api user repo issue_number) 
+    let repo_issue ~user ~repo ~num =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/issues/%d" api user repo num)
 
     let repo_tags ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/tags" api user repo)
@@ -186,8 +186,8 @@ module Make(CL : Cohttp_lwt.Client) = struct
     let repo_commit ~user ~repo ~sha =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/commits/%s" api user repo sha)
 
-    let repo_statuses ~user ~repo ~sha =
-      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/statuses/%s" api user repo sha)
+    let repo_statuses ~user ~repo ~git_ref =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/statuses/%s" api user repo git_ref)
 
     let repo_hooks ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/hooks" api user repo)
@@ -225,11 +225,11 @@ module Make(CL : Cohttp_lwt.Client) = struct
     let milestone ~user ~repo ~num =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/milestones/%d" api user repo num)
 
-    let issue_comments ~user ~repo ~issue_number =
-      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/issues/%d/comments" api user repo issue_number)
+    let issue_comments ~user ~repo ~num =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/issues/%d/comments" api user repo num)
 
-    let issue_comment ~user ~repo ~comment_id =
-      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/issues/comments/%d" api user repo comment_id)
+    let issue_comment ~user ~repo ~num =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/issues/comments/%d" api user repo num)
 
     let repo_releases ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/releases" api user repo)
@@ -237,10 +237,10 @@ module Make(CL : Cohttp_lwt.Client) = struct
     let repo_release ~user ~repo ~num =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/releases/%d" api user repo num)
 
-    let upload_release_asset ~user ~repo ~id =
+    let upload_release_asset ~user ~repo ~num =
       Uri.of_string (
         Printf.sprintf "https://uploads.github.com/repos/%s/%s/releases/%d/assets"
-          user repo id)
+          user repo num)
   
     let repo_deploy_keys ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/keys" api user repo)
@@ -283,9 +283,6 @@ module Make(CL : Cohttp_lwt.Client) = struct
     let list_users_gists ~user = 
       Uri.of_string (Printf.sprintf "%s/users/%s/gists" api user)
 
-    let list_gists = 
-      Uri.of_string (Printf.sprintf "%s/gists" api)
-
     let list_all_public_gists = 
       Uri.of_string (Printf.sprintf "%s/gists/public" api)
 
@@ -307,14 +304,14 @@ module Make(CL : Cohttp_lwt.Client) = struct
     let gist_forks ~num =
       Uri.of_string (Printf.sprintf "%s/gists/%s/forks" api num)
 
-    let team ~id =
-      Uri.of_string (Printf.sprintf "%s/teams/%d" api id)
+    let team ~num =
+      Uri.of_string (Printf.sprintf "%s/teams/%d" api num)
 
     let org_teams ~org =
       Uri.of_string (Printf.sprintf "%s/orgs/%s/teams" api org)
 
-    let team_repos ~id =
-      Uri.of_string (Printf.sprintf "%s/teams/%d/repos" api id)
+    let team_repos ~num =
+      Uri.of_string (Printf.sprintf "%s/teams/%d/repos" api num)
   end 
 
   module C = Cohttp
@@ -827,7 +824,8 @@ module Make(CL : Cohttp_lwt.Client) = struct
         (fun body -> return (Result ()))
 
     (* Convert a code after a user oAuth into an access token that can
-    * be used in subsequent requests.
+       be used in subsequent requests.
+       TODO: more informative error case
     *)
     let of_code ~client_id ~client_secret ~code () =
       let uri = URI.token ~client_id ~client_secret ~code () in
@@ -892,6 +890,13 @@ module Make(CL : Cohttp_lwt.Client) = struct
       |`Stars -> "stars"
       |`Forks -> "forks"
       |`Updated -> "updated"
+
+    type forks_sort = [ `Newest | `Oldest | `Stargazers ]
+    let string_of_forks_sort (s:forks_sort) =
+      match s with
+      |`Newest -> "newest"
+      |`Oldest -> "oldest"
+      |`Stargazers -> "stargazers"
 
     type direction = [ `Asc | `Desc ]
     let string_of_direction (d:direction) =
@@ -1092,10 +1097,10 @@ module Make(CL : Cohttp_lwt.Client) = struct
       let body = string_of_update_release release in
       API.patch ?token ~body ~uri ~expected_code:`OK (fun b -> return (release_of_string b))
 
-    let upload_asset ?token ~user ~repo ~id ~filename ~content_type ~body () =
+    let upload_asset ?token ~user ~repo ~num ~filename ~content_type ~body () =
       let headers = Cohttp.Header.init_with "content-type" content_type in
       let params = ["name", filename] in
-      let uri = URI.upload_release_asset ~user ~repo ~id in
+      let uri = URI.upload_release_asset ~user ~repo ~num in
       API.post ?token ~params ~headers ~body ~uri ~expected_code:`Created (fun b -> return ())
   end
 
@@ -1103,7 +1108,7 @@ module Make(CL : Cohttp_lwt.Client) = struct
     open Lwt
 
     let for_repo ?token ~user ~repo () =
-      API.get ?token ~uri:(URI.repo_deploy_keys ~user ~repo) 
+      API.get_stream ?token ~uri:(URI.repo_deploy_keys ~user ~repo)
         (fun b -> return (deploy_keys_of_string b))
 
     let get ?token ~user ~repo ~num () =
@@ -1123,9 +1128,9 @@ module Make(CL : Cohttp_lwt.Client) = struct
   module Issue = struct
     open Lwt
     
-    let for_repo ?token ?creator ?mentioned ?labels
-      ?milestone ?state ?(sort=`Created)
-      ?(direction=`Desc) ?assignee ~user ~repo () =
+    let for_repo ?token ?creator ?mentioned ?assignee
+        ?labels ?milestone ?state ?(sort=`Created)
+        ?(direction=`Desc) ~user ~repo () =
       let params = Filter.([
         "direction", string_of_direction direction;
         "sort", string_of_issue_sort sort;
@@ -1162,18 +1167,19 @@ module Make(CL : Cohttp_lwt.Client) = struct
       let uri = URI.repo_issues ~user ~repo in
       API.post ~body ?token ~uri ~expected_code:`Created (fun b -> return (issue_of_string b))
 
-    let update ?token ~user ~repo ~issue_number ~issue () =
+    let update ?token ~user ~repo ~num ~issue () =
       let body = string_of_new_issue issue in
-      let uri = URI.repo_issue ~user ~repo ~issue_number in
-      API.patch ~body ?token ~uri ~expected_code:`OK (fun b -> return (issue_of_string b))
+      let uri = URI.repo_issue ~user ~repo ~num in
+      API.patch ~body ?token ~uri ~expected_code:`OK
+        (fun b -> return (issue_of_string b))
 
-    let comments ?token ~user ~repo ~issue_number () =
-      let uri = URI.issue_comments ~user ~repo ~issue_number in
+    let comments ?token ~user ~repo ~num () =
+      let uri = URI.issue_comments ~user ~repo ~num in
       API.get_stream ?token ~uri (fun b -> return (issue_comments_of_string b))
 
-    let create_comment ?token ~user ~repo ~issue_number ~body () =
+    let create_comment ?token ~user ~repo ~num ~body () =
       let body = string_of_new_issue_comment { new_issue_comment_body=body } in
-      let uri = URI.issue_comments ~user ~repo ~issue_number in
+      let uri = URI.issue_comments ~user ~repo ~num in
       API.post ~body ?token ~uri ~expected_code:`Created (fun b -> return (issue_comment_of_string b))
 
     let is_issue = function { issue_pull_request = None } -> true | _ -> false
@@ -1184,12 +1190,12 @@ module Make(CL : Cohttp_lwt.Client) = struct
   module Status = struct
     open Lwt
 
-    let for_sha ?token ~user ~repo ~sha () =
-      let uri = URI.repo_statuses ~user ~repo ~sha in
-      API.get ?token ~uri (fun b -> return (statuses_of_string b))
+    let for_ref ?token ~user ~repo ~git_ref () =
+      let uri = URI.repo_statuses ~user ~repo ~git_ref in
+      API.get_stream ?token ~uri (fun b -> return (statuses_of_string b))
 
     let create ?token ~user ~repo ~sha ~status () =
-      let uri = URI.repo_statuses ~user ~repo ~sha in
+      let uri = URI.repo_statuses ~user ~repo ~git_ref:sha in
       let body = string_of_new_status status in
       API.post ~body ?token ~uri ~expected_code:`Created (fun b -> return (status_of_string b))
   end
@@ -1256,21 +1262,23 @@ module Make(CL : Cohttp_lwt.Client) = struct
         return (repository_of_string b)
       )
 
-    let forks ?token ~user ~repo () =
+    let forks ?token ?sort ~user ~repo () =
       let uri = URI.repo_forks ~user ~repo in
-      API.get_stream ?token ~uri (fun b -> return (repositories_of_string b))
-
-    let tags ?token ~user ~repo () =
-      let uri = URI.repo_tags ~user ~repo in
-      API.get_stream ?token ~uri (fun b -> return (repo_tags_of_string b))
-
-    let branches ?token ~user ~repo () =
-      let uri = URI.repo_branches ~user ~repo in
-      API.get_stream ?token ~uri (fun b -> return (repo_branches_of_string b))
+      let params = match sort with
+        | None -> []
+        | Some sort -> ["sort",Filter.string_of_forks_sort sort]
+      in
+      API.get_stream ?token ~params ~uri (fun b ->
+        return (repositories_of_string b)
+      )
 
     let refs ?token ?ty ~user ~repo () =
       let uri = URI.repo_refs ?ty ~user ~repo in
       API.get_stream ?token ~uri (fun b -> return (git_refs_of_string b))
+
+    let branches ?token ~user ~repo () =
+      let uri = URI.repo_branches ~user ~repo in
+      API.get_stream ?token ~uri (fun b -> return (repo_branches_of_string b))
 
     let commit ?token ~user ~repo ~sha () =
       let uri = URI.repo_commit ~user ~repo ~sha in
@@ -1364,7 +1372,7 @@ module Make(CL : Cohttp_lwt.Client) = struct
       API.get_stream ?token ~uri (fun b -> return (events_of_string b))
 
     let for_user_public ?token ~user () =
-      let uri = URI.user_events ~user in
+      let uri = URI.public_user_events ~user in
       API.get_stream ?token ~uri (fun b -> return (events_of_string b))
   end
 
@@ -1494,12 +1502,12 @@ module Make(CL : Cohttp_lwt.Client) = struct
   module Team = struct
     open Lwt
 
-    let info ?token ~id () =
-      let uri = URI.team ~id in
+    let info ?token ~num () =
+      let uri = URI.team ~num in
       API.get ?token ~uri (fun b -> return (team_info_of_string b))
 
-    let repositories ?token ~id () =
-      let uri = URI.team_repos ~id in
+    let repositories ?token ~num () =
+      let uri = URI.team_repos ~num in
       API.get_stream ?token ~uri (fun b -> return (repositories_of_string b))
   end
 end 

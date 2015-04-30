@@ -226,12 +226,39 @@ module type Github = sig
   module URI : sig
     val authorizations : Uri.t
     val authorize : ?scopes:Github_t.scope list -> ?redirect_uri:Uri.t ->
-      client_id:string -> unit -> Uri.t
-    val issue_comments: user:string -> repo:string -> issue_number:int -> Uri.t
-    val issue_comment: user:string -> repo:string -> comment_id:int -> Uri.t
-    val token : client_id:string -> client_secret:string -> code:string -> unit -> Uri.t
+      client_id:string -> state:string -> unit -> Uri.t
+    (** [authorize ?scopes ?redirect_uri ~client_id ~state ()] is the
+        URL to
+        {{:https://developer.github.com/v3/oauth/#redirect-users-to-request-github-access}redirect
+        users} to in an OAuth2 flow to create an authorization
+        token. [?redirect_url] is the URL in your Web application
+        where users will be sent after authorization. If omitted, it
+        will default to the callback URL in GitHub's OAuth application
+        settings. The [state] parameter should match the callback
+        state parameter in order to protect against CSRF. *)
+
+    val token :
+      client_id:string -> client_secret:string -> code:string -> unit -> Uri.t
+    (** [token ~client_id ~client_secret ~code ()] is the API endpoint
+        used by {!Token.of_code} to finish the OAuth2 web flow and
+        convert a temporary OAuth code into a real API access token. *)
+
     val repo_issues : user:string -> repo:string -> Uri.t
-    val repo_issue : user:string -> repo:string -> issue_number:int ->  Uri.t
+    (** [repo_issues ~user ~repo] is the API endpoint for all issues
+        on repo [user]/[repo]. *)
+
+    val repo_issue : user:string -> repo:string -> num:int ->  Uri.t
+    (** [repo_issue ~user ~repo ~num] is the API endpoint for the
+        issue [user]/[repo]#[num]. *)
+
+    val issue_comments: user:string -> repo:string -> num:int -> Uri.t
+    (** [issue_comments ~user ~repo ~num] is the API endpoint
+        for the comments on issue [user]/[repo]#[num]. *)
+
+    val issue_comment: user:string -> repo:string -> num:int -> Uri.t
+    (** [issue_comment ~user ~repo ~num] is the API endpoint for
+        comment [num] in repo [user]/[repo]. *)
+
     val repo_pulls : user:string -> repo:string -> Uri.t
     val repo_milestones : user:string -> repo:string -> Uri.t
     val milestone : user:string -> repo:string -> num:int -> Uri.t
@@ -260,6 +287,13 @@ module type Github = sig
     type milestone_sort = [ `Due_date | `Completeness ]
     type issue_sort = [ `Created | `Updated | `Comments ]
     type repo_sort = [ `Stars | `Forks | `Updated ]
+    (** [repo_sort] is the field by which to sort a collection of
+        repositories. See {!Search.repos}. *)
+
+    type forks_sort = [ `Newest | `Oldest | `Stargazers ]
+    (** [forks_sort] is the bias used when sorting a collection of
+        forks. See {!Repo.forks}. *)
+
     type direction = [ `Asc | `Desc ]
     type milestone = [ `Any | `None | `Num of int ]
     type user = [ `Any | `None | `Login of string ]
@@ -404,7 +438,7 @@ module type Github = sig
     val upload_asset :
       ?token:Token.t ->
       user:string -> repo:string ->
-      id:int -> filename:string -> content_type:string ->
+      num:int -> filename:string -> content_type:string ->
       body:string ->
       unit -> unit Monad.t
 
@@ -413,7 +447,9 @@ module type Github = sig
   module Deploy_key : sig
     val for_repo:
       ?token:Token.t ->
-      user:string -> repo:string -> unit -> Github_t.deploy_keys Monad.t
+      user:string -> repo:string -> unit -> Github_t.deploy_key Stream.t
+    (** [for_repo ~user ~repo ()] is a stream of deploy keys
+        associated with repo [user]/[repo]. *)
 
     val get:
       ?token:Token.t ->
@@ -432,10 +468,10 @@ module type Github = sig
   module Issue: sig
     val for_repo :
       ?token:Token.t -> ?creator:string -> ?mentioned:string ->
-      ?labels:string list -> ?milestone:Filter.milestone ->
-      ?state:Filter.state -> ?sort:Filter.issue_sort ->
-      ?direction:Filter.direction ->
       ?assignee:Filter.user ->
+      ?labels:string list -> ?milestone:Filter.milestone ->
+      ?state:Filter.state ->
+      ?sort:Filter.issue_sort -> ?direction:Filter.direction ->
       user:string -> repo:string -> unit -> Github_t.issue Stream.t
 
     val create :
@@ -444,16 +480,20 @@ module type Github = sig
 
     val update :
       ?token:Token.t -> user:string -> repo:string ->
-      issue_number:int -> issue:Github_t.new_issue ->
+      num:int -> issue:Github_t.new_issue ->
       unit -> Github_t.issue Monad.t
 
     val comments :
       ?token:Token.t -> user:string -> repo:string ->
-      issue_number:int -> unit -> Github_t.issue_comment Stream.t
+      num:int -> unit -> Github_t.issue_comment Stream.t
+    (** [comments ~user ~repo ~num ()] is a stream of issue comments
+        for [user]/[repo]#[num]. *)
 
     val create_comment :
       ?token:Token.t -> user:string -> repo:string ->
-      issue_number:int -> body:string -> unit -> Github_t.issue_comment Monad.t
+      num:int -> body:string -> unit -> Github_t.issue_comment Monad.t
+    (** [create_comment ~user ~repo ~num ~body ()] is a newly created
+        issue comment on [user]/[repo]#[num] with content [body]. *)
 
     val is_issue : Github_t.issue -> bool
 
@@ -461,11 +501,14 @@ module type Github = sig
   end
 
   module Status : sig
-    val for_sha :
+    val for_ref :
       ?token:Token.t ->
       user:string ->
       repo:string ->
-      sha:string -> unit -> Github_t.statuses Monad.t
+      git_ref:string -> unit -> Github_t.status Stream.t
+    (** [for_sha ~user ~repo ~git_ref ()] is a stream of statuses
+        attached to the SHA, branch name, or tag name [git_ref] in
+        repo [user]/[repo]. *)
 
     val create :
       ?token:Token.t ->
@@ -525,6 +568,7 @@ module type Github = sig
 
     val forks :
       ?token:Token.t ->
+      ?sort:Filter.forks_sort ->
       user:string -> repo:string ->
       unit -> Github_t.repository Stream.t
     (** [forks ?sort ~user ~repo ()] is a stream of all repositories
@@ -713,12 +757,12 @@ module type Github = sig
   module Team : sig
     val info :
       ?token:Token.t ->
-      id:int ->
+      num:int ->
       unit -> Github_t.team_info Monad.t
 
     val repositories :
       ?token:Token.t ->
-      id:int ->
+      num:int ->
       unit -> Github_t.repository Stream.t
   end
 

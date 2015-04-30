@@ -12,9 +12,9 @@ let t =
   run (
     let issues = Issue.for_repo ~token ~user ~repo () in
     Stream.iter (fun issue ->
-      let issue_number = issue.issue_number in
-      eprintf "issue %d: %s\n%!" issue_number issue.issue_title;
-      let issue_comments = Issue.comments ~token ~user ~repo ~issue_number () in
+      let num = issue.issue_number in
+      eprintf "issue %d: %s\n%!" num issue.issue_title;
+      let issue_comments = Issue.comments ~token ~user ~repo ~num () in
       Stream.to_list issue_comments
       >>= fun comments ->
       List.iter (fun c ->

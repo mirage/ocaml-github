@@ -16,7 +16,16 @@
  *
  *)
 
-(** GitHub APIv3 client library *)
+(**
+   {3 {{:https://developer.github.com/v3/}GitHub APIv3} client library}
+
+   This library offers thin but natural bindings to GitHub's developer API.
+*)
+
+(** This module type is returned from the {!Github_core.Make} functor
+    which may be applied to Cohttp_lwt client libraries in order to
+    run on Unix, in a browser in Javascript, or as a MirageOS
+    unikernel. *)
 module type Github = sig
 
   (** {4 API Concepts} *)
@@ -31,6 +40,8 @@ module type Github = sig
       set via {!API} functions. *)
   module Monad : sig
     type 'a t
+    (** ['a t] is an Lwt thread sensitive to GitHub API state. *)
+
     val return : 'a -> 'a t
     (** [return x] is the value [x] wrapped in a state-sensitive Lwt thread. *)
 
@@ -39,52 +50,103 @@ module type Github = sig
         contents of [m]. Its argument order is designed for currying. *)
 
     val map : ('a -> 'b) -> 'a t -> 'b t
+    (** [map f m] is {!bind} [m (fun x -> return (f x))]. Its argument
+        order is designed for currying. *)
+
     val (>>=) : 'a t -> ('a -> 'b t) -> 'b t
+    (** [m >>= f] is {!bind} [f m]. *)
+
     val (>|=) : 'a t -> ('a -> 'b) -> 'b t
+    (** [m >|= f] is {!map} [f m]. *)
 
     val run : 'a t -> 'a Lwt.t
+    (** [run m] is the Lwt thread corresponding to the sequence of API
+        actions represented by [m]. Once a {!t} has been [run], any
+        GitHub API state such as associated default security tokens or
+        declared user agent string will not be available in
+        subsequently bound functions. *)
+
     val embed : 'a Lwt.t -> 'a t
+    (** [embed lwt] is an Lwt thread lifted into the GitHub API
+        monad. Its monadic state will be inherited from any monadic
+        values bound before it. *)
   end
 
+  (** The [Stream] module provides an abstraction to GitHub's paginated
+      endpoints. Stream creation does not initiate any network
+      activity. When requests are made, results are buffered
+      internally. Streams are not mutable. *)
   module Stream : sig
     type 'a t
+    (** ['a t] is a stream consisting roughly of a buffer and a means
+        to refill it. *)
+
     type 'a parse = string -> 'a list Lwt.t
+    (** ['a parse] is the type of functions which extract elements
+        from a paginated response. *)
 
-    (** [next s] is the next element of the stream and a stream
-        continuation if one exists. *)
     val next : 'a t -> ('a * 'a t) option Monad.t
+    (** [next s] is the next element of the stream and a stream
+        continuation if one exists. The input stream is not
+        modified. This function offers an efficient, lazy, and uniform
+        means to iterate over ordered API results which may be too
+        numerous to fit into a single request/response pair. *)
 
+    val map : ('a -> 'b list Monad.t) -> 'a t -> 'b t
     (** [map f s] is the lazy stream of [f] applied to elements of [s]
         as they are demanded. *)
-    val map : ('a -> 'b list Monad.t) -> 'a t -> 'b t
 
-    (** [find p s] is the first value in [s] satisfying [p] if one
-        exists and a stream continuation. *)
     val find : ('a -> bool) -> 'a t -> ('a * 'a t) option Monad.t
+    (** [find p s] is the first value in [s] satisfying [p] if one
+        exists and a stream continuation for further ingestion. *)
 
-    (** [iter f s] is after the application of [f] to each element of [s]. *)
     val iter : ('a -> unit Monad.t) -> 'a t -> unit Monad.t
+    (** [iter f s] is activated after the application of [f] to each
+        element of [s]. *)
 
-    (** [to_list s] is a list with each element of [s]. *)
     val to_list : 'a t -> 'a list Monad.t
+    (** [to_list s] is a list with each element of [s]. {b Warning:}
+        this function may result in {i many} successive API transactions. *)
 
-    (** [of_list l] is a stream with each element of [l]. *)
     val of_list : 'a list -> 'a t
+    (** [of_list l] is a stream with each element of [l].
+        Occasionally, it is useful to write interfaces which operate
+        generically on streams. [of_list] allows you to use list
+        values with those interfaces. *)
+
   end
 
   type rate = Core | Search
+  (** [rate] is a type used to indicate which
+      {{:https://developer.github.com/v3/#rate-limiting}rate-limiting
+      regime} is to be used for query quota accounting. [rate] is used
+      by the function in {!API}. *)
 
-  (** Some results may require 2-factor authentication. [Result]
-      values do not. [Two_factor] values contain the mode of 2FA. *)
   type 'a authorization =
     | Result of 'a
-    | Two_factor of string
+    | Two_factor of string (** *)
+  (** Some results may require 2-factor authentication. [Result]
+      values do not. [Two_factor] values contain the mode by which a
+      2FA code will be delivered. This code is required as [?otp] to
+      a subsequent invocation of the function which returns this
+      type. *)
 
   type +'a parse = string -> 'a Lwt.t
+  (** ['a parse] is the type of functions which extract meaningful
+      values from GitHub responses. *)
+
   type 'a handler =
     (Cohttp.Response.t * Cohttp_lwt_body.t -> bool) * 'a
+  (** ['a handler] is the type of response handlers which consist of
+      an activation predicate (fst) and a parse function (snd). *)
 
-  (** Authorization scopes; http://developer.github.com/v3/oauth/ *)
+  val log_active : bool ref
+  (** [log_active] regulates debug messages. It is [true] by default
+      when the environment variable [GITHUB_DEBUG] is set to 1. *)
+
+  (** The [Scope] module abstracts GitHub's
+      {{:https://developer.github.com/v3/oauth/#scopes}authorization
+      scopes}. *)
   module Scope : sig
     val to_string : Github_t.scope -> string
     (** [to_string scope] is the string GitHub uses to indicate
@@ -112,35 +174,87 @@ module type Github = sig
         needed to enable full privilege. *)
   end
 
-  (** Access token to the API, usually obtained via a user oAuth *)
+  (** The [Token] module manipulates authorization tokens. GitHub has
+      two types of tokens:
+      {{:https://developer.github.com/v3/oauth/}OAuth application
+      tokens} and
+      {{:https://help.github.com/articles/creating-an-access-token-for-command-line-use/}"personal
+      tokens"}.
+      @see <https://developer.github.com/v3/oauth_authorizations/> OAuth Authorizations API
+  *)
   module Token : sig
     type t
+    (** [t] is the abstract type of a token. *)
 
-    val of_code: client_id:string -> client_secret:string -> code:string -> unit -> t option Lwt.t
+    val of_code :
+      client_id:string -> client_secret:string -> code:string ->
+      unit -> t option Lwt.t
+    (** [of_code ~client_id ~client_secret ~code ()] is the {!t}
+        granted by a [code] from an
+        {{:https://developer.github.com/v3/oauth/#github-redirects-back-to-your-site}OAuth
+        web flow redirect}. *)
 
     val create : ?scopes:Github_t.scope list -> ?note:string ->
       ?note_url:string -> ?client_id:string -> ?client_secret:string ->
       ?fingerprint:string -> ?otp:string ->
       user:string -> pass:string -> unit ->
       Github_t.auth authorization Monad.t
+    (** [create ?otp ~user ~pass ()] is a new authorization with the
+        provided fields. When a user has enabled two-factor
+        authentication, the return value will be a {!Two_factor}
+        constructor with the one-time password delivery
+        mode. Including a valid [?otp] will yield a {!Result} return
+        value. *)
 
     val get_all : ?otp:string -> user:string -> pass:string -> unit ->
       Github_t.auths authorization Monad.t
+    (** [get_all ~user ~pass ()] are all of the authorizations that
+        this user has made. See {!create} for an explanation of how
+        two-factor authentication is handled. *)
+
     val get : ?otp:string -> user:string -> pass:string -> id:int -> unit ->
       Github_t.auth option authorization Monad.t
+    (** [get ~user ~pass ~id ()] is the authorization with identifier
+        [id]. See {!create} for an explanation of how two-factor
+        authentication is handled. *)
+
     val delete : ?otp:string -> user:string -> pass:string -> id:int -> unit ->
       unit authorization Monad.t
+    (** [delete ~user ~pass ~id ()] is [Result ()] after the
+        authorization with identifier [id] has been removed. See
+        {!create} for an explanation of how two-factor authentication
+        is handled. *)
 
     val of_auth : Github_t.auth -> t
+    (** [of_auth auth] is the OAuth application or personal token
+        contained within [auth]. *)
+
     val of_string : string -> t
+    (** [of_string token_string] is the abstract token value
+        corresponding to the string [token_string]. *)
+
     val to_string : t -> string
+    (** [to_string token] is the string serialization of [token]. *)
   end
 
-  (** Generic API accessor function, not normally used directly, but
-      useful in case you wish to call an API call that isn't wrapped
-      in the rest of the library (i.e. most of them at the moment!) *)
+  (** The [API] module contains functionality that relates to the
+      entirety of the GitHub API and these bindings. In particular,
+      this module contains:
+
+      - {{:https://developer.github.com/v3/#http-verbs}generic accessor functions},
+        not normally used directly, but useful if you wish to invoke
+        API endpoints not yet bound.
+      - handler constructors to help with using the generic accessors
+      - monad state injectors for setting things like default tokens or
+        user agent strings
+      - cached, rate limit queries
+      - error message utility functions
+  *)
   module API : sig
     val code_handler : expected_code:Cohttp.Code.status_code -> 'a -> 'a handler
+    (** [code_handler ~expected_code parse] is a response handler that
+        fires for responses with status [expected_code] and applies
+        [parse]. *)
 
     val get :
       ?rate:rate ->
@@ -151,6 +265,17 @@ module type Github = sig
       ?params:(string * string) list ->
       uri:Uri.t -> 
       'a parse -> 'a Monad.t
+    (** [get ?rate ?fail_handlers ?expected_code ?headers ?token
+        ?params uri p] is the [p]-parsed response to a GitHub API HTTP
+        GET request to [uri] with extra query parameters [params] and
+        extra headers [headers]. If [token] is supplied, it will be
+        used instead of any token bound into the monad. [p] will only
+        fire if the response status is [expected_code] which defaults
+        to [200 OK]. If the response status is not [expected_code],
+        [fail_handlers], if any, will be checked in the order
+        supplied. The [rate] parameter determines which rate limit
+        accounting regime will be used for caching rate limit values
+        in response headers. *)
 
     val get_stream :
       ?rate:rate ->
@@ -161,6 +286,12 @@ module type Github = sig
       ?params:(string * string) list ->
       uri:Uri.t ->
       'a Stream.parse -> 'a Stream.t
+    (** [get_stream uri stream_p] is the {!Stream.t} encapsulating
+        lazy [stream_p]-parsed responses to GitHub API HTTP GET
+        requests to [uri] and
+        {{:https://developer.github.com/v3/#pagination}its
+        successors}. For an explanation of the other
+        parameters, see {!get}. *)
 
     val post :
       ?rate:rate ->
@@ -171,7 +302,10 @@ module type Github = sig
       ?token:Token.t ->
       ?params:(string * string) list ->
       uri:Uri.t ->
-      (string -> 'a Lwt.t) -> 'a Monad.t
+      'a parse -> 'a Monad.t
+    (** [post uri p] is the [p]-parsed response to a GitHub API HTTP
+        POST request to [uri]. For an explanation of the other
+        parameters, see {!get}. *)
 
     val delete :
       ?rate:rate ->
@@ -181,7 +315,10 @@ module type Github = sig
       ?token:Token.t -> 
       ?params:(string * string) list ->
       uri:Uri.t -> 
-      (string -> 'a Lwt.t) -> 'a Monad.t
+      'a parse -> 'a Monad.t
+    (** [delete uri p] is the [p]-parsed response to a GitHub API HTTP
+        DELETE request to [uri]. For an explanation of the other
+        parameters, see {!get}. *)
 
     val patch :
       ?rate:rate ->
@@ -192,7 +329,10 @@ module type Github = sig
       ?token:Token.t ->
       ?params:(string * string) list ->
       uri:Uri.t ->
-      (string -> 'a Lwt.t) -> 'a Monad.t
+      'a parse -> 'a Monad.t
+    (** [patch uri p] is the [p]-parsed response to a GitHub API HTTP
+        PATCH request to [uri]. For an explanation of the other
+        parameters, see {!get}. *)
 
     val put :
       ?rate:rate ->
@@ -203,28 +343,51 @@ module type Github = sig
       ?token:Token.t ->
       ?params:(string * string) list ->
       uri:Uri.t ->
-      (string -> 'a Lwt.t) -> 'a Monad.t
+      'a parse -> 'a Monad.t
+    (** [put uri p] is the [p]-parsed response to a GitHub API HTTP
+        PUT request to [uri]. For an explanation of the other
+        parameters, see {!get}. *)
 
     val set_user_agent : string -> unit Monad.t
+    (** [set_user_agent ua] contains monadic state that will cause
+        bound requests to use the [User-Agent] header value of [ua]. *)
 
     val set_token : Token.t -> unit Monad.t
+    (** [set_token token] contains monadic state that will cause bound
+        requests to use [token] for authentication by default. This
+        function enables the creation of large, generic monadic
+        compositions that do not have to be parameterized by
+        authentication token. *)
 
     val get_rate : ?rate:rate -> ?token:Token.t -> unit -> Github_t.rate Monad.t
+    (** [get_rate ?rate ()] is the, possibly cached, rate limit
+        information for the rate limit regime [?rate] (default {!Core}). *)
 
     val get_rate_limit : ?token:Token.t -> unit -> int Monad.t
+    (** [get_rate_limit ()] is the, possibly cached, {!Core} total request
+        quota for the current token. *)
 
     val get_rate_remaining : ?token:Token.t -> unit -> int Monad.t
+    (** [get_rate_remaining ()] is the, possibly cached, {!Core} remaining
+        request quota for the current token. *)
 
     val get_rate_reset : ?token:Token.t -> unit -> int Monad.t
+    (** [get_rate_reset ()] is the, possibly cached, {!Core} UNIX
+        epoch expiry time (s) when the remaining request quota will be
+        reset to the total request quota for the current token. *)
 
     val string_of_message : Github_t.message -> string
+    (** [string_of_message message] is the English language error
+        message that GitHub generated in [message]. *)
   end
 
-  (** Useful URI generation functions, normally for displaying on a web-page.
-      The {!authorize} function is the entry URL for your users, and the {!token}
-      is the URI used to convert the result into a concrete access token. *)
+  (** The [URI] module contains URI generation functions which may be
+      useful for linking on the Web or passing to other GitHub API
+      clients. *)
   module URI : sig
     val authorizations : Uri.t
+    (** The API endpoint for creating and retrieving authorizations. *)
+
     val authorize : ?scopes:Github_t.scope list -> ?redirect_uri:Uri.t ->
       client_id:string -> state:string -> unit -> Uri.t
     (** [authorize ?scopes ?redirect_uri ~client_id ~state ()] is the
@@ -260,32 +423,71 @@ module type Github = sig
         comment [num] in repo [user]/[repo]. *)
 
     val repo_pulls : user:string -> repo:string -> Uri.t
+    (** [repo_pulls ~user ~repo] is the API endpoint for all pull
+        requests on repo [user]/[repo]. *)
+
     val repo_milestones : user:string -> repo:string -> Uri.t
+    (** [repo_milestones ~user ~repo] is the API endpoint for all
+        milestones on repo [user]/[repo]. *)
+
     val milestone : user:string -> repo:string -> num:int -> Uri.t
+    (** [milestone ~user ~repo] is the API endpoint for milestone
+        [num] on repo [user]/[repo]. *)
   end
 
+  (** {4 API Modules} *)
+
+  (** The [Rate_limit] module contains explicit rate limit API request
+      functions which do not {i read} the rate limit cache but do {i
+      write} to it. *)
   module Rate_limit : sig
     val all : ?token:Token.t -> unit -> Github_t.rate_resources Monad.t
+    (** [all ()] is the current token's rate limit information for all
+        rate limiting regimes. *)
+
     val for_core : ?token:Token.t -> unit -> Github_t.rate Monad.t
+    (** [for_core ()] is the current token's rate limit information
+        for the {!Core} rate limit regime. *)
+
     val for_search : ?token:Token.t -> unit -> Github_t.rate Monad.t
+    (** [for_search ()] is the current token's rate limit information
+        for the {!Search} rate limit regime. *)
+
   end
 
+  (** The [User] module provides basic user information query functions. *)
   module User : sig
     val current_info : ?token:Token.t -> unit -> Github_t.user_info Monad.t
-    (** Return the currently logged in user *)
+    (** [current_info ()] is the user information linked to the
+        current token. *)
 
     val info :
       ?token:Token.t -> user:string -> unit -> Github_t.user_info Monad.t
+    (** [info ~user ()] is the user information for user [user]. *)
 
     val repositories :
       ?token:Token.t ->
       user:string -> unit -> Github_t.repository Stream.t
+    (** [repositories ~user ()] is a stream of user [user]'s repositories. *)
   end
 
+  (** The [Filter] module contains types used by search and
+      enumeration interfaces which describe ways to perform result
+      filtering directly in the GitHub API. *)
   module Filter : sig
     type state = [ `All | `Open | `Closed ]
+    (** [state] is the activation state of a pull request, milestone,
+        or issue. See {!Pull.for_repo}, {!Milestone.for_repo}, and
+        {!Issue.for_repo}. *)
+
     type milestone_sort = [ `Due_date | `Completeness ]
+    (** [milestone_sort] is the field by which to sort a collection of
+        milestones. See {!Milestone.for_repo}. *)
+
     type issue_sort = [ `Created | `Updated | `Comments ]
+    (** [issue_sort] is the field by which to sort a collection of
+        issues. See {!Issue.for_repo}. *)
+
     type repo_sort = [ `Stars | `Forks | `Updated ]
     (** [repo_sort] is the field by which to sort a collection of
         repositories. See {!Search.repos}. *)
@@ -295,8 +497,16 @@ module type Github = sig
         forks. See {!Repo.forks}. *)
 
     type direction = [ `Asc | `Desc ]
+    (** [direction] is the sortation precedence. *)
+
     type milestone = [ `Any | `None | `Num of int ]
+    (** [milestone] is the filter predicate for issues. See
+        {!Issue.for_repo}. *)
+
     type user = [ `Any | `None | `Login of string ]
+    (** [user] is the filter predicate for issues. See
+        {!Issue.for_repo}. *)
+
     type 'a range = [
       | `Range of 'a option * 'a option
       | `Lt of 'a
@@ -305,12 +515,20 @@ module type Github = sig
       | `Gte of 'a
       | `Gt of 'a
     ]
+    (** ['a range] is the type of range expressions in search
+        queries. [`Range] is inclusive. See {!qualifier}. *)
+
     type repo_field = [
       | `Name
       | `Description
       | `Readme
     ]
+    (** [repo_field] is a repository search field selector. See [`In]
+        in {!qualifier}. *)
+
     type date = string
+    (** [date] is the YYYY-MM-DD representation of a day. *)
+
     type qualifier = [
       | `In of repo_field list
       | `Size of int range
@@ -322,25 +540,35 @@ module type Github = sig
       | `User of string
       | `Language of string
     ]
+    (** [qualifier] is the type of repository search query predicates. *)
+
   end
 
+  (** The [Pull] module contains functionality relating to GitHub's
+      {{:https://developer.github.com/v3/pulls/}pull request API}. *)
   module Pull : sig
     val for_repo :
       ?state:Filter.state ->
       ?token:Token.t ->
       user:string ->
       repo:string -> unit -> Github_t.pull Stream.t
+    (** [for_repo ?state ~user ~repo ()] is a stream of pull requests
+        against repo [user]/[repo] which are currently in state
+        [?state] (default [`Open]). *)
 
     val get :
       ?token:Token.t ->
       user:string ->
       repo:string -> num:int -> unit -> Github_t.pull Monad.t
+    (** [get ~user ~repo ~num ()] is the pull request [user]/[repo]#[num]. *)
 
     val create :
       ?token:Token.t ->
       user:string ->
       repo:string ->
       pull:Github_t.new_pull -> unit -> Github_t.pull Monad.t
+    (** [create ~user ~repo ~pull ()] is the newly created pull
+        request against repo [user]/[repo] as described by [pull]. *)
 
     val create_from_issue :
       ?token:Token.t ->
@@ -348,6 +576,9 @@ module type Github = sig
       repo:string ->
       pull_issue:Github_t.new_pull_issue ->
       unit -> Github_t.pull Monad.t
+    (** [create_from_issue ~user ~repo ~pull_issue ()] is the newly
+        created pull request from an issue against repo [user]/[repo]
+        as described by [pull_issue]. *)
 
     val update :
       ?token:Token.t ->
@@ -355,21 +586,29 @@ module type Github = sig
       repo:string ->
       update_pull:Github_t.update_pull ->
       num:int -> unit -> Github_t.pull Monad.t
+    (** [update ~user ~repo ~update_pull ~num ()] is the updated pull
+        request [user]/[repo]#[num] as described by [update_pull]. *)
 
     val list_commits :
       ?token:Token.t ->
       user:string ->
       repo:string -> num:int -> unit -> Github_t.commit Stream.t
+    (** [list_commits ~user ~repo ~num ()] is the stream of commits
+        included in pull request [user]/[repo]#[num]. *)
 
     val list_files :
       ?token:Token.t ->
       user:string ->
       repo:string -> num:int -> unit -> Github_t.file Stream.t
+    (** [list_files ~user ~repo ~num ()] is the stream of files
+        included in pull request [user]/[repo]#[num]. *)
 
     val is_merged :
       ?token:Token.t ->
       user:string ->
       repo:string -> num:int -> unit -> bool Monad.t
+    (** [is_merged ~user ~repo ~num ()] is [true] if pull request
+        [user]/[repo]#[num] has been merged. *)
 
     val merge :
       ?token:Token.t ->
@@ -377,8 +616,14 @@ module type Github = sig
       repo:string ->
       num:int ->
       ?merge_commit_message:string -> unit -> Github_t.merge Monad.t
+    (** [merge ~user ~repo ~num ?merge_commit_message ()] is the merge
+        of pull request [user]/[repo]#[num] with optional commit
+        message [?merge_commit_message]. *)
   end
 
+  (** The [Milestone] module exposes GitHub's
+      {{:https://developer.github.com/v3/issues/milestones/}milestone
+      API}. *)
   module Milestone : sig
     val for_repo:
       ?state:Filter.state ->
@@ -386,54 +631,82 @@ module type Github = sig
       ?direction:Filter.direction ->
       ?token:Token.t ->
       user:string -> repo:string -> unit -> Github_t.milestone Stream.t
+    (** [for_repo ?state ?sort ?direction ~user ~repo ()] is a stream
+        of all milestones in repo [user]/[repo] which match [?state]
+        (default [`Open]). The stream is sorted by [?sort] (default
+        [`Due_date]) and ordered by [?direction] (default [`Desc]). *)
 
     val get:
       ?token:Token.t ->
       user:string -> repo:string -> num:int -> unit -> Github_t.milestone Monad.t
+    (** [get ~user ~repo ~num ()] is milestone number [num] in repo
+        [user]/[repo]. *)
 
     val create :
       ?token:Token.t ->
       user:string -> repo:string ->
       milestone:Github_t.new_milestone -> unit -> Github_t.milestone Monad.t
+    (** [create ~user ~repo ~milestone ()] is the newly created
+        milestone described by [milestone] in repo [user]/[repo]. *)
 
     val delete:
       ?token:Token.t ->
       user:string -> repo:string -> num:int -> unit -> unit Monad.t
+    (** [delete ~user ~repo ~num ()] is activated after milestone
+        [num] in repo [user]/[repo] has been deleted. *)
 
     val update :
       ?token:Token.t ->
       user:string -> repo:string ->
       milestone:Github_t.update_milestone -> num:int ->
       unit -> Github_t.milestone Monad.t
+    (** [update ~user ~repo ~milestone ~num ()] is the updated
+        milestone [num] in repo [user]/[repo] as described by
+        [milestone]. *)
   end
 
+  (** The [Release] module provides access to GitHub's
+      {{:https://developer.github.com/v3/repos/releases/}release API}
+      features. *)
   module Release : sig
     val for_repo:
       ?token:Token.t ->
       user:string -> repo:string -> unit -> Github_t.release Stream.t
+    (** [for_repo ~user ~repo ()] is a stream of all releases in repo
+        [user]/[repo]. *)
 
     val get:
       ?token:Token.t ->
       user:string -> repo:string -> num:int -> unit -> Github_t.release Monad.t
+    (** [get ~user ~repo ~num ()] is release number [num] in repo
+        [user]/[repo]. *)
 
     val get_by_tag_name:
       ?token:Token.t ->
       user:string -> repo:string -> tag:string -> unit -> Github_t.release Monad.t
+    (** [get_by_tag_name ~user ~repo ~tag ()] is the release in repo
+        [user]/[repo] which is using git tag [tag]. *)
 
     val create :
       ?token:Token.t ->
       user:string -> repo:string ->
       release:Github_t.new_release -> unit -> Github_t.release Monad.t
+    (** [create ~user ~repo ~release ()] is the newly created release
+        described by [release] in repo [user]/[repo]. *)
 
     val delete:
       ?token:Token.t ->
       user:string -> repo:string -> num:int -> unit -> unit Monad.t
+    (** [delete ~user ~repo ~num ()] is activated after release [num]
+        in repo [user]/[repo] has been deleted. *)
 
     val update :
       ?token:Token.t ->
       user:string -> repo:string ->
       release:Github_t.update_release -> num:int ->
       unit -> Github_t.release Monad.t
+    (** [update ~user ~repo ~release ~num ()] is the updated release
+        [num] in [user]/[repo] as described by [release]. *)
 
     val upload_asset :
       ?token:Token.t ->
@@ -441,9 +714,18 @@ module type Github = sig
       num:int -> filename:string -> content_type:string ->
       body:string ->
       unit -> unit Monad.t
-
+    (** [upload_asset ~user ~repo ~num ~filename ~content_type ~body ()]
+        is activated after [body] is uploaded to repo [user]/[repo] as
+        an asset for release [num] with file name [filename] and content
+        type [content_type]. *)
   end
 
+  (** The [Deploy_key] module provides the means to manage
+      per-repository
+      {{:https://developer.github.com/guides/managing-deploy-keys/#deploy-keys}deploy
+      keys}.
+      @see <https://developer.github.com/v3/repos/keys/> deploy key API docs
+  *)
   module Deploy_key : sig
     val for_repo:
       ?token:Token.t ->
@@ -454,17 +736,24 @@ module type Github = sig
     val get:
       ?token:Token.t ->
       user:string -> repo:string -> num:int -> unit -> Github_t.deploy_key Monad.t
+    (** [get ~user ~repo ~num ()] is deploy key [num] for repo [user]/[repo]. *)
 
     val create :
       ?token:Token.t ->
       user:string -> repo:string ->
       new_key:Github_t.new_deploy_key -> unit -> Github_t.deploy_key Monad.t
+    (** [create ~user ~repo ~new_key ()] is the newly created deploy
+        key [new_key] for repo [user]/[repo]. *)
 
     val delete:
       ?token:Token.t ->
       user:string -> repo:string -> num:int -> unit -> unit Monad.t
+    (** [delete ~user ~repo ~num ()] is activated after deploy key
+        [num] in repo [user]/[repo] has been deleted. *)
   end
 
+  (** The [Issue] module gives users access to GitHub's
+      {{:https://developer.github.com/v3/issues/}issue API}. *)
   module Issue: sig
     val for_repo :
       ?token:Token.t -> ?creator:string -> ?mentioned:string ->
@@ -473,15 +762,27 @@ module type Github = sig
       ?state:Filter.state ->
       ?sort:Filter.issue_sort -> ?direction:Filter.direction ->
       user:string -> repo:string -> unit -> Github_t.issue Stream.t
+    (** [for_repo ?creator ?mentioned ?assignee ?labels ?milestone
+        ?state ?sort ?direction ~user ~repo ()] is a stream of issues
+        in repo [user]/[repo] which were created by user [?creator],
+        mention user [?mentioned], are assigned to user [?assignee],
+        have labels [?labels], are included in milestone [?milestone],
+        and are in state [?state]. The stream is sorted by [?sort]
+        (default [`Created]) and ordered by [?direction] (default
+        [`Desc]). *)
 
     val create :
       ?token:Token.t -> user:string -> repo:string ->
       issue:Github_t.new_issue -> unit -> Github_t.issue Monad.t
+    (** [create ~user ~repo ~issue ()] is a newly created issue
+        described by [issue] in repo [user]/[repo]. *)
 
     val update :
       ?token:Token.t -> user:string -> repo:string ->
       num:int -> issue:Github_t.new_issue ->
       unit -> Github_t.issue Monad.t
+    (** [update ~user ~repo ~num ~issue ()] is the updated issue [num]
+        in [user]/[repo] as described by [issue]. *)
 
     val comments :
       ?token:Token.t -> user:string -> repo:string ->
@@ -496,10 +797,15 @@ module type Github = sig
         issue comment on [user]/[repo]#[num] with content [body]. *)
 
     val is_issue : Github_t.issue -> bool
+    (** [is_issue issue] is true if [issue] is an actual issue and not
+        a pull request. *)
 
     val is_pull : Github_t.issue -> bool
+    (** [is_pull issue] is true if [issue] is a pull request. *)
   end
 
+  (** The [Status] module provides the functionality of GitHub's
+      {{:https://developer.github.com/v3/repos/statuses/}status API}. *)
   module Status : sig
     val for_ref :
       ?token:Token.t ->
@@ -517,24 +823,33 @@ module type Github = sig
       sha:string ->
       status:Github_t.new_status ->
       unit -> Github_t.status Monad.t
+    (** [create ~user ~repo ~sha ~status ()] is a newly created status
+        on SHA [sha] in repo [user]/[repo] as described by [status]. *)
   end
 
+  (** The [Hook] module provides access to GitHub's
+      {{:https://developer.github.com/v3/repos/hooks/}webhooks API}
+      which lets you manage a repository's post-receive hooks. *)
   module Hook : sig
     val for_repo :
       ?token:Token.t ->
       user:string ->
       repo:string -> unit -> Github_t.hook Stream.t
+    (** [for_repo ~user ~repo ()] is a stream of hooks for repo [user]/[repo]. *)
 
     val get :
       ?token:Token.t ->
       user:string ->
       repo:string -> num:int -> unit -> Github_t.hook Monad.t
+    (** [get ~user ~repo ~num ()] is hook [num] for repo [user]/[repo]. *)
 
     val create :
       ?token:Token.t ->
       user:string ->
       repo:string ->
       hook:Github_t.new_hook -> unit -> Github_t.hook Monad.t
+    (** [create ~user ~repo ~hook ()] is a newly created post-receive
+        hook for repo [user]/[repo] as described by [hook]. *)
 
     val update :
       ?token:Token.t ->
@@ -542,29 +857,42 @@ module type Github = sig
       repo:string ->
       num:int ->
       hook:Github_t.update_hook -> unit -> Github_t.hook Monad.t
+    (** [update ~user ~repo ~num ~hook ()] is the updated hook [num]
+        in [user]/[repo] as described by [hook]. *)
 
     val delete :
       ?token:Token.t ->
       user:string ->
       repo:string -> num:int -> unit -> unit Monad.t
+    (** [delete ~user ~repo ~num ()] is activated after hook [num] in
+        repo [user]/[repo] has been deleted. *)
 
     val test :
       ?token:Token.t ->
       user:string ->
       repo:string -> num:int -> unit -> unit Monad.t
+    (** [test ~user ~repo ~num ()] is activated after a [push] event
+        for the lastest push to [user]/[repo] has been synthesized
+        and sent to hook [num]. *)
   end
 
+  (** The [Repo] module offers the functionality of GitHub's
+      {{:https://developer.github.com/v3/repos/}repository API}. *)
   module Repo : sig
     val info :
       ?token:Token.t ->
       user:string -> repo:string ->
       unit -> Github_t.repository Monad.t
+    (** [info ~user ~repo ()] is a description of repository [user]/[repo]. *)
 
     val fork :
       ?token:Token.t ->
       ?organization:string ->
       user:string -> repo:string ->
       unit -> Github_t.repository Monad.t
+    (** [fork ?organization ~user ~repo ()] is a newly forked
+        repository from [user]/[repo] to the current token's user or
+        [organization] if it's provided. *)
 
     val forks :
       ?token:Token.t ->
@@ -599,16 +927,22 @@ module type Github = sig
       ?token:Token.t ->
       user:string -> repo:string ->
       unit -> Github_t.repo_branch Stream.t
+    (** [branches ~user ~repo ()] is a stream of all branches in repo
+        [user]/[repo]. *)
 
     val refs :
       ?token:Token.t ->
       ?ty:string -> user:string -> repo:string ->
       unit -> Github_t.git_ref Stream.t
+    (** [refs ?ty ~user ~repo ()] is a stream of all
+        {{:https://developer.github.com/v3/git/refs/}git references}
+        with prefix [?ty] for repo [user]/[repo]. *)
 
     val commit :
       ?token:Token.t ->
       user:string -> repo:string -> sha:string ->
       unit -> Github_t.commit Monad.t
+    (** [commit ~user ~repo ~sha ()] is commit [sha] in [user]/[repo]. *)
 
     val search :
       ?token:Token.t ->
@@ -617,50 +951,81 @@ module type Github = sig
       qualifiers:Filter.qualifier list ->
       keywords:string list ->
       unit -> Github_t.repository_search Stream.t
+    (** [search ?sort ?direction ~qualifiers ~keywords ()] is a
+        stream of repository search results for [keywords] and
+        matching [qualifiers] predicates. Results are sorted by
+        [?sort] (default best match) and ordered by [?direction]
+        (default [`Desc]). *)
   end
 
+  (** The [Event] module exposes GitHub's
+      {{:https://developer.github.com/v3/activity/events/}Event API}
+      functionality. *)
   module Event : sig
     val for_repo :
       ?token:Token.t ->
       user:string ->
       repo:string -> unit -> Github_t.event Stream.t
+    (** [for_repo ~user ~repo ()] is a stream of all events for
+        [user]/[repo]. *)
 
     val for_repo_issues :
       ?token:Token.t ->
       user:string ->
       repo:string -> unit -> Github_t.event Stream.t
+    (** [for_repo_issues ~user ~repo ()] is a stream of all issue
+        events for [user]/[repo]. *)
 
     val public_events : unit -> Github_t.event Stream.t
+    (** [public_events ()] is a stream of all public events on GitHub. *)
 
     val for_network :
       ?token:Token.t ->
       user:string ->
       repo:string -> unit -> Github_t.event Stream.t
+    (** [for_network ~user ~repo ()] is a stream of all events for the
+        fork network containing [user]/[repo]. *)
 
     val for_org :
       ?token:Token.t ->
       org:string -> unit -> Github_t.event Stream.t
+    (** [for_org ~org ()] is a stream of all events for the
+        organization [org]. *)
 
     val for_org_member :
       ?token:Token.t ->
       user:string ->
       org:string -> unit -> Github_t.event Stream.t
+    (** [for_org_member ~user ~org ()] is a stream of [org] events
+        which [user] receives. *)
 
     val received_by_user :
       ?token:Token.t ->
       user:string -> unit -> Github_t.event Stream.t
+    (** [received_by_user ~user ()] is a stream of all of the events
+        [user] receives. If the current token is for [user], public
+        and private events will be returned. If not, only public
+        events will be returned. *)
 
     val public_received_by_user :
       ?token:Token.t ->
       user:string -> unit -> Github_t.event Stream.t
+    (** [public_received_by_user ~user ()] is a stream of the public
+        events [user] receives. *)
 
     val for_user :
       ?token:Token.t ->
       user:string -> unit -> Github_t.event Stream.t
+    (** [for_user ~user ()] is a stream of the events generated by
+        [user]. If the current token is for [user], public and private
+        events will be returned. If not, only public events will be
+        returned. *)
 
     val for_user_public :
       ?token:Token.t ->
       user:string -> unit -> Github_t.event Stream.t
+    (** [for_user_public ~user ()] is a stream of the public events
+        generated by [user]. *)
   end
 
   (** The [Gist] module provides access to the GitHub
@@ -747,23 +1112,33 @@ module type Github = sig
     (** [delete ~num ()] is activated after gist [num] has been deleted. *)
   end
 
+  (** The [Organization] module exposes the functionality of the
+      GitHub {{:https://developer.github.com/v3/orgs/}organization
+      API}. *)
   module Organization : sig
     val teams :
       ?token:Token.t ->
       org:string ->
       unit -> Github_t.team Stream.t
+    (** [teams ~org ()] is a stream of teams belonging to the
+        organization [org]. *)
   end
 
+  (** The [Team] module contains functionality relating to GitHub's
+      {{:https://developer.github.com/v3/orgs/teams/}team API}. *)
   module Team : sig
     val info :
       ?token:Token.t ->
       num:int ->
       unit -> Github_t.team_info Monad.t
+    (** [info ~num ()] is a description of team [num]. *)
 
     val repositories :
       ?token:Token.t ->
       num:int ->
       unit -> Github_t.repository Stream.t
+    (** [repositories ~num ()] is a stream of repositories belonging
+        to team [num]. *)
   end
 
   (** {4 Utility Modules} *)

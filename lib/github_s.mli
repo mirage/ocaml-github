@@ -435,71 +435,6 @@ module type Github = sig
         [num] on repo [user]/[repo]. *)
   end
 
-  (** {4 API Modules} *)
-
-  (** The [Rate_limit] module contains explicit rate limit API request
-      functions which do not {i read} the rate limit cache but do {i
-      write} to it. *)
-  module Rate_limit : sig
-    val all : ?token:Token.t -> unit -> Github_t.rate_resources Monad.t
-    (** [all ()] is the current token's rate limit information for all
-        rate limiting regimes. *)
-
-    val for_core : ?token:Token.t -> unit -> Github_t.rate Monad.t
-    (** [for_core ()] is the current token's rate limit information
-        for the {!const:Core} rate limit regime. *)
-
-    val for_search : ?token:Token.t -> unit -> Github_t.rate Monad.t
-    (** [for_search ()] is the current token's rate limit information
-        for the {!const:Search} rate limit regime. *)
-
-  end
-
-  (** The [User] module provides basic user information query functions. *)
-  module User : sig
-    val current_info : ?token:Token.t -> unit -> Github_t.user_info Monad.t
-    (** [current_info ()] is the user information linked to the
-        current token. *)
-
-    val info :
-      ?token:Token.t -> user:string -> unit -> Github_t.user_info Monad.t
-    (** [info ~user ()] is the user information for user [user]. *)
-
-    val repositories :
-      ?token:Token.t ->
-      user:string -> unit -> Github_t.repository Stream.t
-    (** [repositories ~user ()] is a stream of user [user]'s repositories. *)
-  end
-
-  (** The [Organization] module exposes the functionality of the
-      GitHub {{:https://developer.github.com/v3/orgs/}organization
-      API}. *)
-  module Organization : sig
-    val teams :
-      ?token:Token.t ->
-      org:string ->
-      unit -> Github_t.team Stream.t
-    (** [teams ~org ()] is a stream of teams belonging to the
-        organization [org]. *)
-  end
-
-  (** The [Team] module contains functionality relating to GitHub's
-      {{:https://developer.github.com/v3/orgs/teams/}team API}. *)
-  module Team : sig
-    val info :
-      ?token:Token.t ->
-      num:int ->
-      unit -> Github_t.team_info Monad.t
-    (** [info ~num ()] is a description of team [num]. *)
-
-    val repositories :
-      ?token:Token.t ->
-      num:int ->
-      unit -> Github_t.repository Stream.t
-    (** [repositories ~num ()] is a stream of repositories belonging
-        to team [num]. *)
-  end
-
   (** The [Filter] module contains types used by search and
       enumeration interfaces which describe ways to perform result
       filtering directly in the GitHub API. *)
@@ -571,6 +506,282 @@ module type Github = sig
     ]
     (** [qualifier] is the type of repository search query predicates. *)
 
+  end
+
+  (** {4 API Modules} *)
+
+  (** The [Rate_limit] module contains explicit rate limit API request
+      functions which do not {i read} the rate limit cache but do {i
+      write} to it. *)
+  module Rate_limit : sig
+    val all : ?token:Token.t -> unit -> Github_t.rate_resources Monad.t
+    (** [all ()] is the current token's rate limit information for all
+        rate limiting regimes. *)
+
+    val for_core : ?token:Token.t -> unit -> Github_t.rate Monad.t
+    (** [for_core ()] is the current token's rate limit information
+        for the {!const:Core} rate limit regime. *)
+
+    val for_search : ?token:Token.t -> unit -> Github_t.rate Monad.t
+    (** [for_search ()] is the current token's rate limit information
+        for the {!const:Search} rate limit regime. *)
+
+  end
+
+  (** The [User] module provides basic user information query functions. *)
+  module User : sig
+    val current_info : ?token:Token.t -> unit -> Github_t.user_info Monad.t
+    (** [current_info ()] is the user information linked to the
+        current token. *)
+
+    val info :
+      ?token:Token.t -> user:string -> unit -> Github_t.user_info Monad.t
+    (** [info ~user ()] is the user information for user [user]. *)
+
+    val repositories :
+      ?token:Token.t ->
+      user:string -> unit -> Github_t.repository Stream.t
+    (** [repositories ~user ()] is a stream of user [user]'s repositories. *)
+  end
+
+  (** The [Organization] module exposes the functionality of the
+      GitHub {{:https://developer.github.com/v3/orgs/}organization
+      API}. *)
+  module Organization : sig
+    val teams :
+      ?token:Token.t ->
+      org:string ->
+      unit -> Github_t.team Stream.t
+    (** [teams ~org ()] is a stream of teams belonging to the
+        organization [org]. *)
+  end
+
+  (** The [Team] module contains functionality relating to GitHub's
+      {{:https://developer.github.com/v3/orgs/teams/}team API}. *)
+  module Team : sig
+    val info :
+      ?token:Token.t ->
+      num:int ->
+      unit -> Github_t.team_info Monad.t
+    (** [info ~num ()] is a description of team [num]. *)
+
+    val repositories :
+      ?token:Token.t ->
+      num:int ->
+      unit -> Github_t.repository Stream.t
+    (** [repositories ~num ()] is a stream of repositories belonging
+        to team [num]. *)
+  end
+
+  (** The [Event] module exposes GitHub's
+      {{:https://developer.github.com/v3/activity/events/}event API}
+      functionality. *)
+  module Event : sig
+    val for_repo :
+      ?token:Token.t ->
+      user:string ->
+      repo:string -> unit -> Github_t.event Stream.t
+    (** [for_repo ~user ~repo ()] is a stream of all events for
+        [user]/[repo]. *)
+
+    val for_repo_issues :
+      ?token:Token.t ->
+      user:string ->
+      repo:string -> unit -> Github_t.event Stream.t
+    (** [for_repo_issues ~user ~repo ()] is a stream of all issue
+        events for [user]/[repo]. *)
+
+    val public_events : unit -> Github_t.event Stream.t
+    (** [public_events ()] is a stream of all public events on GitHub. *)
+
+    val for_network :
+      ?token:Token.t ->
+      user:string ->
+      repo:string -> unit -> Github_t.event Stream.t
+    (** [for_network ~user ~repo ()] is a stream of all events for the
+        fork network containing [user]/[repo]. *)
+
+    val for_org :
+      ?token:Token.t ->
+      org:string -> unit -> Github_t.event Stream.t
+    (** [for_org ~org ()] is a stream of all events for the
+        organization [org]. *)
+
+    val for_org_member :
+      ?token:Token.t ->
+      user:string ->
+      org:string -> unit -> Github_t.event Stream.t
+    (** [for_org_member ~user ~org ()] is a stream of [org] events
+        which [user] receives. *)
+
+    val received_by_user :
+      ?token:Token.t ->
+      user:string -> unit -> Github_t.event Stream.t
+    (** [received_by_user ~user ()] is a stream of all of the events
+        [user] receives. If the current token is for [user], public
+        and private events will be returned. If not, only public
+        events will be returned. *)
+
+    val public_received_by_user :
+      ?token:Token.t ->
+      user:string -> unit -> Github_t.event Stream.t
+    (** [public_received_by_user ~user ()] is a stream of the public
+        events [user] receives. *)
+
+    val for_user :
+      ?token:Token.t ->
+      user:string -> unit -> Github_t.event Stream.t
+    (** [for_user ~user ()] is a stream of the events generated by
+        [user]. If the current token is for [user], public and private
+        events will be returned. If not, only public events will be
+        returned. *)
+
+    val for_user_public :
+      ?token:Token.t ->
+      user:string -> unit -> Github_t.event Stream.t
+    (** [for_user_public ~user ()] is a stream of the public events
+        generated by [user]. *)
+  end
+
+  (** The [Repo] module offers the functionality of GitHub's
+      {{:https://developer.github.com/v3/repos/}repository API}. *)
+  module Repo : sig
+    val info :
+      ?token:Token.t ->
+      user:string -> repo:string ->
+      unit -> Github_t.repository Monad.t
+    (** [info ~user ~repo ()] is a description of repository [user]/[repo]. *)
+
+    val fork :
+      ?token:Token.t ->
+      ?organization:string ->
+      user:string -> repo:string ->
+      unit -> Github_t.repository Monad.t
+    (** [fork ?organization ~user ~repo ()] is a newly forked
+        repository from [user]/[repo] to the current token's user or
+        [organization] if it's provided. *)
+
+    val forks :
+      ?token:Token.t ->
+      ?sort:Filter.forks_sort ->
+      user:string -> repo:string ->
+      unit -> Github_t.repository Stream.t
+    (** [forks ?sort ~user ~repo ()] is a stream of all repositories
+        forked from [user]/[repo] sorted by [?sort] (default [`Newest]). *)
+
+    val get_tag :
+      ?token:Token.t ->
+      user:string -> repo:string -> sha:string ->
+      unit -> Github_t.tag Monad.t
+    (** [get_tag ~user ~repo ~sha ()] is the annotated tag object with
+        SHA [sha] in [user]/[repo]. *)
+
+    val tags :
+      ?token:Token.t ->
+      user:string -> repo:string ->
+      unit -> Github_t.repo_tag Stream.t
+    (** [tags ~user ~repo ()] is a stream of all tags in repo [user]/[repo]. *)
+
+    val get_tags_and_times :
+      ?token:Token.t ->
+      user:string -> repo:string ->
+      unit -> (string * string) Stream.t
+    (** [get_tags_and_times ~user ~repo ()] is a stream of pairs of
+        tag names and creation times for all lightweight and annotated
+        tags in [user]/[repo]. *)
+
+    val branches :
+      ?token:Token.t ->
+      user:string -> repo:string ->
+      unit -> Github_t.repo_branch Stream.t
+    (** [branches ~user ~repo ()] is a stream of all branches in repo
+        [user]/[repo]. *)
+
+    val refs :
+      ?token:Token.t ->
+      ?ty:string -> user:string -> repo:string ->
+      unit -> Github_t.git_ref Stream.t
+    (** [refs ?ty ~user ~repo ()] is a stream of all
+        {{:https://developer.github.com/v3/git/refs/}git references}
+        with prefix [?ty] for repo [user]/[repo]. *)
+
+    val commit :
+      ?token:Token.t ->
+      user:string -> repo:string -> sha:string ->
+      unit -> Github_t.commit Monad.t
+    (** [commit ~user ~repo ~sha ()] is commit [sha] in [user]/[repo]. *)
+  end
+
+  (** The [Hook] module provides access to GitHub's
+      {{:https://developer.github.com/v3/repos/hooks/}webhooks API}
+      which lets you manage a repository's post-receive hooks. *)
+  module Hook : sig
+    val for_repo :
+      ?token:Token.t ->
+      user:string ->
+      repo:string -> unit -> Github_t.hook Stream.t
+    (** [for_repo ~user ~repo ()] is a stream of hooks for repo [user]/[repo]. *)
+
+    val get :
+      ?token:Token.t ->
+      user:string ->
+      repo:string -> num:int -> unit -> Github_t.hook Monad.t
+    (** [get ~user ~repo ~num ()] is hook [num] for repo [user]/[repo]. *)
+
+    val create :
+      ?token:Token.t ->
+      user:string ->
+      repo:string ->
+      hook:Github_t.new_hook -> unit -> Github_t.hook Monad.t
+    (** [create ~user ~repo ~hook ()] is a newly created post-receive
+        hook for repo [user]/[repo] as described by [hook]. *)
+
+    val update :
+      ?token:Token.t ->
+      user:string ->
+      repo:string ->
+      num:int ->
+      hook:Github_t.update_hook -> unit -> Github_t.hook Monad.t
+    (** [update ~user ~repo ~num ~hook ()] is the updated hook [num]
+        in [user]/[repo] as described by [hook]. *)
+
+    val delete :
+      ?token:Token.t ->
+      user:string ->
+      repo:string -> num:int -> unit -> unit Monad.t
+    (** [delete ~user ~repo ~num ()] is activated after hook [num] in
+        repo [user]/[repo] has been deleted. *)
+
+    val test :
+      ?token:Token.t ->
+      user:string ->
+      repo:string -> num:int -> unit -> unit Monad.t
+    (** [test ~user ~repo ~num ()] is activated after a [push] event
+        for the lastest push to [user]/[repo] has been synthesized
+        and sent to hook [num]. *)
+  end
+
+  (** The [Status] module provides the functionality of GitHub's
+      {{:https://developer.github.com/v3/repos/statuses/}status API}. *)
+  module Status : sig
+    val for_ref :
+      ?token:Token.t ->
+      user:string ->
+      repo:string ->
+      git_ref:string -> unit -> Github_t.status Stream.t
+    (** [for_sha ~user ~repo ~git_ref ()] is a stream of statuses
+        attached to the SHA, branch name, or tag name [git_ref] in
+        repo [user]/[repo]. *)
+
+    val create :
+      ?token:Token.t ->
+      user:string ->
+      repo:string ->
+      sha:string ->
+      status:Github_t.new_status ->
+      unit -> Github_t.status Monad.t
+    (** [create ~user ~repo ~sha ~status ()] is a newly created status
+        on SHA [sha] in repo [user]/[repo] as described by [status]. *)
   end
 
   (** The [Pull] module contains functionality relating to GitHub's
@@ -648,6 +859,58 @@ module type Github = sig
     (** [merge ~user ~repo ~num ?merge_commit_message ()] is the merge
         of pull request [user]/[repo]#[num] with optional commit
         message [?merge_commit_message]. *)
+  end
+
+  (** The [Issue] module gives users access to GitHub's
+      {{:https://developer.github.com/v3/issues/}issue API}. *)
+  module Issue: sig
+    val for_repo :
+      ?token:Token.t -> ?creator:string -> ?mentioned:string ->
+      ?assignee:Filter.user ->
+      ?labels:string list -> ?milestone:Filter.milestone ->
+      ?state:Filter.state ->
+      ?sort:Filter.issue_sort -> ?direction:Filter.direction ->
+      user:string -> repo:string -> unit -> Github_t.issue Stream.t
+    (** [for_repo ?creator ?mentioned ?assignee ?labels ?milestone
+        ?state ?sort ?direction ~user ~repo ()] is a stream of issues
+        in repo [user]/[repo] which were created by user [?creator],
+        mention user [?mentioned], are assigned to user [?assignee],
+        have labels [?labels], are included in milestone [?milestone],
+        and are in state [?state]. The stream is sorted by [?sort]
+        (default [`Created]) and ordered by [?direction] (default
+        [`Desc]). *)
+
+    val create :
+      ?token:Token.t -> user:string -> repo:string ->
+      issue:Github_t.new_issue -> unit -> Github_t.issue Monad.t
+    (** [create ~user ~repo ~issue ()] is a newly created issue
+        described by [issue] in repo [user]/[repo]. *)
+
+    val update :
+      ?token:Token.t -> user:string -> repo:string ->
+      num:int -> issue:Github_t.new_issue ->
+      unit -> Github_t.issue Monad.t
+    (** [update ~user ~repo ~num ~issue ()] is the updated issue [num]
+        in [user]/[repo] as described by [issue]. *)
+
+    val comments :
+      ?token:Token.t -> user:string -> repo:string ->
+      num:int -> unit -> Github_t.issue_comment Stream.t
+    (** [comments ~user ~repo ~num ()] is a stream of issue comments
+        for [user]/[repo]#[num]. *)
+
+    val create_comment :
+      ?token:Token.t -> user:string -> repo:string ->
+      num:int -> body:string -> unit -> Github_t.issue_comment Monad.t
+    (** [create_comment ~user ~repo ~num ~body ()] is a newly created
+        issue comment on [user]/[repo]#[num] with content [body]. *)
+
+    val is_issue : Github_t.issue -> bool
+    (** [is_issue issue] is true if [issue] is an actual issue and not
+        a pull request. *)
+
+    val is_pull : Github_t.issue -> bool
+    (** [is_pull issue] is true if [issue] is a pull request. *)
   end
 
   (** The [Milestone] module exposes GitHub's
@@ -779,269 +1042,6 @@ module type Github = sig
       user:string -> repo:string -> num:int -> unit -> unit Monad.t
     (** [delete ~user ~repo ~num ()] is activated after deploy key
         [num] in repo [user]/[repo] has been deleted. *)
-  end
-
-  (** The [Issue] module gives users access to GitHub's
-      {{:https://developer.github.com/v3/issues/}issue API}. *)
-  module Issue: sig
-    val for_repo :
-      ?token:Token.t -> ?creator:string -> ?mentioned:string ->
-      ?assignee:Filter.user ->
-      ?labels:string list -> ?milestone:Filter.milestone ->
-      ?state:Filter.state ->
-      ?sort:Filter.issue_sort -> ?direction:Filter.direction ->
-      user:string -> repo:string -> unit -> Github_t.issue Stream.t
-    (** [for_repo ?creator ?mentioned ?assignee ?labels ?milestone
-        ?state ?sort ?direction ~user ~repo ()] is a stream of issues
-        in repo [user]/[repo] which were created by user [?creator],
-        mention user [?mentioned], are assigned to user [?assignee],
-        have labels [?labels], are included in milestone [?milestone],
-        and are in state [?state]. The stream is sorted by [?sort]
-        (default [`Created]) and ordered by [?direction] (default
-        [`Desc]). *)
-
-    val create :
-      ?token:Token.t -> user:string -> repo:string ->
-      issue:Github_t.new_issue -> unit -> Github_t.issue Monad.t
-    (** [create ~user ~repo ~issue ()] is a newly created issue
-        described by [issue] in repo [user]/[repo]. *)
-
-    val update :
-      ?token:Token.t -> user:string -> repo:string ->
-      num:int -> issue:Github_t.new_issue ->
-      unit -> Github_t.issue Monad.t
-    (** [update ~user ~repo ~num ~issue ()] is the updated issue [num]
-        in [user]/[repo] as described by [issue]. *)
-
-    val comments :
-      ?token:Token.t -> user:string -> repo:string ->
-      num:int -> unit -> Github_t.issue_comment Stream.t
-    (** [comments ~user ~repo ~num ()] is a stream of issue comments
-        for [user]/[repo]#[num]. *)
-
-    val create_comment :
-      ?token:Token.t -> user:string -> repo:string ->
-      num:int -> body:string -> unit -> Github_t.issue_comment Monad.t
-    (** [create_comment ~user ~repo ~num ~body ()] is a newly created
-        issue comment on [user]/[repo]#[num] with content [body]. *)
-
-    val is_issue : Github_t.issue -> bool
-    (** [is_issue issue] is true if [issue] is an actual issue and not
-        a pull request. *)
-
-    val is_pull : Github_t.issue -> bool
-    (** [is_pull issue] is true if [issue] is a pull request. *)
-  end
-
-  (** The [Status] module provides the functionality of GitHub's
-      {{:https://developer.github.com/v3/repos/statuses/}status API}. *)
-  module Status : sig
-    val for_ref :
-      ?token:Token.t ->
-      user:string ->
-      repo:string ->
-      git_ref:string -> unit -> Github_t.status Stream.t
-    (** [for_sha ~user ~repo ~git_ref ()] is a stream of statuses
-        attached to the SHA, branch name, or tag name [git_ref] in
-        repo [user]/[repo]. *)
-
-    val create :
-      ?token:Token.t ->
-      user:string ->
-      repo:string ->
-      sha:string ->
-      status:Github_t.new_status ->
-      unit -> Github_t.status Monad.t
-    (** [create ~user ~repo ~sha ~status ()] is a newly created status
-        on SHA [sha] in repo [user]/[repo] as described by [status]. *)
-  end
-
-  (** The [Hook] module provides access to GitHub's
-      {{:https://developer.github.com/v3/repos/hooks/}webhooks API}
-      which lets you manage a repository's post-receive hooks. *)
-  module Hook : sig
-    val for_repo :
-      ?token:Token.t ->
-      user:string ->
-      repo:string -> unit -> Github_t.hook Stream.t
-    (** [for_repo ~user ~repo ()] is a stream of hooks for repo [user]/[repo]. *)
-
-    val get :
-      ?token:Token.t ->
-      user:string ->
-      repo:string -> num:int -> unit -> Github_t.hook Monad.t
-    (** [get ~user ~repo ~num ()] is hook [num] for repo [user]/[repo]. *)
-
-    val create :
-      ?token:Token.t ->
-      user:string ->
-      repo:string ->
-      hook:Github_t.new_hook -> unit -> Github_t.hook Monad.t
-    (** [create ~user ~repo ~hook ()] is a newly created post-receive
-        hook for repo [user]/[repo] as described by [hook]. *)
-
-    val update :
-      ?token:Token.t ->
-      user:string ->
-      repo:string ->
-      num:int ->
-      hook:Github_t.update_hook -> unit -> Github_t.hook Monad.t
-    (** [update ~user ~repo ~num ~hook ()] is the updated hook [num]
-        in [user]/[repo] as described by [hook]. *)
-
-    val delete :
-      ?token:Token.t ->
-      user:string ->
-      repo:string -> num:int -> unit -> unit Monad.t
-    (** [delete ~user ~repo ~num ()] is activated after hook [num] in
-        repo [user]/[repo] has been deleted. *)
-
-    val test :
-      ?token:Token.t ->
-      user:string ->
-      repo:string -> num:int -> unit -> unit Monad.t
-    (** [test ~user ~repo ~num ()] is activated after a [push] event
-        for the lastest push to [user]/[repo] has been synthesized
-        and sent to hook [num]. *)
-  end
-
-  (** The [Repo] module offers the functionality of GitHub's
-      {{:https://developer.github.com/v3/repos/}repository API}. *)
-  module Repo : sig
-    val info :
-      ?token:Token.t ->
-      user:string -> repo:string ->
-      unit -> Github_t.repository Monad.t
-    (** [info ~user ~repo ()] is a description of repository [user]/[repo]. *)
-
-    val fork :
-      ?token:Token.t ->
-      ?organization:string ->
-      user:string -> repo:string ->
-      unit -> Github_t.repository Monad.t
-    (** [fork ?organization ~user ~repo ()] is a newly forked
-        repository from [user]/[repo] to the current token's user or
-        [organization] if it's provided. *)
-
-    val forks :
-      ?token:Token.t ->
-      ?sort:Filter.forks_sort ->
-      user:string -> repo:string ->
-      unit -> Github_t.repository Stream.t
-    (** [forks ?sort ~user ~repo ()] is a stream of all repositories
-        forked from [user]/[repo] sorted by [?sort] (default [`Newest]). *)
-
-    val get_tag :
-      ?token:Token.t ->
-      user:string -> repo:string -> sha:string ->
-      unit -> Github_t.tag Monad.t
-    (** [get_tag ~user ~repo ~sha ()] is the annotated tag object with
-        SHA [sha] in [user]/[repo]. *)
-
-    val tags :
-      ?token:Token.t ->
-      user:string -> repo:string ->
-      unit -> Github_t.repo_tag Stream.t
-    (** [tags ~user ~repo ()] is a stream of all tags in repo [user]/[repo]. *)
-
-    val get_tags_and_times :
-      ?token:Token.t ->
-      user:string -> repo:string ->
-      unit -> (string * string) Stream.t
-    (** [get_tags_and_times ~user ~repo ()] is a stream of pairs of
-        tag names and creation times for all lightweight and annotated
-        tags in [user]/[repo]. *)
-
-    val branches :
-      ?token:Token.t ->
-      user:string -> repo:string ->
-      unit -> Github_t.repo_branch Stream.t
-    (** [branches ~user ~repo ()] is a stream of all branches in repo
-        [user]/[repo]. *)
-
-    val refs :
-      ?token:Token.t ->
-      ?ty:string -> user:string -> repo:string ->
-      unit -> Github_t.git_ref Stream.t
-    (** [refs ?ty ~user ~repo ()] is a stream of all
-        {{:https://developer.github.com/v3/git/refs/}git references}
-        with prefix [?ty] for repo [user]/[repo]. *)
-
-    val commit :
-      ?token:Token.t ->
-      user:string -> repo:string -> sha:string ->
-      unit -> Github_t.commit Monad.t
-    (** [commit ~user ~repo ~sha ()] is commit [sha] in [user]/[repo]. *)
-  end
-
-  (** The [Event] module exposes GitHub's
-      {{:https://developer.github.com/v3/activity/events/}Event API}
-      functionality. *)
-  module Event : sig
-    val for_repo :
-      ?token:Token.t ->
-      user:string ->
-      repo:string -> unit -> Github_t.event Stream.t
-    (** [for_repo ~user ~repo ()] is a stream of all events for
-        [user]/[repo]. *)
-
-    val for_repo_issues :
-      ?token:Token.t ->
-      user:string ->
-      repo:string -> unit -> Github_t.event Stream.t
-    (** [for_repo_issues ~user ~repo ()] is a stream of all issue
-        events for [user]/[repo]. *)
-
-    val public_events : unit -> Github_t.event Stream.t
-    (** [public_events ()] is a stream of all public events on GitHub. *)
-
-    val for_network :
-      ?token:Token.t ->
-      user:string ->
-      repo:string -> unit -> Github_t.event Stream.t
-    (** [for_network ~user ~repo ()] is a stream of all events for the
-        fork network containing [user]/[repo]. *)
-
-    val for_org :
-      ?token:Token.t ->
-      org:string -> unit -> Github_t.event Stream.t
-    (** [for_org ~org ()] is a stream of all events for the
-        organization [org]. *)
-
-    val for_org_member :
-      ?token:Token.t ->
-      user:string ->
-      org:string -> unit -> Github_t.event Stream.t
-    (** [for_org_member ~user ~org ()] is a stream of [org] events
-        which [user] receives. *)
-
-    val received_by_user :
-      ?token:Token.t ->
-      user:string -> unit -> Github_t.event Stream.t
-    (** [received_by_user ~user ()] is a stream of all of the events
-        [user] receives. If the current token is for [user], public
-        and private events will be returned. If not, only public
-        events will be returned. *)
-
-    val public_received_by_user :
-      ?token:Token.t ->
-      user:string -> unit -> Github_t.event Stream.t
-    (** [public_received_by_user ~user ()] is a stream of the public
-        events [user] receives. *)
-
-    val for_user :
-      ?token:Token.t ->
-      user:string -> unit -> Github_t.event Stream.t
-    (** [for_user ~user ()] is a stream of the events generated by
-        [user]. If the current token is for [user], public and private
-        events will be returned. If not, only public events will be
-        returned. *)
-
-    val for_user_public :
-      ?token:Token.t ->
-      user:string -> unit -> Github_t.event Stream.t
-    (** [for_user_public ~user ()] is a stream of the public events
-        generated by [user]. *)
   end
 
   (** The [Gist] module provides access to the GitHub

@@ -863,6 +863,26 @@ module Make(CL : Cohttp_lwt.Client) = struct
 
   end
 
+  module Organization = struct
+    open Lwt
+
+    let teams ?token ~org () =
+      let uri = URI.org_teams ~org in
+      API.get_stream ?token ~uri (fun b -> return (teams_of_string b))
+  end
+
+  module Team = struct
+    open Lwt
+
+    let info ?token ~num () =
+      let uri = URI.team ~num in
+      API.get ?token ~uri (fun b -> return (team_info_of_string b))
+
+    let repositories ?token ~num () =
+      let uri = URI.team_repos ~num in
+      API.get_stream ?token ~uri (fun b -> return (repositories_of_string b))
+  end
+
   module Filter = struct
     type state = [ `All | `Open | `Closed ]
     let string_of_state (s:state) =
@@ -1312,24 +1332,6 @@ module Make(CL : Cohttp_lwt.Client) = struct
     let tags ?token ~user ~repo () =
       let uri = URI.repo_tags ~user ~repo in
       API.get_stream ?token ~uri (fun b -> return (repo_tags_of_string b))
-
-    let search ?token ?sort ?(direction=`Desc) ~qualifiers ~keywords () =
-      let qs = List.rev_map Filter.string_of_qualifier qualifiers in
-      let q = String.concat " " (List.rev_append qs keywords) in
-      let sort = match sort with
-        | Some sort -> Some (Filter.string_of_repo_sort sort)
-        | None -> None
-      in
-      let direction = Filter.string_of_direction direction in
-      let uri = URI.repo_search in
-      let params = [
-        "q", q;
-        "order",direction;
-        "per_page",string_of_int 100;
-      ]@(match sort with None -> [] | Some s -> ["sort",s]) in
-      API.get_stream ~rate:Search ?token ~params ~uri (fun b ->
-        return [repository_search_of_string b]
-      )
   end
 
   module Event = struct
@@ -1491,24 +1493,26 @@ module Make(CL : Cohttp_lwt.Client) = struct
       API.delete ?token ~uri ~expected_code:`No_content (fun b -> return ())
   end
 
-  module Organization = struct
+  module Search = struct
     open Lwt
 
-    let teams ?token ~org () =
-      let uri = URI.org_teams ~org in
-      API.get_stream ?token ~uri (fun b -> return (teams_of_string b))
-  end
-
-  module Team = struct
-    open Lwt
-
-    let info ?token ~num () =
-      let uri = URI.team ~num in
-      API.get ?token ~uri (fun b -> return (team_info_of_string b))
-
-    let repositories ?token ~num () =
-      let uri = URI.team_repos ~num in
-      API.get_stream ?token ~uri (fun b -> return (repositories_of_string b))
+    let repos ?token ?sort ?(direction=`Desc) ~qualifiers ~keywords () =
+      let qs = List.rev_map Filter.string_of_qualifier qualifiers in
+      let q = String.concat " " (List.rev_append qs keywords) in
+      let sort = match sort with
+        | Some sort -> Some (Filter.string_of_repo_sort sort)
+        | None -> None
+      in
+      let direction = Filter.string_of_direction direction in
+      let uri = URI.repo_search in
+      let params = [
+        "q", q;
+        "order",direction;
+        "per_page",string_of_int 100;
+      ]@(match sort with None -> [] | Some s -> ["sort",s]) in
+      API.get_stream ~rate:Search ?token ~params ~uri (fun b ->
+        return [repository_search_of_string b]
+      )
   end
 end 
 

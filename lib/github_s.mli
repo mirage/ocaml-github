@@ -116,7 +116,7 @@ module type Github = sig
 
   end
 
-  type rate = Core | Search
+  type rate = Core | Search (**)
   (** [rate] is a type used to indicate which
       {{:https://developer.github.com/v3/#rate-limiting}rate-limiting
       regime} is to be used for query quota accounting. [rate] is used
@@ -124,7 +124,7 @@ module type Github = sig
 
   type 'a authorization =
     | Result of 'a
-    | Two_factor of string (** *)
+    | Two_factor of string (**)
   (** Some results may require 2-factor authentication. [Result]
       values do not. [Two_factor] values contain the mode by which a
       2FA code will be delivered. This code is required as [?otp] to
@@ -201,9 +201,9 @@ module type Github = sig
       Github_t.auth authorization Monad.t
     (** [create ?otp ~user ~pass ()] is a new authorization with the
         provided fields. When a user has enabled two-factor
-        authentication, the return value will be a {!Two_factor}
+        authentication, the return value will be a {!const:Two_factor}
         constructor with the one-time password delivery
-        mode. Including a valid [?otp] will yield a {!Result} return
+        mode. Including a valid [?otp] will yield a {!const:Result} return
         value. *)
 
     val get_all : ?otp:string -> user:string -> pass:string -> unit ->
@@ -361,18 +361,18 @@ module type Github = sig
 
     val get_rate : ?rate:rate -> ?token:Token.t -> unit -> Github_t.rate Monad.t
     (** [get_rate ?rate ()] is the, possibly cached, rate limit
-        information for the rate limit regime [?rate] (default {!Core}). *)
+        information for the rate limit regime [?rate] (default {!const:Core}). *)
 
     val get_rate_limit : ?token:Token.t -> unit -> int Monad.t
-    (** [get_rate_limit ()] is the, possibly cached, {!Core} total request
+    (** [get_rate_limit ()] is the, possibly cached, {!const:Core} total request
         quota for the current token. *)
 
     val get_rate_remaining : ?token:Token.t -> unit -> int Monad.t
-    (** [get_rate_remaining ()] is the, possibly cached, {!Core} remaining
+    (** [get_rate_remaining ()] is the, possibly cached, {!const:Core} remaining
         request quota for the current token. *)
 
     val get_rate_reset : ?token:Token.t -> unit -> int Monad.t
-    (** [get_rate_reset ()] is the, possibly cached, {!Core} UNIX
+    (** [get_rate_reset ()] is the, possibly cached, {!const:Core} UNIX
         epoch expiry time (s) when the remaining request quota will be
         reset to the total request quota for the current token. *)
 
@@ -447,11 +447,11 @@ module type Github = sig
 
     val for_core : ?token:Token.t -> unit -> Github_t.rate Monad.t
     (** [for_core ()] is the current token's rate limit information
-        for the {!Core} rate limit regime. *)
+        for the {!const:Core} rate limit regime. *)
 
     val for_search : ?token:Token.t -> unit -> Github_t.rate Monad.t
     (** [for_search ()] is the current token's rate limit information
-        for the {!Search} rate limit regime. *)
+        for the {!const:Search} rate limit regime. *)
 
   end
 
@@ -469,6 +469,35 @@ module type Github = sig
       ?token:Token.t ->
       user:string -> unit -> Github_t.repository Stream.t
     (** [repositories ~user ()] is a stream of user [user]'s repositories. *)
+  end
+
+  (** The [Organization] module exposes the functionality of the
+      GitHub {{:https://developer.github.com/v3/orgs/}organization
+      API}. *)
+  module Organization : sig
+    val teams :
+      ?token:Token.t ->
+      org:string ->
+      unit -> Github_t.team Stream.t
+    (** [teams ~org ()] is a stream of teams belonging to the
+        organization [org]. *)
+  end
+
+  (** The [Team] module contains functionality relating to GitHub's
+      {{:https://developer.github.com/v3/orgs/teams/}team API}. *)
+  module Team : sig
+    val info :
+      ?token:Token.t ->
+      num:int ->
+      unit -> Github_t.team_info Monad.t
+    (** [info ~num ()] is a description of team [num]. *)
+
+    val repositories :
+      ?token:Token.t ->
+      num:int ->
+      unit -> Github_t.repository Stream.t
+    (** [repositories ~num ()] is a stream of repositories belonging
+        to team [num]. *)
   end
 
   (** The [Filter] module contains types used by search and
@@ -943,19 +972,6 @@ module type Github = sig
       user:string -> repo:string -> sha:string ->
       unit -> Github_t.commit Monad.t
     (** [commit ~user ~repo ~sha ()] is commit [sha] in [user]/[repo]. *)
-
-    val search :
-      ?token:Token.t ->
-      ?sort:Filter.repo_sort ->
-      ?direction:Filter.direction ->
-      qualifiers:Filter.qualifier list ->
-      keywords:string list ->
-      unit -> Github_t.repository_search Stream.t
-    (** [search ?sort ?direction ~qualifiers ~keywords ()] is a
-        stream of repository search results for [keywords] and
-        matching [qualifiers] predicates. Results are sorted by
-        [?sort] (default best match) and ordered by [?direction]
-        (default [`Desc]). *)
   end
 
   (** The [Event] module exposes GitHub's
@@ -1112,33 +1128,21 @@ module type Github = sig
     (** [delete ~num ()] is activated after gist [num] has been deleted. *)
   end
 
-  (** The [Organization] module exposes the functionality of the
-      GitHub {{:https://developer.github.com/v3/orgs/}organization
-      API}. *)
-  module Organization : sig
-    val teams :
+  (** The [Search] module exposes GitHub's
+      {{:https://developer.github.com/v3/search/}search interfaces}. *)
+  module Search : sig
+    val repos :
       ?token:Token.t ->
-      org:string ->
-      unit -> Github_t.team Stream.t
-    (** [teams ~org ()] is a stream of teams belonging to the
-        organization [org]. *)
-  end
-
-  (** The [Team] module contains functionality relating to GitHub's
-      {{:https://developer.github.com/v3/orgs/teams/}team API}. *)
-  module Team : sig
-    val info :
-      ?token:Token.t ->
-      num:int ->
-      unit -> Github_t.team_info Monad.t
-    (** [info ~num ()] is a description of team [num]. *)
-
-    val repositories :
-      ?token:Token.t ->
-      num:int ->
-      unit -> Github_t.repository Stream.t
-    (** [repositories ~num ()] is a stream of repositories belonging
-        to team [num]. *)
+      ?sort:Filter.repo_sort ->
+      ?direction:Filter.direction ->
+      qualifiers:Filter.qualifier list ->
+      keywords:string list ->
+      unit -> Github_t.repository_search Stream.t
+    (** [repos ?sort ?direction ~qualifiers ~keywords ()] is a
+        stream of repository search results for [keywords] and
+        matching [qualifiers] predicates. Results are sorted by
+        [?sort] (default best match) and ordered by [?direction]
+        (default [`Desc]). *)
   end
 
   (** {4 Utility Modules} *)

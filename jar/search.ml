@@ -49,7 +49,7 @@ let search token ?language ?sort keywords =
     | Some lang -> (`Language lang)::basic_qs
   in
   Github.(Monad.(run (
-    let results = Repo.search ~token ?sort ~qualifiers ~keywords () in
+    let results = Github.Search.repos ~token ?sort ~qualifiers ~keywords () in
     Stream.next results (* TODO: option for count? *)
     >>= function
     | Some ({ T.repository_search_items; repository_search_total_count }, _) ->

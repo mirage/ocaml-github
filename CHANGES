@@ -133,6 +133,7 @@
 * Add Scope.max which contains a minimal set of scopes for maximum privilege
 * Add Repo.fork to create fork of a repository to the present user or given org
 * Add Repo.forks to list the forks of a given repository
+* Add Search module to access GitHub's search API
 * Filter.forks_sort type added
 * Add Event module with a variety of event sources
 * A new jar command, git-list-events, has been added to print events for a repo

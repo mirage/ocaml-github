@@ -116,7 +116,9 @@ module type Github = sig
 
     val poll : 'a t -> 'a t option Monad.t
     (** [poll stream] is a stream with items newer than [stream]'s
-        items. *)
+        items and will not resolve until any timeouts indicated by
+        GitHub have elapsed. By default, GitHub throttles polling
+        requests to once per minute per URL endpoint. *)
   end
 
   type rate = Core | Search (**)

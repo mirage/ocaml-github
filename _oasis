@@ -124,6 +124,14 @@ Executable "git-search"
   Install:            true
   BuildDepends:       cohttp.lwt, github.unix, cmdliner
 
+Executable listen_events
+  Path:               jar
+  MainIs:             listen_events.ml
+  Custom:             true
+  CompiledObject:     best
+  Install:            false
+  BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, cmdliner
+
 Executable "git-gist"
   Path:               gist
   MainIs:             gist.ml

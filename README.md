@@ -85,7 +85,7 @@ Your Github application can how use it via the `Github_cookie_jar` module:
 
 The [Releases](https://developer.github.com/v3/repos/releases/) API in
 GitHub cannot itself be synched via Git, so this command-line tool lets
-you specify a src user/repo and destination user/repo pair, and copies
+you specify a source user/repo and destination user/repo pair, and copies
 all the releases from one to the other.
 
 The `git-sync-releases` binary can copy all the releases from one
@@ -170,7 +170,7 @@ $ git upload-release mirage ocaml-uri v1.4.0 release.tar.gz
  * [Edit an issue comment](https://developer.github.com/v3/issues/comments/#edit-a-comment)
  * [Delete an issue comment](https://developer.github.com/v3/issues/comments/#delete-a-comment)
  * [Issue events](https://developer.github.com/v3/issues/events/#list-events-for-an-issue)
- * [All issue event types](https://developer.github.com/v3/issues/events/)
+ * [Several issue event type](https://developer.github.com/v3/issues/events/)
  * [Labels](https://developer.github.com/v3/issues/labels/)
 
 ### [Miscellaneous](https://developer.github.com/v3/misc/)

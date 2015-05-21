@@ -533,7 +533,7 @@ module Make(CL : Cohttp_lwt.Client) = struct
         in
         let rate_limit = int_of_string limit_s in
         let rate_remaining = int_of_string remaining_s in
-        let rate_reset = int_of_string reset_s in
+        let rate_reset = float_of_string reset_s in
         let new_rate =
           Some { Github_t.rate_limit; rate_remaining; rate_reset }
         in

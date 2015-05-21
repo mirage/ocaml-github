@@ -12,7 +12,7 @@ type message = {
 type rate = {
   limit: int;
   remaining: int;
-  reset: int;
+  reset: float;
 } <ocaml field_prefix="rate_">
 
 type rate_resources = {

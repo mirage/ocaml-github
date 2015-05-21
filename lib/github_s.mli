@@ -371,7 +371,7 @@ module type Github = sig
     (** [get_rate_remaining ()] is the, possibly cached, {!const:Core} remaining
         request quota for the current token. *)
 
-    val get_rate_reset : ?token:Token.t -> unit -> int Monad.t
+    val get_rate_reset : ?token:Token.t -> unit -> float Monad.t
     (** [get_rate_reset ()] is the, possibly cached, {!const:Core} UNIX
         epoch expiry time (s) when the remaining request quota will be
         reset to the total request quota for the current token. *)

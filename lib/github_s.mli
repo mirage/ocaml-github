@@ -114,6 +114,9 @@ module type Github = sig
         generically on streams. [of_list] allows you to use list
         values with those interfaces. *)
 
+    val poll : 'a t -> 'a t option Monad.t
+    (** [poll stream] is a stream with items newer than [stream]'s
+        items. *)
   end
 
   type rate = Core | Search (**)

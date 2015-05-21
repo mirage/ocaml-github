@@ -22,9 +22,9 @@
    This library offers thin but natural bindings to GitHub's developer API.
 *)
 
-(** This module type is returned from the {!Github_core.Make} functor
-    which may be applied to Cohttp_lwt client libraries in order to
-    run on Unix, in a browser in Javascript, or as a MirageOS
+(** Modules of this type are returned from the {!Github_core.Make}
+    functor which may be applied to Cohttp_lwt client libraries in
+    order to run on Unix, in a browser in Javascript, or as a MirageOS
     unikernel. *)
 module type Github = sig
 
@@ -749,14 +749,14 @@ module type Github = sig
       ?token:Token.t ->
       user:string ->
       repo:string -> num:int -> unit -> unit Monad.t
-    (** [delete ~user ~repo ~num ()] is activated after hook [num] in
+    (** [delete ~user ~repo ~num ()] activates after hook [num] in
         repo [user]/[repo] has been deleted. *)
 
     val test :
       ?token:Token.t ->
       user:string ->
       repo:string -> num:int -> unit -> unit Monad.t
-    (** [test ~user ~repo ~num ()] is activated after a [push] event
+    (** [test ~user ~repo ~num ()] activates after a [push] event
         for the lastest push to [user]/[repo] has been synthesized
         and sent to hook [num]. *)
   end
@@ -944,7 +944,7 @@ module type Github = sig
     val delete:
       ?token:Token.t ->
       user:string -> repo:string -> num:int -> unit -> unit Monad.t
-    (** [delete ~user ~repo ~num ()] is activated after milestone
+    (** [delete ~user ~repo ~num ()] activates after milestone
         [num] in repo [user]/[repo] has been deleted. *)
 
     val update :
@@ -989,7 +989,7 @@ module type Github = sig
     val delete:
       ?token:Token.t ->
       user:string -> repo:string -> num:int -> unit -> unit Monad.t
-    (** [delete ~user ~repo ~num ()] is activated after release [num]
+    (** [delete ~user ~repo ~num ()] activates after release [num]
         in repo [user]/[repo] has been deleted. *)
 
     val update :
@@ -1007,7 +1007,7 @@ module type Github = sig
       body:string ->
       unit -> unit Monad.t
     (** [upload_asset ~user ~repo ~num ~filename ~content_type ~body ()]
-        is activated after [body] is uploaded to repo [user]/[repo] as
+        activates after [body] is uploaded to repo [user]/[repo] as
         an asset for release [num] with file name [filename] and content
         type [content_type]. *)
   end
@@ -1040,7 +1040,7 @@ module type Github = sig
     val delete:
       ?token:Token.t ->
       user:string -> repo:string -> num:int -> unit -> unit Monad.t
-    (** [delete ~user ~repo ~num ()] is activated after deploy key
+    (** [delete ~user ~repo ~num ()] activates after deploy key
         [num] in repo [user]/[repo] has been deleted. *)
   end
 
@@ -1101,13 +1101,13 @@ module type Github = sig
     val star :
       ?token:Token.t ->
       num:string -> unit -> unit Monad.t
-    (** [star ~num ()] is activated after gist [num] is marked as
+    (** [star ~num ()] activates after gist [num] is marked as
         starred by the current token's user. *)
 
     val unstar :
       ?token:Token.t ->
       num:string -> unit -> unit Monad.t
-    (** [unstar ~num ()] is activated after gist [num] is marked as
+    (** [unstar ~num ()] activates after gist [num] is marked as
         not starred by the current token's user. *)
 
     (* is_starred *)
@@ -1125,7 +1125,7 @@ module type Github = sig
     val delete :
       ?token:Token.t ->
       num:string -> unit -> unit Monad.t
-    (** [delete ~num ()] is activated after gist [num] has been deleted. *)
+    (** [delete ~num ()] activates after gist [num] has been deleted. *)
   end
 
   (** The [Search] module exposes GitHub's

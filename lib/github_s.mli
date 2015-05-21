@@ -1160,4 +1160,12 @@ module type Github = sig
   end
 end
 
+(** A module of this type is required in order to construct a
+    {!Github} module using {!Github_core.Make}. *)
+module type Time = sig
+  val now : unit -> float
+  (** [now ()] is the current UNIX epoch time in seconds. *)
 
+  val sleep : float -> unit Lwt.t
+  (** [sleep sec] activates after [sec] seconds have elapsed. *)
+end

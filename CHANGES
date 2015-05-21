@@ -86,6 +86,7 @@
 * ! branch_user is now optional
 * ! user_info_ty field removed in favor of specific user and organization types
 * ! user_type type has been removed
+* ! org_gravatar_id field and all derived fields (e.g. user_gravatar_id) removed
 * ! team_info_permission is now a variant type instead of a string
 * ! team_info_organization is now an org rather than a user
 * ! event_org field is now an org option rather than a user

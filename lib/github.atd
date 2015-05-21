@@ -102,7 +102,6 @@ type org = {
   id: int;
   url: string;
   ?avatar_url: string option;
-  ?gravatar_id: string option;
 } <ocaml field_prefix="org_">
 
 type user = {

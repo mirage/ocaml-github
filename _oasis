@@ -275,3 +275,12 @@ Executable parse_events
   CompiledObject:     best
   Install:            false
   BuildDepends:       cohttp.lwt, github, cmdliner
+
+Executable test_javascript
+  Build$:             flag(js)
+  Path:               lib_test
+  MainIs:             test_javascript.ml
+  Custom:             true
+  CompiledObject:     byte
+  Install:            false
+  BuildDepends:       lwt.syntax, lwt, js_of_ocaml, js_of_ocaml.syntax, cohttp.lwt-core, cohttp.js, github.js

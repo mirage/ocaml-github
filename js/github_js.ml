@@ -15,7 +15,11 @@
  *
  *)
 
+module Time = struct
+  let now = Unix.gettimeofday
+  let sleep = Lwt_js.sleep
+end
 
-module Github' = Github_core.Make(Cohttp_lwt_xhr.Client)
+module Github' = Github_core.Make(Time)(Cohttp_lwt_xhr.Client)
 include Github'
 

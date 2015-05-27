@@ -8,4 +8,5 @@ setup.bin
 *.byte
 *.bak
 lib_test/config.ml
+lib_test/test_javascript.js
 *~

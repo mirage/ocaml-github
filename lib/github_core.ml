@@ -325,7 +325,7 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
     * an HTTP error. Depending on the error status code, it may
     * be retried within the monad, or a permanent failure returned *)
     type error =
-      | Generic of (CL.Response.t * CLB.t)
+      | Generic of (C.Response.t * CLB.t)
       | Semantic of C.Code.status_code * Github_t.message
       | No_response
       | Bad_response of exn
@@ -361,8 +361,8 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
         CLB.to_string body >>= fun body_s ->
         Lwt.return
           (sprintf "HTTP Error %s\nHeaders:\n%s\nBody:\n%s\n"
-             (C.Code.string_of_status (CL.Response.status res))
-             (String.concat "" (C.Header.to_lines (CL.Response.headers res)))
+             (C.Code.string_of_status (C.Response.status res))
+             (String.concat "" (C.Header.to_lines (C.Response.headers res)))
              body_s)
       | Semantic (_,message) ->
         Lwt.return ("GitHub API error: "^string_of_message message)
@@ -554,7 +554,7 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
     | Two_factor of string
 
   type 'a parse = string -> 'a Lwt.t
-  type 'a handler = (CL.Response.t * CLB.t -> bool) * 'a
+  type 'a handler = (C.Response.t * CLB.t -> bool) * 'a
 
   module API = struct
     (* Use the highest precedence handler that matches the response. *)
@@ -579,7 +579,7 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
           ) bad_response
         end
       | [] ->
-        let status = CL.Response.status envelope in
+        let status = C.Response.status envelope in
         match status with
         | `Unprocessable_entity | `Gone | `Unauthorized | `Forbidden ->
           CLB.to_string body
@@ -590,7 +590,7 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
     )
 
     let update_rate_table rate ?token response =
-      let headers = CL.Response.headers response in
+      let headers = C.Response.headers response in
       match C.Header.get headers "x-ratelimit-limit",
             C.Header.get headers "x-ratelimit-remaining",
             C.Header.get headers "x-ratelimit-reset"
@@ -624,13 +624,13 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
       >>= fun response ->
       update_rate_table rate ?token (fst response);
       log "Response code %s\n%!"
-        (C.Code.string_of_status (CL.Response.status (fst response)));
+        (C.Code.string_of_status (C.Response.status (fst response)));
       handle_response response resp_handlers
     )
 
     (* A simple response pattern that matches on HTTP code equivalence *)
     let code_handler ~expected_code handler =
-      (fun (res,_) -> CL.Response.status res = expected_code), handler
+      (fun (res,_) -> C.Response.status res = expected_code), handler
 
     (* Convert a request body into a stream *)
     let realize_body = function None -> None | Some b -> Some (CLB.of_string b)
@@ -889,9 +889,9 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
     let two_factor_auth_handler () =
       let mode = ref "" in
       (fun (res,_) ->
-         CL.Response.status res = `Unauthorized
+         C.Response.status res = `Unauthorized
          &&
-         match C.Header.get (CL.Response.headers res) "x-github-otp" with
+         match C.Header.get (C.Response.headers res) "x-github-otp" with
          | None -> false
          | Some v ->
            let required = String.sub v 0 10 in

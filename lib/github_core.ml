@@ -1164,11 +1164,11 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
       let body = string_of_update_pull update_pull in
       API.patch ?token ~body ~uri ~expected_code:`OK (fun b -> return (pull_of_string b))
 
-    let list_commits ?token ~user ~repo ~num () =
+    let commits ?token ~user ~repo ~num () =
       let uri = URI.pull_commits ~user ~repo ~num in
       API.get_stream ?token ~uri (fun b -> return (commits_of_string b))
 
-    let list_files ?token ~user ~repo ~num () =
+    let files ?token ~user ~repo ~num () =
       let uri = URI.pull_files ~user ~repo ~num in
       API.get_stream ?token ~uri (fun b -> return (files_of_string b))
 
@@ -1440,7 +1440,7 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
       let uri = URI.repo_branches ~user ~repo in
       API.get_stream ?token ~uri (fun b -> return (repo_branches_of_string b))
 
-    let commit ?token ~user ~repo ~sha () =
+    let get_commit ?token ~user ~repo ~sha () =
       let uri = URI.repo_commit ~user ~repo ~sha in
       API.get ?token ~uri (fun b -> return (commit_of_string b))
 
@@ -1459,7 +1459,7 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
         let sha = hd.git_ref_obj.obj_sha in
         match hd.git_ref_obj.obj_ty with
         |`Commit -> (* lightweight tag, so get commit info *)
-          commit ?token ~user ~repo ~sha ()
+          get_commit ?token ~user ~repo ~sha ()
           >>~ fun c ->
           return [name, c.commit_git.git_commit_author.info_date]
         |`Tag ->
@@ -1505,7 +1505,7 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
       let uri = URI.received_events ~user in
       API.get_stream ?token ~uri (fun b -> return (events_of_string b))
 
-    let public_received_by_user ?token ~user () =
+    let received_by_user_public ?token ~user () =
       let uri = URI.public_received_events ~user in
       API.get_stream ?token ~uri (fun b -> return (events_of_string b))
 

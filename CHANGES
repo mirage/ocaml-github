@@ -24,8 +24,8 @@
 * ! User.repos is now User.repositories
 * ! User.repositories now accepts optional ?token and does not accept ?page
 * ! Pull.for_repo does not accept ?page and now returns pull Stream.t
-* ! Pull.list_commits now returns commit Stream.t
-* ! Pull.list_files now returns file Stream.t
+* ! Pull.list_commits was renamed Pull.commits and now returns commit Stream.t
+* ! Pull.list_files was renamed Pull.files and now returns file Stream.t
 * ! Pull.get now returns pull Response.t Monad.t
 * ! Pull.create now returns pull Response.t Monad.t
 * ! Pull.create_from_issue now returns pull Response.t Monad.t
@@ -75,7 +75,7 @@
 * ! Repo.info now returns repository Response.t Monad.t
 * ! Repo.fork now returns repository Response.t Monad.t
 * ! Repo.get_tag now returns tag Response.t Monad.t
-* ! Repo.commit now returns commit Response.t Monad.t
+* ! Repo.commit was renamed Repo.get_commit and returns commit Response.t Monad.t
 * ! Gist.list_users was renamed Gist.for_user and now returns gist Stream.t
 * ! Gist.list was renamed Gist.all and now returns gist Stream.t
 * ! Gist.list_all_public was renamed Gist.all_public and now returns gist Stream.t

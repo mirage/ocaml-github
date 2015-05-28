@@ -438,14 +438,6 @@ module type Github = sig
     (** [repo_issue ~user ~repo ~num] is the API endpoint for the
         issue [user]/[repo]#[num]. *)
 
-    val issue_comments: user:string -> repo:string -> num:int -> Uri.t
-    (** [issue_comments ~user ~repo ~num] is the API endpoint
-        for the comments on issue [user]/[repo]#[num]. *)
-
-    val issue_comment: user:string -> repo:string -> num:int -> Uri.t
-    (** [issue_comment ~user ~repo ~num] is the API endpoint for
-        comment [num] in repo [user]/[repo]. *)
-
     val repo_pulls : user:string -> repo:string -> Uri.t
     (** [repo_pulls ~user ~repo] is the API endpoint for all pull
         requests on repo [user]/[repo]. *)
@@ -453,6 +445,14 @@ module type Github = sig
     val repo_milestones : user:string -> repo:string -> Uri.t
     (** [repo_milestones ~user ~repo] is the API endpoint for all
         milestones on repo [user]/[repo]. *)
+
+    val issue_comments: user:string -> repo:string -> num:int -> Uri.t
+    (** [issue_comments ~user ~repo ~num] is the API endpoint
+        for the comments on issue [user]/[repo]#[num]. *)
+
+    val issue_comment: user:string -> repo:string -> num:int -> Uri.t
+    (** [issue_comment ~user ~repo ~num] is the API endpoint for
+        comment [num] in repo [user]/[repo]. *)
 
     val milestone : user:string -> repo:string -> num:int -> Uri.t
     (** [milestone ~user ~repo] is the API endpoint for milestone
@@ -648,10 +648,10 @@ module type Github = sig
         and private events will be returned. If not, only public
         events will be returned. *)
 
-    val public_received_by_user :
+    val received_by_user_public :
       ?token:Token.t ->
       user:string -> unit -> Github_t.event Stream.t
-    (** [public_received_by_user ~user ()] is a stream of the public
+    (** [received_by_user_public ~user ()] is a stream of the public
         events [user] receives. *)
 
     val for_user :
@@ -731,11 +731,11 @@ module type Github = sig
         {{:https://developer.github.com/v3/git/refs/}git references}
         with prefix [?ty] for repo [user]/[repo]. *)
 
-    val commit :
+    val get_commit :
       ?token:Token.t ->
       user:string -> repo:string -> sha:string ->
       unit -> Github_t.commit Response.t Monad.t
-    (** [commit ~user ~repo ~sha ()] is commit [sha] in [user]/[repo]. *)
+    (** [get_commit ~user ~repo ~sha ()] is commit [sha] in [user]/[repo]. *)
   end
 
   (** The [Hook] module provides access to GitHub's
@@ -855,18 +855,18 @@ module type Github = sig
     (** [update ~user ~repo ~update_pull ~num ()] is the updated pull
         request [user]/[repo]#[num] as described by [update_pull]. *)
 
-    val list_commits :
+    val commits :
       ?token:Token.t ->
       user:string ->
       repo:string -> num:int -> unit -> Github_t.commit Stream.t
-    (** [list_commits ~user ~repo ~num ()] is the stream of commits
+    (** [commits ~user ~repo ~num ()] is the stream of commits
         included in pull request [user]/[repo]#[num]. *)
 
-    val list_files :
+    val files :
       ?token:Token.t ->
       user:string ->
       repo:string -> num:int -> unit -> Github_t.file Stream.t
-    (** [list_files ~user ~repo ~num ()] is the stream of files
+    (** [files ~user ~repo ~num ()] is the stream of files
         included in pull request [user]/[repo]#[num]. *)
 
     val is_merged :

@@ -27,13 +27,13 @@ let t = Github.(Monad.(run (
     >>~ fun p ->
     eprintf "Inside monad: pull %d: %s\n%!"
       p.Github_t.pull_number p.Github_t.pull_title;
-    return (Pull.list_commits ?token ~user ~repo ~num:hd.Github_t.pull_number ())
+    return (Pull.commits ?token ~user ~repo ~num:hd.Github_t.pull_number ())
     >>= Stream.iter (fun commit ->
       eprintf "    %s\n" commit.Github_t.commit_sha; return ()
     )
     >>= fun () ->
     eprintf "---------\n%!";
-    return (Pull.list_files ?token ~user ~repo ~num:hd.Github_t.pull_number ())
+    return (Pull.files ?token ~user ~repo ~num:hd.Github_t.pull_number ())
     >>= Stream.iter (fun file ->
       eprintf "    %s\n" file.Github_t.file_filename; return ()
     )

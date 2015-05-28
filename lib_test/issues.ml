@@ -18,7 +18,7 @@ let t =
       Stream.to_list issue_comments
       >>= fun comments ->
       List.iter (fun c ->
-        eprintf "  > %d: %s\n" c.issue_comment_id c.issue_comment_body
+        eprintf "  > %Ld: %s\n" c.issue_comment_id c.issue_comment_body
       ) comments;
       return ()
     ) issues

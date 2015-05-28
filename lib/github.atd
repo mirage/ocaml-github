@@ -66,7 +66,7 @@ type auth = {
   token: string;
   app: app;
   url: string;
-  id: int;
+  id: int <ocaml repr="int64">;
   ?note: string option;
   ?note_url: string option;
 } <ocaml field_prefix="auth_">
@@ -99,7 +99,7 @@ type direction = [
 
 type org = {
   login: string;
-  id: int;
+  id: int <ocaml repr="int64">;
   url: string;
   ?avatar_url: string option;
 } <ocaml field_prefix="org_">
@@ -151,7 +151,7 @@ type organization = {
 type team = {
   url: string;
   name: string;
-  id: int;
+  id: int <ocaml repr="int64">;
 } <ocaml field_prefix="team_">
 
 type teams = team list
@@ -235,7 +235,7 @@ type issue = {
 type issues = issue list
 
 type comment = {
-  id: int;
+  id: int <ocaml repr="int64">;
   url: string;
   html_url: string;
   body: string;
@@ -328,7 +328,7 @@ type commit = {
 type commits = commit list
 
 type repo = {
-  id: int; (* TODO: too small? *)
+  id: int <ocaml repr="int64">;
   name: string;
   url: string;
 } <ocaml field_prefix="repo_">
@@ -742,7 +742,7 @@ type event = {
   ?org: org option;
   created_at: string;
   repo: repo;
-  id: int; (* TODO: too small? *)
+  id: int <ocaml repr="int64">;
 } <ocaml field_prefix="event_">
 
 type events = event list
@@ -765,7 +765,7 @@ type hook = {
   events: event_type list;
   active: bool;
   config <json tag_field="name">: hook_config;
-  id: int;
+  id: int <ocaml repr="int64">;
 } <ocaml field_prefix="hook_">
 
 type hooks = hook list
@@ -793,7 +793,7 @@ type status = {
   url: string;
   updated_at: string;
   created_at: string;
-  id: int;
+  id: int <ocaml repr="int64">;
   state: status_state;
   ?target_url: string option;
   ?description: string option;
@@ -809,7 +809,7 @@ type new_status = {
 } <ocaml field_prefix="new_status_">
 
 type release = {
-  id: int;
+  id: int <ocaml repr="int64">;
   tag_name: string;
   ?target_commitish: string option; 
   ?name: string option;
@@ -852,7 +852,7 @@ type update_release = {
 } <ocaml field_prefix="update_release_">
 
 type deploy_key = {
-  id: int;
+  id: int <ocaml repr="int64">;
   key: string;
   url: string;
   title: string;
@@ -879,7 +879,7 @@ type gist_files = (string * gist_file) list <json repr="object">
 type gist_fork = {
   user: user;
   url: string;
-  id: int;
+  id: int <ocaml repr="int64">;
   created_at: string;
   updated_at: string;
 } <ocaml field_prefix="gist_fork_">

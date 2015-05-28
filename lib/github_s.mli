@@ -236,13 +236,13 @@ module type Github = sig
         this user has made. See {!create} for an explanation of how
         two-factor authentication is handled. *)
 
-    val get : ?otp:string -> user:string -> pass:string -> id:int ->
+    val get : ?otp:string -> user:string -> pass:string -> id:int64 ->
       unit -> Github_t.auth option authorization Response.t Monad.t
     (** [get ~user ~pass ~id ()] is the authorization with identifier
         [id]. See {!create} for an explanation of how two-factor
         authentication is handled. *)
 
-    val delete : ?otp:string -> user:string -> pass:string -> id:int -> unit ->
+    val delete : ?otp:string -> user:string -> pass:string -> id:int64 -> unit ->
       unit authorization Response.t Monad.t
     (** [delete ~user ~pass ~id ()] is [Result ()] after the
         authorization with identifier [id] has been removed. See
@@ -587,16 +587,16 @@ module type Github = sig
   module Team : sig
     val info :
       ?token:Token.t ->
-      num:int ->
+      id:int64 ->
       unit -> Github_t.team_info Response.t Monad.t
-    (** [info ~num ()] is a description of team [num]. *)
+    (** [info ~id ()] is a description of team [id]. *)
 
     val repositories :
       ?token:Token.t ->
-      num:int ->
+      id:int64 ->
       unit -> Github_t.repository Stream.t
-    (** [repositories ~num ()] is a stream of repositories belonging
-        to team [num]. *)
+    (** [repositories ~id ()] is a stream of repositories belonging
+        to team [id]. *)
   end
 
   (** The [Event] module exposes GitHub's
@@ -751,8 +751,8 @@ module type Github = sig
     val get :
       ?token:Token.t ->
       user:string ->
-      repo:string -> num:int -> unit -> Github_t.hook Response.t Monad.t
-    (** [get ~user ~repo ~num ()] is hook [num] for repo [user]/[repo]. *)
+      repo:string -> id:int64 -> unit -> Github_t.hook Response.t Monad.t
+    (** [get ~user ~repo ~id ()] is hook [id] for repo [user]/[repo]. *)
 
     val create :
       ?token:Token.t ->
@@ -766,25 +766,25 @@ module type Github = sig
       ?token:Token.t ->
       user:string ->
       repo:string ->
-      num:int ->
+      id:int64 ->
       hook:Github_t.update_hook -> unit -> Github_t.hook Response.t Monad.t
-    (** [update ~user ~repo ~num ~hook ()] is the updated hook [num]
+    (** [update ~user ~repo ~id ~hook ()] is the updated hook [id]
         in [user]/[repo] as described by [hook]. *)
 
     val delete :
       ?token:Token.t ->
       user:string ->
-      repo:string -> num:int -> unit -> unit Response.t Monad.t
-    (** [delete ~user ~repo ~num ()] activates after hook [num] in
+      repo:string -> id:int64 -> unit -> unit Response.t Monad.t
+    (** [delete ~user ~repo ~id ()] activates after hook [id] in
         repo [user]/[repo] has been deleted. *)
 
     val test :
       ?token:Token.t ->
       user:string ->
-      repo:string -> num:int -> unit -> unit Response.t Monad.t
-    (** [test ~user ~repo ~num ()] activates after a [push] event
+      repo:string -> id:int64 -> unit -> unit Response.t Monad.t
+    (** [test ~user ~repo ~id ()] activates after a [push] event
         for the lastest push to [user]/[repo] has been synthesized
-        and sent to hook [num]. *)
+        and sent to hook [id]. *)
   end
 
   (** The [Status] module provides the functionality of GitHub's
@@ -814,8 +814,8 @@ module type Github = sig
       {{:https://developer.github.com/v3/pulls/}pull request API}. *)
   module Pull : sig
     val for_repo :
-      ?state:Filter.state ->
       ?token:Token.t ->
+      ?state:Filter.state ->
       user:string ->
       repo:string -> unit -> Github_t.pull Stream.t
     (** [for_repo ?state ~user ~repo ()] is a stream of pull requests
@@ -946,10 +946,10 @@ module type Github = sig
       API}. *)
   module Milestone : sig
     val for_repo:
+      ?token:Token.t ->
       ?state:Filter.state ->
       ?sort:Filter.milestone_sort ->
       ?direction:Filter.direction ->
-      ?token:Token.t ->
       user:string -> repo:string -> unit -> Github_t.milestone Stream.t
     (** [for_repo ?state ?sort ?direction ~user ~repo ()] is a stream
         of all milestones in repo [user]/[repo] which match [?state]
@@ -1000,14 +1000,15 @@ module type Github = sig
 
     val get:
       ?token:Token.t ->
-      user:string -> repo:string -> num:int ->
+      user:string -> repo:string -> id:int64 ->
       unit -> Github_t.release Response.t Monad.t
-    (** [get ~user ~repo ~num ()] is release number [num] in repo
+    (** [get ~user ~repo ~id ()] is release number [id] in repo
         [user]/[repo]. *)
 
     val get_by_tag_name:
       ?token:Token.t ->
-      user:string -> repo:string -> tag:string -> unit -> Github_t.release Monad.t
+      user:string -> repo:string -> tag:string ->
+      unit -> Github_t.release Monad.t
     (** [get_by_tag_name ~user ~repo ~tag ()] is the release in repo
         [user]/[repo] which is using git tag [tag]. *)
 
@@ -1021,27 +1022,27 @@ module type Github = sig
 
     val delete:
       ?token:Token.t ->
-      user:string -> repo:string -> num:int -> unit -> unit Response.t Monad.t
-    (** [delete ~user ~repo ~num ()] activates after release [num]
+      user:string -> repo:string -> id:int64 -> unit -> unit Response.t Monad.t
+    (** [delete ~user ~repo ~id ()] activates after release [id]
         in repo [user]/[repo] has been deleted. *)
 
     val update :
       ?token:Token.t ->
       user:string -> repo:string ->
-      release:Github_t.update_release -> num:int ->
+      release:Github_t.update_release -> id:int64 ->
       unit -> Github_t.release Response.t Monad.t
-    (** [update ~user ~repo ~release ~num ()] is the updated release
-        [num] in [user]/[repo] as described by [release]. *)
+    (** [update ~user ~repo ~release ~id ()] is the updated release
+        [id] in [user]/[repo] as described by [release]. *)
 
     val upload_asset :
       ?token:Token.t ->
       user:string -> repo:string ->
-      num:int -> filename:string -> content_type:string ->
+      id:int64 -> filename:string -> content_type:string ->
       body:string ->
       unit -> unit Response.t Monad.t
-    (** [upload_asset ~user ~repo ~num ~filename ~content_type ~body ()]
+    (** [upload_asset ~user ~repo ~id ~filename ~content_type ~body ()]
         activates after [body] is uploaded to repo [user]/[repo] as
-        an asset for release [num] with file name [filename] and content
+        an asset for release [id] with file name [filename] and content
         type [content_type]. *)
   end
 
@@ -1060,9 +1061,9 @@ module type Github = sig
 
     val get:
       ?token:Token.t ->
-      user:string -> repo:string -> num:int ->
+      user:string -> repo:string -> id:int64 ->
       unit -> Github_t.deploy_key Response.t Monad.t
-    (** [get ~user ~repo ~num ()] is deploy key [num] for repo [user]/[repo]. *)
+    (** [get ~user ~repo ~id ()] is deploy key [id] for repo [user]/[repo]. *)
 
     val create :
       ?token:Token.t ->
@@ -1074,10 +1075,10 @@ module type Github = sig
 
     val delete:
       ?token:Token.t ->
-      user:string -> repo:string -> num:int ->
+      user:string -> repo:string -> id:int64 ->
       unit -> unit Response.t Monad.t
-    (** [delete ~user ~repo ~num ()] activates after deploy key
-        [num] in repo [user]/[repo] has been deleted. *)
+    (** [delete ~user ~repo ~id ()] activates after deploy key
+        [id] in repo [user]/[repo] has been deleted. *)
   end
 
   (** The [Gist] module provides access to the GitHub
@@ -1115,8 +1116,8 @@ module type Github = sig
 
     val get :
       ?token:Token.t ->
-      num:string -> unit -> Github_t.gist Response.t Monad.t
-    (** [get ~num ()] is the gist [num]. *)
+      id:string -> unit -> Github_t.gist Response.t Monad.t
+    (** [get ~id ()] is the gist [id]. *)
 
     val create :
       ?token:Token.t ->
@@ -1125,44 +1126,44 @@ module type Github = sig
 
     val update :
       ?token:Token.t ->
-      num:string -> gist:Github_t.update_gist ->
+      id:string -> gist:Github_t.update_gist ->
       unit -> Github_t.gist Response.t Monad.t
-    (** [update ~num ~gist ()] is the updated gist [num] as described
+    (** [update ~id ~gist ()] is the updated gist [id] as described
         by [gist]. *)
 
     val commits :
       ?token:Token.t ->
-      num:string -> unit -> Github_t.gist_commit Stream.t
-    (** [commits ~num ()] is a stream of commits for gist [num]. *)
+      id:string -> unit -> Github_t.gist_commit Stream.t
+    (** [commits ~id ()] is a stream of commits for gist [id]. *)
 
     val star :
       ?token:Token.t ->
-      num:string -> unit -> unit Response.t Monad.t
-    (** [star ~num ()] activates after gist [num] is marked as
+      id:string -> unit -> unit Response.t Monad.t
+    (** [star ~id ()] activates after gist [id] is marked as
         starred by the current token's user. *)
 
     val unstar :
       ?token:Token.t ->
-      num:string -> unit -> unit Response.t Monad.t
-    (** [unstar ~num ()] activates after gist [num] is marked as
+      id:string -> unit -> unit Response.t Monad.t
+    (** [unstar ~id ()] activates after gist [id] is marked as
         not starred by the current token's user. *)
 
     (* is_starred *)
 
     val fork :
       ?token:Token.t ->
-      num:string -> unit -> Github_t.gist Response.t Monad.t
-    (** [fork ~num ()] is a newly forked gist from gist [num]. *)
+      id:string -> unit -> Github_t.gist Response.t Monad.t
+    (** [fork ~id ()] is a newly forked gist from gist [id]. *)
 
     val forks :
       ?token:Token.t ->
-      num:string -> unit -> Github_t.gist_fork Stream.t
-    (** [forks ~num ()] is a stream of forks of gist [num]. *)
+      id:string -> unit -> Github_t.gist_fork Stream.t
+    (** [forks ~id ()] is a stream of forks of gist [id]. *)
 
     val delete :
       ?token:Token.t ->
-      num:string -> unit -> unit Response.t Monad.t
-    (** [delete ~num ()] activates after gist [num] has been deleted. *)
+      id:string -> unit -> unit Response.t Monad.t
+    (** [delete ~id ()] activates after gist [id] has been deleted. *)
   end
 
   (** The [Search] module exposes GitHub's

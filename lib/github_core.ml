@@ -150,7 +150,7 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
       Uri.of_string (Printf.sprintf "%s/authorizations" api)
 
     let authorization ~id =
-      Uri.of_string (Printf.sprintf "%s/authorizations/%d" api id)
+      Uri.of_string (Printf.sprintf "%s/authorizations/%Ld" api id)
 
     let user ?user () =
       match user with
@@ -201,11 +201,11 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
     let repo_search =
       Uri.of_string (Printf.sprintf "%s/search/repositories" api)
 
-    let hook ~user ~repo ~num =
-      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/hooks/%d" api user repo num)
+    let hook ~user ~repo ~id =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/hooks/%Ld" api user repo id)
 
-    let hook_test ~user ~repo ~num =
-      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/hooks/%d/tests" api user repo num)
+    let hook_test ~user ~repo ~id =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/hooks/%Ld/tests" api user repo id)
 
     let repo_pulls ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/pulls" api user repo)
@@ -240,19 +240,20 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
     let repo_releases ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/releases" api user repo)
 
-    let repo_release ~user ~repo ~num =
-      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/releases/%d" api user repo num)
+    let repo_release ~user ~repo ~id =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/releases/%Ld" api user repo id)
 
-    let upload_release_asset ~user ~repo ~num =
+    let upload_release_asset ~user ~repo ~id =
       Uri.of_string (
-        Printf.sprintf "https://uploads.github.com/repos/%s/%s/releases/%d/assets"
-          user repo num)
+        Printf.sprintf
+          "https://uploads.github.com/repos/%s/%s/releases/%Ld/assets"
+          user repo id)
   
     let repo_deploy_keys ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/keys" api user repo)
 
-    let repo_deploy_key ~user ~repo ~num =
-      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/keys/%d" api user repo num)
+    let repo_deploy_key ~user ~repo ~id =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/keys/%Ld" api user repo id)
 
     let repo_events ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/events" api user repo)
@@ -298,26 +299,26 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
     let gists =
       Uri.of_string (Printf.sprintf "%s/gists" api)
 
-    let gist ~num =
-      Uri.of_string (Printf.sprintf "%s/gists/%s" api num)
+    let gist ~id =
+      Uri.of_string (Printf.sprintf "%s/gists/%s" api id)
 
-    let gist_commits ~num =
-      Uri.of_string (Printf.sprintf "%s/gists/%s/commits" api num)
+    let gist_commits ~id =
+      Uri.of_string (Printf.sprintf "%s/gists/%s/commits" api id)
 
-    let gist_star ~num =
-      Uri.of_string (Printf.sprintf "%s/gists/%s/star" api num)
+    let gist_star ~id =
+      Uri.of_string (Printf.sprintf "%s/gists/%s/star" api id)
 
-    let gist_forks ~num =
-      Uri.of_string (Printf.sprintf "%s/gists/%s/forks" api num)
+    let gist_forks ~id =
+      Uri.of_string (Printf.sprintf "%s/gists/%s/forks" api id)
 
-    let team ~num =
-      Uri.of_string (Printf.sprintf "%s/teams/%d" api num)
+    let team ~id =
+      Uri.of_string (Printf.sprintf "%s/teams/%Ld" api id)
 
     let org_teams ~org =
       Uri.of_string (Printf.sprintf "%s/orgs/%s/teams" api org)
 
-    let team_repos ~num =
-      Uri.of_string (Printf.sprintf "%s/teams/%d/repos" api num)
+    let team_repos ~id =
+      Uri.of_string (Printf.sprintf "%s/teams/%Ld/repos" api id)
   end 
 
   module C = Cohttp
@@ -1014,12 +1015,12 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
   module Team = struct
     open Lwt
 
-    let info ?token ~num () =
-      let uri = URI.team ~num in
+    let info ?token ~id () =
+      let uri = URI.team ~id in
       API.get ?token ~uri (fun b -> return (team_info_of_string b))
 
-    let repositories ?token ~num () =
-      let uri = URI.team_repos ~num in
+    let repositories ?token ~id () =
+      let uri = URI.team_repos ~id in
       API.get_stream ?token ~uri (fun b -> return (repositories_of_string b))
   end
 
@@ -1138,7 +1139,7 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
   module Pull = struct
     open Lwt
 
-    let for_repo ?(state=`Open) ?token ~user ~repo () =
+    let for_repo ?token ?(state=`Open) ~user ~repo () =
       let params = Filter.([
         "state", string_of_state state;
       ]) in
@@ -1190,7 +1191,7 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
   module Milestone = struct
     open Lwt
 
-    let for_repo ?(state=`Open) ?(sort=`Due_date) ?(direction=`Desc) ?token
+    let for_repo ?token ?(state=`Open) ?(sort=`Due_date) ?(direction=`Desc)
         ~user ~repo () =
       let params = Filter.([
         "direction", string_of_direction direction;
@@ -1225,8 +1226,8 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
       API.get_stream ?token ~uri:(URI.repo_releases ~user ~repo)
         (fun b -> return (releases_of_string b))
 
-    let get ?token ~user ~repo ~num () =
-      let uri = URI.repo_release ~user ~repo ~num in
+    let get ?token ~user ~repo ~id () =
+      let uri = URI.repo_release ~user ~repo ~id in
       API.get ?token ~uri (fun b -> return (release_of_string b))
 
     (** We need to stream down releases until we find the target *)
@@ -1243,8 +1244,8 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
         let msg = {Github_t.message_message=msg; message_errors=[]} in
         fail (Semantic (`Not_found,msg))
 
-    let delete ?token ~user ~repo ~num () =
-      let uri = URI.repo_release ~user ~repo ~num in
+    let delete ?token ~user ~repo ~id () =
+      let uri = URI.repo_release ~user ~repo ~id in
       API.delete ?token ~uri (fun _ -> return ())
 
     let create ?token ~user ~repo ~release () =
@@ -1252,15 +1253,15 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
       let body = string_of_new_release release in
       API.post ?token ~body ~uri ~expected_code:`Created (fun b -> return (release_of_string b))
 
-    let update ?token ~user ~repo ~release ~num () =
-      let uri = URI.repo_release ~user ~repo ~num in
+    let update ?token ~user ~repo ~release ~id () =
+      let uri = URI.repo_release ~user ~repo ~id in
       let body = string_of_update_release release in
       API.patch ?token ~body ~uri ~expected_code:`OK (fun b -> return (release_of_string b))
 
-    let upload_asset ?token ~user ~repo ~num ~filename ~content_type ~body () =
+    let upload_asset ?token ~user ~repo ~id ~filename ~content_type ~body () =
       let headers = Cohttp.Header.init_with "content-type" content_type in
       let params = ["name", filename] in
-      let uri = URI.upload_release_asset ~user ~repo ~num in
+      let uri = URI.upload_release_asset ~user ~repo ~id in
       API.post ?token ~params ~headers ~body ~uri ~expected_code:`Created (fun b -> return ())
   end
 
@@ -1271,12 +1272,12 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
       API.get_stream ?token ~uri:(URI.repo_deploy_keys ~user ~repo)
         (fun b -> return (deploy_keys_of_string b))
 
-    let get ?token ~user ~repo ~num () =
-      let uri = URI.repo_deploy_key ~user ~repo ~num in
+    let get ?token ~user ~repo ~id () =
+      let uri = URI.repo_deploy_key ~user ~repo ~id in
       API.get ?token ~uri (fun b -> return (deploy_key_of_string b))
 
-    let delete ?token ~user ~repo ~num () =
-      let uri = URI.repo_deploy_key ~user ~repo ~num in
+    let delete ?token ~user ~repo ~id () =
+      let uri = URI.repo_deploy_key ~user ~repo ~id in
       API.delete ?token ~uri (fun _ -> return ())
 
     let create ?token ~user ~repo ~new_key () =
@@ -1367,8 +1368,8 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
       let uri = URI.repo_hooks ~user ~repo in
       API.get_stream ?token ~uri (fun b -> return (hooks_of_string b))
 
-    let get ?token ~user ~repo ~num () =
-      let uri = URI.hook ~user ~repo ~num in
+    let get ?token ~user ~repo ~id () =
+      let uri = URI.hook ~user ~repo ~id in
       API.get ?token ~uri (fun b -> return (hook_of_string b))
 
     let create ?token ~user ~repo ~hook () =
@@ -1376,17 +1377,17 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
       let body = string_of_new_hook hook in
       API.post ~body ?token ~uri ~expected_code:`Created (fun b -> return (hook_of_string b))
 
-    let update ?token ~user ~repo ~num ~hook () =
-      let uri = URI.hook ~user ~repo ~num in
+    let update ?token ~user ~repo ~id ~hook () =
+      let uri = URI.hook ~user ~repo ~id in
       let body = string_of_update_hook hook in
       API.patch ?token ~body ~uri ~expected_code:`OK (fun b -> return (hook_of_string b))
 
-    let delete ?token ~user ~repo ~num () =
-      let uri = URI.hook ~user ~repo ~num in
+    let delete ?token ~user ~repo ~id () =
+      let uri = URI.hook ~user ~repo ~id in
       API.delete ?token ~uri (fun _ -> return ())
 
-    let test ?token ~user ~repo ~num () =
-      let uri = URI.hook_test ~user ~repo ~num in
+    let test ?token ~user ~repo ~id () =
+      let uri = URI.hook_test ~user ~repo ~id in
       API.post ?token ~uri ~expected_code:`No_content (fun b -> return ())
   end
 
@@ -1562,8 +1563,8 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
 
     (* Get a single gist https://developer.github.com/v3/gists/#get-a-single-gist 
      * GET /gists/:id  *)
-    let get ?token ~num () =
-      let uri = URI.gist ~num in
+    let get ?token ~id () =
+      let uri = URI.gist ~id in
       API.get ?token ~uri (fun b -> return (gist_of_string b))
 
     (* Create a gist https://developer.github.com/v3/gists/#create-a-gist
@@ -1584,29 +1585,29 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
      *  files       hash    Files that make up this gist.
      *  content     string  Updated file contents.
      *  filename    string  New name for this file. *)
-    let update ?token ~num ~gist () =
-      let uri = URI.gist ~num in
+    let update ?token ~id ~gist () =
+      let uri = URI.gist ~id in
       let body = string_of_update_gist gist in
       API.patch ~body ?token ~uri ~expected_code:`OK (fun b -> return (gist_of_string b))
 
     (* List gist commits https://developer.github.com/v3/gists/#list-gist-commits
      * GET /gists/:id/commits *)
-    let commits ?token ~num () =
-      let uri = URI.gist_commits ~num in
+    let commits ?token ~id () =
+      let uri = URI.gist_commits ~id in
       API.get_stream ?token ~uri (fun b -> return (gist_commits_of_string b))
 
     (* Star a gist https://developer.github.com/v3/gists/#star-a-gist
      * PUT /gists/:id/star
      * Note that you’ll need to set Content-Length to zero when calling 
      * out to this endpoint. For more information, see “HTTP verbs.” *)
-    let star ?token ~num () =
-      let uri = URI.gist_star ~num in
+    let star ?token ~id () =
+      let uri = URI.gist_star ~id in
       API.put ?token ~uri ~expected_code:`No_content (fun b -> return ())
 
     (* Unstar a gist https://developer.github.com/v3/gists/#unstar-a-gist
      * DELETE /gists/:id/star *)
-    let unstar ?token ~num () =
-      let uri = URI.gist_star ~num in
+    let unstar ?token ~id () =
+      let uri = URI.gist_star ~id in
       API.delete ?token ~uri ~expected_code:`No_content (fun b -> return ())
 
     (* Check if a gist is starred https://developer.github.com/v3/gists/#check-if-a-gist-is-starred
@@ -1616,20 +1617,20 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
 
     (* Fork a gist https://developer.github.com/v3/gists/#fork-a-gist
      * POST /gists/:id/forks *)
-    let fork ?token ~num () =
-      let uri = URI.gist_forks ~num in
+    let fork ?token ~id () =
+      let uri = URI.gist_forks ~id in
       API.post ?token ~uri ~expected_code:`Created (fun b -> return (gist_of_string b))
 
     (* List gist forks https://developer.github.com/v3/gists/#list-gist-forks
      * GET /gists/:id/forks *)
-    let forks ?token ~num () =
-      let uri = URI.gist_forks ~num in
+    let forks ?token ~id () =
+      let uri = URI.gist_forks ~id in
       API.get_stream ?token ~uri (fun b -> return (gist_forks_of_string b))
 
     (* Delete a gist https://developer.github.com/v3/gists/#delete-a-gist
      * DELETE /gists/:id *)
-    let delete ?token ~num () =
-      let uri = URI.gist ~num in
+    let delete ?token ~id () =
+      let uri = URI.gist ~id in
       API.delete ?token ~uri ~expected_code:`No_content (fun b -> return ())
   end
 

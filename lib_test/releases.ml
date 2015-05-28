@@ -12,7 +12,7 @@ let print_releases m = Github.(Monad.(
   Stream.iter (fun m ->
       let open Github_t in
       let name = name_of_release m in
-      eprintf "release %d: %s (%s)\n%!" m.release_id name m.release_created_at;
+      eprintf "release %Ld: %s (%s)\n%!" m.release_id name m.release_created_at;
       return ()
   ) m
   >>= fun () ->

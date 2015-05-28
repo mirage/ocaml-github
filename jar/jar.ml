@@ -61,7 +61,7 @@ let list_auth user pass =
       let localnames = List.fold_left (fun acc (n,a) ->
         if a.auth_id = id then n::acc else acc) [] local in
       let print_line name =
-        Printf.printf "%13s | %-8d | %-40s | %-10s\n"
+        Printf.printf "%13s | %-8Ld | %-40s | %-10s\n"
           (match name with None -> "<remote>" |Some n -> n)
           a.auth_id a.auth_app.app_name
           (match a.auth_note with None -> "" |Some b -> b)
@@ -92,7 +92,7 @@ let make_auth
     >>= fun auth ->
     Github_cookie_jar.save jar ~name ~auth
     >>= fun _jar ->
-    Printf.printf "Created token %s (%d): %s\n"
+    Printf.printf "Created token %s (%Ld): %s\n"
       name auth.auth_id (Github.Token.(to_string (of_auth auth)));
     return ()
   )
@@ -106,7 +106,7 @@ let revoke_auth user pass name_or_id =
     >>= (function
       | Some auth -> Lwt.return auth.auth_id
       | None ->
-        (try Lwt.return (int_of_string name_or_id)
+        (try Lwt.return (Int64.of_string name_or_id)
          with _ ->
            Printf.eprintf "unknown name or id %s\n" name_or_id;
            exit 1

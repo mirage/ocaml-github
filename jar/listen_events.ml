@@ -42,7 +42,7 @@ let print_event event =
     | user::repo::_ -> user, repo
     | [_] | [] -> failwith "nonsense repo name"
   in
-  printf "#%d--> %s:" event.event_id event.event_actor.user_login;
+  printf "#%Ld--> %s:" event.event_id event.event_actor.user_login;
   (match event.event_payload with
   | `CommitComment { commit_comment_event_comment = comment } ->
     printf "CommitComment on %s/%s %s\n%!"

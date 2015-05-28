@@ -37,7 +37,7 @@ let create_release ~token
   lwt release = Github.(Monad.(run (
     Release.create ~token ~user ~repo ~release:new_release () >|= Response.value
   ))) in
-  let num = release.release_id in
+  let id = release.release_id in
   Lwt_list.iter_s (fun filename ->
     lwt len = Lwt_io.file_length filename >|= Int64.to_int in
     let body = Bytes.create len in
@@ -46,7 +46,7 @@ let create_release ~token
     >>= fun () ->
     lwt _a = Github.(Monad.(run (
       Release.upload_asset
-        ~token ~user ~repo ~num ~filename ~content_type ~body ()
+        ~token ~user ~repo ~id ~filename ~content_type ~body ()
       >|= Response.value
     ))) in
     return ()) assets

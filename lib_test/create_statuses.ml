@@ -6,7 +6,7 @@ let token = Config.access_token
 let print_statuses sl =
   List.iter (fun s ->
     let open Github_t in
-    eprintf "status %d: %s %s %s %s %s\n%!"
+    eprintf "status %Ld: %s %s %s %s %s\n%!"
       s.status_id
       (Github_j.string_of_status_state s.status_state)
       (match s.status_target_url with None -> "\"\"" | Some x -> x)

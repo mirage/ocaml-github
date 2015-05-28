@@ -17,6 +17,7 @@
 * ! Token.{create,get_all,get,delete} now have additional ?otp:string argument
 * ! Token.create now has additional ?fingerprint:string argument
 * ! Token.get now returns auth option authorization Response.t Monad.t
+* ! Token.{get,delete} ~num argument was renamed to ~id and changed to int64
 * ! User.current_info ~token argument was made optional ?token
 * ! User.current_info now returns user_info Response.t Monad.t
 * ! User.info ~login argument was renamed to ~user
@@ -39,15 +40,20 @@
 * ! Milestone.for_repo does not accept ?page
 * ! Milestone.for_repo now returns milestone Stream.t
 * ! Release.get now returns release Response.t Monad.t
+* ! Release.get ~num argument was renamed to ~id and changed to int64
 * ! Release.create now returns release Response.t Monad.t
 * ! Release.update now returns release Response.t Monad.t
+* ! Release.update ~num argument was renamed to ~id and changed to int64
 * ! Release.delete now returns unit Response.t Monad.t
+* ! Release.delete ~num argument was renamed to ~id and changed to int64
 * ! Release.upload_asset now returns unit Response.t Monad.t
+* ! Release.upload_asset ~id argument was changed to int64
 * ! Release.for_repo now returns release Stream.t
-* ! Release.upload_asset ~id argument was renamed to ~num
 * ! Deploy_key.get now returns deploy_key Response.t Monad.t
+* ! Deploy_key.get ~num argument was renamed to ~id and changed to int64
 * ! Deploy_key.create now returns deploy_key Response.t Monad.t
 * ! Deploy_key.delete now returns unit Response.t Monad.t
+* ! Deploy_key.delete ~num argument was renamed to ~id and changed to int64
 * ! Deploy_key.for_repo now returns deploy_key Stream.t
 * ! Issue.create now returns issue Response.t Monad.t
 * ! Issue.update now returns issue Response.t Monad.t
@@ -62,10 +68,14 @@
 * ! Status.create now returns status Response.t Monad.t
 * ! Hook.for_repo now returns hook Stream.t
 * ! Hook.get now returns hook Response.t Monad.t
+* ! Hook.get ~num argument was renamed to ~id and changed to int64
 * ! Hook.create now returns hook Response.t Monad.t
 * ! Hook.update now returns hook Response.t Monad.t
+* ! Hook.update ~num argument was renamed to ~id and changed to int64
 * ! Hook.delete now returns unit Response.t Monad.t
+* ! Hook.delete ~num argument was renamed to ~id and changed to int64
 * ! Hook.test now returns unit Response.t Monad.t
+* ! Hook.test ~num argument was renamed to ~id and changed to int64
 * ! Repo.tags now returns repo_tag Stream.t
 * ! Repo.branches now returns repo_branch Stream.t
 * ! Repo.refs now returns git_ref Stream.t
@@ -82,38 +92,44 @@
 * ! Gist.list_starred was renamed Gist.starred
 * ! Gist.starred ~token argument was made optional ?token
 * ! Gist.starred now returns gist Stream.t
-* ! Gist.get ~id argument was renamed to ~num
+* ! Gist.get ~id argument is now int64
 * ! Gist.get now returns gist Response.t Monad.t
 * ! Gist.create ~token argument was made optional ?token
 * ! Gist.create ~contents argument was renamed to ~gist
 * ! Gist.create now returns gist Response.t Monad.t
 * ! Gist.edit was renamed Gist.update
-* ! Gist.update signature now has s/~token/?token/ s/~id/~num/ s/~contents/~gist/
+* ! Gist.update signature now has s/~token/?token/ s/~contents/~gist/
 * ! Gist.update now returns gist Response.t Monad.t
-* ! Gist.commits ~id argument was renamed to ~num
+* ! Gist.update ~id argument is now int64
+* ! Gist.commits ~id argument is now int64
 * ! Gist.commits now returns gist_commit Stream.t
 * ! Gist.star ~token argument was made optional ?token
-* ! Gist.star ~id argument was renamed to ~num
+* ! Gist.star ~id argument is now int64
 * ! Gist.star now returns unit Response.t Monad.t
 * ! Gist.unstar ~token argument was made optional ?token
-* ! Gist.unstar ~id argument was renamed to ~num
+* ! Gist.unstar ~id argument is now int64
 * ! Gist.unstar now returns unit Response.t Monad.t
 * ! Gist.fork ~token argument was made optional ?token
-* ! Gist.fork ~id argument was renamed to ~num
+* ! Gist.fork ~id argument is now int64
 * ! Gist.fork now returns gist Response.t Monad.t
 * ! Gist.list_forks was renamed Gist.forks and now returns gist_fork Stream.t
-* ! Gist.forks ~id argument was renamed to ~num
+* ! Gist.forks ~id argument is now int64
 * ! Gist.delete ~token argument was made optional ?token
-* ! Gist.delete ~id argument was renamed to ~num
+* ! Gist.delete ~id argument is now int64
 * ! Gist.delete now returns unit Response.t Monad.t
 * ! Organization.teams now returns team Stream.t
 * ! Team.repos is now Team.repositories
 * ! Team.repositories now returns repository Stream.t
+* ! Team.repositories ~num argument was renamed to ~id and is now int64
 * ! Team.info now returns team_info Response.t Monad.t
+* ! Team.info ~num argument was renamed to ~id and is now int64
 * ! Git_obj.obj_type_to_string was renamed Git_obj.type_to_string
 * ! user:email scope constructor UserEmail has been renamed User_email
 * ! user:follow scope constructor UserFollow has been renamed User_follow
 * ! scope constructor `Admin_org_hook added
+* ! org_id, user_id, organization_id are now int64
+* ! team_id, team_info_id, team_add_info_id are now int64
+* ! auth_id is now int64
 * ! repo type has been renamed repository
 * ! repos type has been renamed repositories
 * ! repository_forks field renamed to repository_forks_count
@@ -121,8 +137,11 @@
 * ! repository_open_issues field renamed to repository_open_issues_count
 * ! repository_master_branch field renamed to repository_default_branch
 * ! repository_description is now optional
+* ! repository_id is now int64
+* ! comment_id is now int64
 * ! release_name is now optional
 * ! release_body is now optional
+* ! release_id is now int64
 * ! new_release_name is now optional
 * ! new_release_body is now optional
 * ! branch_user is now optional
@@ -132,10 +151,14 @@
 * ! team_info_permission is now a variant type instead of a string
 * ! team_info_organization is now an org rather than a user
 * ! event_org field is now an org option rather than a user
+* ! event_id is now int64
 * ! web_hook_config_insecure_ssl is now a bool rather than a string
 * ! hook_config is now a hook_config rather than a web_hook_config
+* ! hook_id is now int64
 * ! new_hook_config is now a hook_config rather than a web_hook_config
 * ! update_hook_config is now a hook_config rather than a web_hook_config
+* ! deploy_key_id is now int64
+* ! status_id is now int64
 * ! change_statusdeletions field renamed to change_status_deletions
 * ! change_statusadditions field renamed to change_status_additions
 * ! change_statustotal field renamed to change_status_total
@@ -153,6 +176,7 @@
 * ! gist_edit_content field renamed to update_gist_file_content
 * ! gist_edit_filename field renamed to update_gist_file_name
 * ! gist_edits type has been renamed update_gist (+ fields)
+* ! gist_fork_id is now int64
 * Atdgen >=1.5.0 and Yojson >=1.2.0 are now required for tag_field support
 * Cohttp >=0.17.0 is now required for Link header support
 * Monad.map, Monad.(>|=), and Monad.embed : 'a Lwt.t -> 'a Monad.t added

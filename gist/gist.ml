@@ -198,7 +198,7 @@ let gist_info auth_id user pass token_name json pretty gist_id =
   Lwt_main.run (
     lwt code = get_auth auth_id user pass token_name in
     let token = G.Token.of_auth code in
-    lwt gist = M.(run (Gist.get ~token ~num:gist_id () >|= G.Response.value)) in
+    lwt gist = M.(run (Gist.get ~token ~id:gist_id () >|= G.Response.value)) in
     if json then
       Lwt_io. printf "%s\n" (pretty_json pretty (Github_j.string_of_gist gist))
     else 
@@ -211,7 +211,7 @@ let gist_file_info auth_id user pass token_name json pretty gist_id file =
   Lwt_main.run (
     lwt code = get_auth auth_id user pass token_name in
     let token = G.Token.of_auth code in
-    lwt gist = M.(run (Gist.get ~token ~num:gist_id () >|= G.Response.value)) in
+    lwt gist = M.(run (Gist.get ~token ~id:gist_id () >|= G.Response.value)) in
     lwt file_data = 
       try Lwt.return (List.assoc file gist.gist_files)
       with _ -> Lwt.fail (Gist_file_not_found file)

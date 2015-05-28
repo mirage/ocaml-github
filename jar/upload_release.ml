@@ -24,8 +24,8 @@ let ask_github fn = Github.(Monad.run (fn ()))
 let upload_release token user repo tag content_type filename =
   let open Github_t in
   lwt r = ask_github (Github.Release.get_by_tag_name ~token ~user ~repo ~tag) in
-  let num = r.release_id in
-  print_endline (sprintf "uploading to release id %d" num);
+  let id = r.release_id in
+  print_endline (sprintf "uploading to release id %Ld" id);
   lwt body =
     lwt len = Lwt_io.file_length filename >|= Int64.to_int in
     let buf = String.create len in
@@ -34,7 +34,7 @@ let upload_release token user repo tag content_type filename =
     >>= fun () -> return buf
   in
   lwt _a = ask_github (Github.Release.upload_asset 
-    ~token ~user ~repo ~num ~filename ~content_type ~body) in
+    ~token ~user ~repo ~id ~filename ~content_type ~body) in
   return_unit
 
 let run token user repo tag content_type filename =

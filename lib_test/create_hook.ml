@@ -55,34 +55,34 @@ let t = Github.(Monad.(run Github_t.(
   >>= fun () ->
   let hook = make_hook "http://example.com/" [`Push; `PullRequest; `Status] in
   Hook.create ~token ~user ~repo ~hook ()
-  >>= fun hook_a -> print_hooks "Created:" (Stream.of_list [hook_a])
+  >>~ fun hook_a -> print_hooks "Created:" (Stream.of_list [hook_a])
   >>= fun () ->
   let hook = make_hook "http://example.org/"
     [`CommitComment; `IssueComment; `PullRequestReviewComment] in
   Hook.create ~token ~user ~repo ~hook ()
-  >>= fun hook_b -> print_hooks "Created:" (Stream.of_list [hook_b])
+  >>~ fun hook_b -> print_hooks "Created:" (Stream.of_list [hook_b])
   >>= fun () ->
   Hook.get ~token ~user ~repo ~num:hook_b.hook_id ()
-  >>= fun hook -> print_hooks "Just:" (Stream.of_list [hook])
+  >>~ fun hook -> print_hooks "Just:" (Stream.of_list [hook])
   >>= fun () ->
   Hook.update ~token ~user ~repo ~num:hook.hook_id ~hook:{
     update_hook_config=`Web (make_web_hook_config "http://example.net/" None);
     update_hook_events=Some (`Watch::hook.hook_events);
     update_hook_active=false;
   } ()
-  >>= fun hook -> print_hooks "Updated:" (Stream.of_list [hook])
+  >>~ fun hook -> print_hooks "Updated:" (Stream.of_list [hook])
   >>= fun () ->
   API.set_user_agent "lib_test/create_hook.ml"
   >>= fun () ->
   print_hooks "Retrieved:" get_hooks
   >>= fun () ->
   Hook.delete ~token ~user ~repo ~num:hook.hook_id ()
-  >>= fun () -> print_hooks "Deleted:" (Stream.of_list [hook])
+  >>~ fun () -> print_hooks "Deleted:" (Stream.of_list [hook])
   >>= fun () ->
   print_hooks "Retrieved:" get_hooks
   >>= fun () ->
   Hook.delete ~token ~user ~repo ~num:hook_a.hook_id ()
-  >>= fun () -> print_hooks "Deleted:" (Stream.of_list [hook_a])
+  >>~ fun () -> print_hooks "Deleted:" (Stream.of_list [hook_a])
   >>= fun () ->
   print_hooks "Present:" get_hooks
 )))

@@ -20,8 +20,6 @@ open Lwt
 open Cmdliner
 open Printf
 
-let ask_github fn = Github.(Monad.run (fn ()))
-
 let create_release ~token
       ~user ~repo ~tag ~release_name ~target_commitish ~body:new_release_body
       ~assets ~content_type ~prerelease ~draft =
@@ -36,10 +34,9 @@ let create_release ~token
       new_release_prerelease = prerelease;
     }
   in
-  lwt release =
-    ask_github (
-      Github.Release.create ~token ~user ~repo ~release:new_release)
-  in
+  lwt release = Github.(Monad.(run (
+    Release.create ~token ~user ~repo ~release:new_release () >|= Response.value
+  ))) in
   let num = release.release_id in
   Lwt_list.iter_s (fun filename ->
     lwt len = Lwt_io.file_length filename >|= Int64.to_int in
@@ -47,10 +44,12 @@ let create_release ~token
     Lwt_io.with_file ~mode:Lwt_io.input filename
       (fun ic -> Lwt_io.read_into_exactly ic body 0 len)
     >>= fun () ->
-      lwt _a = ask_github (
-        Github.Release.upload_asset
-          ~token ~user ~repo ~num ~filename ~content_type ~body) in
-      return ()) assets
+    lwt _a = Github.(Monad.(run (
+      Release.upload_asset
+        ~token ~user ~repo ~num ~filename ~content_type ~body ()
+      >|= Response.value
+    ))) in
+    return ()) assets
 
 let run token user repo tag release_name target_commitish body assets
     content_type prerelease draft =

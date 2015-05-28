@@ -24,8 +24,9 @@ let t = Github.(Monad.(run (
   return (opam_repo_pulls ())
   >>= Stream.iter (fun hd ->
     Pull.get ?token ~user ~repo ~num:hd.Github_t.pull_number ()
-    >>= fun p ->
-    eprintf "Inside monad: pull %d: %s\n%!" p.Github_t.pull_number p.Github_t.pull_title;
+    >>~ fun p ->
+    eprintf "Inside monad: pull %d: %s\n%!"
+      p.Github_t.pull_number p.Github_t.pull_title;
     return (Pull.list_commits ?token ~user ~repo ~num:hd.Github_t.pull_number ())
     >>= Stream.iter (fun commit ->
       eprintf "    %s\n" commit.Github_t.commit_sha; return ()

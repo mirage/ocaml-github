@@ -33,7 +33,7 @@ let t = Github.(Monad.(run (
       ~sort:`Completeness ~direction:`Desc ~user ~repo ()
   in Stream.iter (fun { Github_t.milestone_number = num } ->
     Milestone.get ~user ~repo ~num ()
-    >>= fun { Github_t.milestone_title } ->
+    >>~ fun { Github_t.milestone_title } ->
     eprintf "Inside monad: milestone %d: %s\n" num milestone_title;
     return ()
   ) milestones

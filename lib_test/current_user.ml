@@ -2,9 +2,9 @@ let token = Config.access_token
 
 let user =
   Lwt_main.run (
-    Github.Monad.run (
-      Github.User.current_info ~token ()
-    )
+    Github.(Monad.(run (
+      User.current_info ~token () >|= Response.value
+    )))
   )
 
 let _ =

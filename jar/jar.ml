@@ -29,7 +29,7 @@ let scope =
   parse, print
 
 let complete_2fa c =
-  let rec try_again f = Github.(Monad.(f () >>= function
+  let rec try_again f = Github.(Monad.(f () >>~ function
   | Result auths -> return auths
   | Two_factor mode ->
     embed (Lwt_io.printf "Enter 2FA code from '%s': " mode)

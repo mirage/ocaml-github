@@ -41,6 +41,12 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
 
   let rate_table : (string option,rates) Hashtbl.t = Hashtbl.create 4
 
+  module Response = struct
+    type 'a t = 'a
+
+    let value r = r
+  end
+
   (* Authorization Scopes *)
   module Scope = struct
 
@@ -418,6 +424,7 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
 
     let (>>=) m f = bind f m
     let (>|=) m f = map f m
+    let (>>~) m f = m >|= Response.value >>= f
 
     let embed lw =
       Lwt.(fun state -> lw >>= (fun v -> return (state, Response v)))
@@ -749,11 +756,13 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
       in
       let request ~uri f =
         let fail_handlers = stream_fail_handlers restart fail_handlers in
-        idempotent ?rate
-          `GET ?headers ?token ?params ~fail_handlers ~expected_code ~uri f
+        Monad.map Response.value
+          (idempotent ?rate
+             `GET ?headers ?token ?params ~fail_handlers ~expected_code ~uri f)
       in
       let uri = endpoint.Endpoint.uri in
-      first_request ~uri (stream_next restart request uri fn endpoint)
+      Monad.map Response.value
+        (first_request ~uri (stream_next restart request uri fn endpoint))
 
     let get_stream (type a)
         ?rate
@@ -767,8 +776,9 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
       in
       let request ~uri f =
         let fail_handlers = stream_fail_handlers restart fail_handlers in
-        idempotent ?rate
-          `GET ?headers ?token ?params ~fail_handlers ~expected_code ~uri f
+        Monad.map Response.value
+          (idempotent ?rate
+             `GET ?headers ?token ?params ~fail_handlers ~expected_code ~uri f)
       in
       let endpoint = Endpoint.({ empty with uri }) in
       let refill = Some (fun () ->
@@ -814,7 +824,7 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
     let request_rate_limit ?token () = Monad.(
       let uri = URI.rate_limit in
       get ?token ~uri (fun b -> Lwt.return (Github_j.rate_limit_of_string b))
-      >>= fun { Github_t.rate_limit_resources } ->
+      >>~ fun { Github_t.rate_limit_resources } ->
       let rates = rates_of_resources rate_limit_resources in
       Hashtbl.replace rate_table token rates;
       return rate_limit_resources
@@ -1450,11 +1460,11 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
         match hd.git_ref_obj.obj_ty with
         |`Commit -> (* lightweight tag, so get commit info *)
           commit ?token ~user ~repo ~sha ()
-          >>= fun c ->
+          >>~ fun c ->
           return [name, c.commit_git.git_commit_author.info_date]
         |`Tag ->
           get_tag ?token ~user ~repo ~sha ()
-          >>= fun t ->
+          >>~ fun t ->
           return [name, t.tag_tagger.info_date]
         |_ -> return []
       ) tags

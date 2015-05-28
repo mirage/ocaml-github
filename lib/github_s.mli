@@ -35,6 +35,22 @@ module type Github = sig
       returns an unexpected response code. Typical reasons for this
       exception are insufficient permissions or missing resources. *)
 
+  (** Functions corresponding to direct API requests return
+      {!Response.t} values inside of {!Monad.t} values so that more
+      information about the request can be made
+      available. {!Monad.(>>~)} is a convenience operator that lets
+      you bind directly to the carried value. *)
+  module Response : sig
+    type 'a t
+    (** ['a t] is an API response containing a payload of type
+        ['a]. {b Do not} refer to this type explicitly as its identity and
+        representation are subject to change (e.g. a family of object
+        types may replace it before 2.0). *)
+
+    val value : 'a t -> 'a
+    (** [value r] is the payload in response [r]. *)
+  end
+
   (** All API requests are bound through this monad which encapsulates
       an Lwt cooperative thread and includes some state which may be
       set via {!API} functions. *)
@@ -54,10 +70,13 @@ module type Github = sig
         order is designed for currying. *)
 
     val (>>=) : 'a t -> ('a -> 'b t) -> 'b t
-    (** [m >>= f] is {!bind} [f m]. *)
+    (** [m >>= f] is [{!bind} f m]. *)
 
     val (>|=) : 'a t -> ('a -> 'b) -> 'b t
-    (** [m >|= f] is {!map} [f m]. *)
+    (** [m >|= f] is [{!map} f m]. *)
+
+    val (>>~) : 'a Response.t t -> ('a -> 'b t) -> 'b t
+    (** [m >>~ f] is [m >|= {!Response.value} >>= f]. *)
 
     val run : 'a t -> 'a Lwt.t
     (** [run m] is the Lwt thread corresponding to the sequence of API
@@ -203,7 +222,7 @@ module type Github = sig
       ?note_url:string -> ?client_id:string -> ?client_secret:string ->
       ?fingerprint:string -> ?otp:string ->
       user:string -> pass:string -> unit ->
-      Github_t.auth authorization Monad.t
+      Github_t.auth authorization Response.t Monad.t
     (** [create ?otp ~user ~pass ()] is a new authorization with the
         provided fields. When a user has enabled two-factor
         authentication, the return value will be a {!const:Two_factor}
@@ -212,19 +231,19 @@ module type Github = sig
         value. *)
 
     val get_all : ?otp:string -> user:string -> pass:string -> unit ->
-      Github_t.auths authorization Monad.t
+      Github_t.auths authorization Response.t Monad.t
     (** [get_all ~user ~pass ()] are all of the authorizations that
         this user has made. See {!create} for an explanation of how
         two-factor authentication is handled. *)
 
-    val get : ?otp:string -> user:string -> pass:string -> id:int -> unit ->
-      Github_t.auth option authorization Monad.t
+    val get : ?otp:string -> user:string -> pass:string -> id:int ->
+      unit -> Github_t.auth option authorization Response.t Monad.t
     (** [get ~user ~pass ~id ()] is the authorization with identifier
         [id]. See {!create} for an explanation of how two-factor
         authentication is handled. *)
 
     val delete : ?otp:string -> user:string -> pass:string -> id:int -> unit ->
-      unit authorization Monad.t
+      unit authorization Response.t Monad.t
     (** [delete ~user ~pass ~id ()] is [Result ()] after the
         authorization with identifier [id] has been removed. See
         {!create} for an explanation of how two-factor authentication
@@ -269,7 +288,7 @@ module type Github = sig
       ?token:Token.t -> 
       ?params:(string * string) list ->
       uri:Uri.t -> 
-      'a parse -> 'a Monad.t
+      'a parse -> 'a Response.t Monad.t
     (** [get ?rate ?fail_handlers ?expected_code ?headers ?token
         ?params uri p] is the [p]-parsed response to a GitHub API HTTP
         GET request to [uri] with extra query parameters [params] and
@@ -307,7 +326,7 @@ module type Github = sig
       ?token:Token.t ->
       ?params:(string * string) list ->
       uri:Uri.t ->
-      'a parse -> 'a Monad.t
+      'a parse -> 'a Response.t Monad.t
     (** [post uri p] is the [p]-parsed response to a GitHub API HTTP
         POST request to [uri]. For an explanation of the other
         parameters, see {!get}. *)
@@ -320,7 +339,7 @@ module type Github = sig
       ?token:Token.t -> 
       ?params:(string * string) list ->
       uri:Uri.t -> 
-      'a parse -> 'a Monad.t
+      'a parse -> 'a Response.t Monad.t
     (** [delete uri p] is the [p]-parsed response to a GitHub API HTTP
         DELETE request to [uri]. For an explanation of the other
         parameters, see {!get}. *)
@@ -334,7 +353,7 @@ module type Github = sig
       ?token:Token.t ->
       ?params:(string * string) list ->
       uri:Uri.t ->
-      'a parse -> 'a Monad.t
+      'a parse -> 'a Response.t Monad.t
     (** [patch uri p] is the [p]-parsed response to a GitHub API HTTP
         PATCH request to [uri]. For an explanation of the other
         parameters, see {!get}. *)
@@ -348,7 +367,7 @@ module type Github = sig
       ?token:Token.t ->
       ?params:(string * string) list ->
       uri:Uri.t ->
-      'a parse -> 'a Monad.t
+      'a parse -> 'a Response.t Monad.t
     (** [put uri p] is the [p]-parsed response to a GitHub API HTTP
         PUT request to [uri]. For an explanation of the other
         parameters, see {!get}. *)
@@ -535,12 +554,14 @@ module type Github = sig
 
   (** The [User] module provides basic user information query functions. *)
   module User : sig
-    val current_info : ?token:Token.t -> unit -> Github_t.user_info Monad.t
+    val current_info : ?token:Token.t ->
+      unit -> Github_t.user_info Response.t Monad.t
     (** [current_info ()] is the user information linked to the
         current token. *)
 
     val info :
-      ?token:Token.t -> user:string -> unit -> Github_t.user_info Monad.t
+      ?token:Token.t -> user:string ->
+      unit -> Github_t.user_info Response.t Monad.t
     (** [info ~user ()] is the user information for user [user]. *)
 
     val repositories :
@@ -567,7 +588,7 @@ module type Github = sig
     val info :
       ?token:Token.t ->
       num:int ->
-      unit -> Github_t.team_info Monad.t
+      unit -> Github_t.team_info Response.t Monad.t
     (** [info ~num ()] is a description of team [num]. *)
 
     val repositories :
@@ -654,14 +675,14 @@ module type Github = sig
     val info :
       ?token:Token.t ->
       user:string -> repo:string ->
-      unit -> Github_t.repository Monad.t
+      unit -> Github_t.repository Response.t Monad.t
     (** [info ~user ~repo ()] is a description of repository [user]/[repo]. *)
 
     val fork :
       ?token:Token.t ->
       ?organization:string ->
       user:string -> repo:string ->
-      unit -> Github_t.repository Monad.t
+      unit -> Github_t.repository Response.t Monad.t
     (** [fork ?organization ~user ~repo ()] is a newly forked
         repository from [user]/[repo] to the current token's user or
         [organization] if it's provided. *)
@@ -677,7 +698,7 @@ module type Github = sig
     val get_tag :
       ?token:Token.t ->
       user:string -> repo:string -> sha:string ->
-      unit -> Github_t.tag Monad.t
+      unit -> Github_t.tag Response.t Monad.t
     (** [get_tag ~user ~repo ~sha ()] is the annotated tag object with
         SHA [sha] in [user]/[repo]. *)
 
@@ -713,7 +734,7 @@ module type Github = sig
     val commit :
       ?token:Token.t ->
       user:string -> repo:string -> sha:string ->
-      unit -> Github_t.commit Monad.t
+      unit -> Github_t.commit Response.t Monad.t
     (** [commit ~user ~repo ~sha ()] is commit [sha] in [user]/[repo]. *)
   end
 
@@ -730,14 +751,14 @@ module type Github = sig
     val get :
       ?token:Token.t ->
       user:string ->
-      repo:string -> num:int -> unit -> Github_t.hook Monad.t
+      repo:string -> num:int -> unit -> Github_t.hook Response.t Monad.t
     (** [get ~user ~repo ~num ()] is hook [num] for repo [user]/[repo]. *)
 
     val create :
       ?token:Token.t ->
       user:string ->
       repo:string ->
-      hook:Github_t.new_hook -> unit -> Github_t.hook Monad.t
+      hook:Github_t.new_hook -> unit -> Github_t.hook Response.t Monad.t
     (** [create ~user ~repo ~hook ()] is a newly created post-receive
         hook for repo [user]/[repo] as described by [hook]. *)
 
@@ -746,21 +767,21 @@ module type Github = sig
       user:string ->
       repo:string ->
       num:int ->
-      hook:Github_t.update_hook -> unit -> Github_t.hook Monad.t
+      hook:Github_t.update_hook -> unit -> Github_t.hook Response.t Monad.t
     (** [update ~user ~repo ~num ~hook ()] is the updated hook [num]
         in [user]/[repo] as described by [hook]. *)
 
     val delete :
       ?token:Token.t ->
       user:string ->
-      repo:string -> num:int -> unit -> unit Monad.t
+      repo:string -> num:int -> unit -> unit Response.t Monad.t
     (** [delete ~user ~repo ~num ()] activates after hook [num] in
         repo [user]/[repo] has been deleted. *)
 
     val test :
       ?token:Token.t ->
       user:string ->
-      repo:string -> num:int -> unit -> unit Monad.t
+      repo:string -> num:int -> unit -> unit Response.t Monad.t
     (** [test ~user ~repo ~num ()] activates after a [push] event
         for the lastest push to [user]/[repo] has been synthesized
         and sent to hook [num]. *)
@@ -784,7 +805,7 @@ module type Github = sig
       repo:string ->
       sha:string ->
       status:Github_t.new_status ->
-      unit -> Github_t.status Monad.t
+      unit -> Github_t.status Response.t Monad.t
     (** [create ~user ~repo ~sha ~status ()] is a newly created status
         on SHA [sha] in repo [user]/[repo] as described by [status]. *)
   end
@@ -804,14 +825,14 @@ module type Github = sig
     val get :
       ?token:Token.t ->
       user:string ->
-      repo:string -> num:int -> unit -> Github_t.pull Monad.t
+      repo:string -> num:int -> unit -> Github_t.pull Response.t Monad.t
     (** [get ~user ~repo ~num ()] is the pull request [user]/[repo]#[num]. *)
 
     val create :
       ?token:Token.t ->
       user:string ->
       repo:string ->
-      pull:Github_t.new_pull -> unit -> Github_t.pull Monad.t
+      pull:Github_t.new_pull -> unit -> Github_t.pull Response.t Monad.t
     (** [create ~user ~repo ~pull ()] is the newly created pull
         request against repo [user]/[repo] as described by [pull]. *)
 
@@ -820,7 +841,7 @@ module type Github = sig
       user:string ->
       repo:string ->
       pull_issue:Github_t.new_pull_issue ->
-      unit -> Github_t.pull Monad.t
+      unit -> Github_t.pull Response.t Monad.t
     (** [create_from_issue ~user ~repo ~pull_issue ()] is the newly
         created pull request from an issue against repo [user]/[repo]
         as described by [pull_issue]. *)
@@ -830,7 +851,7 @@ module type Github = sig
       user:string ->
       repo:string ->
       update_pull:Github_t.update_pull ->
-      num:int -> unit -> Github_t.pull Monad.t
+      num:int -> unit -> Github_t.pull Response.t Monad.t
     (** [update ~user ~repo ~update_pull ~num ()] is the updated pull
         request [user]/[repo]#[num] as described by [update_pull]. *)
 
@@ -851,7 +872,7 @@ module type Github = sig
     val is_merged :
       ?token:Token.t ->
       user:string ->
-      repo:string -> num:int -> unit -> bool Monad.t
+      repo:string -> num:int -> unit -> bool Response.t Monad.t
     (** [is_merged ~user ~repo ~num ()] is [true] if pull request
         [user]/[repo]#[num] has been merged. *)
 
@@ -860,7 +881,8 @@ module type Github = sig
       user:string ->
       repo:string ->
       num:int ->
-      ?merge_commit_message:string -> unit -> Github_t.merge Monad.t
+      ?merge_commit_message:string ->
+      unit -> Github_t.merge Response.t Monad.t
     (** [merge ~user ~repo ~num ?merge_commit_message ()] is the merge
         of pull request [user]/[repo]#[num] with optional commit
         message [?merge_commit_message]. *)
@@ -887,14 +909,14 @@ module type Github = sig
 
     val create :
       ?token:Token.t -> user:string -> repo:string ->
-      issue:Github_t.new_issue -> unit -> Github_t.issue Monad.t
+      issue:Github_t.new_issue -> unit -> Github_t.issue Response.t Monad.t
     (** [create ~user ~repo ~issue ()] is a newly created issue
         described by [issue] in repo [user]/[repo]. *)
 
     val update :
       ?token:Token.t -> user:string -> repo:string ->
       num:int -> issue:Github_t.new_issue ->
-      unit -> Github_t.issue Monad.t
+      unit -> Github_t.issue Response.t Monad.t
     (** [update ~user ~repo ~num ~issue ()] is the updated issue [num]
         in [user]/[repo] as described by [issue]. *)
 
@@ -906,7 +928,8 @@ module type Github = sig
 
     val create_comment :
       ?token:Token.t -> user:string -> repo:string ->
-      num:int -> body:string -> unit -> Github_t.issue_comment Monad.t
+      num:int -> body:string ->
+      unit -> Github_t.issue_comment Response.t Monad.t
     (** [create_comment ~user ~repo ~num ~body ()] is a newly created
         issue comment on [user]/[repo]#[num] with content [body]. *)
 
@@ -935,20 +958,23 @@ module type Github = sig
 
     val get:
       ?token:Token.t ->
-      user:string -> repo:string -> num:int -> unit -> Github_t.milestone Monad.t
+      user:string -> repo:string -> num:int ->
+      unit -> Github_t.milestone Response.t Monad.t
     (** [get ~user ~repo ~num ()] is milestone number [num] in repo
         [user]/[repo]. *)
 
     val create :
       ?token:Token.t ->
       user:string -> repo:string ->
-      milestone:Github_t.new_milestone -> unit -> Github_t.milestone Monad.t
+      milestone:Github_t.new_milestone ->
+      unit -> Github_t.milestone Response.t Monad.t
     (** [create ~user ~repo ~milestone ()] is the newly created
         milestone described by [milestone] in repo [user]/[repo]. *)
 
     val delete:
       ?token:Token.t ->
-      user:string -> repo:string -> num:int -> unit -> unit Monad.t
+      user:string -> repo:string -> num:int ->
+      unit -> unit Response.t Monad.t
     (** [delete ~user ~repo ~num ()] activates after milestone
         [num] in repo [user]/[repo] has been deleted. *)
 
@@ -956,7 +982,7 @@ module type Github = sig
       ?token:Token.t ->
       user:string -> repo:string ->
       milestone:Github_t.update_milestone -> num:int ->
-      unit -> Github_t.milestone Monad.t
+      unit -> Github_t.milestone Response.t Monad.t
     (** [update ~user ~repo ~milestone ~num ()] is the updated
         milestone [num] in repo [user]/[repo] as described by
         [milestone]. *)
@@ -974,7 +1000,8 @@ module type Github = sig
 
     val get:
       ?token:Token.t ->
-      user:string -> repo:string -> num:int -> unit -> Github_t.release Monad.t
+      user:string -> repo:string -> num:int ->
+      unit -> Github_t.release Response.t Monad.t
     (** [get ~user ~repo ~num ()] is release number [num] in repo
         [user]/[repo]. *)
 
@@ -987,13 +1014,14 @@ module type Github = sig
     val create :
       ?token:Token.t ->
       user:string -> repo:string ->
-      release:Github_t.new_release -> unit -> Github_t.release Monad.t
+      release:Github_t.new_release ->
+      unit -> Github_t.release Response.t Monad.t
     (** [create ~user ~repo ~release ()] is the newly created release
         described by [release] in repo [user]/[repo]. *)
 
     val delete:
       ?token:Token.t ->
-      user:string -> repo:string -> num:int -> unit -> unit Monad.t
+      user:string -> repo:string -> num:int -> unit -> unit Response.t Monad.t
     (** [delete ~user ~repo ~num ()] activates after release [num]
         in repo [user]/[repo] has been deleted. *)
 
@@ -1001,7 +1029,7 @@ module type Github = sig
       ?token:Token.t ->
       user:string -> repo:string ->
       release:Github_t.update_release -> num:int ->
-      unit -> Github_t.release Monad.t
+      unit -> Github_t.release Response.t Monad.t
     (** [update ~user ~repo ~release ~num ()] is the updated release
         [num] in [user]/[repo] as described by [release]. *)
 
@@ -1010,7 +1038,7 @@ module type Github = sig
       user:string -> repo:string ->
       num:int -> filename:string -> content_type:string ->
       body:string ->
-      unit -> unit Monad.t
+      unit -> unit Response.t Monad.t
     (** [upload_asset ~user ~repo ~num ~filename ~content_type ~body ()]
         activates after [body] is uploaded to repo [user]/[repo] as
         an asset for release [num] with file name [filename] and content
@@ -1032,19 +1060,22 @@ module type Github = sig
 
     val get:
       ?token:Token.t ->
-      user:string -> repo:string -> num:int -> unit -> Github_t.deploy_key Monad.t
+      user:string -> repo:string -> num:int ->
+      unit -> Github_t.deploy_key Response.t Monad.t
     (** [get ~user ~repo ~num ()] is deploy key [num] for repo [user]/[repo]. *)
 
     val create :
       ?token:Token.t ->
       user:string -> repo:string ->
-      new_key:Github_t.new_deploy_key -> unit -> Github_t.deploy_key Monad.t
+      new_key:Github_t.new_deploy_key ->
+      unit -> Github_t.deploy_key Response.t Monad.t
     (** [create ~user ~repo ~new_key ()] is the newly created deploy
         key [new_key] for repo [user]/[repo]. *)
 
     val delete:
       ?token:Token.t ->
-      user:string -> repo:string -> num:int -> unit -> unit Monad.t
+      user:string -> repo:string -> num:int ->
+      unit -> unit Response.t Monad.t
     (** [delete ~user ~repo ~num ()] activates after deploy key
         [num] in repo [user]/[repo] has been deleted. *)
   end
@@ -1084,17 +1115,18 @@ module type Github = sig
 
     val get :
       ?token:Token.t ->
-      num:string -> unit -> Github_t.gist Monad.t
+      num:string -> unit -> Github_t.gist Response.t Monad.t
     (** [get ~num ()] is the gist [num]. *)
 
     val create :
       ?token:Token.t ->
-      gist:Github_t.new_gist -> unit -> Github_t.gist Monad.t
+      gist:Github_t.new_gist -> unit -> Github_t.gist Response.t Monad.t
     (** [create ~gist ()] is a newly created gist described by [gist]. *)
 
     val update :
       ?token:Token.t ->
-      num:string -> gist:Github_t.update_gist -> unit -> Github_t.gist Monad.t
+      num:string -> gist:Github_t.update_gist ->
+      unit -> Github_t.gist Response.t Monad.t
     (** [update ~num ~gist ()] is the updated gist [num] as described
         by [gist]. *)
 
@@ -1105,13 +1137,13 @@ module type Github = sig
 
     val star :
       ?token:Token.t ->
-      num:string -> unit -> unit Monad.t
+      num:string -> unit -> unit Response.t Monad.t
     (** [star ~num ()] activates after gist [num] is marked as
         starred by the current token's user. *)
 
     val unstar :
       ?token:Token.t ->
-      num:string -> unit -> unit Monad.t
+      num:string -> unit -> unit Response.t Monad.t
     (** [unstar ~num ()] activates after gist [num] is marked as
         not starred by the current token's user. *)
 
@@ -1119,7 +1151,7 @@ module type Github = sig
 
     val fork :
       ?token:Token.t ->
-      num:string -> unit -> Github_t.gist Monad.t
+      num:string -> unit -> Github_t.gist Response.t Monad.t
     (** [fork ~num ()] is a newly forked gist from gist [num]. *)
 
     val forks :
@@ -1129,7 +1161,7 @@ module type Github = sig
 
     val delete :
       ?token:Token.t ->
-      num:string -> unit -> unit Monad.t
+      num:string -> unit -> unit Response.t Monad.t
     (** [delete ~num ()] activates after gist [num] has been deleted. *)
   end
 

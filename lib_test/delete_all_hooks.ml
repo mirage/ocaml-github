@@ -30,7 +30,9 @@ let t = Github.(Monad.(run Github_t.(
   >>= fun hooks ->
   printf "Present: %d hooks\n" (List.length hooks);
   List.fold_left (fun m h ->
-    m >>= fun () -> Hook.delete ~user ~repo ~num:h.hook_id ()
+    m >>= fun () ->
+    Hook.delete ~user ~repo ~num:h.hook_id ()
+    >|= Response.value
   ) (return ()) hooks
   >>= fun () -> Stream.to_list get_hooks
   >>= fun hooks ->

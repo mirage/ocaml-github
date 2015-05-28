@@ -31,7 +31,9 @@ let run _ =
 
   let run_gist_fetch _ = 
     Lwt.ignore_result
-      (lwt gist = Monad.run (Gist.get ~num:(value "gist-id") ()) in
+      (lwt gist = Monad.(run (
+         Gist.get ~num:(value "gist-id") () >|= Response.value
+       )) in
       let content = 
         try (* show content of 1st file in gist *)
           match (snd (List.nth gist.gist_files 0)).gist_file_content with 

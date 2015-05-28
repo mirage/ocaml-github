@@ -13,7 +13,7 @@ let t = Github.(Monad.(run (
   | None -> eprintf "no teams for %s\n" org; exit 1
   | Some (first_team,_) ->
   let get_first_team = Team.info ~token:token ~num:first_team.team_id in
-  get_first_team () >>= fun team ->
+  get_first_team () >>~ fun team ->
   eprintf "team %d: %s (%s)\n%!"
     team.team_info_id team.team_info_name team.team_info_url;
   let get_team_repos =

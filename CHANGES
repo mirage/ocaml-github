@@ -3,6 +3,7 @@
 * ! Monad.bind now accepts a function first and then a Monad.t
 * ! API.{get,post,delete,patch,put} now take optional fail_handlers
 * ! API.{get,post,delete,patch,put} now take optional rate classification
+* ! API.{get,post,delete,patch,put} now return 'a Response.t Monad.t
 * ! URI.authorize now requires ~state argument to protect against CSRF.
 * ! URI.repo_issue ~issue_number argument was renamed to ~num
 * ! URI.issue_comments ~issue_number argument was renamed to ~num
@@ -12,21 +13,45 @@
 * ! Scope.scopes_of_string was renamed Scope.list_of_string
 * ! Scope.list_of_string returns a scope list option for unparseable scopes
 * ! Scope.string_of_scopes was renamed Scope.list_to_string
-* ! Token.{create,get_all,get,delete} now return _ authorization Monad.t
+* ! Token.{create,get_all,get,delete} return _ authorization Response.t Monad.t
 * ! Token.{create,get_all,get,delete} now have additional ?otp:string argument
 * ! Token.create now has additional ?fingerprint:string argument
-* ! Token.get now returns auth option authorization Monad.t
+* ! Token.get now returns auth option authorization Response.t Monad.t
 * ! User.current_info ~token argument was made optional ?token
+* ! User.current_info now returns user_info Response.t Monad.t
 * ! User.info ~login argument was renamed to ~user
+* ! User.info now returns user_info Response.t Monad.t
+* ! User.repos is now User.repositories
 * ! User.repositories now accepts optional ?token and does not accept ?page
 * ! Pull.for_repo does not accept ?page and now returns pull Stream.t
 * ! Pull.list_commits now returns commit Stream.t
 * ! Pull.list_files now returns file Stream.t
+* ! Pull.get now returns pull Response.t Monad.t
+* ! Pull.create now returns pull Response.t Monad.t
+* ! Pull.create_from_issue now returns pull Response.t Monad.t
+* ! Pull.update now returns pull Response.t Monad.t
+* ! Pull.is_merged now returns bool Response.t Monad.t
+* ! Pull.merge now returns merge Response.t Monad.t
+* ! Milestone.get now returns milestone Response.t Monad.t
+* ! Milestone.create now returns milestone Response.t Monad.t
+* ! Milestone.update now returns milestone Response.t Monad.t
+* ! Milestone.delete now returns unit Response.t Monad.t
 * ! Milestone.for_repo does not accept ?page
 * ! Milestone.for_repo now returns milestone Stream.t
+* ! Release.get now returns release Response.t Monad.t
+* ! Release.create now returns release Response.t Monad.t
+* ! Release.update now returns release Response.t Monad.t
+* ! Release.delete now returns unit Response.t Monad.t
+* ! Release.upload_asset now returns unit Response.t Monad.t
 * ! Release.for_repo now returns release Stream.t
 * ! Release.upload_asset ~id argument was renamed to ~num
+* ! Deploy_key.get now returns deploy_key Response.t Monad.t
+* ! Deploy_key.create now returns deploy_key Response.t Monad.t
+* ! Deploy_key.delete now returns unit Response.t Monad.t
 * ! Deploy_key.for_repo now returns deploy_key Stream.t
+* ! Issue.create now returns issue Response.t Monad.t
+* ! Issue.update now returns issue Response.t Monad.t
+* ! Issue.create_comment now returns issue_comment Response.t Monad.t
 * ! Issue.for_repo does not accept ?page and now returns issue Stream.t
 * ! Issue.update ~issue_number argument was renamed to ~num
 * ! Issue.comments ~issue_number argument was renamed to ~num
@@ -34,13 +59,23 @@
 * ! Issue.comments now returns issue_comment Stream.t
 * ! Status.for_sha was renamed Status.for_ref and now returns status Stream.t
 * ! Status.for_ref ~sha argument was renamed to ~git_ref
+* ! Status.create now returns status Response.t Monad.t
 * ! Hook.for_repo now returns hook Stream.t
+* ! Hook.get now returns hook Response.t Monad.t
+* ! Hook.create now returns hook Response.t Monad.t
+* ! Hook.update now returns hook Response.t Monad.t
+* ! Hook.delete now returns unit Response.t Monad.t
+* ! Hook.test now returns unit Response.t Monad.t
 * ! Repo.tags now returns repo_tag Stream.t
 * ! Repo.branches now returns repo_branch Stream.t
 * ! Repo.refs now returns git_ref Stream.t
 * ! Tag.get_tags_and_times was renamed Repo.get_tags_and_times
 * ! Repo.get_tags_and_times now returns (string * string) Stream.t
 * ! Tag.tag was renamed Repo.get_tag
+* ! Repo.info now returns repository Response.t Monad.t
+* ! Repo.fork now returns repository Response.t Monad.t
+* ! Repo.get_tag now returns tag Response.t Monad.t
+* ! Repo.commit now returns commit Response.t Monad.t
 * ! Gist.list_users was renamed Gist.for_user and now returns gist Stream.t
 * ! Gist.list was renamed Gist.all and now returns gist Stream.t
 * ! Gist.list_all_public was renamed Gist.all_public and now returns gist Stream.t
@@ -48,24 +83,33 @@
 * ! Gist.starred ~token argument was made optional ?token
 * ! Gist.starred now returns gist Stream.t
 * ! Gist.get ~id argument was renamed to ~num
+* ! Gist.get now returns gist Response.t Monad.t
 * ! Gist.create ~token argument was made optional ?token
 * ! Gist.create ~contents argument was renamed to ~gist
+* ! Gist.create now returns gist Response.t Monad.t
 * ! Gist.edit was renamed Gist.update
 * ! Gist.update signature now has s/~token/?token/ s/~id/~num/ s/~contents/~gist/
+* ! Gist.update now returns gist Response.t Monad.t
 * ! Gist.commits ~id argument was renamed to ~num
 * ! Gist.commits now returns gist_commit Stream.t
 * ! Gist.star ~token argument was made optional ?token
 * ! Gist.star ~id argument was renamed to ~num
+* ! Gist.star now returns unit Response.t Monad.t
 * ! Gist.unstar ~token argument was made optional ?token
 * ! Gist.unstar ~id argument was renamed to ~num
+* ! Gist.unstar now returns unit Response.t Monad.t
 * ! Gist.fork ~token argument was made optional ?token
 * ! Gist.fork ~id argument was renamed to ~num
+* ! Gist.fork now returns gist Response.t Monad.t
 * ! Gist.list_forks was renamed Gist.forks and now returns gist_fork Stream.t
 * ! Gist.forks ~id argument was renamed to ~num
 * ! Gist.delete ~token argument was made optional ?token
 * ! Gist.delete ~id argument was renamed to ~num
+* ! Gist.delete now returns unit Response.t Monad.t
 * ! Organization.teams now returns team Stream.t
+* ! Team.repos is now Team.repositories
 * ! Team.repositories now returns repository Stream.t
+* ! Team.info now returns team_info Response.t Monad.t
 * ! Git_obj.obj_type_to_string was renamed Git_obj.type_to_string
 * ! user:email scope constructor UserEmail has been renamed User_email
 * ! user:follow scope constructor UserFollow has been renamed User_follow
@@ -76,8 +120,6 @@
 * ! repository_watchers field renamed to repository_stargazers_count
 * ! repository_open_issues field renamed to repository_open_issues_count
 * ! repository_master_branch field renamed to repository_default_branch
-* ! User.repos is now User.repositories
-* ! Team.repos is now Team.repositories
 * ! repository_description is now optional
 * ! release_name is now optional
 * ! release_body is now optional
@@ -114,6 +156,8 @@
 * Atdgen >=1.5.0 and Yojson >=1.2.0 are now required for tag_field support
 * Cohttp >=0.17.0 is now required for Link header support
 * Monad.map, Monad.(>|=), and Monad.embed : 'a Lwt.t -> 'a Monad.t added
+* Github.Response module added for metadata about responses
+* Monad.(>>~) added to bind and project a Response.t value
 * Add Stream module and API.get_stream function for paginated responses (#46)
 * `git-jar save` removed after Authorizations API response changes of 2015-04-20
 * `git-jar make` now requires a cookie name and defaults to that for token note
@@ -144,6 +188,7 @@
   milestone (#49,#53 Michael Grünewald)
 * A new jar command, git-list-issues, has been added to print issues for a repo
 * A new jar command, git-search, has been added to search GitHub
+* Add Gist manipulation command line tool (#48)
 * Filter.state now includes `All constructor (#59,#62 Michael Grünewald)
 * pull_ref type added from which pull now inherits
 * issue_pull_request optional field of pull_ref type added
@@ -199,9 +244,6 @@
 * event_payload field added
 * events type added
 * hook_config type added
-
-* Add Gist manipulation support (#48)
-* Retrieve issues regardless of their state (#62 from Michael Grünewald)
 
 0.9.4 (2014-12-18):
 * Add bindings for organisation teams and repositories (#45).

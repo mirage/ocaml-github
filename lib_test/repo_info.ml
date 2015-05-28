@@ -9,7 +9,7 @@ let t =
   let open Monad in
   run (
     Repo.info ~token ~user:"ocaml" ~repo:"opam" ()
-    >>= fun info ->
+    >>~ fun info ->
     let descr = match info.repository_description with
       | Some descr -> descr
       | None -> ""

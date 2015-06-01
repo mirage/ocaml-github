@@ -42,9 +42,11 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
   let rate_table : (string option,rates) Hashtbl.t = Hashtbl.create 4
 
   module Response = struct
-    type 'a t = 'a
+    type 'a t = < value : 'a >
 
-    let value r = r
+    let value r = r#value
+
+    let wrap : 'a -> 'a t = fun v -> object method value = v end
   end
 
   (* Authorization Scopes *)
@@ -576,7 +578,7 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
             catch (fun () ->
               handler response
               >>= fun r ->
-              return (Monad.response r)
+              return (Monad.response (Response.wrap r))
             ) (fun exn ->
               (* XXX revert *)
               CLB.to_string body

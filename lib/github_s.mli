@@ -41,13 +41,13 @@ module type Github = sig
       available. {!Monad.(>>~)} is a convenience operator that lets
       you bind directly to the carried value. *)
   module Response : sig
-    type 'a t
+    type 'a t = private < value : 'a; .. >
     (** ['a t] is an API response containing a payload of type
         ['a]. {b Do not} refer to this type explicitly as its identity and
         representation are subject to change (e.g. a family of object
         types may replace it before 2.0). *)
 
-    val value : 'a t -> 'a
+    val value : < value : 'a; .. > -> 'a
     (** [value r] is the payload in response [r]. *)
   end
 

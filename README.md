@@ -256,6 +256,7 @@ $ git upload-release mirage ocaml-uri v1.4.0 release.tar.gz
  * [Pages](https://developer.github.com/v3/repos/pages/)
  * [Get the latest
    release](https://developer.github.com/v3/repos/releases/#get-the-latest-release)
+ * [Get a release by tag name](https://developer.github.com/v3/repos/releases/#get-a-release-by-tag-name)
  * [List assets for a
    release](https://developer.github.com/v3/repos/releases/#list-assets-for-a-release)
  * [Get a single release

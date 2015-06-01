@@ -1,4 +1,4 @@
-1.0.0 (trunk):
+1.0.0 (2015-06-01):
 * Changes marked with ! are type changes (not including field additions)
 * ! Monad.bind now accepts a function first and then a Monad.t
 * ! API.{get,post,delete,patch,put} now take optional fail_handlers

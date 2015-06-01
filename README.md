@@ -119,7 +119,10 @@ $ git upload-release mirage ocaml-uri v1.4.0 release.tar.gz
 
 *Not yet supported*:
 
- * get-or-create, update, check, reset, revoke
+ * [Check](https://developer.github.com/v3/oauth_authorizations/#check-an-authorization) (see [#83](https://github.com/mirage/ocaml-github/issues/83))
+ * [Reset](https://developer.github.com/v3/oauth_authorizations/#reset-an-authorization) (see [#83](https://github.com/mirage/ocaml-github/issues/83))
+ * Fingerprint retrieval (see [#83](https://github.com/mirage/ocaml-github/issues/83))
+ * get-or-create, update, revoke
  * fingerprint endpoints
 
 ### [Activity](https://developer.github.com/v3/activity/)

@@ -170,7 +170,7 @@ $ git upload-release mirage ocaml-uri v1.4.0 release.tar.gz
  * [Assignees](https://developer.github.com/v3/issues/assignees/)
  * [Repository issue comments](https://developer.github.com/v3/issues/comments/#list-comments-in-a-repository)
  * [Get a single issue comment](https://developer.github.com/v3/issues/comments/#get-a-single-comment)
- * [Edit an issue comment](https://developer.github.com/v3/issues/comments/#edit-a-comment)
+ * [Edit an issue comment](https://developer.github.com/v3/issues/comments/#edit-a-comment) (see [#87](https://github.com/mirage/ocaml-github/issues/87))
  * [Delete an issue comment](https://developer.github.com/v3/issues/comments/#delete-a-comment)
  * [Issue events](https://developer.github.com/v3/issues/events/#list-events-for-an-issue)
  * [Several issue event type](https://developer.github.com/v3/issues/events/)
@@ -265,7 +265,7 @@ $ git upload-release mirage ocaml-uri v1.4.0 release.tar.gz
    asset](https://developer.github.com/v3/repos/releases/#edit-a-release-asset)
  * [Delete a release
    asset](https://developer.github.com/v3/repos/releases/#delete-a-release-asset)
- * [Statistics](https://developer.github.com/v3/repos/statistics/)
+ * [Statistics](https://developer.github.com/v3/repos/statistics/) (see [#86](https://github.com/mirage/ocaml-github/issues/86))
  * [Get the combined status for a specific
    ref](https://developer.github.com/v3/repos/statuses/#get-the-combined-status-for-a-specific-ref)
  * [Ping a

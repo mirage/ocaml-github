@@ -2,7 +2,12 @@ opam-version: "1.2"
 name: "github"
 version: "1.0.0"
 maintainer: "sheets@alum.mit.edu"
-authors: [ "Anil Madhavapeddy" "David Sheets" "Andy Ray" "Jeff Hammerbacher" ]
+authors: [
+  "Anil Madhavapeddy"
+  "David Sheets"
+  "Andy Ray"
+  "Jeff Hammerbacher"
+]
 homepage: "https://github.com/mirage/ocaml-github"
 bug-reports: "https://github.com/mirage/ocaml-github/issues"
 dev-repo: "https://github.com/mirage/ocaml-github.git"
@@ -37,5 +42,5 @@ depopts: [
   "js_of_ocaml"
 ]
 conflicts: [
-  "js_of_ocaml" {<"2.4.0"}
+  "js_of_ocaml" {< "2.4.0"}
 ]

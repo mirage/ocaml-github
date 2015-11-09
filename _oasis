@@ -204,6 +204,14 @@ Executable deploy_keys
   Install:            false
   BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, atdgen
 
+Executable test_datas
+  Path:               lib_test
+  MainIs:             test_datas.ml
+  Custom:             true
+  CompiledObject:     best
+  Install:            false
+  BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, atdgen, git, git.unix
+
 Executable list_pulls
   Path:               lib_test
   MainIs:             pulls.ml

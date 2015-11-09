@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 57ecf876694938a5ff5086058e7a17b2)
+# DO NOT EDIT (digest: 7a25631954acd6828ad7f7f0d5bb9806)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
@@ -378,6 +378,25 @@ true: annot, bin_annot
 <lib_test/deploy_keys.{native,byte}>: use_github_core
 <lib_test/deploy_keys.{native,byte}>: use_github_unix
 <lib_test/deploy_keys.{native,byte}>: custom
+# Executable test_datas
+<lib_test/test_datas.{native,byte}>: pkg_atdgen
+<lib_test/test_datas.{native,byte}>: pkg_bytes
+<lib_test/test_datas.{native,byte}>: pkg_cohttp
+<lib_test/test_datas.{native,byte}>: pkg_cohttp.lwt
+<lib_test/test_datas.{native,byte}>: pkg_cohttp.lwt-core
+<lib_test/test_datas.{native,byte}>: pkg_cstruct
+<lib_test/test_datas.{native,byte}>: pkg_git
+<lib_test/test_datas.{native,byte}>: pkg_git.unix
+<lib_test/test_datas.{native,byte}>: pkg_lwt
+<lib_test/test_datas.{native,byte}>: pkg_lwt.syntax
+<lib_test/test_datas.{native,byte}>: pkg_lwt.unix
+<lib_test/test_datas.{native,byte}>: pkg_uri
+<lib_test/test_datas.{native,byte}>: pkg_yojson
+<lib_test/test_datas.{native,byte}>: use_github_core
+<lib_test/test_datas.{native,byte}>: use_github_unix
+<lib_test/*.ml{,i,y}>: pkg_git
+<lib_test/*.ml{,i,y}>: pkg_git.unix
+<lib_test/test_datas.{native,byte}>: custom
 # Executable list_pulls
 <lib_test/pulls.{native,byte}>: pkg_atdgen
 <lib_test/pulls.{native,byte}>: pkg_bytes

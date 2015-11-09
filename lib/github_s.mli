@@ -1240,6 +1240,35 @@ module type Github = sig
             Blob.t ->
             SHA.Blob.t Response.t Monad.t
         end
+
+      module Commit :
+        sig
+          type t =
+            {
+              sha       : SHA.Commit.t;
+              uri       : Uri.t;
+              author    : Github_t.info;
+              committer : Github_t.info;
+              message   : string;
+              tree      : SHA.Tree.t;
+              parents   : SHA.Commit.t list;
+            }
+
+          val get : ?token:string ->
+            owner:string ->
+            repo:string ->
+            sha:SHA.Commit.t ->
+            t Response.t Monad.t
+
+          val create : ?token:string ->
+            owner:string ->
+            repo:string ->
+            ?parents:SHA.Commit.t list ->
+            ?author:Github_t.info ->
+            ?committer:Github_t.info ->
+            string -> SHA.Tree.t ->
+            t Response.t Monad.t
+        end
     end
 
   (** The [Search] module exposes GitHub's

@@ -964,3 +964,21 @@ type git_object = {
   url : string <ocaml valid="Github_uril.validate_uri">;
   sha : string;
 } <ocaml field_prefix="git_object_">
+
+type unsafe_commit = {
+  sha       : string;
+  url       : string <ocaml valid="Github_util.validate_uri">;
+  author    : info;
+  committer : info;
+  message   : string;
+  tree      : git_object;
+  parents   : git_object list;
+} <ocaml field_prefix="unsafe_commit_">
+
+type new_commit = {
+  message    : string;
+  tree       : string;
+  ~parents <ocaml default="[]"> : string list;
+  ?committer : info option;
+  ?author    : info option;
+} <ocaml field_prefix="new_commit_">

@@ -329,6 +329,14 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
     let post_blobs ~owner ~repo =
       Uri.of_string
         (Printf.sprintf "%s/repos/%s/%s/git/blobs" api owner repo)
+
+    let get_commits ~owner ~repo ~sha =
+      Uri.of_string
+        (Printf.sprintf "%s/repos/%s/%s/git/commits/%s" api owner repo sha)
+
+    let post_commits ~owner ~repo =
+      Uri.of_string
+        (Printf.sprintf "%s/repos/%s/%s/git/commits" api owner repo)
   end 
 
   module C = Cohttp
@@ -1756,6 +1764,60 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
         in
         API.post ?token ~uri ~expected_code:`Created
           ~body (fun b -> return (git_object_of_string b |> to_blob))
+    end
+
+    module Commit = struct
+      type t =
+        {
+          sha       : SHA.Commit.t;
+          uri       : Uri.t;
+          author    : Github_t.info;
+          committer : Github_t.info;
+          message   : string;
+          tree      : SHA.Tree.t;
+          parents   : SHA.Commit.t list;
+        }
+
+      let make atd_commit
+          ?(uri = atd_commit.Github_t.unsafe_commit_url |> Uri.of_string) () =
+        { sha       = atd_commit.Github_t.unsafe_commit_sha
+                      |> SHA_IO.of_hex
+                      |> SHA.to_commit;
+          uri;
+          author    = atd_commit.Github_t.unsafe_commit_author;
+          committer = atd_commit.Github_t.unsafe_commit_committer;
+          message   = atd_commit.Github_t.unsafe_commit_message;
+          tree      = atd_commit.Github_t.unsafe_commit_tree
+                                .Github_t.git_object_sha
+                      |> SHA_IO.of_hex
+                      |> SHA.to_tree;
+          parents   =
+            List.map
+              (fun o -> SHA_IO.of_hex o.Github_t.git_object_sha |> SHA.to_commit)
+              atd_commit.Github_t.unsafe_commit_parents;
+        }
+
+      let get ?token ~owner ~repo ~sha =
+        let uri = URI.get_commits owner repo (SHA.Commit.to_hex sha) in
+        API.get ?token ~uri
+          ~expected_code:`OK
+          (fun b -> return (unsafe_commit_of_string b
+                    |> fun o -> make o ~uri ()))
+
+      let create ?token ~owner ~repo ?(parents = []) ?author ?committer
+          message tree =
+        let uri = URI.post_commits owner repo in
+        let body =
+          { Github_t.new_commit_message = message;
+            new_commit_tree             = SHA.Tree.to_hex tree;
+            new_commit_parents          = List.map SHA.Commit.to_hex parents;
+            new_commit_author           = author;
+            new_commit_committer        = committer; }
+          |> string_of_new_commit
+        in
+        API.post ?token ~uri ~expected_code:`Created
+          ~body (fun b -> return (unsafe_commit_of_string b
+                          |> fun o -> make o ()))
     end
   end
 

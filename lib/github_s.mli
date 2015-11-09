@@ -1166,6 +1166,56 @@ module type Github = sig
     (** [delete ~id ()] activates after gist [id] has been deleted. *)
   end
 
+  module type SHA_S = sig
+    type t
+
+    val to_raw     : t -> string
+    val of_raw     : string -> t
+    val to_hex     : t -> string
+  end
+
+  module type SHA_H = sig
+    include SHA_S
+
+    val of_hex : string -> t
+    val of_short_hex : string -> t
+  end
+
+  module type SHA = sig
+    include SHA_S
+
+    module Blob   : SHA_S
+    module Tree   : SHA_S
+    module Commit : SHA_S
+
+    val to_blob   : t -> Blob.t
+    val to_commit : t -> Commit.t
+    val to_tree   : t -> Tree.t
+
+    type 'a digest = 'a -> t
+
+    module type DIGEST = sig
+      val cstruct : Cstruct.t digest
+      val string : string digest
+      val length : int
+    end
+
+    module IO : functor (D : DIGEST) -> sig
+      include SHA_H with type t = t
+
+      module Blob   : SHA_H with type t = Blob.t
+      module Tree   : SHA_H with type t = Tree.t
+      module Commit : SHA_H with type t = Commit.t
+    end
+  end
+
+  module type BLOB = sig
+    type t
+
+    val to_raw : t -> string
+    val of_raw : string -> t
+  end
+
   (** The [Search] module exposes GitHub's
       {{:https://developer.github.com/v3/search/}search interfaces}. *)
   module Search : sig

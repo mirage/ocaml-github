@@ -6789,7 +6789,8 @@ let setup_t =
                              ("cohttp.lwt-core",
                                Some (OASISVersion.VGreaterEqual "0.10.0"));
                            FindlibPackage ("yojson", None);
-                           FindlibPackage ("atdgen", None)
+                           FindlibPackage ("atdgen", None);
+                           FindlibPackage ("cstruct", None)
                         ];
                       bs_build_tools = [ExternalTool "ocamlbuild"];
                       bs_c_sources = [];

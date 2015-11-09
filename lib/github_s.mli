@@ -1216,6 +1216,32 @@ module type Github = sig
     val of_raw : string -> t
   end
 
+  module GitData (SHA : SHA) (D : SHA.DIGEST) (Blob : BLOB) :
+    sig
+      module Blob :
+        sig
+          type t =
+            {
+              sha : SHA.Blob.t;
+              uri : Uri.t;
+              content : string;
+            }
+
+          val get : ?token:string ->
+            owner:string ->
+            repo:string ->
+            sha:SHA.Blob.t ->
+            t Response.t Monad.t
+
+          val create : ?token:string ->
+            owner:string ->
+            repo:string ->
+            ?encoding:Github_t.encoding ->
+            Blob.t ->
+            SHA.Blob.t Response.t Monad.t
+        end
+    end
+
   (** The [Search] module exposes GitHub's
       {{:https://developer.github.com/v3/search/}search interfaces}. *)
   module Search : sig

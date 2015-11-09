@@ -321,6 +321,14 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
 
     let team_repos ~id =
       Uri.of_string (Printf.sprintf "%s/teams/%Ld/repos" api id)
+
+    let get_blobs ~owner ~repo ~sha =
+      Uri.of_string
+        (Printf.sprintf "%s/repos/%s/%s/git/blobs/%s" api owner repo sha)
+
+    let post_blobs ~owner ~repo =
+      Uri.of_string
+        (Printf.sprintf "%s/repos/%s/%s/git/blobs" api owner repo)
   end 
 
   module C = Cohttp
@@ -1684,6 +1692,71 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
 
     val to_raw : t -> string
     val of_raw : string -> t
+  end
+
+  module GitData (SHA : SHA) (D : SHA.DIGEST) (Blob : BLOB) = struct
+    open Lwt
+
+    module SHA_IO = SHA.IO(D)
+
+    module Encoding =
+      struct
+        type t =
+        [ `Base64
+        | `Utf8 ]
+
+        let encode ~encoding content = match encoding with
+          | `Base64 -> B64.encode content
+          | `Utf8 -> content
+
+        let decode ~encoding content = match encoding with
+          | `Base64 -> B64.decode content
+          | `Utf8 -> content
+      end
+
+    module Blob = struct
+      type t =
+        {
+          sha     : SHA.Blob.t;
+          uri     : Uri.t;
+          content : string;
+        }
+
+      let make ~uri atd_blob =
+        { sha =  atd_blob.Github_t.blob_sha |> SHA_IO.of_hex |> SHA.to_blob;
+          uri;
+          content = atd_blob.Github_t.blob_content |> B64.decode; }
+
+      let get ?token ~owner ~repo ~sha =
+        let uri = URI.get_blobs owner repo (SHA.Blob.to_hex sha) in
+        API.get ?token ~uri
+          ~expected_code:`OK
+          (fun b -> return (unsafe_blob_of_string b |> make ~uri))
+
+      type new_blob =
+        {
+          blob : Blob.t;
+          encoding : Encoding.t;
+        }
+
+      (* XXX: atdgen ? *)
+      let new_blob_to_yojson { blob; encoding; } =
+        `Assoc ["content", `String (Blob.to_raw blob |> Encoding.encode ~encoding);
+                "encoding", `String (string_of_encoding encoding); ]
+
+      let create ?token ~owner ~repo ?(encoding = `Utf8) blob =
+        let to_blob { Github_t.git_object_sha; _ } =
+          SHA_IO.of_hex git_object_sha |> SHA.to_blob in
+        let uri = URI.post_blobs owner repo in
+        let body =
+          { blob;
+            encoding; }
+          |> new_blob_to_yojson
+          |> Yojson.Safe.to_string
+        in
+        API.post ?token ~uri ~expected_code:`Created
+          ~body (fun b -> return (git_object_of_string b |> to_blob))
+    end
   end
 
   module Search = struct

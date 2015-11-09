@@ -946,3 +946,21 @@ type update_gist = {
   description: string;
   files: (string * update_gist) list <json repr="object">
 } <ocaml field_prefix="update_gist_">
+
+type encoding = [
+  | Base64 <json name="base64">
+  | Utf8 <json name="utf-8">
+]
+
+type unsafe_blob = {
+  content  : string;
+  encoding : encoding;
+  url      : string <ocaml valid="Github_util.validate_uri">;
+  sha      : string;
+  size     : int;
+} <ocaml field_prefix="blob_">
+
+type git_object = {
+  url : string <ocaml valid="Github_uril.validate_uri">;
+  sha : string;
+} <ocaml field_prefix="git_object_">

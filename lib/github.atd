@@ -947,14 +947,9 @@ type update_gist = {
   files: (string * update_gist) list <json repr="object">
 } <ocaml field_prefix="update_gist_">
 
-type encoding = [
-  | Base64 <json name="base64">
-  | Utf8 <json name="utf-8">
-]
-
 type unsafe_blob = {
   content  : string;
-  encoding : encoding;
+  encoding : string;
   url      : string;
   sha      : string;
   size     : int;

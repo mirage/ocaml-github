@@ -1236,7 +1236,7 @@ module type Github = sig
           val create : ?token:string ->
             owner:string ->
             repo:string ->
-            ?encoding:Github_t.encoding ->
+              ?encoding:[ `Base64 | `Utf8 ] ->
             Blob.t ->
             SHA.Blob.t Response.t Monad.t
         end

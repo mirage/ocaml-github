@@ -1720,6 +1720,15 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
         let decode ~encoding content = match encoding with
           | `Base64 -> B64.decode content
           | `Utf8 -> content
+
+        let of_string = function
+          | "base64" -> `Base64
+          | "utf-8" -> `Utf8
+          | _ -> raise (Invalid_argument "Encoding.of_string")
+
+        let to_string = function
+          | `Base64 -> "base64"
+          | `Utf8 -> "utf-8"
       end
 
     module Blob = struct
@@ -1731,9 +1740,13 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
         }
 
       let make ~uri atd_blob =
+        let encoding = Encoding.of_string
+          atd_blob.Github_t.unsafe_blob_encoding in
+        let content = atd_blob.Github_t.unsafe_blob_content
+                      |> Encoding.decode ~encoding in
         { sha =  atd_blob.Github_t.blob_sha |> SHA_IO.of_hex |> SHA.to_blob;
           uri;
-          content = atd_blob.Github_t.blob_content |> B64.decode; }
+          content; }
 
       let get ?token ~owner ~repo ~sha =
         let uri = URI.get_blobs owner repo (SHA.Blob.to_hex sha) in
@@ -1750,7 +1763,7 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
       (* XXX: atdgen ? *)
       let new_blob_to_yojson { blob; encoding; } =
         `Assoc ["content", `String (Blob.to_raw blob |> Encoding.encode ~encoding);
-                "encoding", `String (string_of_encoding encoding); ]
+                "encoding", `String (Encoding.to_string encoding); ]
 
       let create ?token ~owner ~repo ?(encoding = `Utf8) blob =
         let to_blob { Github_t.git_object_sha; _ } =

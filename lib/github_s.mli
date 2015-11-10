@@ -1227,11 +1227,13 @@ module type Github = sig
               content : string;
             }
 
+          val make : Github_t.unsafe_blob -> t
+
           val get : ?token:string ->
             owner:string ->
             repo:string ->
             sha:SHA.Blob.t ->
-            t Response.t Monad.t
+            Github_t.unsafe_blob Response.t Monad.t
 
           val create : ?token:string ->
             owner:string ->
@@ -1254,11 +1256,13 @@ module type Github = sig
               parents   : SHA.Commit.t list;
             }
 
+          val make : Github_t.unsafe_commit -> t
+
           val get : ?token:string ->
             owner:string ->
             repo:string ->
             sha:SHA.Commit.t ->
-            t Response.t Monad.t
+            Github_t.unsafe_commit Response.t Monad.t
 
           val create : ?token:string ->
             owner:string ->
@@ -1267,7 +1271,7 @@ module type Github = sig
             ?author:Github_t.info ->
             ?committer:Github_t.info ->
             string -> SHA.Tree.t ->
-            t Response.t Monad.t
+            Github_t.unsafe_commit Response.t Monad.t
         end
     end
 

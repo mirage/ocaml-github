@@ -1764,7 +1764,7 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
         let uri = URI.get_blobs owner repo (SHA.Blob.to_hex sha) in
         API.get ?token ~uri
           ~expected_code:`OK
-          (fun b -> return (unsafe_blob_of_string b |> make ~uri))
+          (fun b -> return (unsafe_blob_of_string b))
 
       type new_blob =
         {
@@ -1826,8 +1826,7 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
         let uri = URI.get_commits owner repo (SHA.Commit.to_hex sha) in
         API.get ?token ~uri
           ~expected_code:`OK
-          (fun b -> return (unsafe_commit_of_string b
-                    |> fun o -> make o ~uri ()))
+          (fun b -> return (unsafe_commit_of_string b))
 
       let create ?token ~owner ~repo ?(parents = []) ?author ?committer
           message tree =
@@ -1841,8 +1840,7 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
           |> string_of_new_commit
         in
         API.post ?token ~uri ~expected_code:`Created
-          ~body (fun b -> return (unsafe_commit_of_string b
-                          |> fun o -> make o ()))
+          ~body (fun b -> return (unsafe_commit_of_string b))
     end
   end
 

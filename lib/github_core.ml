@@ -1713,12 +1713,22 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
         [ `Base64
         | `Utf8 ]
 
+        let sanitize x =
+          let result = Buffer.create (String.length x) in
+          for i = 0 to String.length x - 1 do
+            if String.unsafe_get x i >= '\000' && String.unsafe_get x i <= '\031'
+               || String.unsafe_get x i = '\127'
+            then () (* ignore CTLs characters *)
+            else Buffer.add_char result (String.unsafe_get x i)
+          done;
+          Buffer.contents result
+
         let encode ~encoding content = match encoding with
           | `Base64 -> B64.encode content
           | `Utf8 -> content
 
         let decode ~encoding content = match encoding with
-          | `Base64 -> B64.decode content
+          | `Base64 -> sanitize content |> B64.decode
           | `Utf8 -> content
 
         let of_string = function

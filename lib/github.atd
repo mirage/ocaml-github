@@ -955,19 +955,19 @@ type encoding = [
 type unsafe_blob = {
   content  : string;
   encoding : encoding;
-  url      : string <ocaml valid="Github_util.validate_uri">;
+  url      : string;
   sha      : string;
   size     : int;
 } <ocaml field_prefix="blob_">
 
 type git_object = {
-  url : string <ocaml valid="Github_uril.validate_uri">;
+  url : string;
   sha : string;
 } <ocaml field_prefix="git_object_">
 
 type unsafe_commit = {
   sha       : string;
-  url       : string <ocaml valid="Github_util.validate_uri">;
+  url       : string;
   author    : info;
   committer : info;
   message   : string;

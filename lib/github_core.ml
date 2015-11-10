@@ -1749,14 +1749,16 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
           content : string;
         }
 
-      let make ~uri atd_blob =
+      let make atd_blob =
         let encoding = Encoding.of_string
           atd_blob.Github_t.unsafe_blob_encoding in
+        let sha = atd_blob.Github_t.unsafe_blob_sha
+                  |> SHA_IO.of_hex
+                  |> SHA.to_blob in
+        let uri = Uri.of_string atd_blob.Github_t.unsafe_blob_url in
         let content = atd_blob.Github_t.unsafe_blob_content
                       |> Encoding.decode ~encoding in
-        { sha =  atd_blob.Github_t.blob_sha |> SHA_IO.of_hex |> SHA.to_blob;
-          uri;
-          content; }
+        { sha; uri; content; }
 
       let get ?token ~owner ~repo ~sha =
         let uri = URI.get_blobs owner repo (SHA.Blob.to_hex sha) in
@@ -1801,12 +1803,12 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
           parents   : SHA.Commit.t list;
         }
 
-      let make atd_commit
-          ?(uri = atd_commit.Github_t.unsafe_commit_url |> Uri.of_string) () =
+      let make atd_commit =
         { sha       = atd_commit.Github_t.unsafe_commit_sha
                       |> SHA_IO.of_hex
                       |> SHA.to_commit;
-          uri;
+          uri       = Uri.of_string
+            atd_commit.Github_t.unsafe_commit_url;
           author    = atd_commit.Github_t.unsafe_commit_author;
           committer = atd_commit.Github_t.unsafe_commit_committer;
           message   = atd_commit.Github_t.unsafe_commit_message;

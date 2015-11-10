@@ -953,7 +953,7 @@ type unsafe_blob = {
   url      : string;
   sha      : string;
   size     : int;
-} <ocaml field_prefix="blob_">
+} <ocaml field_prefix="unsafe_blob_">
 
 type git_object = {
   url : string;

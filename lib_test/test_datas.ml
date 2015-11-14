@@ -61,7 +61,12 @@ let t =
   Lwt_list.iter_s
     (fun entrie ->
       Github.(Monad.(run (
-        let module GitData = Github.GitData(Git.SHA)(Store.Digest)(Git.Blob) in
+        let module SHA_IO = Git.SHA.IO(Store.Digest) in
+        let module GitData = Github.GitData
+          (SHA_IO.Blob)(Git.Blob)
+          (SHA_IO.Tree)(Git.Tree)
+          (SHA_IO.Commit)(Git.Commit)
+        in
         GitData.Blob.get ?token ~owner ~repo ~sha:entrie.Git.Index.id >|=
         Github.Response.value >|=
         GitData.Blob.make >>= fun blob ->

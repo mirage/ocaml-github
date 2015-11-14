@@ -1652,60 +1652,28 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
       API.delete ?token ~uri ~expected_code:`No_content (fun b -> return ())
   end
 
-  module type SHA_S = sig
+  module type SHA = sig
     type t
 
-    val to_raw     : t -> string
-    val of_raw     : string -> t
     val to_hex     : t -> string
+    val of_hex     : string -> t
   end
 
-  module type SHA_H = sig
-    include SHA_S
-
-    val of_hex : string -> t
-    val of_short_hex : string -> t
-  end
-
-  module type SHA = sig
-    include SHA_S
-
-    module Blob   : SHA_S
-    module Tree   : SHA_S
-    module Commit : SHA_S
-
-    val to_blob   : t -> Blob.t
-    val to_commit : t -> Commit.t
-    val to_tree   : t -> Tree.t
-
-    type 'a digest = 'a -> t
-
-    module type DIGEST = sig
-      val cstruct : Cstruct.t digest
-      val string : string digest
-      val length : int
-    end
-
-    module IO : functor (D : DIGEST) -> sig
-      include SHA_H with type t = t
-
-      module Blob   : SHA_H with type t = Blob.t
-      module Tree   : SHA_H with type t = Tree.t
-      module Commit : SHA_H with type t = Commit.t
-    end
-  end
-
-  module type BLOB = sig
+  module type RAWDATA = sig
     type t
 
     val to_raw : t -> string
-    val of_raw : string -> t
   end
 
-  module GitData (SHA : SHA) (D : SHA.DIGEST) (Blob : BLOB) = struct
-    open Lwt
+  module type OBJECT = sig
+    type t
+  end
 
-    module SHA_IO = SHA.IO(D)
+  module GitData
+    (SHA_Blob : SHA) (Blob : RAWDATA)
+    (SHA_Tree : SHA) (Tree : OBJECT)
+    (SHA_Commit : SHA) (Commit : OBJECT)= struct
+    open Lwt
 
     module Encoding =
       struct
@@ -1744,7 +1712,7 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
     module Blob = struct
       type t =
         {
-          sha     : SHA.Blob.t;
+          sha     : SHA_Blob.t;
           uri     : Uri.t;
           content : string;
         }
@@ -1753,15 +1721,14 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
         let encoding = Encoding.of_string
           atd_blob.Github_t.unsafe_blob_encoding in
         let sha = atd_blob.Github_t.unsafe_blob_sha
-                  |> SHA_IO.of_hex
-                  |> SHA.to_blob in
+                  |> SHA_Blob.of_hex in
         let uri = Uri.of_string atd_blob.Github_t.unsafe_blob_url in
         let content = atd_blob.Github_t.unsafe_blob_content
                       |> Encoding.decode ~encoding in
         { sha; uri; content; }
 
       let get ?token ~owner ~repo ~sha =
-        let uri = URI.get_blobs owner repo (SHA.Blob.to_hex sha) in
+        let uri = URI.get_blobs owner repo (SHA_Blob.to_hex sha) in
         API.get ?token ~uri
           ~expected_code:`OK
           (fun b -> return (unsafe_blob_of_string b))
@@ -1779,7 +1746,7 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
 
       let create ?token ~owner ~repo ?(encoding = `Utf8) blob =
         let to_blob { Github_t.git_object_sha; _ } =
-          SHA_IO.of_hex git_object_sha |> SHA.to_blob in
+          SHA_Blob.of_hex git_object_sha in
         let uri = URI.post_blobs owner repo in
         let body =
           { blob;
@@ -1794,19 +1761,18 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
     module Commit = struct
       type t =
         {
-          sha       : SHA.Commit.t;
+          sha       : SHA_Commit.t;
           uri       : Uri.t;
           author    : Github_t.info;
           committer : Github_t.info;
           message   : string;
-          tree      : SHA.Tree.t;
-          parents   : SHA.Commit.t list;
+          tree      : SHA_Tree.t;
+          parents   : SHA_Commit.t list;
         }
 
       let make atd_commit =
         { sha       = atd_commit.Github_t.unsafe_commit_sha
-                      |> SHA_IO.of_hex
-                      |> SHA.to_commit;
+                      |> SHA_Commit.of_hex;
           uri       = Uri.of_string
             atd_commit.Github_t.unsafe_commit_url;
           author    = atd_commit.Github_t.unsafe_commit_author;
@@ -1814,16 +1780,15 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
           message   = atd_commit.Github_t.unsafe_commit_message;
           tree      = atd_commit.Github_t.unsafe_commit_tree
                                 .Github_t.git_object_sha
-                      |> SHA_IO.of_hex
-                      |> SHA.to_tree;
+                      |> SHA_Tree.of_hex;
           parents   =
             List.map
-              (fun o -> SHA_IO.of_hex o.Github_t.git_object_sha |> SHA.to_commit)
+              (fun o -> o.Github_t.git_object_sha |> SHA_Commit.of_hex)
               atd_commit.Github_t.unsafe_commit_parents;
         }
 
       let get ?token ~owner ~repo ~sha =
-        let uri = URI.get_commits owner repo (SHA.Commit.to_hex sha) in
+        let uri = URI.get_commits owner repo (SHA_Commit.to_hex sha) in
         API.get ?token ~uri
           ~expected_code:`OK
           (fun b -> return (unsafe_commit_of_string b))
@@ -1833,8 +1798,8 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
         let uri = URI.post_commits owner repo in
         let body =
           { Github_t.new_commit_message = message;
-            new_commit_tree             = SHA.Tree.to_hex tree;
-            new_commit_parents          = List.map SHA.Commit.to_hex parents;
+            new_commit_tree             = SHA_Tree.to_hex tree;
+            new_commit_parents          = List.map SHA_Commit.to_hex parents;
             new_commit_author           = author;
             new_commit_committer        = committer; }
           |> string_of_new_commit

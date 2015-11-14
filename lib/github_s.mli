@@ -1166,63 +1166,33 @@ module type Github = sig
     (** [delete ~id ()] activates after gist [id] has been deleted. *)
   end
 
-  module type SHA_S = sig
+  module type SHA = sig
     type t
 
-    val to_raw     : t -> string
-    val of_raw     : string -> t
     val to_hex     : t -> string
+    val of_hex     : string -> t
   end
 
-  module type SHA_H = sig
-    include SHA_S
-
-    val of_hex : string -> t
-    val of_short_hex : string -> t
-  end
-
-  module type SHA = sig
-    include SHA_S
-
-    module Blob   : SHA_S
-    module Tree   : SHA_S
-    module Commit : SHA_S
-
-    val to_blob   : t -> Blob.t
-    val to_commit : t -> Commit.t
-    val to_tree   : t -> Tree.t
-
-    type 'a digest = 'a -> t
-
-    module type DIGEST = sig
-      val cstruct : Cstruct.t digest
-      val string : string digest
-      val length : int
-    end
-
-    module IO : functor (D : DIGEST) -> sig
-      include SHA_H with type t = t
-
-      module Blob   : SHA_H with type t = Blob.t
-      module Tree   : SHA_H with type t = Tree.t
-      module Commit : SHA_H with type t = Commit.t
-    end
-  end
-
-  module type BLOB = sig
+  module type RAWDATA = sig
     type t
 
     val to_raw : t -> string
-    val of_raw : string -> t
   end
 
-  module GitData (SHA : SHA) (D : SHA.DIGEST) (Blob : BLOB) :
+  module type OBJECT = sig
+    type t
+  end
+
+  module GitData
+    (SHA_Blob : SHA) (Blob : RAWDATA)
+    (SHA_Tree : SHA) (Tree : OBJECT)
+    (SHA_Commit : SHA) (Commit : OBJECT) :
     sig
       module Blob :
         sig
           type t =
             {
-              sha : SHA.Blob.t;
+              sha : SHA_Blob.t;
               uri : Uri.t;
               content : string;
             }
@@ -1232,7 +1202,7 @@ module type Github = sig
           val get : ?token:string ->
             owner:string ->
             repo:string ->
-            sha:SHA.Blob.t ->
+            sha:SHA_Blob.t ->
             Github_t.unsafe_blob Response.t Monad.t
 
           val create : ?token:string ->
@@ -1240,20 +1210,20 @@ module type Github = sig
             repo:string ->
               ?encoding:[ `Base64 | `Utf8 ] ->
             Blob.t ->
-            SHA.Blob.t Response.t Monad.t
+            SHA_Blob.t Response.t Monad.t
         end
 
       module Commit :
         sig
           type t =
             {
-              sha       : SHA.Commit.t;
+              sha       : SHA_Commit.t;
               uri       : Uri.t;
               author    : Github_t.info;
               committer : Github_t.info;
               message   : string;
-              tree      : SHA.Tree.t;
-              parents   : SHA.Commit.t list;
+              tree      : SHA_Tree.t;
+              parents   : SHA_Commit.t list;
             }
 
           val make : Github_t.unsafe_commit -> t
@@ -1261,16 +1231,16 @@ module type Github = sig
           val get : ?token:string ->
             owner:string ->
             repo:string ->
-            sha:SHA.Commit.t ->
+            sha:SHA_Commit.t ->
             Github_t.unsafe_commit Response.t Monad.t
 
           val create : ?token:string ->
             owner:string ->
             repo:string ->
-            ?parents:SHA.Commit.t list ->
+            ?parents:SHA_Commit.t list ->
             ?author:Github_t.info ->
             ?committer:Github_t.info ->
-            string -> SHA.Tree.t ->
+            string -> SHA_Tree.t ->
             Github_t.unsafe_commit Response.t Monad.t
         end
     end

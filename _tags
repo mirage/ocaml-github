@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 7a25631954acd6828ad7f7f0d5bb9806)
+# DO NOT EDIT (digest: 32b2e1647c7711cb9d9f6933889a54ab)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
@@ -19,7 +19,6 @@ true: annot, bin_annot
 <lib/*.ml{,i,y}>: pkg_atdgen
 <lib/*.ml{,i,y}>: pkg_cohttp
 <lib/*.ml{,i,y}>: pkg_cohttp.lwt-core
-<lib/*.ml{,i,y}>: pkg_cstruct
 <lib/*.ml{,i,y}>: pkg_lwt
 <lib/*.ml{,i,y}>: pkg_uri
 <lib/*.ml{,i,y}>: pkg_yojson
@@ -30,7 +29,6 @@ true: annot, bin_annot
 <unix/*.ml{,i,y}>: pkg_cohttp
 <unix/*.ml{,i,y}>: pkg_cohttp.lwt
 <unix/*.ml{,i,y}>: pkg_cohttp.lwt-core
-<unix/*.ml{,i,y}>: pkg_cstruct
 <unix/*.ml{,i,y}>: pkg_lwt
 <unix/*.ml{,i,y}>: pkg_lwt.unix
 <unix/*.ml{,i,y}>: pkg_uri
@@ -42,7 +40,6 @@ true: annot, bin_annot
 <js/*.ml{,i,y}>: pkg_cohttp
 <js/*.ml{,i,y}>: pkg_cohttp.js
 <js/*.ml{,i,y}>: pkg_cohttp.lwt-core
-<js/*.ml{,i,y}>: pkg_cstruct
 <js/*.ml{,i,y}>: pkg_js_of_ocaml
 <js/*.ml{,i,y}>: pkg_js_of_ocaml.syntax
 <js/*.ml{,i,y}>: pkg_lwt
@@ -56,7 +53,6 @@ true: annot, bin_annot
 <lib_test/rwo.{native,byte}>: pkg_cohttp
 <lib_test/rwo.{native,byte}>: pkg_cohttp.lwt
 <lib_test/rwo.{native,byte}>: pkg_cohttp.lwt-core
-<lib_test/rwo.{native,byte}>: pkg_cstruct
 <lib_test/rwo.{native,byte}>: pkg_lwt
 <lib_test/rwo.{native,byte}>: pkg_lwt.syntax
 <lib_test/rwo.{native,byte}>: pkg_lwt.unix
@@ -74,7 +70,6 @@ true: annot, bin_annot
 <jar/jar.{native,byte}>: pkg_cohttp
 <jar/jar.{native,byte}>: pkg_cohttp.lwt
 <jar/jar.{native,byte}>: pkg_cohttp.lwt-core
-<jar/jar.{native,byte}>: pkg_cstruct
 <jar/jar.{native,byte}>: pkg_lambda-term
 <jar/jar.{native,byte}>: pkg_lwt
 <jar/jar.{native,byte}>: pkg_lwt.syntax
@@ -92,7 +87,6 @@ true: annot, bin_annot
 <jar/create_release.{native,byte}>: pkg_cohttp
 <jar/create_release.{native,byte}>: pkg_cohttp.lwt
 <jar/create_release.{native,byte}>: pkg_cohttp.lwt-core
-<jar/create_release.{native,byte}>: pkg_cstruct
 <jar/create_release.{native,byte}>: pkg_lwt
 <jar/create_release.{native,byte}>: pkg_lwt.syntax
 <jar/create_release.{native,byte}>: pkg_lwt.unix
@@ -108,7 +102,6 @@ true: annot, bin_annot
 <jar/sync_releases.{native,byte}>: pkg_cohttp
 <jar/sync_releases.{native,byte}>: pkg_cohttp.lwt
 <jar/sync_releases.{native,byte}>: pkg_cohttp.lwt-core
-<jar/sync_releases.{native,byte}>: pkg_cstruct
 <jar/sync_releases.{native,byte}>: pkg_lwt
 <jar/sync_releases.{native,byte}>: pkg_lwt.syntax
 <jar/sync_releases.{native,byte}>: pkg_lwt.unix
@@ -124,7 +117,6 @@ true: annot, bin_annot
 <jar/upload_release.{native,byte}>: pkg_cohttp
 <jar/upload_release.{native,byte}>: pkg_cohttp.lwt
 <jar/upload_release.{native,byte}>: pkg_cohttp.lwt-core
-<jar/upload_release.{native,byte}>: pkg_cstruct
 <jar/upload_release.{native,byte}>: pkg_lwt
 <jar/upload_release.{native,byte}>: pkg_lwt.syntax
 <jar/upload_release.{native,byte}>: pkg_lwt.unix
@@ -140,7 +132,6 @@ true: annot, bin_annot
 <jar/list_releases.{native,byte}>: pkg_cohttp
 <jar/list_releases.{native,byte}>: pkg_cohttp.lwt
 <jar/list_releases.{native,byte}>: pkg_cohttp.lwt-core
-<jar/list_releases.{native,byte}>: pkg_cstruct
 <jar/list_releases.{native,byte}>: pkg_lwt
 <jar/list_releases.{native,byte}>: pkg_lwt.syntax
 <jar/list_releases.{native,byte}>: pkg_lwt.unix
@@ -156,7 +147,6 @@ true: annot, bin_annot
 <jar/list_events.{native,byte}>: pkg_cohttp
 <jar/list_events.{native,byte}>: pkg_cohttp.lwt
 <jar/list_events.{native,byte}>: pkg_cohttp.lwt-core
-<jar/list_events.{native,byte}>: pkg_cstruct
 <jar/list_events.{native,byte}>: pkg_lwt
 <jar/list_events.{native,byte}>: pkg_lwt.syntax
 <jar/list_events.{native,byte}>: pkg_lwt.unix
@@ -172,7 +162,6 @@ true: annot, bin_annot
 <jar/list_issues.{native,byte}>: pkg_cohttp
 <jar/list_issues.{native,byte}>: pkg_cohttp.lwt
 <jar/list_issues.{native,byte}>: pkg_cohttp.lwt-core
-<jar/list_issues.{native,byte}>: pkg_cstruct
 <jar/list_issues.{native,byte}>: pkg_lwt
 <jar/list_issues.{native,byte}>: pkg_lwt.syntax
 <jar/list_issues.{native,byte}>: pkg_lwt.unix
@@ -188,7 +177,6 @@ true: annot, bin_annot
 <jar/search.{native,byte}>: pkg_cohttp
 <jar/search.{native,byte}>: pkg_cohttp.lwt
 <jar/search.{native,byte}>: pkg_cohttp.lwt-core
-<jar/search.{native,byte}>: pkg_cstruct
 <jar/search.{native,byte}>: pkg_lwt
 <jar/search.{native,byte}>: pkg_lwt.unix
 <jar/search.{native,byte}>: pkg_uri
@@ -203,7 +191,6 @@ true: annot, bin_annot
 <jar/listen_events.{native,byte}>: pkg_cohttp
 <jar/listen_events.{native,byte}>: pkg_cohttp.lwt
 <jar/listen_events.{native,byte}>: pkg_cohttp.lwt-core
-<jar/listen_events.{native,byte}>: pkg_cstruct
 <jar/listen_events.{native,byte}>: pkg_lwt
 <jar/listen_events.{native,byte}>: pkg_lwt.syntax
 <jar/listen_events.{native,byte}>: pkg_lwt.unix
@@ -217,7 +204,6 @@ true: annot, bin_annot
 <jar/*.ml{,i,y}>: pkg_cohttp
 <jar/*.ml{,i,y}>: pkg_cohttp.lwt
 <jar/*.ml{,i,y}>: pkg_cohttp.lwt-core
-<jar/*.ml{,i,y}>: pkg_cstruct
 <jar/*.ml{,i,y}>: pkg_lwt
 <jar/*.ml{,i,y}>: pkg_lwt.syntax
 <jar/*.ml{,i,y}>: pkg_lwt.unix
@@ -233,7 +219,6 @@ true: annot, bin_annot
 <gist/gist.{native,byte}>: pkg_cohttp
 <gist/gist.{native,byte}>: pkg_cohttp.lwt
 <gist/gist.{native,byte}>: pkg_cohttp.lwt-core
-<gist/gist.{native,byte}>: pkg_cstruct
 <gist/gist.{native,byte}>: pkg_lambda-term
 <gist/gist.{native,byte}>: pkg_lwt
 <gist/gist.{native,byte}>: pkg_lwt.syntax
@@ -248,7 +233,6 @@ true: annot, bin_annot
 <gist/*.ml{,i,y}>: pkg_cohttp
 <gist/*.ml{,i,y}>: pkg_cohttp.lwt
 <gist/*.ml{,i,y}>: pkg_cohttp.lwt-core
-<gist/*.ml{,i,y}>: pkg_cstruct
 <gist/*.ml{,i,y}>: pkg_lambda-term
 <gist/*.ml{,i,y}>: pkg_lwt
 <gist/*.ml{,i,y}>: pkg_lwt.syntax
@@ -264,7 +248,6 @@ true: annot, bin_annot
 <lib_test/current_user.{native,byte}>: pkg_cohttp
 <lib_test/current_user.{native,byte}>: pkg_cohttp.lwt
 <lib_test/current_user.{native,byte}>: pkg_cohttp.lwt-core
-<lib_test/current_user.{native,byte}>: pkg_cstruct
 <lib_test/current_user.{native,byte}>: pkg_lwt
 <lib_test/current_user.{native,byte}>: pkg_lwt.syntax
 <lib_test/current_user.{native,byte}>: pkg_lwt.unix
@@ -279,7 +262,6 @@ true: annot, bin_annot
 <lib_test/get_token.{native,byte}>: pkg_cohttp
 <lib_test/get_token.{native,byte}>: pkg_cohttp.lwt
 <lib_test/get_token.{native,byte}>: pkg_cohttp.lwt-core
-<lib_test/get_token.{native,byte}>: pkg_cstruct
 <lib_test/get_token.{native,byte}>: pkg_lwt
 <lib_test/get_token.{native,byte}>: pkg_lwt.syntax
 <lib_test/get_token.{native,byte}>: pkg_lwt.unix
@@ -294,7 +276,6 @@ true: annot, bin_annot
 <lib_test/repo_info.{native,byte}>: pkg_cohttp
 <lib_test/repo_info.{native,byte}>: pkg_cohttp.lwt
 <lib_test/repo_info.{native,byte}>: pkg_cohttp.lwt-core
-<lib_test/repo_info.{native,byte}>: pkg_cstruct
 <lib_test/repo_info.{native,byte}>: pkg_lwt
 <lib_test/repo_info.{native,byte}>: pkg_lwt.syntax
 <lib_test/repo_info.{native,byte}>: pkg_lwt.unix
@@ -309,7 +290,6 @@ true: annot, bin_annot
 <lib_test/issues.{native,byte}>: pkg_cohttp
 <lib_test/issues.{native,byte}>: pkg_cohttp.lwt
 <lib_test/issues.{native,byte}>: pkg_cohttp.lwt-core
-<lib_test/issues.{native,byte}>: pkg_cstruct
 <lib_test/issues.{native,byte}>: pkg_lwt
 <lib_test/issues.{native,byte}>: pkg_lwt.syntax
 <lib_test/issues.{native,byte}>: pkg_lwt.unix
@@ -324,7 +304,6 @@ true: annot, bin_annot
 <lib_test/tags.{native,byte}>: pkg_cohttp
 <lib_test/tags.{native,byte}>: pkg_cohttp.lwt
 <lib_test/tags.{native,byte}>: pkg_cohttp.lwt-core
-<lib_test/tags.{native,byte}>: pkg_cstruct
 <lib_test/tags.{native,byte}>: pkg_lwt
 <lib_test/tags.{native,byte}>: pkg_lwt.syntax
 <lib_test/tags.{native,byte}>: pkg_lwt.unix
@@ -339,7 +318,6 @@ true: annot, bin_annot
 <lib_test/milestones.{native,byte}>: pkg_cohttp
 <lib_test/milestones.{native,byte}>: pkg_cohttp.lwt
 <lib_test/milestones.{native,byte}>: pkg_cohttp.lwt-core
-<lib_test/milestones.{native,byte}>: pkg_cstruct
 <lib_test/milestones.{native,byte}>: pkg_lwt
 <lib_test/milestones.{native,byte}>: pkg_lwt.syntax
 <lib_test/milestones.{native,byte}>: pkg_lwt.unix
@@ -354,7 +332,6 @@ true: annot, bin_annot
 <lib_test/releases.{native,byte}>: pkg_cohttp
 <lib_test/releases.{native,byte}>: pkg_cohttp.lwt
 <lib_test/releases.{native,byte}>: pkg_cohttp.lwt-core
-<lib_test/releases.{native,byte}>: pkg_cstruct
 <lib_test/releases.{native,byte}>: pkg_lwt
 <lib_test/releases.{native,byte}>: pkg_lwt.syntax
 <lib_test/releases.{native,byte}>: pkg_lwt.unix
@@ -369,7 +346,6 @@ true: annot, bin_annot
 <lib_test/deploy_keys.{native,byte}>: pkg_cohttp
 <lib_test/deploy_keys.{native,byte}>: pkg_cohttp.lwt
 <lib_test/deploy_keys.{native,byte}>: pkg_cohttp.lwt-core
-<lib_test/deploy_keys.{native,byte}>: pkg_cstruct
 <lib_test/deploy_keys.{native,byte}>: pkg_lwt
 <lib_test/deploy_keys.{native,byte}>: pkg_lwt.syntax
 <lib_test/deploy_keys.{native,byte}>: pkg_lwt.unix
@@ -384,7 +360,6 @@ true: annot, bin_annot
 <lib_test/test_datas.{native,byte}>: pkg_cohttp
 <lib_test/test_datas.{native,byte}>: pkg_cohttp.lwt
 <lib_test/test_datas.{native,byte}>: pkg_cohttp.lwt-core
-<lib_test/test_datas.{native,byte}>: pkg_cstruct
 <lib_test/test_datas.{native,byte}>: pkg_git
 <lib_test/test_datas.{native,byte}>: pkg_git.unix
 <lib_test/test_datas.{native,byte}>: pkg_lwt
@@ -403,7 +378,6 @@ true: annot, bin_annot
 <lib_test/pulls.{native,byte}>: pkg_cohttp
 <lib_test/pulls.{native,byte}>: pkg_cohttp.lwt
 <lib_test/pulls.{native,byte}>: pkg_cohttp.lwt-core
-<lib_test/pulls.{native,byte}>: pkg_cstruct
 <lib_test/pulls.{native,byte}>: pkg_lwt
 <lib_test/pulls.{native,byte}>: pkg_lwt.syntax
 <lib_test/pulls.{native,byte}>: pkg_lwt.unix
@@ -418,7 +392,6 @@ true: annot, bin_annot
 <lib_test/create_issue.{native,byte}>: pkg_cohttp
 <lib_test/create_issue.{native,byte}>: pkg_cohttp.lwt
 <lib_test/create_issue.{native,byte}>: pkg_cohttp.lwt-core
-<lib_test/create_issue.{native,byte}>: pkg_cstruct
 <lib_test/create_issue.{native,byte}>: pkg_lwt
 <lib_test/create_issue.{native,byte}>: pkg_lwt.syntax
 <lib_test/create_issue.{native,byte}>: pkg_lwt.unix
@@ -433,7 +406,6 @@ true: annot, bin_annot
 <lib_test/create_milestone.{native,byte}>: pkg_cohttp
 <lib_test/create_milestone.{native,byte}>: pkg_cohttp.lwt
 <lib_test/create_milestone.{native,byte}>: pkg_cohttp.lwt-core
-<lib_test/create_milestone.{native,byte}>: pkg_cstruct
 <lib_test/create_milestone.{native,byte}>: pkg_lwt
 <lib_test/create_milestone.{native,byte}>: pkg_lwt.syntax
 <lib_test/create_milestone.{native,byte}>: pkg_lwt.unix
@@ -448,7 +420,6 @@ true: annot, bin_annot
 <lib_test/create_pull.{native,byte}>: pkg_cohttp
 <lib_test/create_pull.{native,byte}>: pkg_cohttp.lwt
 <lib_test/create_pull.{native,byte}>: pkg_cohttp.lwt-core
-<lib_test/create_pull.{native,byte}>: pkg_cstruct
 <lib_test/create_pull.{native,byte}>: pkg_lwt
 <lib_test/create_pull.{native,byte}>: pkg_lwt.syntax
 <lib_test/create_pull.{native,byte}>: pkg_lwt.unix
@@ -463,7 +434,6 @@ true: annot, bin_annot
 <lib_test/create_hook.{native,byte}>: pkg_cohttp
 <lib_test/create_hook.{native,byte}>: pkg_cohttp.lwt
 <lib_test/create_hook.{native,byte}>: pkg_cohttp.lwt-core
-<lib_test/create_hook.{native,byte}>: pkg_cstruct
 <lib_test/create_hook.{native,byte}>: pkg_lwt
 <lib_test/create_hook.{native,byte}>: pkg_lwt.syntax
 <lib_test/create_hook.{native,byte}>: pkg_lwt.unix
@@ -478,7 +448,6 @@ true: annot, bin_annot
 <lib_test/delete_all_hooks.{native,byte}>: pkg_cohttp
 <lib_test/delete_all_hooks.{native,byte}>: pkg_cohttp.lwt
 <lib_test/delete_all_hooks.{native,byte}>: pkg_cohttp.lwt-core
-<lib_test/delete_all_hooks.{native,byte}>: pkg_cstruct
 <lib_test/delete_all_hooks.{native,byte}>: pkg_lwt
 <lib_test/delete_all_hooks.{native,byte}>: pkg_lwt.syntax
 <lib_test/delete_all_hooks.{native,byte}>: pkg_lwt.unix
@@ -493,7 +462,6 @@ true: annot, bin_annot
 <lib_test/create_statuses.{native,byte}>: pkg_cohttp
 <lib_test/create_statuses.{native,byte}>: pkg_cohttp.lwt
 <lib_test/create_statuses.{native,byte}>: pkg_cohttp.lwt-core
-<lib_test/create_statuses.{native,byte}>: pkg_cstruct
 <lib_test/create_statuses.{native,byte}>: pkg_lwt
 <lib_test/create_statuses.{native,byte}>: pkg_lwt.syntax
 <lib_test/create_statuses.{native,byte}>: pkg_lwt.unix
@@ -508,7 +476,6 @@ true: annot, bin_annot
 <lib_test/organizations.{native,byte}>: pkg_cohttp
 <lib_test/organizations.{native,byte}>: pkg_cohttp.lwt
 <lib_test/organizations.{native,byte}>: pkg_cohttp.lwt-core
-<lib_test/organizations.{native,byte}>: pkg_cstruct
 <lib_test/organizations.{native,byte}>: pkg_lwt
 <lib_test/organizations.{native,byte}>: pkg_lwt.syntax
 <lib_test/organizations.{native,byte}>: pkg_lwt.unix
@@ -526,7 +493,6 @@ true: annot, bin_annot
 <lib_test/parse_events.{native,byte}>: pkg_cohttp
 <lib_test/parse_events.{native,byte}>: pkg_cohttp.lwt
 <lib_test/parse_events.{native,byte}>: pkg_cohttp.lwt-core
-<lib_test/parse_events.{native,byte}>: pkg_cstruct
 <lib_test/parse_events.{native,byte}>: pkg_lwt
 <lib_test/parse_events.{native,byte}>: pkg_uri
 <lib_test/parse_events.{native,byte}>: pkg_yojson
@@ -539,7 +505,6 @@ true: annot, bin_annot
 "lib_test/test_javascript.byte": pkg_cohttp
 "lib_test/test_javascript.byte": pkg_cohttp.js
 "lib_test/test_javascript.byte": pkg_cohttp.lwt-core
-"lib_test/test_javascript.byte": pkg_cstruct
 "lib_test/test_javascript.byte": pkg_js_of_ocaml
 "lib_test/test_javascript.byte": pkg_js_of_ocaml.syntax
 "lib_test/test_javascript.byte": pkg_lwt
@@ -552,7 +517,6 @@ true: annot, bin_annot
 <lib_test/*.ml{,i,y}>: pkg_cohttp
 <lib_test/*.ml{,i,y}>: pkg_cohttp.js
 <lib_test/*.ml{,i,y}>: pkg_cohttp.lwt-core
-<lib_test/*.ml{,i,y}>: pkg_cstruct
 <lib_test/*.ml{,i,y}>: pkg_js_of_ocaml
 <lib_test/*.ml{,i,y}>: pkg_js_of_ocaml.syntax
 <lib_test/*.ml{,i,y}>: pkg_lwt

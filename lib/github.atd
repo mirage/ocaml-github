@@ -806,6 +806,7 @@ type new_status = {
   state: status_state;
   ?target_url: string option;
   ?description: string option;
+  ?context: string option;
 } <ocaml field_prefix="new_status_">
 
 type release = {

@@ -1,3 +1,6 @@
+1.1.0 (trunk):
+* new_status_context field added (#88)
+
 1.0.0 (2015-06-01):
 * Changes marked with ! are type changes (not including field additions)
 * ! Monad.bind now accepts a function first and then a Monad.t

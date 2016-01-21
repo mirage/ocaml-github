@@ -25,6 +25,7 @@ let t =
       new_status_state=`Error;
       new_status_target_url=Some ("http://example.com/commit/#"^sha_a);
       new_status_description=Some "error error on the wall";
+      new_status_context=Some "test tube";
     }) in
     Status.create ~token ~user ~repo ~sha:sha_a ~status ()
     >>= fun status ->
@@ -35,6 +36,7 @@ let t =
       new_status_state=`Pending;
       new_status_target_url=Some ("http://example.com/commit/#"^sha_a);
       new_status_description=Some "append be pend see pend depend";
+      new_status_context=Some "test tube";
     }) in
     Status.create ~token ~user ~repo ~sha:sha_a ~status ()
     >>= fun status ->

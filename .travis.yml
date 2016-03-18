@@ -1,6 +1,21 @@
 language: c
-install: wget https://raw.githubusercontent.com/dsheets/ocaml-travisci-skeleton/yorick/.travis-opam.sh
-script: bash -ex .travis-opam.sh
+sudo: false
+services:
+  - docker
+install: wget https://raw.githubusercontent.com/ocaml/ocaml-travisci-skeleton/master/.travis-docker.sh
+script: bash ./.travis-docker.sh
 env:
-  - PACKAGE="github" OCAML_VERSION=4.01   REVDEPS=true FORK_USER=dsheets FORK_BRANCH=yorick
-  - PACKAGE="github" OCAML_VERSION=latest REVDEPS=true FORK_USER=dsheets FORK_BRANCH=yorick
+ global:
+   - PACKAGE="github"
+   - REVDEPS=true
+ matrix:
+   - DISTRO=debian-stable OCAML_VERSION=4.02.3
+   - DISTRO=debian-testing OCAML_VERSION=4.02.3
+   - DISTRO=debian-unstable OCAML_VERSION=4.02.3
+   - DISTRO=ubuntu-12.04 OCAML_VERSION=4.02.3
+   - DISTRO=ubuntu-15.10 OCAML_VERSION=4.02.3
+   - DISTRO=ubuntu-16.04 OCAML_VERSION=4.02.3
+   - DISTRO=centos-6 OCAML_VERSION=4.02.3
+   - DISTRO=centos-7 OCAML_VERSION=4.02.3
+   - DISTRO=fedora-23 OCAML_VERSION=4.02.3
+   - DISTRO=alpine-3.3 OCAML_VERSION=4.02.3

@@ -1,6 +1,6 @@
 # OASIS_START
-# DO NOT EDIT (digest: 22fb607bcd99a1f62f6c863416df719e)
-version = "1.0.0"
+# DO NOT EDIT (digest: bb51a51ad4503615797f5c157f92e4e1)
+version = "1.1.0"
 description = "Github API interface"
 requires = "cohttp uri cohttp.lwt-core yojson atdgen"
 archive(byte) = "github_core.cma"
@@ -9,7 +9,7 @@ archive(native) = "github_core.cmxa"
 archive(native, plugin) = "github_core.cmxs"
 exists_if = "github_core.cma"
 package "unix" (
- version = "1.0.0"
+ version = "1.1.0"
  description = "Github API interface"
  requires = "lwt.unix cohttp.lwt github bytes"
  archive(byte) = "github_unix.cma"
@@ -20,7 +20,7 @@ package "unix" (
 )
 
 package "js" (
- version = "1.0.0"
+ version = "1.1.0"
  description = "Github API interface"
  requires = "lwt js_of_ocaml cohttp.lwt-core cohttp.js github"
  archive(byte) = "github_js.cma"

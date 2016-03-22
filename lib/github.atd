@@ -208,7 +208,7 @@ type milestone = {
   closed_issues: int;
   created_at: string;
   ?due_on: string option;
-} <ocaml field_prefix="milestone_"> 
+} <ocaml field_prefix="milestone_">
 
 type milestones = milestone list
 
@@ -798,6 +798,7 @@ type status = {
   ?target_url: string option;
   ?description: string option;
   creator: user;
+  ?context: string option;
 } <ocaml field_prefix="status_">
 
 type statuses = status list
@@ -806,12 +807,13 @@ type new_status = {
   state: status_state;
   ?target_url: string option;
   ?description: string option;
+  ?context: string option;
 } <ocaml field_prefix="new_status_">
 
 type release = {
   id: int <ocaml repr="int64">;
   tag_name: string;
-  ?target_commitish: string option; 
+  ?target_commitish: string option;
   ?name: string option;
   ?body: string option;
   draft: bool;

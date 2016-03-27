@@ -40,7 +40,7 @@ Library github_js
   Findlibname: js
   FindlibParent: github_core
   Modules: Github_js
-  BuildDepends: lwt.syntax, lwt, js_of_ocaml, js_of_ocaml.syntax, cohttp.lwt-core, cohttp.js, github
+  BuildDepends: lwt, js_of_ocaml, cohttp.lwt-core, cohttp.js, github
   XMETARequires: lwt, js_of_ocaml, cohttp.lwt-core, cohttp.js, github
 
 Document "api"
@@ -58,7 +58,7 @@ Executable rwo
   Custom:             true
   CompiledObject:     best
   Install:            false
-  BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, atdgen, stringext
+  BuildDepends:       cohttp.lwt, github.unix, atdgen, stringext
 
 Executable "git-jar"
   Path:               jar
@@ -66,7 +66,7 @@ Executable "git-jar"
   Custom:             true
   CompiledObject:     best
   Install:            true
-  BuildDepends:       cohttp.lwt, lwt.syntax, github, github.unix, cmdliner, lambda-term
+  BuildDepends:       cohttp.lwt, github, github.unix, cmdliner, lambda-term
 
 Executable "git-create-release"
   Path:               jar
@@ -74,7 +74,7 @@ Executable "git-create-release"
   Custom:             true
   CompiledObject:     best
   Install:            true
-  BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, cmdliner
+  BuildDepends:       cohttp.lwt, github.unix, cmdliner
 
 Executable "git-sync-releases"
   Path:               jar
@@ -82,7 +82,7 @@ Executable "git-sync-releases"
   Custom:             true
   CompiledObject:     best
   Install:            true
-  BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, cmdliner
+  BuildDepends:       cohttp.lwt, github.unix, cmdliner
 
 Executable "git-upload-release"
   Path:               jar
@@ -90,7 +90,7 @@ Executable "git-upload-release"
   Custom:             true
   CompiledObject:     best
   Install:            true
-  BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, cmdliner
+  BuildDepends:       cohttp.lwt, github.unix, cmdliner
 
 Executable "git-list-releases"
   Path:               jar
@@ -98,7 +98,7 @@ Executable "git-list-releases"
   Custom:             true
   CompiledObject:     best
   Install:            true
-  BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, cmdliner
+  BuildDepends:       cohttp.lwt, github.unix, cmdliner
 
 Executable "git-list-events"
   Path:               jar
@@ -106,7 +106,7 @@ Executable "git-list-events"
   Custom:             true
   CompiledObject:     best
   Install:            true
-  BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, cmdliner
+  BuildDepends:       cohttp.lwt, github.unix, cmdliner
 
 Executable "git-list-issues"
   Path:               jar
@@ -114,7 +114,7 @@ Executable "git-list-issues"
   Custom:             true
   CompiledObject:     best
   Install:            true
-  BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, cmdliner
+  BuildDepends:       cohttp.lwt, github.unix, cmdliner
 
 Executable "git-search"
   Path:               jar
@@ -130,7 +130,7 @@ Executable listen_events
   Custom:             true
   CompiledObject:     best
   Install:            false
-  BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, cmdliner
+  BuildDepends:       cohttp.lwt, github.unix, cmdliner
 
 Executable "git-gist"
   Path:               gist
@@ -138,7 +138,7 @@ Executable "git-gist"
   Custom:             true
   CompiledObject:     best
   Install:            true
-  BuildDepends:       cohttp.lwt, lwt.syntax, github, github.unix, cmdliner, lambda-term
+  BuildDepends:       cohttp.lwt, github, github.unix, cmdliner, lambda-term
 
 Executable current_user
   Path:               lib_test
@@ -146,7 +146,7 @@ Executable current_user
   Custom:             true
   CompiledObject:     best
   Install:            false
-  BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, atdgen
+  BuildDepends:       cohttp.lwt, github.unix, atdgen
 
 Executable get_token
   Path:               lib_test
@@ -154,7 +154,7 @@ Executable get_token
   Custom:             true
   CompiledObject:     best
   Install:            false
-  BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, atdgen
+  BuildDepends:       cohttp.lwt, github.unix, atdgen
 
 Executable repo_info
   Path:               lib_test
@@ -162,7 +162,7 @@ Executable repo_info
   Custom:             true
   CompiledObject:     best
   Install:            false
-  BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, atdgen
+  BuildDepends:       cohttp.lwt, github.unix, atdgen
 
 Executable list_issues
   Path:               lib_test
@@ -170,7 +170,7 @@ Executable list_issues
   Custom:             true
   CompiledObject:     best
   Install:            false
-  BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, atdgen
+  BuildDepends:       cohttp.lwt, github.unix, atdgen
 
 Executable list_tags
   Path:               lib_test
@@ -178,7 +178,7 @@ Executable list_tags
   Custom:             true
   CompiledObject:     best
   Install:            false
-  BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, atdgen
+  BuildDepends:       cohttp.lwt, github.unix, atdgen
 
 Executable list_milestones
   Path:               lib_test
@@ -186,7 +186,7 @@ Executable list_milestones
   Custom:             true
   CompiledObject:     best
   Install:            false
-  BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, atdgen
+  BuildDepends:       cohttp.lwt, github.unix, atdgen
 
 Executable releases
   Path:               lib_test
@@ -194,7 +194,7 @@ Executable releases
   Custom:             true
   CompiledObject:     best
   Install:            false
-  BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, atdgen
+  BuildDepends:       cohttp.lwt, github.unix, atdgen
 
 Executable deploy_keys
   Path:               lib_test
@@ -202,7 +202,7 @@ Executable deploy_keys
   Custom:             true
   CompiledObject:     best
   Install:            false
-  BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, atdgen
+  BuildDepends:       cohttp.lwt, github.unix, atdgen
 
 Executable list_pulls
   Path:               lib_test
@@ -210,7 +210,7 @@ Executable list_pulls
   Custom:             true
   CompiledObject:     best
   Install:            false
-  BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, atdgen
+  BuildDepends:       cohttp.lwt, github.unix, atdgen
 
 Executable create_issue
   Path:               lib_test
@@ -218,7 +218,7 @@ Executable create_issue
   Custom:             true
   CompiledObject:     best
   Install:            false
-  BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, atdgen
+  BuildDepends:       cohttp.lwt, github.unix, atdgen
 
 Executable create_milestone
   Path:               lib_test
@@ -226,7 +226,7 @@ Executable create_milestone
   Custom:             true
   CompiledObject:     best
   Install:            false
-  BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, atdgen
+  BuildDepends:       cohttp.lwt, github.unix, atdgen
 
 Executable create_pull
   Path:               lib_test
@@ -234,7 +234,7 @@ Executable create_pull
   Custom:             true
   CompiledObject:     best
   Install:            false
-  BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, atdgen
+  BuildDepends:       cohttp.lwt, github.unix, atdgen
 
 Executable create_hook
   Path:               lib_test
@@ -242,7 +242,7 @@ Executable create_hook
   Custom:             true
   CompiledObject:     best
   Install:            false
-  BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, atdgen
+  BuildDepends:       cohttp.lwt, github.unix, atdgen
 
 Executable delete_all_hooks
   Path:               lib_test
@@ -250,7 +250,7 @@ Executable delete_all_hooks
   Custom:             true
   CompiledObject:     best
   Install:            false
-  BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, atdgen
+  BuildDepends:       cohttp.lwt, github.unix, atdgen
 
 Executable create_statuses
   Path:               lib_test
@@ -258,7 +258,7 @@ Executable create_statuses
   Custom:             true
   CompiledObject:     best
   Install:            false
-  BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, atdgen
+  BuildDepends:       cohttp.lwt, github.unix, atdgen
 
 Executable organizations
   Path:               lib_test
@@ -266,7 +266,7 @@ Executable organizations
   Custom:             true
   CompiledObject:     best
   Install:            false
-  BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, atdgen
+  BuildDepends:       cohttp.lwt, github.unix, atdgen
 
 Executable parse_events
   Path:               lib_test
@@ -283,4 +283,4 @@ Executable test_javascript
   Custom:             true
   CompiledObject:     byte
   Install:            false
-  BuildDepends:       lwt.syntax, lwt, js_of_ocaml, js_of_ocaml.syntax, cohttp.lwt-core, cohttp.js, github.js
+  BuildDepends:       lwt, js_of_ocaml, cohttp.lwt-core, cohttp.js, github.js

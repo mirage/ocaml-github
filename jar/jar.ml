@@ -52,7 +52,7 @@ let list_auth user pass =
     >>= fun (pass : string) ->
     Github.(Monad.(run (complete_2fa (Token.get_all ~user ~pass))))
     >>= fun auths ->
-    lwt local = Github_cookie_jar.get_all jar in
+    Github_cookie_jar.get_all jar >>= fun local ->
     printf "%-13s | %-8s | %-40s | %-10s\n" "Cookie Name" "ID" "Application" "Note";
     printf "%s\n" (String.make 80 '-');
     List.iter (fun a ->
@@ -116,13 +116,13 @@ let revoke_auth user pass name_or_id =
     >>= fun pass ->
     Github.Monad.run (complete_2fa (Github.Token.delete ~user ~pass ~id))
     >>= fun () ->
-    lwt local = Github_cookie_jar.get_all jar in
-    lwt _ = Lwt_list.fold_left_s (fun jar (name,a) ->
+    Github_cookie_jar.get_all jar >>= fun local ->
+    Lwt_list.fold_left_s (fun jar (name,a) ->
       if a.auth_id = id then
         Github_cookie_jar.delete jar ~name
       else return jar
-    ) jar local in
-    return ()
+    ) jar local >>= fun _ ->
+    return_unit
   )
 
 (* Command declarations for Cmdliner *)

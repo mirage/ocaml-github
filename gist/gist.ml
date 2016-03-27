@@ -67,16 +67,13 @@ exception Gist_file_not_found of string
 (************************************************************************)
 (* Authorization *)
 
-(* for now, we look it up in the cookie jar.  
+(* for now, we look it up in the cookie jar.
    We could query github for it instead. *)
-let get_auth_token_from_jar auth_id = 
-  lwt jar = Github_cookie_jar.init () in
-  lwt code = 
-    match_lwt Github_cookie_jar.(get jar auth_id) with
-    | Some(x) -> return x
-    | None -> Lwt.fail (Auth_token_not_found "given id not in cookie jar")
-  in
-  return code
+let get_auth_token_from_jar auth_id =
+  Github_cookie_jar.init () >>= fun jar ->
+  Github_cookie_jar.(get jar auth_id) >>= function
+  | Some x -> return x
+  | None -> Lwt.fail (Auth_token_not_found "given id not in cookie jar")
 
 (* TODO factor out 2FA code *)
 let complete_2fa c =
@@ -93,65 +90,61 @@ let complete_2fa c =
   let otp = None in
   try_again (c ?otp)
 
-(* find a personal access token with either the given name, 
+(* find a personal access token with either the given name,
  * or the first one to include Gist scope *)
-let get_personal_access_token_from_github user pass token_name = 
-  lwt pass = Passwd.get pass in
-  lwt tokens = M.run (complete_2fa (G.Token.get_all ~user ~pass)) in
-  lwt code = 
-    try 
-      match token_name with
-      | "" -> (* find token with gist scope *)
-          return (List.find (fun a -> List.mem `Gist a.auth_scopes) tokens)
-      | _ -> (* find given token *)
-          return (List.find (fun a -> a.auth_app.app_name = token_name) tokens)
-    with _ ->
-      fail (Auth_token_not_found "couldn't find a matching token")
-  in
-  return code
+let get_personal_access_token_from_github user pass token_name =
+  Passwd.get pass >>= fun pass ->
+  M.run (complete_2fa (G.Token.get_all ~user ~pass)) >>= fun tokens ->
+  try
+    match token_name with
+    | "" -> (* find token with gist scope *)
+      return (List.find (fun a -> List.mem `Gist a.auth_scopes) tokens)
+    | _ -> (* find given token *)
+      return (List.find (fun a -> a.auth_app.app_name = token_name) tokens)
+  with _ ->
+    fail (Auth_token_not_found "couldn't find a matching token")
 
-let get_auth auth_id user pass token_name = 
+let get_auth auth_id user pass token_name =
   match auth_id, user with
   | "", "" -> Lwt.fail (Auth_token_not_found "must specify username or jar token id")
   | _, "" -> get_auth_token_from_jar auth_id
   | "", _ -> get_personal_access_token_from_github user pass token_name
   | _ -> Lwt.fail (Auth_token_not_found "must specify either username or jar token id")
 
-let login auth_id user pass token_name json pretty = 
+let login auth_id user pass token_name json pretty =
   Lwt_main.run (
-    lwt code = get_auth auth_id user pass token_name in
+    get_auth auth_id user pass token_name >>= fun code ->
     if json then
       Lwt_io. printf "%s\n" (pretty_json pretty (Github_j.string_of_auth code))
-    else 
-      return ()
+    else
+      return_unit
   )
 
 (************************************************************************)
 (* List gists *)
 
-let describe_gist g = 
+let describe_gist g =
   printf "%.20s" g.gist_id;
   (match g.gist_description with
   | Some(d) when d <> "" -> printf " '%s'" d
   | _ -> ());
   printf "\n"
 
-let list_your_gists auth_id user pass token_name json pretty = 
+let list_your_gists auth_id user pass token_name json pretty =
   Lwt_main.run (
-    lwt code = get_auth auth_id user pass token_name in
+    get_auth auth_id user pass token_name >>= fun code ->
     let token = G.Token.of_auth code in
-    lwt gists = M.run (G.Stream.to_list (Gist.all ~token ())) in
+    M.run (G.Stream.to_list (Gist.all ~token ())) >>= fun gists ->
     if json then Lwt_io.printf "%s" (pretty_json pretty (Github_j.string_of_gists gists))
     else return (List.iter describe_gist gists)
   )
 
-let list_user_gists auth_id user pass token_name json pretty username = 
+let list_user_gists auth_id user pass token_name json pretty username =
   Lwt_main.run (
-    lwt code = get_auth auth_id user pass token_name in
+    get_auth auth_id user pass token_name >>= fun code ->
     let token = G.Token.of_auth code in
-    lwt gists =
-      M.run (G.Stream.to_list (Gist.for_user ~token ~user:username ()))
-    in
+    M.run (G.Stream.to_list (Gist.for_user ~token ~user:username ()))
+    >>= fun gists ->
     if json then Lwt_io.printf "%s" (pretty_json pretty (Github_j.string_of_gists gists))
     else return (List.iter describe_gist gists)
   )
@@ -160,25 +153,25 @@ let list_user_gists auth_id user pass token_name json pretty username =
 (* gists file info *)
 
 let string_of_public = function true -> "public" | false -> "private"
-let string_of_size x = 
+let string_of_size x =
   let rnd x y = (x + y - 1) / y in
   if x < 1024 then sprintf "%i B" x
   else if x < (1024*1024) then sprintf "%i KiB" (rnd x 1024)
   else if x < (1024*1024*1024) then sprintf "%i MiB" (rnd x (1024*1024))
   else "> GiB!"
-let string_of_bool ?(t="true") ?(f="false") =  
+let string_of_bool ?(t="true") ?(f="false") =
   function true -> t
          | false-> f
-let string_of_bool_opt ?(t="true") ?(f="false") = 
+let string_of_bool_opt ?(t="true") ?(f="false") =
   function Some true -> t
          | Some false | None -> f
-let string_of_opt = 
+let string_of_opt =
   function Some x -> x
          | None -> ""
 
-let rec comma_sep x = 
-  List.fold_left 
-    (fun a x -> 
+let rec comma_sep x =
+  List.fold_left
+    (fun a x ->
       match a,x with
       | "","" -> ""
       | "",_ -> x
@@ -186,7 +179,7 @@ let rec comma_sep x =
       | _ -> a ^ "," ^ x)
     "" (List.filter ((<>) "") x)
 
-let print_gist_file_info name file = 
+let print_gist_file_info name file =
   let flags = comma_sep [
     string_of_bool_opt ~t:"truncated" ~f:"" file.gist_file_truncated;
     file.gist_file_ty;
@@ -194,32 +187,33 @@ let print_gist_file_info name file =
   ] in
   Lwt_io.printf "%-40s %-8s %s\n" name (string_of_size file.gist_file_size) flags
 
-let gist_info auth_id user pass token_name json pretty gist_id = 
+let gist_info auth_id user pass token_name json pretty gist_id =
   Lwt_main.run (
-    lwt code = get_auth auth_id user pass token_name in
+    get_auth auth_id user pass token_name >>= fun code ->
     let token = G.Token.of_auth code in
-    lwt gist = M.(run (Gist.get ~token ~id:gist_id () >|= G.Response.value)) in
+    M.(run (Gist.get ~token ~id:gist_id () >|= G.Response.value))
+    >>= fun gist ->
     if json then
       Lwt_io. printf "%s\n" (pretty_json pretty (Github_j.string_of_gist gist))
-    else 
-      Lwt_list.iter_s 
-        (fun (name,file) -> print_gist_file_info name file) 
+    else
+      Lwt_list.iter_s
+        (fun (name,file) -> print_gist_file_info name file)
         gist.gist_files
   )
 
-let gist_file_info auth_id user pass token_name json pretty gist_id file = 
+let gist_file_info auth_id user pass token_name json pretty gist_id file =
   Lwt_main.run (
-    lwt code = get_auth auth_id user pass token_name in
+    get_auth auth_id user pass token_name >>= fun code ->
     let token = G.Token.of_auth code in
-    lwt gist = M.(run (Gist.get ~token ~id:gist_id () >|= G.Response.value)) in
-    lwt file_data = 
-      try Lwt.return (List.assoc file gist.gist_files)
-      with _ -> Lwt.fail (Gist_file_not_found file)
-    in
+    M.(run (Gist.get ~token ~id:gist_id () >|= G.Response.value))
+    >>= fun gist ->
+    (try Lwt.return (List.assoc file gist.gist_files)
+     with _ -> Lwt.fail (Gist_file_not_found file)) >>=
+    fun file_data ->
     if json then
       Lwt_io. printf "%s\n" (pretty_json pretty (Github_j.string_of_gist_file file_data))
     else begin
-      lwt () = print_gist_file_info file file_data in
+      print_gist_file_info file file_data >>= fun () ->
       Lwt_io.printf "url: %s\n" file_data.gist_file_raw_url
     end
   )
@@ -227,7 +221,7 @@ let gist_file_info auth_id user pass token_name json pretty gist_id file =
 (************************************************************************)
 (* gists files *)
 
-let gist_get auth_id user pass token_name json pretty gist_id file_or_dir = 
+let gist_get auth_id user pass token_name json pretty gist_id file_or_dir =
   ()
 
 (************************************************************************)
@@ -263,45 +257,45 @@ let gist_id_pos = Arg.(required & pos 0 (some string) None & info [] ~docv:"GIST
 let file_pos = Arg.(required & pos 1 (some string) None & info [] ~docv:"FILENAME"
                   ~doc:"File name.")
 
-let list_your_gists = 
-  Term.(pure list_your_gists $ 
+let list_your_gists =
+  Term.(pure list_your_gists $
     auth_id $ user $ pass $ token_name $ json $ pretty
   ),
   Term.info "list" ~doc:"list your GISTs"
 
-let list_user_gists = 
-  Term.(pure list_user_gists $ 
+let list_user_gists =
+  Term.(pure list_user_gists $
     auth_id $ user $ pass $ token_name $ json $ pretty $ user_pos
   ),
   Term.info "list-user" ~doc:"list users GISTs"
 
 let login =
-  Term.(pure login $ 
+  Term.(pure login $
     auth_id $ user $ pass $ token_name $ json $ pretty
   ),
   Term.info "login" ~doc:"show login token"
 
 let gist_info =
-  Term.(pure gist_info $ 
+  Term.(pure gist_info $
     auth_id $ user $ pass $ token_name $ json $ pretty $ gist_id_pos
   ),
   Term.info "info" ~doc:"display info about a given gist"
 
 let gist_file_info =
-  Term.(pure gist_file_info $ 
+  Term.(pure gist_file_info $
     auth_id $ user $ pass $ token_name $ json $ pretty $ gist_id_pos $ file_pos
   ),
   Term.info "file-info" ~doc:"display info about a file within gist"
 
-let default_cmd = 
-  let doc = "manipulate Github GIST files from the command line" in 
+let default_cmd =
+  let doc = "manipulate Github GIST files from the command line" in
   Term.(ret (pure (`Help (`Pager, None)))),
   let man = [
     `S "DESCRIPTION";
     `P "Read, write and otherwise manipulate Github GIST files from the command line.  Github authentication is handled with tokens created with the $(b,git-jar) command line tool.";
     `S "AUTHORIZATION OPTIONS";
-    `P "An authorization token is required to access the Github API.  You can generate and store
-a token using the $(b,git-jar) tool and retrieve it with $(b,--auth-id).  Alternatively you can supply a username and password to retrieve a token from Github (specified with $(b,--token-id) or otherwise found automatically).";
+    `P "An authorization token is required to access the Github API.  You can generate and store \
+        a token using the $(b,git-jar) tool and retrieve it with $(b,--auth-id).  Alternatively you can supply a username and password to retrieve a token from Github (specified with $(b,--token-id) or otherwise found automatically).";
     `P "$(b,--username) specify Github username.";
     `P "$(b,--password) optionally specifies the Github password on the command-line. If it isn't present, then the password will be obtained interactively.";
     `P "$(b,--token-id) specify the Github token id.";
@@ -313,10 +307,10 @@ a token using the $(b,git-jar) tool and retrieve it with $(b,--auth-id).  Altern
     `S "BUGS";
      `P "Email bug reports to <cl-mirage@lists.cl.cam.ac.uk>, or report them online at <http://github.com/avsm/ocaml-github>."] in
   Term.info "git-gist" ~version:gist_version ~doc ~man
-       
+
 let cmds = [list_your_gists; list_user_gists; login; gist_info; gist_file_info]
 
 let () =
-  match Term.eval_choice default_cmd cmds with 
+  match Term.eval_choice default_cmd cmds with
   | `Error _ -> exit 1 | _ -> exit 0
 

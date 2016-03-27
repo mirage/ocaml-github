@@ -28,11 +28,11 @@ let t =
     new_issue_milestone=None;
     new_issue_labels=[];
   } in
-    
-  lwt issue = Github.(Monad.(run (
+
+  Github.(Monad.(run (
     Issue.create ~token ~user:"avsm" ~repo:"ocaml-github" ~issue ()
     >|= Response.value
-  ))) in
+  ))) >>= fun issue ->
   eprintf "created issue number %d\n%!" (issue.Github_t.issue_number);
   return ()
 

@@ -73,7 +73,7 @@ let repo_cmd =
     "updated",Some `Updated;
     "magic",None;
   ]) None & info ["sort"] ~docv ~doc) in
-  
+
   let doc = "language filter" in
   let docv = "LANGUAGE" in
   let language = Arg.(
@@ -83,7 +83,7 @@ let repo_cmd =
   let doc = "keywords" in
   let docv = "KEYWORDS" in
   let keywords = Arg.(value & pos_all string [] & info [] ~docv ~doc) in
-  
+
   let doc = "search GitHub repositories" in
   let man = help_sections in
   Term.((pure (fun t language keywords sort ->
@@ -95,8 +95,8 @@ let default_cmd =
   let doc = "search GitHub" in
   let man = [
     `S "DESCRIPTION";
-    `P ("$(b, git search) searches GitHub for repositories, code,
-issues, or users.");
+    `P ("$(b, git search) searches GitHub for repositories, code, \
+         issues, or users.");
   ] @ help_sections
   in
   let no_cmd_err = `Error (true, "No search object type given.") in

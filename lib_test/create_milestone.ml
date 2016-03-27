@@ -27,15 +27,14 @@ let t =
     new_milestone_description=Some "new milestone description";
     new_milestone_due_on=None;
   } in
-    
-  lwt milestone = 
-    Github.(Monad.(run (
+
+  Github.(Monad.(run (
     Milestone.create ~token ~user:"avsm" ~repo:"ocaml-github" ~milestone ()
     >|= Response.value
-  ))) in
+  ))) >>= fun milestone ->
 
   eprintf "created milestone number %d\n%!" (milestone.Github_t.milestone_number);
-  lwt () = Lwt_unix.sleep 5.0 in
+  Lwt_unix.sleep 5.0 >>= fun () ->
   let num = milestone.Github_t.milestone_number in
   eprintf "about to update milestone\n";
   let milestone = {
@@ -44,19 +43,16 @@ let t =
     update_milestone_description=Some "about to delete this";
     update_milestone_due_on=None;
   } in
-  
-  lwt _milestone =
-    Github.(Monad.(run (
+
+  Github.(Monad.(run (
     Milestone.update ~token ~user:"avsm" ~repo:"ocaml-github" ~milestone ~num ()
     >|= Response.value
-  ))) in
+  ))) >>= fun _milestone ->
   eprintf "updated, sleeping\n";
-  lwt () = Lwt_unix.sleep 5.0 in
-  lwt () = 
-    Github.(Monad.(run (
+  Lwt_unix.sleep 5.0 >>= fun () ->
+  Github.(Monad.(run (
     Milestone.delete ~token ~user:"avsm" ~repo:"ocaml-github" ~num ()
     >|= Response.value
-  ))) in
-  return ()
+  )))
 
 let _ = Lwt_main.run t

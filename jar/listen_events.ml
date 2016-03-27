@@ -146,13 +146,13 @@ let listen_events token repos =
     | _ -> eprintf "Repositories must be in username/repo format"; exit 1
   ) repos in
   (* Get the events per repo *)
-  lwt _events = Lwt_list.iter_s (fun (user,repo) -> Github.(Monad.(run (
+  Lwt_list.iter_s (fun (user,repo) -> Github.(Monad.(run (
     let events = Event.for_repo ~token ~user ~repo () in
     Stream.next events
     >|= function
     | Some (_,s) -> async (listen ~token user repo s)
     | None -> assert false
-  )))) repos in
+  )))) repos >>= fun _events ->
   let forever, _wakener = Lwt.wait () in
   forever
 

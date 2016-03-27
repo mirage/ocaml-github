@@ -34,22 +34,22 @@ let create_release ~token
       new_release_prerelease = prerelease;
     }
   in
-  lwt release = Github.(Monad.(run (
+  Github.(Monad.(run (
     Release.create ~token ~user ~repo ~release:new_release () >|= Response.value
-  ))) in
+  ))) >>= fun release ->
   let id = release.release_id in
   Lwt_list.iter_s (fun filename ->
-    lwt len = Lwt_io.file_length filename >|= Int64.to_int in
+    Lwt_io.file_length filename >|= Int64.to_int >>= fun len ->
     let body = Bytes.create len in
     Lwt_io.with_file ~mode:Lwt_io.input filename
       (fun ic -> Lwt_io.read_into_exactly ic body 0 len)
     >>= fun () ->
-    lwt _a = Github.(Monad.(run (
+    Github.(Monad.(run (
       Release.upload_asset
         ~token ~user ~repo ~id ~filename ~content_type ~body ()
       >|= Response.value
-    ))) in
-    return ()) assets
+    ))) >>= fun a ->
+    return_unit) assets
 
 let run token user repo tag release_name target_commitish body assets
     content_type prerelease draft =

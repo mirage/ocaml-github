@@ -121,12 +121,14 @@ let list_events token repos =
     | _ -> eprintf "Repositories must be in username/repo format"; exit 1
   ) repos in
   (* Get the events per repo *)
-  lwt events = Lwt_list.fold_left_s (fun a (user,repo) ->
-    lwt r = Github.(Monad.(run (
-      let events = Event.for_repo ~token ~user ~repo () in
-      Stream.to_list events (* TODO: bound!??! *)
-    ))) in
-    return (r @ a)) [] repos in
+  begin
+    Lwt_list.fold_left_s (fun a (user,repo) ->
+      Github.(Monad.(run (
+        let events = Event.for_repo ~token ~user ~repo () in
+        Stream.to_list events (* TODO: bound!??! *)
+      ))) >>= fun r ->
+      return (r @ a)) [] repos
+  end >>= fun events ->
   Lwt_list.iter_s print_event events
 
 let cmd =

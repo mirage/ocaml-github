@@ -31,9 +31,9 @@ let t =
     new_issue_labels=[];
   } in
 
-  lwt issue = Github.(Monad.(run (
+  Github.(Monad.(run (
     Issue.create ~token ~user ~repo ~issue () >|= Response.value
-  ))) in
+  ))) >>= fun issue ->
   eprintf "created issue number %d\n%!" (issue.Github_t.issue_number);
 
   let pull_issue = Github_t.({
@@ -42,10 +42,10 @@ let t =
     new_pull_issue_base="master";
   }) in
 
-  lwt pull = Github.(Monad.(run (
+  Github.(Monad.(run (
     Pull.create_from_issue ~token ~user ~repo ~pull_issue ()
     >|= Response.value
-  ))) in
+  ))) >>= fun pull ->
   let num = pull.Github_t.pull_number in
   eprintf "created pull request number %d from issue %d\n%!" num issue.Github_t.issue_number;
 
@@ -55,16 +55,16 @@ let t =
     update_pull_state=None;
   }) in
 
-  lwt pull = Github.(Monad.(run (
+  Github.(Monad.(run (
     Pull.update ~token ~user ~repo ~update_pull ~num ()
     >|= Response.value
-  ))) in
+  ))) >>= fun pull ->
   eprintf "updated pull request number %d with title \"%s\"\n%!" num pull.Github_t.pull_title;
 
-  lwt merged_flag = Github.(Monad.(run (
+  Github.(Monad.(run (
     Pull.is_merged ~token ~user ~repo ~num ()
     >|= Response.value
-  ))) in
+  ))) >>= fun merged_flag ->
   eprintf "is pull request number %d merged? %b\n%!" num merged_flag;
 
   return ()

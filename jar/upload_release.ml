@@ -23,18 +23,20 @@ let ask_github fn = Github.(Monad.run (fn ()))
 
 let upload_release token user repo tag content_type filename =
   let open Github_t in
-  lwt r = ask_github (Github.Release.get_by_tag_name ~token ~user ~repo ~tag) in
+  ask_github (Github.Release.get_by_tag_name ~token ~user ~repo ~tag)
+  >>= fun r ->
   let id = r.release_id in
   print_endline (sprintf "uploading to release id %Ld" id);
-  lwt body =
-    lwt len = Lwt_io.file_length filename >|= Int64.to_int in
+  begin
+    Lwt_io.file_length filename >|= Int64.to_int >>= fun len ->
     let buf = String.create len in
     Lwt_io.with_file ~mode:Lwt_io.input filename
       (fun ic -> Lwt_io.read_into_exactly ic buf 0 len)
     >>= fun () -> return buf
-  in
-  lwt _a = ask_github (Github.Release.upload_asset 
-    ~token ~user ~repo ~id ~filename ~content_type ~body) in
+  end >>= fun body ->
+  ask_github (Github.Release.upload_asset
+                ~token ~user ~repo ~id ~filename ~content_type ~body)
+  >>= fun _a ->
   return_unit
 
 let run token user repo tag content_type filename =
@@ -42,11 +44,11 @@ let run token user repo tag content_type filename =
 
 let cmd =
   let cookie = Jar_cli.cookie () in
-  let user = 
+  let user =
     let doc = "The user name on GitHub" in
     Arg.(required & pos 0 (some string) None & info [] ~docv:"USER" ~doc)
   in
-  let repo = 
+  let repo =
     let doc = "The repository name on GitHub" in
     Arg.(required & pos 1 (some string) None & info [] ~docv:"REPO" ~doc)
   in
@@ -54,7 +56,7 @@ let cmd =
     let doc = "The release tag name on GitHub" in
     Arg.(required & pos 2 (some string) None & info [] ~docv:"TAG" ~doc)
   in
-  let filename = 
+  let filename =
     let doc = "The filename to upload" in
     Arg.(required & pos 3 (some string) None & info [] ~docv:"FILENAME" ~doc)
   in

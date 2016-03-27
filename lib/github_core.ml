@@ -321,6 +321,22 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
 
     let team_repos ~id =
       Uri.of_string (Printf.sprintf "%s/teams/%Ld/repos" api id)
+
+    let get_blobs ~owner ~repo ~sha =
+      Uri.of_string
+        (Printf.sprintf "%s/repos/%s/%s/git/blobs/%s" api owner repo sha)
+
+    let post_blobs ~owner ~repo =
+      Uri.of_string
+        (Printf.sprintf "%s/repos/%s/%s/git/blobs" api owner repo)
+
+    let get_commits ~owner ~repo ~sha =
+      Uri.of_string
+        (Printf.sprintf "%s/repos/%s/%s/git/commits/%s" api owner repo sha)
+
+    let post_commits ~owner ~repo =
+      Uri.of_string
+        (Printf.sprintf "%s/repos/%s/%s/git/commits" api owner repo)
   end 
 
   module C = Cohttp
@@ -1634,6 +1650,163 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
     let delete ?token ~id () =
       let uri = URI.gist ~id in
       API.delete ?token ~uri ~expected_code:`No_content (fun b -> return ())
+  end
+
+  module type SHA = sig
+    type t
+
+    val to_hex     : t -> string
+    val of_hex     : string -> t
+  end
+
+  module type RAWDATA = sig
+    type t
+
+    val to_raw : t -> string
+  end
+
+  module type OBJECT = sig
+    type t
+  end
+
+  module GitData
+    (SHA_Blob : SHA) (Blob : RAWDATA)
+    (SHA_Tree : SHA) (Tree : OBJECT)
+    (SHA_Commit : SHA) (Commit : OBJECT)= struct
+    open Lwt
+
+    module Encoding =
+      struct
+        type t =
+        [ `Base64
+        | `Utf8 ]
+
+        let sanitize x =
+          let result = Buffer.create (String.length x) in
+          for i = 0 to String.length x - 1 do
+            if String.unsafe_get x i >= '\000' && String.unsafe_get x i <= '\031'
+               || String.unsafe_get x i = '\127'
+            then () (* ignore CTLs characters *)
+            else Buffer.add_char result (String.unsafe_get x i)
+          done;
+          Buffer.contents result
+
+        let encode ~encoding content = match encoding with
+          | `Base64 -> B64.encode content
+          | `Utf8 -> content
+
+        let decode ~encoding content = match encoding with
+          | `Base64 -> sanitize content |> B64.decode
+          | `Utf8 -> content
+
+        let of_string = function
+          | "base64" -> `Base64
+          | "utf-8" -> `Utf8
+          | _ -> raise (Invalid_argument "Encoding.of_string")
+
+        let to_string = function
+          | `Base64 -> "base64"
+          | `Utf8 -> "utf-8"
+      end
+
+    module Blob = struct
+      type t =
+        {
+          sha     : SHA_Blob.t;
+          uri     : Uri.t;
+          content : string;
+        }
+
+      let make atd_blob =
+        let encoding = Encoding.of_string
+          atd_blob.Github_t.unsafe_blob_encoding in
+        let sha = atd_blob.Github_t.unsafe_blob_sha
+                  |> SHA_Blob.of_hex in
+        let uri = Uri.of_string atd_blob.Github_t.unsafe_blob_url in
+        let content = atd_blob.Github_t.unsafe_blob_content
+                      |> Encoding.decode ~encoding in
+        { sha; uri; content; }
+
+      let get ?token ~owner ~repo ~sha =
+        let uri = URI.get_blobs owner repo (SHA_Blob.to_hex sha) in
+        API.get ?token ~uri
+          ~expected_code:`OK
+          (fun b -> return (unsafe_blob_of_string b))
+
+      type new_blob =
+        {
+          blob : Blob.t;
+          encoding : Encoding.t;
+        }
+
+      (* XXX: atdgen ? *)
+      let new_blob_to_yojson { blob; encoding; } =
+        `Assoc ["content", `String (Blob.to_raw blob |> Encoding.encode ~encoding);
+                "encoding", `String (Encoding.to_string encoding); ]
+
+      let create ?token ~owner ~repo ?(encoding = `Utf8) blob =
+        let to_blob { Github_t.git_object_sha; _ } =
+          SHA_Blob.of_hex git_object_sha in
+        let uri = URI.post_blobs owner repo in
+        let body =
+          { blob;
+            encoding; }
+          |> new_blob_to_yojson
+          |> Yojson.Safe.to_string
+        in
+        API.post ?token ~uri ~expected_code:`Created
+          ~body (fun b -> return (git_object_of_string b |> to_blob))
+    end
+
+    module Commit = struct
+      type t =
+        {
+          sha       : SHA_Commit.t;
+          uri       : Uri.t;
+          author    : Github_t.info;
+          committer : Github_t.info;
+          message   : string;
+          tree      : SHA_Tree.t;
+          parents   : SHA_Commit.t list;
+        }
+
+      let make atd_commit =
+        { sha       = atd_commit.Github_t.unsafe_commit_sha
+                      |> SHA_Commit.of_hex;
+          uri       = Uri.of_string
+            atd_commit.Github_t.unsafe_commit_url;
+          author    = atd_commit.Github_t.unsafe_commit_author;
+          committer = atd_commit.Github_t.unsafe_commit_committer;
+          message   = atd_commit.Github_t.unsafe_commit_message;
+          tree      = atd_commit.Github_t.unsafe_commit_tree
+                                .Github_t.git_object_sha
+                      |> SHA_Tree.of_hex;
+          parents   =
+            List.map
+              (fun o -> o.Github_t.git_object_sha |> SHA_Commit.of_hex)
+              atd_commit.Github_t.unsafe_commit_parents;
+        }
+
+      let get ?token ~owner ~repo ~sha =
+        let uri = URI.get_commits owner repo (SHA_Commit.to_hex sha) in
+        API.get ?token ~uri
+          ~expected_code:`OK
+          (fun b -> return (unsafe_commit_of_string b))
+
+      let create ?token ~owner ~repo ?(parents = []) ?author ?committer
+          message tree =
+        let uri = URI.post_commits owner repo in
+        let body =
+          { Github_t.new_commit_message = message;
+            new_commit_tree             = SHA_Tree.to_hex tree;
+            new_commit_parents          = List.map SHA_Commit.to_hex parents;
+            new_commit_author           = author;
+            new_commit_committer        = committer; }
+          |> string_of_new_commit
+        in
+        API.post ?token ~uri ~expected_code:`Created
+          ~body (fun b -> return (unsafe_commit_of_string b))
+    end
   end
 
   module Search = struct

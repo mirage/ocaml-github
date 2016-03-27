@@ -948,3 +948,34 @@ type update_gist = {
   description: string;
   files: (string * update_gist) list <json repr="object">
 } <ocaml field_prefix="update_gist_">
+
+type unsafe_blob = {
+  content  : string;
+  encoding : string;
+  url      : string;
+  sha      : string;
+  size     : int;
+} <ocaml field_prefix="unsafe_blob_">
+
+type git_object = {
+  url : string;
+  sha : string;
+} <ocaml field_prefix="git_object_">
+
+type unsafe_commit = {
+  sha       : string;
+  url       : string;
+  author    : info;
+  committer : info;
+  message   : string;
+  tree      : git_object;
+  parents   : git_object list;
+} <ocaml field_prefix="unsafe_commit_">
+
+type new_commit = {
+  message    : string;
+  tree       : string;
+  ~parents <ocaml default="[]"> : string list;
+  ?committer : info option;
+  ?author    : info option;
+} <ocaml field_prefix="new_commit_">

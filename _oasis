@@ -21,7 +21,7 @@ Library github_core
   Findlibname: github
   Modules: Github_s, Github_core, Github_j, Github_t
   BuildDepends: lwt, cohttp (>= 0.12.0), uri (>= 1.3.8), cohttp.lwt-core (>= 0.10.0), yojson, atdgen
-  XMETARequires: cohttp, uri, cohttp.lwt-core, yojson, atdgen
+  XMETARequires: cohttp, uri, cohttp.lwt-core, yojson, atdgen, cstruct
 
 Library github_unix
   Build$: flag(unix)
@@ -203,6 +203,14 @@ Executable deploy_keys
   CompiledObject:     best
   Install:            false
   BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, atdgen
+
+Executable test_datas
+  Path:               lib_test
+  MainIs:             test_datas.ml
+  Custom:             true
+  CompiledObject:     best
+  Install:            false
+  BuildDepends:       cohttp.lwt, lwt.syntax, github.unix, atdgen, git, git.unix
 
 Executable list_pulls
   Path:               lib_test

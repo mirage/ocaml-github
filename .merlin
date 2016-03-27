@@ -7,6 +7,8 @@ PKG cohttp
 PKG yojson
 PKG zed
 PKG lambda-term
+PKG git git.unix
+PKG cstruct
 
 S lib
 S lib_test

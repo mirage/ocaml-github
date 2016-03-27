@@ -37,6 +37,9 @@ depends: [
   "lambda-term"
   "cmdliner"
   "base-unix"
+  "cstruct"
+  "git" {test}
+  "git.unix" {test}
 ]
 depopts: [
   "js_of_ocaml"

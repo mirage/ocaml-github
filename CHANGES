@@ -1,6 +1,7 @@
 1.1.0 (2016-03-22):
 * new_status_context field added (#88)
 * add Windows tests via Appveyor
+* Allow the Jar cookie to be set via the `GH_COOKIE` environment variable (#100)
 
 1.0.0 (2015-06-01):
 * Changes marked with ! are type changes (not including field additions)

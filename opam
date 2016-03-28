@@ -1,6 +1,6 @@
 opam-version: "1.2"
 name: "github"
-version: "1.0.0"
+version: "dev"
 maintainer: "sheets@alum.mit.edu"
 authors: [
   "Anil Madhavapeddy"
@@ -35,7 +35,7 @@ depends: [
   "yojson" {>= "1.2.0"}
   "stringext"
   "lambda-term"
-  "cmdliner {>= "0.9.8"}
+  "cmdliner" {>= "0.9.8"}
   "base-unix"
 ]
 depopts: [

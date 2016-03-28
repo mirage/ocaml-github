@@ -7,6 +7,8 @@ authors: [
   "David Sheets"
   "Andy Ray"
   "Jeff Hammerbacher"
+  "Thomas Gazagnaire"
+  "Rudi Grinberg"
 ]
 homepage: "https://github.com/mirage/ocaml-github"
 bug-reports: "https://github.com/mirage/ocaml-github/issues"

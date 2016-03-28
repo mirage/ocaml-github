@@ -2,7 +2,7 @@ OASISFormat: 0.4
 Name:        github
 Version:     1.1.0
 Synopsis:    Github API interface
-Authors:     Anil Madhavapeddy, David Sheets, Andy Ray, Jeff Hammerbacher, Thomas Gazagnaire
+Authors:     Anil Madhavapeddy, David Sheets, Andy Ray, Jeff Hammerbacher, Thomas Gazagnaire, Rudi Grinberg
 License:     ISC
 Plugins:     META (0.4)
 BuildTools: ocamlbuild

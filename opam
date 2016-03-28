@@ -35,7 +35,7 @@ depends: [
   "yojson" {>= "1.2.0"}
   "stringext"
   "lambda-term"
-  "cmdliner"
+  "cmdliner {>= "0.9.8"}
   "base-unix"
 ]
 depopts: [

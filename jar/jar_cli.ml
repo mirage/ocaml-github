@@ -39,4 +39,6 @@ let repos ?(doc_append="") () =
 
 let cookie ?(doc_append="") () =
   let doc = "Authentication cookie"^doc_append in
-  map auth Arg.(value & opt string "infra" & info ["c"] ~docv:"COOKIE" ~doc)
+  let env = Arg.env_var "GH_COOKIE" in
+  map auth Arg.(value & opt string "infra"
+                & info ~env ["c"] ~docv:"COOKIE" ~doc)

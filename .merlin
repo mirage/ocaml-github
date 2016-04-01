@@ -1,9 +1,10 @@
-EXT lwt
-
 PKG lwt
 PKG cmdliner
 PKG stringext
 PKG cohttp
+PKG cohttp.js
+PKG js_of_ocaml
+PKG js_of_ocaml.ppx
 PKG yojson
 PKG zed
 PKG lambda-term

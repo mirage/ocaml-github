@@ -40,7 +40,7 @@ Library github_js
   Findlibname: js
   FindlibParent: github_core
   Modules: Github_js
-  BuildDepends: lwt, js_of_ocaml, cohttp.lwt-core, cohttp.js, github
+  BuildDepends: lwt, js_of_ocaml, js_of_ocaml.ppx, cohttp.lwt-core, cohttp.js, github
   XMETARequires: lwt, js_of_ocaml, cohttp.lwt-core, cohttp.js, github
 
 Document "api"

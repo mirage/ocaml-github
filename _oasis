@@ -142,6 +142,7 @@ Executable "git-gist"
 
 Executable current_user
   Path:               lib_test
+  Build$:             flag(tests)
   MainIs:             current_user.ml
   Custom:             true
   CompiledObject:     best
@@ -150,6 +151,7 @@ Executable current_user
 
 Executable get_token
   Path:               lib_test
+  Build$:             flag(tests)
   MainIs:             get_token.ml
   Custom:             true
   CompiledObject:     best
@@ -158,6 +160,7 @@ Executable get_token
 
 Executable repo_info
   Path:               lib_test
+  Build$:             flag(tests)
   MainIs:             repo_info.ml
   Custom:             true
   CompiledObject:     best
@@ -166,6 +169,7 @@ Executable repo_info
 
 Executable list_issues
   Path:               lib_test
+  Build$:             flag(tests)
   MainIs:             issues.ml
   Custom:             true
   CompiledObject:     best
@@ -174,6 +178,7 @@ Executable list_issues
 
 Executable list_tags
   Path:               lib_test
+  Build$:             flag(tests)
   MainIs:             tags.ml
   Custom:             true
   CompiledObject:     best
@@ -182,6 +187,7 @@ Executable list_tags
 
 Executable list_milestones
   Path:               lib_test
+  Build$:             flag(tests)
   MainIs:             milestones.ml
   Custom:             true
   CompiledObject:     best
@@ -190,6 +196,7 @@ Executable list_milestones
 
 Executable releases
   Path:               lib_test
+  Build$:             flag(tests)
   MainIs:             releases.ml
   Custom:             true
   CompiledObject:     best
@@ -198,6 +205,7 @@ Executable releases
 
 Executable deploy_keys
   Path:               lib_test
+  Build$:             flag(tests)
   MainIs:             deploy_keys.ml
   Custom:             true
   CompiledObject:     best
@@ -206,6 +214,7 @@ Executable deploy_keys
 
 Executable list_pulls
   Path:               lib_test
+  Build$:             flag(tests)
   MainIs:             pulls.ml
   Custom:             true
   CompiledObject:     best
@@ -214,6 +223,7 @@ Executable list_pulls
 
 Executable create_issue
   Path:               lib_test
+  Build$:             flag(tests)
   MainIs:             create_issue.ml
   Custom:             true
   CompiledObject:     best
@@ -222,6 +232,7 @@ Executable create_issue
 
 Executable create_milestone
   Path:               lib_test
+  Build$:             flag(tests)
   MainIs:             create_milestone.ml
   Custom:             true
   CompiledObject:     best
@@ -230,6 +241,7 @@ Executable create_milestone
 
 Executable create_pull
   Path:               lib_test
+  Build$:             flag(tests)
   MainIs:             create_pull.ml
   Custom:             true
   CompiledObject:     best
@@ -238,6 +250,7 @@ Executable create_pull
 
 Executable create_hook
   Path:               lib_test
+  Build$:             flag(tests)
   MainIs:             create_hook.ml
   Custom:             true
   CompiledObject:     best
@@ -246,6 +259,7 @@ Executable create_hook
 
 Executable delete_all_hooks
   Path:               lib_test
+  Build$:             flag(tests)
   MainIs:             delete_all_hooks.ml
   Custom:             true
   CompiledObject:     best
@@ -254,6 +268,7 @@ Executable delete_all_hooks
 
 Executable create_statuses
   Path:               lib_test
+  Build$:             flag(tests)
   MainIs:             create_statuses.ml
   Custom:             true
   CompiledObject:     best
@@ -262,6 +277,7 @@ Executable create_statuses
 
 Executable organizations
   Path:               lib_test
+  Build$:             flag(tests)
   MainIs:             organizations.ml
   Custom:             true
   CompiledObject:     best
@@ -270,6 +286,7 @@ Executable organizations
 
 Executable parse_events
   Path:               lib_test
+  Build$:             flag(tests)
   MainIs:             parse_events.ml
   Custom:             true
   CompiledObject:     best
@@ -277,7 +294,7 @@ Executable parse_events
   BuildDepends:       cohttp.lwt, github, cmdliner
 
 Executable test_javascript
-  Build$:             flag(js)
+  Build$:             flag(js) && flag(tests)
   Path:               lib_test
   MainIs:             test_javascript.ml
   Custom:             true

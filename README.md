@@ -1,5 +1,8 @@
 # GitHub APIv3 OCaml Library
 
+[![Build Status](https://travis-ci.org/mirage/ocaml-github.svg)](https://travis-ci.org/mirage/ocaml-github)
+[![docs](https://img.shields.io/badge/doc-online-blue.svg)](https://mirage.github.io/ocaml-github/)
+
 This library provides an OCaml interface to the [GitHub
 APIv3](https://developer.github.com/v3/) (JSON).
 
@@ -59,7 +62,7 @@ Created token rwo (236241): <token>
 $ git jar show avsm
 Enter Github password: **********
 Enter 2FA code from 'app': 001221
-Cookie Name | ID       | Application                              | Note      
+Cookie Name | ID       | Application                              | Note
 ----------------------------------------------------------------------------------
         rwo | 236241   | Real World OCaml (API)                   |
    <remote> | 340988   | Travis                                   |
@@ -70,14 +73,14 @@ Your Github application can how use it via the `Github_cookie_jar` module:
 ```ocaml
 # #require "github.unix";;
 # Github_cookie_jar.get ~name:"rwo";;
-- : Github_t.auth option = Some 
+- : Github_t.auth option = Some
   { Github_t.auth_scopes = [`Public_repo];
     Github_t.auth_token = "<token>";
     Github_t.auth_app = {
       Github_t.app_name = "Real World OCaml";
       Github_t.app_url = "http://realworldocaml.org/" };
     Github_t.auth_url = "https://api.github.com/authorizations/236241";
-    Github_t.auth_id = 236241; Github_t.auth_note = None; 
+    Github_t.auth_id = 236241; Github_t.auth_note = None;
     Github_t.auth_note_url = None }
 ```
 

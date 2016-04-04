@@ -21,22 +21,22 @@ open Cohttp
 open Cohttp_lwt_unix
 open Config
 
-let scopes = [`Public_repo] 
-let step1_link = Github.URI.authorize ~scopes ~client_id ()
-  
+let scopes = [`Public_repo]
+let step1_link = Github.URI.authorize ~state:"TODO" ~scopes ~client_id ()
+
 module Resp = struct
   let wrap_html s =
     sprintf "<html><body>%s</body></html>" s
 
   (* respond with an error *)
-  let not_found req err = 
+  let not_found req err =
     let status = `Not_found in
     let headers = Header.of_list [ "Cache-control", "no-cache" ] in
     let body = sprintf "<html><body><h1>Error</h1><p>%s</p></body></html>" err in
     Server.respond_string ~headers ~status ~body ()
 
   (* internal error *)
-  let internal_error err = 
+  let internal_error err =
     let status = `Internal_server_error in
     let headers = Header.of_list [ "Cache-control", "no-cache" ] in
     let body = sprintf "<html><body><h1>Internal Server Error</h1><p>%s</p></body></html>" err in
@@ -60,16 +60,21 @@ module Resp = struct
         index req
     | ["";"step2"] -> begin
         let uri = Request.uri req in
-        let code = match Uri.get_query_param uri "code" with
-          |Some hd -> hd |None -> "" in
-        try_lwt begin
-          match_lwt Github.Token.of_code ~client_id ~client_secret ~code () with
-          |None -> internal_error "no token in response" ()
-          |Some token -> dyn req (wrap_html ("ok: token is "^(Github.Token.to_string token)))
-        end with Failure e ->
-          dyn req (wrap_html ("err: "^e))
+        let code =
+          match Uri.get_query_param uri "code" with
+          | Some hd -> hd
+          | None -> "" in
+        Lwt.catch (
+          fun () ->
+          Github.Token.of_code ~client_id ~client_secret ~code () >>= function
+          | None -> internal_error "no token in response" ()
+          | Some token ->
+            dyn req (wrap_html ("ok: token is " ^ (Github.Token.to_string token))))
+          (function
+          | Failure e -> dyn req (wrap_html ("err: " ^ e))
+          | e -> Lwt.fail e)
     end
-    | _ -> 
+    | _ ->
         not_found req "dispatch"
 end
 
@@ -77,12 +82,12 @@ end
 let callback con_id req body =
   let uri = Request.uri req in
   let path = Uri.path uri in
-  printf "%s %s [%s]\n%!" (Code.string_of_method (Request.meth req)) path 
+  printf "%s %s [%s]\n%!" (Code.string_of_method (Request.meth req)) path
     (String.concat "," (List.map (fun (h,v) -> sprintf "%s=%s" h (String.concat "," v)) (Uri.query uri)));
   (* normalize path to strip out ../. and such *)
   let path_elem = Stringext.(split ~on:'/' (Uri.path uri)) in
   List.iter (fun p -> printf "> %s\n%!" p) path_elem;
-  Resp.dispatch req path_elem 
+  Resp.dispatch req path_elem
 
 let server_t =
   let port = 8080 in

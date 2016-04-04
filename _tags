@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 3ff9dfc9e77bebb298dead5f21bc2e4a)
+# DO NOT EDIT (digest: b2ca0e218cc9748e5c0b66bb03a175c3)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
@@ -41,6 +41,7 @@ true: annot, bin_annot
 <js/*.ml{,i,y}>: pkg_cohttp.js
 <js/*.ml{,i,y}>: pkg_cohttp.lwt-core
 <js/*.ml{,i,y}>: pkg_js_of_ocaml
+<js/*.ml{,i,y}>: pkg_js_of_ocaml.ppx
 <js/*.ml{,i,y}>: pkg_lwt
 <js/*.ml{,i,y}>: pkg_uri
 <js/*.ml{,i,y}>: pkg_yojson
@@ -458,6 +459,7 @@ true: annot, bin_annot
 "lib_test/test_javascript.byte": pkg_cohttp.js
 "lib_test/test_javascript.byte": pkg_cohttp.lwt-core
 "lib_test/test_javascript.byte": pkg_js_of_ocaml
+"lib_test/test_javascript.byte": pkg_js_of_ocaml.ppx
 "lib_test/test_javascript.byte": pkg_lwt
 "lib_test/test_javascript.byte": pkg_uri
 "lib_test/test_javascript.byte": pkg_yojson
@@ -468,6 +470,7 @@ true: annot, bin_annot
 <lib_test/*.ml{,i,y}>: pkg_cohttp.js
 <lib_test/*.ml{,i,y}>: pkg_cohttp.lwt-core
 <lib_test/*.ml{,i,y}>: pkg_js_of_ocaml
+<lib_test/*.ml{,i,y}>: pkg_js_of_ocaml.ppx
 <lib_test/*.ml{,i,y}>: pkg_lwt
 <lib_test/*.ml{,i,y}>: pkg_uri
 <lib_test/*.ml{,i,y}>: pkg_yojson

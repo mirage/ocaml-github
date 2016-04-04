@@ -8,6 +8,9 @@ PKG js_of_ocaml.ppx
 PKG yojson
 PKG zed
 PKG lambda-term
+PKG ppx_deriving
+PKG ppx_sexp_conv
+PKG sexplib
 
 S lib
 S lib_test

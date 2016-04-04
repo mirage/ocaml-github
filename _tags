@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: b2ca0e218cc9748e5c0b66bb03a175c3)
+# DO NOT EDIT (digest: abb1d2b715a735a8c6a36bdf803b94b8)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
@@ -20,6 +20,8 @@ true: annot, bin_annot
 <lib/*.ml{,i,y}>: pkg_cohttp
 <lib/*.ml{,i,y}>: pkg_cohttp.lwt-core
 <lib/*.ml{,i,y}>: pkg_lwt
+<lib/*.ml{,i,y}>: pkg_ppx_deriving
+<lib/*.ml{,i,y}>: pkg_ppx_sexp_conv
 <lib/*.ml{,i,y}>: pkg_uri
 <lib/*.ml{,i,y}>: pkg_yojson
 # Library github_unix
@@ -31,6 +33,8 @@ true: annot, bin_annot
 <unix/*.ml{,i,y}>: pkg_cohttp.lwt-core
 <unix/*.ml{,i,y}>: pkg_lwt
 <unix/*.ml{,i,y}>: pkg_lwt.unix
+<unix/*.ml{,i,y}>: pkg_ppx_deriving
+<unix/*.ml{,i,y}>: pkg_ppx_sexp_conv
 <unix/*.ml{,i,y}>: pkg_uri
 <unix/*.ml{,i,y}>: pkg_yojson
 <unix/*.ml{,i,y}>: use_github_core
@@ -43,6 +47,8 @@ true: annot, bin_annot
 <js/*.ml{,i,y}>: pkg_js_of_ocaml
 <js/*.ml{,i,y}>: pkg_js_of_ocaml.ppx
 <js/*.ml{,i,y}>: pkg_lwt
+<js/*.ml{,i,y}>: pkg_ppx_deriving
+<js/*.ml{,i,y}>: pkg_ppx_sexp_conv
 <js/*.ml{,i,y}>: pkg_uri
 <js/*.ml{,i,y}>: pkg_yojson
 <js/*.ml{,i,y}>: use_github_core
@@ -54,6 +60,8 @@ true: annot, bin_annot
 <lib_test/rwo.{native,byte}>: pkg_cohttp.lwt-core
 <lib_test/rwo.{native,byte}>: pkg_lwt
 <lib_test/rwo.{native,byte}>: pkg_lwt.unix
+<lib_test/rwo.{native,byte}>: pkg_ppx_deriving
+<lib_test/rwo.{native,byte}>: pkg_ppx_sexp_conv
 <lib_test/rwo.{native,byte}>: pkg_stringext
 <lib_test/rwo.{native,byte}>: pkg_uri
 <lib_test/rwo.{native,byte}>: pkg_yojson
@@ -71,6 +79,8 @@ true: annot, bin_annot
 <jar/jar.{native,byte}>: pkg_lambda-term
 <jar/jar.{native,byte}>: pkg_lwt
 <jar/jar.{native,byte}>: pkg_lwt.unix
+<jar/jar.{native,byte}>: pkg_ppx_deriving
+<jar/jar.{native,byte}>: pkg_ppx_sexp_conv
 <jar/jar.{native,byte}>: pkg_uri
 <jar/jar.{native,byte}>: pkg_yojson
 <jar/jar.{native,byte}>: use_github_core
@@ -86,6 +96,8 @@ true: annot, bin_annot
 <jar/create_release.{native,byte}>: pkg_cohttp.lwt-core
 <jar/create_release.{native,byte}>: pkg_lwt
 <jar/create_release.{native,byte}>: pkg_lwt.unix
+<jar/create_release.{native,byte}>: pkg_ppx_deriving
+<jar/create_release.{native,byte}>: pkg_ppx_sexp_conv
 <jar/create_release.{native,byte}>: pkg_uri
 <jar/create_release.{native,byte}>: pkg_yojson
 <jar/create_release.{native,byte}>: use_github_core
@@ -100,6 +112,8 @@ true: annot, bin_annot
 <jar/sync_releases.{native,byte}>: pkg_cohttp.lwt-core
 <jar/sync_releases.{native,byte}>: pkg_lwt
 <jar/sync_releases.{native,byte}>: pkg_lwt.unix
+<jar/sync_releases.{native,byte}>: pkg_ppx_deriving
+<jar/sync_releases.{native,byte}>: pkg_ppx_sexp_conv
 <jar/sync_releases.{native,byte}>: pkg_uri
 <jar/sync_releases.{native,byte}>: pkg_yojson
 <jar/sync_releases.{native,byte}>: use_github_core
@@ -114,6 +128,8 @@ true: annot, bin_annot
 <jar/upload_release.{native,byte}>: pkg_cohttp.lwt-core
 <jar/upload_release.{native,byte}>: pkg_lwt
 <jar/upload_release.{native,byte}>: pkg_lwt.unix
+<jar/upload_release.{native,byte}>: pkg_ppx_deriving
+<jar/upload_release.{native,byte}>: pkg_ppx_sexp_conv
 <jar/upload_release.{native,byte}>: pkg_uri
 <jar/upload_release.{native,byte}>: pkg_yojson
 <jar/upload_release.{native,byte}>: use_github_core
@@ -128,6 +144,8 @@ true: annot, bin_annot
 <jar/list_releases.{native,byte}>: pkg_cohttp.lwt-core
 <jar/list_releases.{native,byte}>: pkg_lwt
 <jar/list_releases.{native,byte}>: pkg_lwt.unix
+<jar/list_releases.{native,byte}>: pkg_ppx_deriving
+<jar/list_releases.{native,byte}>: pkg_ppx_sexp_conv
 <jar/list_releases.{native,byte}>: pkg_uri
 <jar/list_releases.{native,byte}>: pkg_yojson
 <jar/list_releases.{native,byte}>: use_github_core
@@ -142,6 +160,8 @@ true: annot, bin_annot
 <jar/list_events.{native,byte}>: pkg_cohttp.lwt-core
 <jar/list_events.{native,byte}>: pkg_lwt
 <jar/list_events.{native,byte}>: pkg_lwt.unix
+<jar/list_events.{native,byte}>: pkg_ppx_deriving
+<jar/list_events.{native,byte}>: pkg_ppx_sexp_conv
 <jar/list_events.{native,byte}>: pkg_uri
 <jar/list_events.{native,byte}>: pkg_yojson
 <jar/list_events.{native,byte}>: use_github_core
@@ -156,6 +176,8 @@ true: annot, bin_annot
 <jar/list_issues.{native,byte}>: pkg_cohttp.lwt-core
 <jar/list_issues.{native,byte}>: pkg_lwt
 <jar/list_issues.{native,byte}>: pkg_lwt.unix
+<jar/list_issues.{native,byte}>: pkg_ppx_deriving
+<jar/list_issues.{native,byte}>: pkg_ppx_sexp_conv
 <jar/list_issues.{native,byte}>: pkg_uri
 <jar/list_issues.{native,byte}>: pkg_yojson
 <jar/list_issues.{native,byte}>: use_github_core
@@ -170,6 +192,8 @@ true: annot, bin_annot
 <jar/search.{native,byte}>: pkg_cohttp.lwt-core
 <jar/search.{native,byte}>: pkg_lwt
 <jar/search.{native,byte}>: pkg_lwt.unix
+<jar/search.{native,byte}>: pkg_ppx_deriving
+<jar/search.{native,byte}>: pkg_ppx_sexp_conv
 <jar/search.{native,byte}>: pkg_uri
 <jar/search.{native,byte}>: pkg_yojson
 <jar/search.{native,byte}>: use_github_core
@@ -184,6 +208,8 @@ true: annot, bin_annot
 <jar/listen_events.{native,byte}>: pkg_cohttp.lwt-core
 <jar/listen_events.{native,byte}>: pkg_lwt
 <jar/listen_events.{native,byte}>: pkg_lwt.unix
+<jar/listen_events.{native,byte}>: pkg_ppx_deriving
+<jar/listen_events.{native,byte}>: pkg_ppx_sexp_conv
 <jar/listen_events.{native,byte}>: pkg_uri
 <jar/listen_events.{native,byte}>: pkg_yojson
 <jar/listen_events.{native,byte}>: use_github_core
@@ -196,6 +222,8 @@ true: annot, bin_annot
 <jar/*.ml{,i,y}>: pkg_cohttp.lwt-core
 <jar/*.ml{,i,y}>: pkg_lwt
 <jar/*.ml{,i,y}>: pkg_lwt.unix
+<jar/*.ml{,i,y}>: pkg_ppx_deriving
+<jar/*.ml{,i,y}>: pkg_ppx_sexp_conv
 <jar/*.ml{,i,y}>: pkg_uri
 <jar/*.ml{,i,y}>: pkg_yojson
 <jar/*.ml{,i,y}>: use_github_core
@@ -211,6 +239,8 @@ true: annot, bin_annot
 <gist/gist.{native,byte}>: pkg_lambda-term
 <gist/gist.{native,byte}>: pkg_lwt
 <gist/gist.{native,byte}>: pkg_lwt.unix
+<gist/gist.{native,byte}>: pkg_ppx_deriving
+<gist/gist.{native,byte}>: pkg_ppx_sexp_conv
 <gist/gist.{native,byte}>: pkg_uri
 <gist/gist.{native,byte}>: pkg_yojson
 <gist/gist.{native,byte}>: use_github_core
@@ -224,6 +254,8 @@ true: annot, bin_annot
 <gist/*.ml{,i,y}>: pkg_lambda-term
 <gist/*.ml{,i,y}>: pkg_lwt
 <gist/*.ml{,i,y}>: pkg_lwt.unix
+<gist/*.ml{,i,y}>: pkg_ppx_deriving
+<gist/*.ml{,i,y}>: pkg_ppx_sexp_conv
 <gist/*.ml{,i,y}>: pkg_uri
 <gist/*.ml{,i,y}>: pkg_yojson
 <gist/*.ml{,i,y}>: use_github_core
@@ -237,6 +269,8 @@ true: annot, bin_annot
 <lib_test/current_user.{native,byte}>: pkg_cohttp.lwt-core
 <lib_test/current_user.{native,byte}>: pkg_lwt
 <lib_test/current_user.{native,byte}>: pkg_lwt.unix
+<lib_test/current_user.{native,byte}>: pkg_ppx_deriving
+<lib_test/current_user.{native,byte}>: pkg_ppx_sexp_conv
 <lib_test/current_user.{native,byte}>: pkg_uri
 <lib_test/current_user.{native,byte}>: pkg_yojson
 <lib_test/current_user.{native,byte}>: use_github_core
@@ -250,6 +284,8 @@ true: annot, bin_annot
 <lib_test/get_token.{native,byte}>: pkg_cohttp.lwt-core
 <lib_test/get_token.{native,byte}>: pkg_lwt
 <lib_test/get_token.{native,byte}>: pkg_lwt.unix
+<lib_test/get_token.{native,byte}>: pkg_ppx_deriving
+<lib_test/get_token.{native,byte}>: pkg_ppx_sexp_conv
 <lib_test/get_token.{native,byte}>: pkg_uri
 <lib_test/get_token.{native,byte}>: pkg_yojson
 <lib_test/get_token.{native,byte}>: use_github_core
@@ -263,6 +299,8 @@ true: annot, bin_annot
 <lib_test/repo_info.{native,byte}>: pkg_cohttp.lwt-core
 <lib_test/repo_info.{native,byte}>: pkg_lwt
 <lib_test/repo_info.{native,byte}>: pkg_lwt.unix
+<lib_test/repo_info.{native,byte}>: pkg_ppx_deriving
+<lib_test/repo_info.{native,byte}>: pkg_ppx_sexp_conv
 <lib_test/repo_info.{native,byte}>: pkg_uri
 <lib_test/repo_info.{native,byte}>: pkg_yojson
 <lib_test/repo_info.{native,byte}>: use_github_core
@@ -276,6 +314,8 @@ true: annot, bin_annot
 <lib_test/issues.{native,byte}>: pkg_cohttp.lwt-core
 <lib_test/issues.{native,byte}>: pkg_lwt
 <lib_test/issues.{native,byte}>: pkg_lwt.unix
+<lib_test/issues.{native,byte}>: pkg_ppx_deriving
+<lib_test/issues.{native,byte}>: pkg_ppx_sexp_conv
 <lib_test/issues.{native,byte}>: pkg_uri
 <lib_test/issues.{native,byte}>: pkg_yojson
 <lib_test/issues.{native,byte}>: use_github_core
@@ -289,6 +329,8 @@ true: annot, bin_annot
 <lib_test/tags.{native,byte}>: pkg_cohttp.lwt-core
 <lib_test/tags.{native,byte}>: pkg_lwt
 <lib_test/tags.{native,byte}>: pkg_lwt.unix
+<lib_test/tags.{native,byte}>: pkg_ppx_deriving
+<lib_test/tags.{native,byte}>: pkg_ppx_sexp_conv
 <lib_test/tags.{native,byte}>: pkg_uri
 <lib_test/tags.{native,byte}>: pkg_yojson
 <lib_test/tags.{native,byte}>: use_github_core
@@ -302,6 +344,8 @@ true: annot, bin_annot
 <lib_test/milestones.{native,byte}>: pkg_cohttp.lwt-core
 <lib_test/milestones.{native,byte}>: pkg_lwt
 <lib_test/milestones.{native,byte}>: pkg_lwt.unix
+<lib_test/milestones.{native,byte}>: pkg_ppx_deriving
+<lib_test/milestones.{native,byte}>: pkg_ppx_sexp_conv
 <lib_test/milestones.{native,byte}>: pkg_uri
 <lib_test/milestones.{native,byte}>: pkg_yojson
 <lib_test/milestones.{native,byte}>: use_github_core
@@ -315,6 +359,8 @@ true: annot, bin_annot
 <lib_test/releases.{native,byte}>: pkg_cohttp.lwt-core
 <lib_test/releases.{native,byte}>: pkg_lwt
 <lib_test/releases.{native,byte}>: pkg_lwt.unix
+<lib_test/releases.{native,byte}>: pkg_ppx_deriving
+<lib_test/releases.{native,byte}>: pkg_ppx_sexp_conv
 <lib_test/releases.{native,byte}>: pkg_uri
 <lib_test/releases.{native,byte}>: pkg_yojson
 <lib_test/releases.{native,byte}>: use_github_core
@@ -328,6 +374,8 @@ true: annot, bin_annot
 <lib_test/deploy_keys.{native,byte}>: pkg_cohttp.lwt-core
 <lib_test/deploy_keys.{native,byte}>: pkg_lwt
 <lib_test/deploy_keys.{native,byte}>: pkg_lwt.unix
+<lib_test/deploy_keys.{native,byte}>: pkg_ppx_deriving
+<lib_test/deploy_keys.{native,byte}>: pkg_ppx_sexp_conv
 <lib_test/deploy_keys.{native,byte}>: pkg_uri
 <lib_test/deploy_keys.{native,byte}>: pkg_yojson
 <lib_test/deploy_keys.{native,byte}>: use_github_core
@@ -341,6 +389,8 @@ true: annot, bin_annot
 <lib_test/pulls.{native,byte}>: pkg_cohttp.lwt-core
 <lib_test/pulls.{native,byte}>: pkg_lwt
 <lib_test/pulls.{native,byte}>: pkg_lwt.unix
+<lib_test/pulls.{native,byte}>: pkg_ppx_deriving
+<lib_test/pulls.{native,byte}>: pkg_ppx_sexp_conv
 <lib_test/pulls.{native,byte}>: pkg_uri
 <lib_test/pulls.{native,byte}>: pkg_yojson
 <lib_test/pulls.{native,byte}>: use_github_core
@@ -354,6 +404,8 @@ true: annot, bin_annot
 <lib_test/create_issue.{native,byte}>: pkg_cohttp.lwt-core
 <lib_test/create_issue.{native,byte}>: pkg_lwt
 <lib_test/create_issue.{native,byte}>: pkg_lwt.unix
+<lib_test/create_issue.{native,byte}>: pkg_ppx_deriving
+<lib_test/create_issue.{native,byte}>: pkg_ppx_sexp_conv
 <lib_test/create_issue.{native,byte}>: pkg_uri
 <lib_test/create_issue.{native,byte}>: pkg_yojson
 <lib_test/create_issue.{native,byte}>: use_github_core
@@ -367,6 +419,8 @@ true: annot, bin_annot
 <lib_test/create_milestone.{native,byte}>: pkg_cohttp.lwt-core
 <lib_test/create_milestone.{native,byte}>: pkg_lwt
 <lib_test/create_milestone.{native,byte}>: pkg_lwt.unix
+<lib_test/create_milestone.{native,byte}>: pkg_ppx_deriving
+<lib_test/create_milestone.{native,byte}>: pkg_ppx_sexp_conv
 <lib_test/create_milestone.{native,byte}>: pkg_uri
 <lib_test/create_milestone.{native,byte}>: pkg_yojson
 <lib_test/create_milestone.{native,byte}>: use_github_core
@@ -380,6 +434,8 @@ true: annot, bin_annot
 <lib_test/create_pull.{native,byte}>: pkg_cohttp.lwt-core
 <lib_test/create_pull.{native,byte}>: pkg_lwt
 <lib_test/create_pull.{native,byte}>: pkg_lwt.unix
+<lib_test/create_pull.{native,byte}>: pkg_ppx_deriving
+<lib_test/create_pull.{native,byte}>: pkg_ppx_sexp_conv
 <lib_test/create_pull.{native,byte}>: pkg_uri
 <lib_test/create_pull.{native,byte}>: pkg_yojson
 <lib_test/create_pull.{native,byte}>: use_github_core
@@ -393,6 +449,8 @@ true: annot, bin_annot
 <lib_test/create_hook.{native,byte}>: pkg_cohttp.lwt-core
 <lib_test/create_hook.{native,byte}>: pkg_lwt
 <lib_test/create_hook.{native,byte}>: pkg_lwt.unix
+<lib_test/create_hook.{native,byte}>: pkg_ppx_deriving
+<lib_test/create_hook.{native,byte}>: pkg_ppx_sexp_conv
 <lib_test/create_hook.{native,byte}>: pkg_uri
 <lib_test/create_hook.{native,byte}>: pkg_yojson
 <lib_test/create_hook.{native,byte}>: use_github_core
@@ -406,6 +464,8 @@ true: annot, bin_annot
 <lib_test/delete_all_hooks.{native,byte}>: pkg_cohttp.lwt-core
 <lib_test/delete_all_hooks.{native,byte}>: pkg_lwt
 <lib_test/delete_all_hooks.{native,byte}>: pkg_lwt.unix
+<lib_test/delete_all_hooks.{native,byte}>: pkg_ppx_deriving
+<lib_test/delete_all_hooks.{native,byte}>: pkg_ppx_sexp_conv
 <lib_test/delete_all_hooks.{native,byte}>: pkg_uri
 <lib_test/delete_all_hooks.{native,byte}>: pkg_yojson
 <lib_test/delete_all_hooks.{native,byte}>: use_github_core
@@ -419,6 +479,8 @@ true: annot, bin_annot
 <lib_test/create_statuses.{native,byte}>: pkg_cohttp.lwt-core
 <lib_test/create_statuses.{native,byte}>: pkg_lwt
 <lib_test/create_statuses.{native,byte}>: pkg_lwt.unix
+<lib_test/create_statuses.{native,byte}>: pkg_ppx_deriving
+<lib_test/create_statuses.{native,byte}>: pkg_ppx_sexp_conv
 <lib_test/create_statuses.{native,byte}>: pkg_uri
 <lib_test/create_statuses.{native,byte}>: pkg_yojson
 <lib_test/create_statuses.{native,byte}>: use_github_core
@@ -432,6 +494,8 @@ true: annot, bin_annot
 <lib_test/organizations.{native,byte}>: pkg_cohttp.lwt-core
 <lib_test/organizations.{native,byte}>: pkg_lwt
 <lib_test/organizations.{native,byte}>: pkg_lwt.unix
+<lib_test/organizations.{native,byte}>: pkg_ppx_deriving
+<lib_test/organizations.{native,byte}>: pkg_ppx_sexp_conv
 <lib_test/organizations.{native,byte}>: pkg_uri
 <lib_test/organizations.{native,byte}>: pkg_yojson
 <lib_test/organizations.{native,byte}>: use_github_core
@@ -447,6 +511,8 @@ true: annot, bin_annot
 <lib_test/parse_events.{native,byte}>: pkg_cohttp.lwt
 <lib_test/parse_events.{native,byte}>: pkg_cohttp.lwt-core
 <lib_test/parse_events.{native,byte}>: pkg_lwt
+<lib_test/parse_events.{native,byte}>: pkg_ppx_deriving
+<lib_test/parse_events.{native,byte}>: pkg_ppx_sexp_conv
 <lib_test/parse_events.{native,byte}>: pkg_uri
 <lib_test/parse_events.{native,byte}>: pkg_yojson
 <lib_test/parse_events.{native,byte}>: use_github_core
@@ -461,6 +527,8 @@ true: annot, bin_annot
 "lib_test/test_javascript.byte": pkg_js_of_ocaml
 "lib_test/test_javascript.byte": pkg_js_of_ocaml.ppx
 "lib_test/test_javascript.byte": pkg_lwt
+"lib_test/test_javascript.byte": pkg_ppx_deriving
+"lib_test/test_javascript.byte": pkg_ppx_sexp_conv
 "lib_test/test_javascript.byte": pkg_uri
 "lib_test/test_javascript.byte": pkg_yojson
 "lib_test/test_javascript.byte": use_github_core
@@ -472,6 +540,8 @@ true: annot, bin_annot
 <lib_test/*.ml{,i,y}>: pkg_js_of_ocaml
 <lib_test/*.ml{,i,y}>: pkg_js_of_ocaml.ppx
 <lib_test/*.ml{,i,y}>: pkg_lwt
+<lib_test/*.ml{,i,y}>: pkg_ppx_deriving
+<lib_test/*.ml{,i,y}>: pkg_ppx_sexp_conv
 <lib_test/*.ml{,i,y}>: pkg_uri
 <lib_test/*.ml{,i,y}>: pkg_yojson
 <lib_test/*.ml{,i,y}>: use_github_core

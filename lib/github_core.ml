@@ -134,7 +134,7 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
       |Some scopes -> ("scope", Scope.list_to_string scopes) :: q
       |None -> q in
       let q = match redirect_uri with
-      |Some uri -> ("redirect_uri", Uri.to_string uri) :: q 
+      |Some uri -> ("redirect_uri", Uri.to_string uri) :: q
       |None -> q in
       Uri.with_query' uri q
 
@@ -163,13 +163,13 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
       Uri.of_string (Printf.sprintf "%s/users/%s/repos" api user)
 
     let repo ~user ~repo =
-      Uri.of_string (Printf.sprintf "%s/repos/%s/%s" api user repo) 
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s" api user repo)
 
     let repo_forks ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/forks" api user repo)
 
     let repo_issues ~user ~repo =
-      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/issues" api user repo) 
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/issues" api user repo)
 
     let repo_issue ~user ~repo ~num =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/issues/%d" api user repo num)
@@ -250,7 +250,7 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
         Printf.sprintf
           "https://uploads.github.com/repos/%s/%s/releases/%Ld/assets"
           user repo id)
-  
+
     let repo_deploy_keys ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/keys" api user repo)
 
@@ -289,13 +289,13 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
       Uri.of_string (Printf.sprintf "%s/users/%s/events/public" api user)
 
     (* gists (some repetition here we could factor out) *)
-    let list_users_gists ~user = 
+    let list_users_gists ~user =
       Uri.of_string (Printf.sprintf "%s/users/%s/gists" api user)
 
-    let list_all_public_gists = 
+    let list_all_public_gists =
       Uri.of_string (Printf.sprintf "%s/gists/public" api)
 
-    let list_starred_gists = 
+    let list_starred_gists =
       Uri.of_string (Printf.sprintf "%s/gists/starred" api)
 
     let gists =
@@ -321,7 +321,7 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
 
     let team_repos ~id =
       Uri.of_string (Printf.sprintf "%s/teams/%Ld/repos" api id)
-  end 
+  end
 
   module C = Cohttp
   module CLB = Cohttp_lwt_body
@@ -351,7 +351,7 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
       | Request of request * (request -> 'a signal Lwt.t)
       | Response of 'a
       | Error of error
-    and 'a t = state -> (state * 'a signal) Lwt.t
+    type 'a t = state -> (state * 'a signal) Lwt.t
 
     let string_of_message message =
       message.Github_t.message_message^
@@ -972,7 +972,7 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
     *)
     let of_code ~client_id ~client_secret ~code () =
       let uri = URI.token ~client_id ~client_secret ~code () in
-      CL.post uri 
+      CL.post uri
       >>= fun (res, body) ->
       CLB.to_string body
       >>= fun body ->
@@ -1069,10 +1069,10 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
 
     type milestone = [ `Any | `None | `Num of int ]
     let string_of_milestone (m:milestone) =
-      match m with 
+      match m with
       |`Any -> "*"
       |`None -> "none"
-      |`Num n -> string_of_int n 
+      |`Num n -> string_of_int n
 
     type user = [ `Any | `None | `Login of string ]
     let string_of_user (a:user) =
@@ -1290,7 +1290,7 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
 
   module Issue = struct
     open Lwt
-    
+
     let for_repo ?token ?creator ?mentioned ?assignee
         ?labels ?milestone ?state ?(sort=`Created)
         ?(direction=`Desc) ~user ~repo () =
@@ -1522,12 +1522,12 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
   end
 
   module Gist = struct
-    open Lwt 
+    open Lwt
 
-    (* List gists https://developer.github.com/v3/gists/#list-gists 
+    (* List gists https://developer.github.com/v3/gists/#list-gists
      * Parameters
-     *  since : string   A timestamp in ISO 8601 format: 
-     *                   YYYY-MM-DDTHH:MM:SSZ. Only gists updated at 
+     *  since : string   A timestamp in ISO 8601 format:
+     *                   YYYY-MM-DDTHH:MM:SSZ. Only gists updated at
      *                   or after this time are returned. *)
 
     let uri_param_since uri = function
@@ -1541,7 +1541,7 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
       let uri = uri_param_since uri since in
       API.get_stream ?token ~uri (fun b -> return (gists_of_string b))
 
-    (* List the authenticated user’s gists or if called anonymously, 
+    (* List the authenticated user’s gists or if called anonymously,
      * this will return all public gists:
      * GET /gists *)
     let all ?token ?since () =
@@ -1563,14 +1563,14 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
       let uri = uri_param_since uri since in
       API.get_stream ?token ~uri (fun b -> return (gists_of_string b))
 
-    (* Get a single gist https://developer.github.com/v3/gists/#get-a-single-gist 
+    (* Get a single gist https://developer.github.com/v3/gists/#get-a-single-gist
      * GET /gists/:id  *)
     let get ?token ~id () =
       let uri = URI.gist ~id in
       API.get ?token ~uri (fun b -> return (gist_of_string b))
 
     (* Create a gist https://developer.github.com/v3/gists/#create-a-gist
-     * POST /gists 
+     * POST /gists
      * input
      *  files       hash      Required. Files that make up this gist.
      *  description string    A description of the gist.
@@ -1600,7 +1600,7 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
 
     (* Star a gist https://developer.github.com/v3/gists/#star-a-gist
      * PUT /gists/:id/star
-     * Note that you’ll need to set Content-Length to zero when calling 
+     * Note that you’ll need to set Content-Length to zero when calling
      * out to this endpoint. For more information, see “HTTP verbs.” *)
     let star ?token ~id () =
       let uri = URI.gist_star ~id in
@@ -1613,7 +1613,7 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
       API.delete ?token ~uri ~expected_code:`No_content (fun b -> return ())
 
     (* Check if a gist is starred https://developer.github.com/v3/gists/#check-if-a-gist-is-starred
-     * GET /gists/:id/star 
+     * GET /gists/:id/star
      * Response if gist is starred : 204 No Content
      * Response if gist is not starred : 404 Not Found *)
 
@@ -1657,5 +1657,5 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
         return [repository_search_of_string b]
       )
   end
-end 
+end
 

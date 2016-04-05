@@ -31,6 +31,7 @@ module type Github = sig
   (** {4 API Concepts} *)
 
   exception Message of Cohttp.Code.status_code * Github_t.message
+    [@@deriving sexp]
   (** [Message] may be raised by any API call when the GitHub service
       returns an unexpected response code. Typical reasons for this
       exception are insufficient permissions or missing resources. *)

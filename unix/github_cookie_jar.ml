@@ -17,10 +17,11 @@
  *)
 open Printf
 open Lwt
+open Sexplib.Std
 
 type t = { jar_path : string }
 
-exception InvalidName of string
+exception InvalidName of string [@@deriving sexp]
 
 let invalid_names = Re.(List.map compile [
   seq [bos; str "."];

@@ -73,6 +73,21 @@ let list_auth user pass =
     return ()
   )
 
+let list_local () =
+  Lwt_main.run begin
+    Github_cookie_jar.init () >>= fun jar ->
+    Github_cookie_jar.get_all jar >|= fun local ->
+    List.iter (fun (name, auth) ->
+      let open Github_t in
+      printf "%-13s | %-8s | %-40s | %-10s\n"
+        "Cookie Name" "ID" "Application" "Note";
+      printf "%s\n" (String.make 80 '-');
+      printf "%13s | %-8Ld | %-40s | %-10s\n"
+        name auth.auth_id auth.auth_app.app_name
+        (match auth.auth_note with None -> "" | Some s -> s)
+    ) local
+  end
+
 let make_auth
     user pass name scopes note note_url client_id client_secret fingerprint =
   let open Github_t in
@@ -137,6 +152,10 @@ let name_or_id = Arg.(
     ~doc:"Cookie name or numeric GitHub token id."
 )
 
+let list_local_cmd =
+  Term.(pure list_local $ (pure ())),
+  Term.info "local" ~doc:"list local active GitHub authorization tokens"
+
 let list_cmd =
   Term.(pure list_auth $ user $ pass),
   Term.info "show"
@@ -177,7 +196,7 @@ let revoke_cmd =
   Term.info "revoke"
     ~doc:"revoke a remote GitHub authorization token and remove it from the local cookie jar."
 
-let default_cmd = 
+let default_cmd =
   let doc = "let local applications use GitHub authorization tokens" in
   Term.(ret (pure (`Help (`Pager, None)))),
   let man = [
@@ -188,10 +207,10 @@ let default_cmd =
     `P "$(b,--password) optionally specifies the GitHub password on the command-line. If it isn't present, then the password will be obtained interactively.";
     `P "$(b,--help) will show more help for each of the sub-commands above.";
     `S "BUGS";
-     `P "Email bug reports to <cl-mirage@lists.cl.cam.ac.uk>, or report them online at <http://github.com/avsm/ocaml-github>."] in
+    `P "Email bug reports to <cl-mirage@lists.cl.cam.ac.uk>, or report them online at <http://github.com/avsm/ocaml-github>."] in
   Term.info "git-jar" ~version:Jar_version.t ~doc ~man
-       
-let cmds = [list_cmd; make_cmd; revoke_cmd]
+
+let cmds = [list_cmd; list_local_cmd; make_cmd; revoke_cmd]
 
 let () =
   try

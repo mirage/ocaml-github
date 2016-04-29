@@ -16,11 +16,14 @@
  *
  *)
 
+open Sexplib.Std
+
 let user_agent = "ocaml-github" (* TODO: add version from build system *)
 
 module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
 
   exception Message of Cohttp.Code.status_code * Github_t.message
+    [@@deriving sexp]
 
   let log_active =
     ref (try Unix.getenv "GITHUB_DEBUG" <> "0" with _ -> false)

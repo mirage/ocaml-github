@@ -640,7 +640,10 @@ module Atdgen = struct
     let tags = tagger (tags_of_pathname (env dst) ++"atdgen") in
     let dir = Filename.dirname (env dst) in
     let fname = Filename.basename (env "%.atd") in
-     Cmd (S [A "cd"; Px dir; Sh "&&"; A cmd; T tags; Px fname])
+    Cmd (S [ A "cd"; Px dir; Sh "&&"
+           ; A cmd; A "-deriving-conv" ; A "sexp"
+           ; A "-open"; A "Sexplib.Std,Github_conv_base"
+           ; T tags; Px fname])
 
   let rules () =
     rule "%.atd -> %_j.ml{i}" ~prods:["%_j.ml";"%_j.mli"] ~dep:"%.atd"

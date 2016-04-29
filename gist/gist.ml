@@ -17,6 +17,7 @@
 
 (* Utility for working with gist files *)
 
+open Sexplib.Std
 open Cmdliner
 open Printf
 open Lwt
@@ -61,8 +62,8 @@ module Passwd = struct
     |p -> return p
 end
 
-exception Auth_token_not_found of string
-exception Gist_file_not_found of string
+exception Auth_token_not_found of string [@@deriving sexp]
+exception Gist_file_not_found of string [@@deriving sexp]
 
 (************************************************************************)
 (* Authorization *)

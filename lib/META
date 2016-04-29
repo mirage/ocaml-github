@@ -1,8 +1,8 @@
 # OASIS_START
-# DO NOT EDIT (digest: bb51a51ad4503615797f5c157f92e4e1)
+# DO NOT EDIT (digest: c191f8eae29699eecfed8f773911f6cc)
 version = "1.1.0"
 description = "Github API interface"
-requires = "cohttp uri cohttp.lwt-core yojson atdgen"
+requires = "cohttp uri cohttp.lwt-core yojson atdgen sexplib"
 archive(byte) = "github_core.cma"
 archive(byte, plugin) = "github_core.cma"
 archive(native) = "github_core.cmxa"

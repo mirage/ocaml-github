@@ -200,6 +200,9 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
     let repo_hooks ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/hooks" api user repo)
 
+    let repo_contributors ~user ~repo =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/stats/contributors" api user repo)
+
     let repo_search =
       Uri.of_string (Printf.sprintf "%s/search/repositories" api)
 
@@ -1475,6 +1478,16 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
     let tags ?token ~user ~repo () =
       let uri = URI.repo_tags ~user ~repo in
       API.get_stream ?token ~uri (fun b -> return (repo_tags_of_string b))
+
+    let contributors ?token ~user ~repo () =
+      let uri = URI.repo_contributors ~user ~repo in
+      let fail_handlers = [
+        API.code_handler
+          ~expected_code:`Accepted
+          (fun _ -> Lwt.return [])] in
+      API.get ?token ~uri
+        ~expected_code:`OK
+        ~fail_handlers (fun b -> return (contributors_of_string b))
   end
 
   module Event = struct

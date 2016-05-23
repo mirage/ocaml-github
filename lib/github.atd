@@ -948,3 +948,10 @@ type update_gist = {
   description: string;
   files: (string * update_gist) list <json repr="object">
 } <ocaml field_prefix="update_gist_">
+
+type contributor = {
+  author: user;
+  total: int;
+} <ocaml field_prefix="repo_contributor_">
+
+type contributors = contributor list

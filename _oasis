@@ -293,6 +293,16 @@ Executable parse_events
   Install:            false
   BuildDepends:       cohttp.lwt, github, cmdliner
 
+Executable list_contributors
+  Path:               lib_test
+  Build$:             flag(tests)
+  MainIs:             contributors.ml
+  Custom:             true
+  CompiledObject:     best
+  Install:            false
+  BuildDepends:       cohttp.lwt, github.unix, atdgen
+
+
 Executable test_javascript
   Build$:             flag(js) && flag(tests)
   Path:               lib_test

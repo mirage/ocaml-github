@@ -446,6 +446,10 @@ module type Github = sig
     (** [repo_milestones ~user ~repo] is the API endpoint for all
         milestones on repo [user]/[repo]. *)
 
+    val repo_contributors : user:string -> repo:string -> Uri.t
+    (** [repo_contributors ~user ~repo] is the API endpoint for the
+        contributors list on repo [user]/[repo]*)
+
     val issue_comments: user:string -> repo:string -> num:int -> Uri.t
     (** [issue_comments ~user ~repo ~num] is the API endpoint
         for the comments on issue [user]/[repo]#[num]. *)
@@ -736,6 +740,13 @@ module type Github = sig
       user:string -> repo:string -> sha:string ->
       unit -> Github_t.commit Response.t Monad.t
     (** [get_commit ~user ~repo ~sha ()] is commit [sha] in [user]/[repo]. *)
+
+    val contributors :
+      ?token:Token.t ->
+      user:string -> repo:string ->
+      unit -> Github_t.contributors Response.t Monad.t
+    (** [contributors ~user ~repo ()] returns contributor list of [user]/[repo],
+        could be empty if the data are not cached yet *)
   end
 
   (** The [Hook] module provides access to GitHub's

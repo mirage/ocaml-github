@@ -9,6 +9,8 @@
 * Add stats_contributors type (#114 by @sevenEng)
 * Add contribution_week type
 * Fix Repo.get_tags_and_times exception when repository has no tags (#113)
+* Change Github_core.Make to accept an Env module making the library
+  Mirage compatible by moving a Unix.getenv invocation into a parameter (#93)
 
 1.0.0 (2015-06-01):
 * Changes marked with ! are type changes (not including field additions)

@@ -4,7 +4,8 @@
 [![docs](https://img.shields.io/badge/doc-online-blue.svg)](https://mirage.github.io/ocaml-github/)
 
 This library provides an OCaml interface to the [GitHub
-APIv3](https://developer.github.com/v3/) (JSON).
+APIv3](https://developer.github.com/v3/) (JSON). It is compatible with
+MirageOS.
 
 It is [not yet complete](#api-support-coverage) but
 [lib/github.atd](https://github.com/mirage/ocaml-github/blob/master/lib/github.atd)

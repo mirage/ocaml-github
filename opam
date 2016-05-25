@@ -17,6 +17,7 @@ dev-repo: "https://github.com/mirage/ocaml-github.git"
 tags: [
   "org:mirage"
   "org:xapi-project"
+  "git"
 ]
 build: [
   ["ocaml" "setup.ml" "-configure" "--%{base-unix:enable}%-unix" "--%{js_of_ocaml:enable}%-js" "--prefix" prefix]

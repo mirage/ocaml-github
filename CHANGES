@@ -8,6 +8,7 @@
 * Add stats_contributor type (#114 by @sevenEng)
 * Add stats_contributors type (#114 by @sevenEng)
 * Add contribution_week type
+* Fix Repo.get_tags_and_times exception when repository has no tags (#113)
 
 1.0.0 (2015-06-01):
 * Changes marked with ! are type changes (not including field additions)

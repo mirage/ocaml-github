@@ -1455,8 +1455,8 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
       API.get ?token ~uri (fun b -> return (tag_of_string b))
 
     (* Retrieve a list of SHA hashes for tags, and obtain a
-    * name and time for each tag.  If annotated, this is explicit,
-    * and otherwise it uses the last commit *)
+     * name and time for each tag.  If annotated, this is explicit,
+     * and otherwise it uses the last commit *)
     let get_tags_and_times ?token ~user ~repo () =
       let open Monad in
       let tags = refs ?token ~ty:"tags" ~user ~repo () in
@@ -1488,10 +1488,11 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
       let fail_handlers = [
         API.code_handler
           ~expected_code:`Accepted
-          (fun _ -> Lwt.return [])] in
+          (fun _ -> Lwt.return [])
+      ] in
       API.get_stream ?token ~uri
-        ~expected_code:`OK
-        ~fail_handlers (fun b -> return (contributors_stats_of_string b))
+        ~fail_handlers
+        (fun b -> return (contributors_stats_of_string b))
   end
 
   module Event = struct

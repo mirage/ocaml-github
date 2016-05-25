@@ -200,6 +200,9 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
     let repo_hooks ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/hooks" api user repo)
 
+    let repo_contributors ~user ~repo =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/contributors" api user repo)
+
     let repo_contributors_stats ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/stats/contributors" api user repo)
 
@@ -1485,6 +1488,11 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
     let tags ?token ~user ~repo () =
       let uri = URI.repo_tags ~user ~repo in
       API.get_stream ?token ~uri (fun b -> return (repo_tags_of_string b))
+
+    let contributors ?token ~user ~repo () =
+      let uri = URI.repo_contributors ~user ~repo in
+      API.get_stream ?token ~uri
+        (fun b -> return (contributors_of_string b))
   end
 
   module Stats = struct

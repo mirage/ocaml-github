@@ -740,6 +740,13 @@ module type Github = sig
       user:string -> repo:string -> sha:string ->
       unit -> Github_t.commit Response.t Monad.t
     (** [get_commit ~user ~repo ~sha ()] is commit [sha] in [user]/[repo]. *)
+
+    val contributors :
+      ?token:Token.t ->
+      user:string -> repo:string ->
+      unit -> Github_t.contributor Stream.t
+    (** [contributors ~user ~repo ()] is a stream of contributors to
+        repo [user]/[repo]. *)
   end
 
   (** The [Stats] module exposes the functionality of GitHub's
@@ -751,9 +758,9 @@ module type Github = sig
       ?token:Token.t ->
       user:string -> repo:string ->
       unit -> Github_t.contributor_stats Stream.t
-      (** [contributors ~user ~repo ()] is a stream of all contributor
-          statistics for [user]/[repo]. The stream is empty if the
-          data are not cached yet *)
+    (** [contributors ~user ~repo ()] is a stream of all contributor
+        statistics for [user]/[repo]. The stream is empty if the
+        data are not cached yet *)
   end
 
   (** The [Hook] module provides access to GitHub's

@@ -577,23 +577,21 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
     let rec handle_response (envelope,body as response) = Lwt.(function
       | (p, handler)::more ->
         if not (p response) then handle_response response more
-        else begin
+        else
           let bad_response exn = return (Monad.(error (Bad_response exn))) in
           catch (fun () ->
-            (* use a second try_lwt to be able to log the body in case of failure *)
+            handler response
+            >>= fun r ->
+            return (Monad.response (Response.wrap r))
+          ) (fun exn ->
             catch (fun () ->
-              handler response
-              >>= fun r ->
-              return (Monad.response (Response.wrap r))
-            ) (fun exn ->
-              (* XXX revert *)
               CLB.to_string body
               >>= fun body ->
-              log "response body:\n%s" (Yojson.Basic.pretty_to_string (Yojson.Basic.from_string body));
+              let json = Yojson.Basic.from_string body in
+              log "response body:\n%s" (Yojson.Basic.pretty_to_string json);
               bad_response exn
-            )
-          ) bad_response
-        end
+            ) (fun _exn -> bad_response exn)
+          )
       | [] ->
         let status = C.Response.status envelope in
         match status with

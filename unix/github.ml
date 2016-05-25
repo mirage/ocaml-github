@@ -20,4 +20,8 @@ module Time = struct
   let sleep = Lwt_unix.sleep
 end
 
-include Github_core.Make(Time)(Cohttp_lwt_unix.Client)
+module Env = struct
+  let debug = try Unix.getenv "GITHUB_DEBUG" <> "0" with _ -> false
+end
+
+include Github_core.Make(Env)(Time)(Cohttp_lwt_unix.Client)

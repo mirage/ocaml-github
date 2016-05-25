@@ -1440,7 +1440,14 @@ module Make(Time : Github_s.Time)(CL : Cohttp_lwt.Client) = struct
 
     let refs ?token ?ty ~user ~repo () =
       let uri = URI.repo_refs ?ty ~user ~repo in
-      API.get_stream ?token ~uri (fun b -> return (git_refs_of_string b))
+      let fail_handlers = [
+        API.code_handler
+          ~expected_code:`Not_found
+          (fun _ -> Lwt.return [])
+      ] in
+      API.get_stream ?token ~uri
+        ~fail_handlers
+        (fun b -> return (git_refs_of_string b))
 
     let branches ?token ~user ~repo () =
       let uri = URI.repo_branches ~user ~repo in

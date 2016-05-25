@@ -9,6 +9,7 @@ authors: [
   "Jeff Hammerbacher"
   "Thomas Gazagnaire"
   "Rudi Grinberg"
+  "Qi Li"
 ]
 homepage: "https://github.com/mirage/ocaml-github"
 bug-reports: "https://github.com/mirage/ocaml-github/issues"

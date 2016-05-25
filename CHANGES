@@ -1,8 +1,13 @@
-1.1.0 (2016-03-22):
-* new_status_context field added (#88)
-* Allow the Jar cookie to be set via the `GH_COOKIE` environment variable (#100)
-* Remove camlp4 as a build time dependency (#99)
-* add Windows tests via Appveyor (#98)
+1.1.0 (2016-05-25):
+* Add new_status_context and status_context fields (#88)
+* Add setting the jar cookie by the `GH_COOKIE` env var (#100 by @rgrinberg)
+* Remove camlp4 as a build time dependency (#99, #104, #106 by @rgrinberg)
+* Add Windows tests via Appveyor (#98)
+* Add jar 'local' subcommand for printing local cookies (#111 by @rgrinberg)
+* Add Repo.contributor_stats (#114 by @sevenEng)
+* Add stats_contributor type (#114 by @sevenEng)
+* Add stats_contributors type (#114 by @sevenEng)
+* Add contribution_week type
 
 1.0.0 (2015-06-01):
 * Changes marked with ! are type changes (not including field additions)

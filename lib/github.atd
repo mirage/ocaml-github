@@ -384,6 +384,21 @@ type link = {
   href: string;
 }
 
+type contribution_week = {
+  w: int;
+  a: int;
+  d: int;
+  c: int;
+} <ocaml field_prefix="repo_contribution_week_">
+
+type contributor_stats = {
+  author: user;
+  total: int;
+  weeks: contribution_week list;
+} <ocaml field_prefix="repo_contributor_stats_">
+
+type contributors_stats = contributor_stats list
+
 type pull_links = {
   self: link;
   html: link;
@@ -948,10 +963,3 @@ type update_gist = {
   description: string;
   files: (string * update_gist) list <json repr="object">
 } <ocaml field_prefix="update_gist_">
-
-type contributor = {
-  author: user;
-  total: int;
-} <ocaml field_prefix="repo_contributor_">
-
-type contributors = contributor list

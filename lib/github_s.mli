@@ -446,9 +446,9 @@ module type Github = sig
     (** [repo_milestones ~user ~repo] is the API endpoint for all
         milestones on repo [user]/[repo]. *)
 
-    val repo_contributors : user:string -> repo:string -> Uri.t
-    (** [repo_contributors ~user ~repo] is the API endpoint for the
-        contributors list on repo [user]/[repo]*)
+    val repo_contributors_stats : user:string -> repo:string -> Uri.t
+    (** [repo_contributors_stats ~user ~repo] is the API endpoint for
+        contributors' statistics on repo [user]/[repo]*)
 
     val issue_comments: user:string -> repo:string -> num:int -> Uri.t
     (** [issue_comments ~user ~repo ~num] is the API endpoint
@@ -740,13 +740,20 @@ module type Github = sig
       user:string -> repo:string -> sha:string ->
       unit -> Github_t.commit Response.t Monad.t
     (** [get_commit ~user ~repo ~sha ()] is commit [sha] in [user]/[repo]. *)
+  end
 
+  (** The [Stats] module exposes the functionality of GitHub's
+      {{:https://developer.github.com/v3/repos/statistics/}repository
+      statistics API} which provides historical data regarding the
+      aggregate behavior of a repository. *)
+  module Stats : sig
     val contributors :
       ?token:Token.t ->
       user:string -> repo:string ->
-      unit -> Github_t.contributors Response.t Monad.t
-    (** [contributors ~user ~repo ()] returns contributor list of [user]/[repo],
-        could be empty if the data are not cached yet *)
+      unit -> Github_t.contributor_stats Stream.t
+      (** [contributors ~user ~repo ()] is a stream of all contributor
+          statistics for [user]/[repo]. The stream is empty if the
+          data are not cached yet *)
   end
 
   (** The [Hook] module provides access to GitHub's
@@ -757,7 +764,8 @@ module type Github = sig
       ?token:Token.t ->
       user:string ->
       repo:string -> unit -> Github_t.hook Stream.t
-    (** [for_repo ~user ~repo ()] is a stream of hooks for repo [user]/[repo]. *)
+    (** [for_repo ~user ~repo ()] is a stream of hooks for repo
+        [user]/[repo]. *)
 
     val get :
       ?token:Token.t ->

@@ -229,6 +229,7 @@ $ git upload-release mirage ocaml-uri v1.4.0 release.tar.gz
    status](https://developer.github.com/v3/repos/statuses/#create-a-status)
  * [List statuses for a specific
    ref](https://developer.github.com/v3/repos/statuses/#list-statuses-for-a-specific-ref)
+ * [List contributors](https://developer.github.com/v3/repos/#list-contributors)
  * Most [Webhooks](https://developer.github.com/v3/repos/hooks/) endpoints
  * [Get contributors list with additions, deletions, and commit counts](https://developer.github.com/v3/repos/statistics/#get-contributors-list-with-additions-deletions-and-commit-counts)
 
@@ -242,7 +243,6 @@ $ git upload-release mirage ocaml-uri v1.4.0 release.tar.gz
    repositories](https://developer.github.com/v3/repos/#list-all-public-repositories)
  * [Create](https://developer.github.com/v3/repos/#create)
  * [Edit](https://developer.github.com/v3/repos/#edit)
- * [List contributors](https://developer.github.com/v3/repos/#list-contributors)
  * [List
    languages](https://developer.github.com/v3/repos/#list-languages)
  * [List teams](https://developer.github.com/v3/repos/#list-teams)

@@ -20,6 +20,10 @@ module Time = struct
   let sleep = Lwt_js.sleep
 end
 
-module Github' = Github_core.Make(Time)(Cohttp_lwt_xhr.Client)
+module Env = struct
+  let debug = false
+end
+
+module Github' = Github_core.Make(Env)(Time)(Cohttp_lwt_xhr.Client)
 include Github'
 

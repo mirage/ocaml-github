@@ -69,7 +69,7 @@ Cookie Name | ID       | Application                              | Note
    <remote> | 340988   | Travis                                   |
 ```
 
-Your Github application can how use it via the `Github_cookie_jar` module:
+Your Github application can now use it via the `Github_cookie_jar` module:
 
 ```ocaml
 # #require "github.unix";;

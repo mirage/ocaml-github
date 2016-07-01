@@ -637,7 +637,7 @@ type status_event = {
   sha: string;
   (* name *)
   ?target_url: string option;
-  (* context *)
+  ?context : string option;
   ?description: string option;
   state: status_state;
   commit: commit;

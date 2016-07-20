@@ -1,4 +1,4 @@
-1.1.0 (2016-05-25):
+1.1.0 (2016-06-20):
 * Add new_status_context and status_context fields (#88)
 * Add setting the jar cookie by the `GH_COOKIE` env var (#100 by @rgrinberg)
 * Remove camlp4 as a build time dependency (#99, #104, #106 by @rgrinberg)

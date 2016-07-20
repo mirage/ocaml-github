@@ -30,10 +30,19 @@ let month_of_time_opt = function
   | Some time ->
     input_line (Unix.open_process_in (sprintf "date -r %d +%%Y-%%m" time))
 
+let space_after s = String.init (20 - String.length s) (fun _ -> ' ')
+
 let t = Github.(Monad.(run (
   embed (get_auth_token_from_jar "test")
   >>= fun auth ->
   let token = Token.of_auth auth in
+  let contributors = Repo.contributors ~token ~user ~repo () in
+  Stream.to_list contributors
+  >>= fun contributors ->
+  let table = Hashtbl.create 256 in
+  List.iter (fun c ->
+    Hashtbl.replace table c.contributor_login c.contributor_contributions
+  ) contributors;
   let contributor_stats = Stats.contributors ~token ~user ~repo () in
   Stream.to_list contributor_stats
   >|= List.rev
@@ -42,14 +51,33 @@ let t = Github.(Monad.(run (
     eprintf "No contributors found OR data not yet computed and cached.";
     return ()
   | stats ->
-    printf "login : total commits in %s/%s : last month of contribution\n"
-      user repo;
+    printf "login%s:\ttotal commits in %s/%s\t:\tlast month of contribution\n"
+      (space_after "login") user repo;
     List.iter (fun c ->
-      printf "%s : %d : %s\n"
-        c.repo_contributor_stats_author.user_login
-        c.repo_contributor_stats_total
-        (month_of_time_opt (last_seen c.repo_contributor_stats_weeks))
+      let user = c.repo_contributor_stats_author.user_login in
+      let from_table =
+        try string_of_int (Hashtbl.find table user)
+        with Not_found -> "?"
+      in
+      let commits =
+        sprintf "%d (%s)" c.repo_contributor_stats_total from_table
+      in
+      printf "%s%s:\t%s%s:\t%s\n"
+        user
+        (space_after user)
+        commits
+        (space_after commits)
+        (month_of_time_opt (last_seen c.repo_contributor_stats_weeks));
+      Hashtbl.remove table user
     ) stats;
+    let remaining = Hashtbl.fold (fun k v l -> (k, v)::l) table [] in
+    let remaining = List.sort (fun (_,x) (_,y) -> compare y x) remaining in
+    List.iter (fun (k, v) ->
+      let commits = sprintf "! (%d)" v in
+      printf "%s%s:\t%s%s:\t?\n"
+        k (space_after k)
+        commits (space_after commits)
+    ) remaining;
     return ()
 )))
 

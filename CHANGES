@@ -4,13 +4,15 @@
 * Remove camlp4 as a build time dependency (#99, #104, #106 by @rgrinberg)
 * Add Windows tests via Appveyor (#98)
 * Add jar 'local' subcommand for printing local cookies (#111 by @rgrinberg)
-* Add Repo.contributor_stats (#114 by @sevenEng)
+* Add Repo.contributor_stats for contributor statistics (#114 by @sevenEng)
 * Add stats_contributor type (#114 by @sevenEng)
 * Add stats_contributors type (#114 by @sevenEng)
 * Add contribution_week type
 * Fix Repo.get_tags_and_times exception when repository has no tags (#113)
 * Change Github_core.Make to accept an Env module making the library
   Mirage compatible by moving a Unix.getenv invocation into a parameter (#93)
+* Add contributor and contributors types (#112)
+* Add Repo.contributors to list contributors to a repository (#112)
 
 1.0.0 (2015-06-01):
 * Changes marked with ! are type changes (not including field additions)

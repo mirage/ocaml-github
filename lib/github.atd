@@ -113,6 +113,13 @@ type linked_user = {
   inherit user
 } <ocaml field_prefix="linked_user_">
 
+type contributor = {
+  contributions: int;
+  inherit linked_user
+} <ocaml field_prefix="contributor_">
+
+type contributors = contributor list
+
 type user_info = {
   ?name: string option;
   ?company: string option;

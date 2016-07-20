@@ -21,9 +21,28 @@ let user_agent = "ocaml-github" (* TODO: add version from build system *)
 module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
 = struct
 
+  let string_of_message message =
+    message.Github_t.message_message^
+    (List.fold_left
+       (fun s {Github_t.error_resource; error_field; error_code} ->
+          let error_field = match error_field with
+            | None -> "\"\""
+            | Some x -> x
+          in
+          Printf.sprintf "%s\n> Resource type: %s\n  Field: %s\n  Code: %s"
+            s error_resource error_field error_code)
+       "" message.Github_t.message_errors)
+
   exception Message of Cohttp.Code.status_code * Github_t.message
 
   let log_active = ref Env.debug
+
+  let () = Printexc.register_printer (function
+    | Message (code, message) ->
+      Some (Printf.sprintf "GitHub API error: %s -- %s"
+              (Cohttp.Code.string_of_status code) (string_of_message message))
+    | _ -> None
+  )
 
   let log fmt =
     Printf.ksprintf (fun s ->
@@ -359,17 +378,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
       | Error of error
     type 'a t = state -> (state * 'a signal) Lwt.t
 
-    let string_of_message message =
-      message.Github_t.message_message^
-      (List.fold_left
-         (fun s {Github_t.error_resource; error_field; error_code} ->
-            let error_field = match error_field with
-              | None -> "\"\""
-              | Some x -> x
-            in
-            sprintf "%s\n> Resource type: %s\n  Field: %s\n  Code: %s"
-              s error_resource error_field error_code)
-         "" message.Github_t.message_errors)
+    let string_of_message = string_of_message
 
     let error_to_string = function
       | Generic (res, body) ->

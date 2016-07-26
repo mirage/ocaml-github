@@ -305,7 +305,7 @@ let default_cmd =
     `P "$(b,--json) Show JSON responses.";
     `P "$(b,--pretty) pretty print JSON responses.";
     `S "BUGS";
-     `P "Email bug reports to <cl-mirage@lists.cl.cam.ac.uk>, or report them online at <http://github.com/avsm/ocaml-github>."] in
+     `P "Email bug reports to <mirageos-devel@lists.xenproject.org>, or report them online at <http://github.com/mirage/ocaml-github/issues>." ] in
   Term.info "git-gist" ~version:gist_version ~doc ~man
 
 let cmds = [list_your_gists; list_user_gists; login; gist_info; gist_file_info]

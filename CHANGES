@@ -14,6 +14,7 @@
 * Add contributor and contributors types (#112)
 * Add Repo.contributors to list contributors to a repository (#112)
 * Register automatically a Message exception printer (#116)
+* Fix `git jar` help strings to match the command reality.
 
 1.0.0 (2015-06-01):
 * Changes marked with ! are type changes (not including field additions)

@@ -231,22 +231,22 @@ let gist_get auth_id user pass token_name json pretty gist_id file_or_dir =
 (* user interface *)
 
 let user = Arg.(value & opt string "" & info ["u";"username"] ~docv:"USERNAME"
-                  ~doc:"Authenication username.")
+                  ~doc:"Authentication username.")
 
 let pass = Arg.(value & opt string "" & info ["p";"password"] ~docv:"PASSWORD"
                   ~doc:"Authentication password.")
 
 let auth_id = Arg.(value & opt string "" & info ["a";"auth-id"] ~docv:"AUTH-ID"
-                  ~doc:"Authentication ID.")
+                  ~doc:"GitHub cookie jar token name.")
 
 let token_name = Arg.(value & opt string "" & info ["t";"token-name"] ~docv:"TOKEN-NAME"
-                  ~doc:"Cookie jar token name.")
+                  ~doc:"Personal authentication token name.")
 
 let json = Arg.(value & flag & info ["json"] ~docv:"JSON"
                  ~doc:"Show JSON responses.")
 
 let pretty = Arg.(value & flag & info ["pretty"] ~docv:"PRETTY"
-                 ~doc:"Petty print JSON responses.")
+                 ~doc:"Pretty print JSON responses.")
 
 let user_pos = Arg.(required & pos 0 (some string) None & info [] ~docv:"USERNAME"
                   ~doc:"Github username.")

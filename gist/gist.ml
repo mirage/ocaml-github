@@ -150,6 +150,23 @@ let list_user_gists auth_id user pass token_name json pretty username =
   )
 
 (************************************************************************)
+(* Post gists *)
+let post_gist auth_id user pass token_name json pretty new_gist_public new_gist_description files =
+  Lwt_main.run (
+    get_auth auth_id user pass token_name >>= fun code ->
+    let token = G.Token.of_auth code in
+    (* get file contents *)
+    let contents fname =
+      Lwt_io.(with_file ~mode:input fname read) >>= fun new_gist_content ->
+      Lwt.return (fname, {Github_t.new_gist_content})
+    in
+    Lwt_list.map_s contents files >>= fun new_gist_files ->
+    let gist = Github_t.{ new_gist_files; new_gist_description; new_gist_public } in
+    M.(run (Gist.create ~token ~gist () >|= G.Response.value)) >>= fun gist ->
+    return (describe_gist gist)
+  )
+
+(************************************************************************)
 (* gists file info *)
 
 let string_of_public = function true -> "public" | false -> "private"
@@ -269,6 +286,16 @@ let list_user_gists =
   ),
   Term.info "list-user" ~doc:"list users GISTs"
 
+let post_new_gist =
+  let public = Arg.(value & flag & info ["public"] ~docv:"PUBLIC GIST"
+    ~doc:"Create a public gist (default is secret)") in
+  let descr = Arg.(required & opt (some string) None & info ["d";"descr"] ~docv:"DESCRIPTION"
+    ~doc:"Description of the Gist") in
+  let files = Arg.(non_empty & pos_all file [] & info [] ~docv:"FILES") in
+  Term.(pure post_gist $
+    auth_id $ user $ pass $ token_name $ json $ pretty $ public $ descr $ files),
+  Term.info "create" ~doc:"create new gist"
+
 let login =
   Term.(pure login $
     auth_id $ user $ pass $ token_name $ json $ pretty
@@ -308,7 +335,7 @@ let default_cmd =
      `P "Email bug reports to <mirageos-devel@lists.xenproject.org>, or report them online at <http://github.com/mirage/ocaml-github/issues>." ] in
   Term.info "git-gist" ~version:gist_version ~doc ~man
 
-let cmds = [list_your_gists; list_user_gists; login; gist_info; gist_file_info]
+let cmds = [list_your_gists; list_user_gists; login; gist_info; gist_file_info; post_new_gist]
 
 let () =
   match Term.eval_choice default_cmd cmds with

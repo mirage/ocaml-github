@@ -1,7 +1,5 @@
 Library:
 
-* X-Rate-Limit support in the Monad.
-
 * Can ATDgen map strings through functions
   (to get `Url.t` instead of a `string`, for example)
 

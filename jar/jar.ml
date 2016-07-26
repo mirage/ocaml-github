@@ -163,7 +163,8 @@ let list_cmd =
 
 let make_cmd =
   let scopes =
-    let doc = Printf.sprintf "Comma delimited list of repository scopes. Can be: %s" (Github.Scope.(list_to_string all)) in
+    let scopes = Github.Scope.(String.concat ", " (List.map to_string all)) in
+    let doc = Printf.sprintf "Comma delimited list of repository scopes. Can be: %s" scopes in
     Arg.(value & opt (list scope) [] & info ["s";"scopes"] ~docv:"SCOPES" ~doc) in
   let note = Arg.(
     value & opt (some string) None & info ["note"] ~docv:"NOTE"
@@ -207,7 +208,7 @@ let default_cmd =
     `P "$(b,--password) optionally specifies the GitHub password on the command-line. If it isn't present, then the password will be obtained interactively.";
     `P "$(b,--help) will show more help for each of the sub-commands above.";
     `S "BUGS";
-    `P "Email bug reports to <cl-mirage@lists.cl.cam.ac.uk>, or report them online at <http://github.com/avsm/ocaml-github>."] in
+    `P "Email bug reports to <mirageos-devel@lists.xenproject.org>, or report them online at <http://github.com/mirage/ocaml-github/issues>."] in
   Term.info "git-jar" ~version:Jar_version.t ~doc ~man
 
 let cmds = [list_cmd; list_local_cmd; make_cmd; revoke_cmd]

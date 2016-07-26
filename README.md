@@ -5,7 +5,8 @@
 
 This library provides an OCaml interface to the [GitHub
 APIv3](https://developer.github.com/v3/) (JSON). It is compatible with
-MirageOS.
+[MirageOS](https://mirage.io) and also compiles to pure JavaScript via
+[js_of_ocaml](http://ocsigen.org/js_of_ocaml).
 
 It is [not yet complete](#api-support-coverage) but
 [lib/github.atd](https://github.com/mirage/ocaml-github/blob/master/lib/github.atd)

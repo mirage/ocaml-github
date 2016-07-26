@@ -163,7 +163,8 @@ let list_cmd =
 
 let make_cmd =
   let scopes =
-    let doc = Printf.sprintf "Comma delimited list of repository scopes. Can be: %s" (Github.Scope.(list_to_string all)) in
+    let scopes = Github.Scope.(String.concat ", " (List.map to_string all)) in
+    let doc = Printf.sprintf "Comma delimited list of repository scopes. Can be: %s" scopes in
     Arg.(value & opt (list scope) [] & info ["s";"scopes"] ~docv:"SCOPES" ~doc) in
   let note = Arg.(
     value & opt (some string) None & info ["note"] ~docv:"NOTE"

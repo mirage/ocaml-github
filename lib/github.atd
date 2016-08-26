@@ -769,16 +769,31 @@ type event = {
 
 type events = event list
 
+type bool_as_string = string wrap <ocaml
+  t="bool"
+  wrap="fun x -> x <> \"0\""
+  unwrap="function true -> \"1\" | false -> \"0\""
+>
+
 type web_hook_config = {
   url: string;
   content_type: string;
-  insecure_ssl: bool;
+  insecure_ssl: bool_as_string;
   ?secret: string option;
 } <ocaml field_prefix="web_hook_config_">
 
-type hook_config = [
-  | Web <json name="web"> of web_hook_config
-]
+type json <ocaml module="Yojson.Safe"> = abstract
+
+type host_config = json wrap <ocaml
+  t="[`Raw of json | `Web of web_hook_config]"
+  wrap="fun x ->
+    let s = Yojson.Safe.to_string x in
+     try `Web (web_hook_config_of_string s)
+     with Ag_oj_run.Error _ -> `Raw x"
+  unwrap="function
+  | `Raw x -> x
+  | `Web w -> Yojson.Safe.from_string (string_of_web_hook_config w)"
+>
 
 type hook = {
   url: string;
@@ -786,20 +801,23 @@ type hook = {
   created_at: string;
   events: event_type list;
   active: bool;
-  config <json tag_field="name">: hook_config;
+  name: string;
+  config: host_config;
   id: int <ocaml repr="int64">;
 } <ocaml field_prefix="hook_">
 
 type hooks = hook list
 
 type new_hook = {
-  config <json tag_field="name">: hook_config;
+  name: string;
+  config: host_config;
   events: event_type list;
   active: bool;
 } <ocaml field_prefix="new_hook_">
 
 type update_hook = {
-  config <json tag_field="name">: hook_config;
+  name: string;
+  config: host_config;
   ?events: event_type list option;
   active: bool;
 } <ocaml field_prefix="update_hook_">

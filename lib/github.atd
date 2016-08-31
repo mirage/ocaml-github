@@ -615,9 +615,14 @@ type push_event_commit = {
 } <ocaml field_prefix="push_event_commit_">
 
 type push_event = {
-  head: string;
+  ?head: string option;
   ref: string;
   size: int;
+  before: string;
+  ?after: string option;
+  ?created: bool option;
+  ?deleted: bool option;
+  ?forced: bool option;
   commits: push_event_commit list;
 } <ocaml field_prefix="push_event_">
 

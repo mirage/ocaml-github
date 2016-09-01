@@ -584,6 +584,13 @@ module type Github = sig
       unit -> Github_t.team Stream.t
     (** [teams ~org ()] is a stream of teams belonging to the
         organization [org]. *)
+
+    val user_orgs :
+      ?token:Token.t ->
+      user:string ->
+      unit -> Github_t.org Stream.t
+    (** [user_organizations ~user ()] is a stream of the organizations
+         to which the user [user] belongs. *)
   end
 
   (** The [Team] module contains functionality relating to GitHub's

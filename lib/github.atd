@@ -104,6 +104,8 @@ type org = {
   ?avatar_url: string option;
 } <ocaml field_prefix="org_">
 
+type orgs = org list
+
 type user = {
   inherit org
 } <ocaml field_prefix="user_">

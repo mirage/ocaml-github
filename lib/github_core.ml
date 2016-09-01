@@ -346,6 +346,9 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
 
     let team_repos ~id =
       Uri.of_string (Printf.sprintf "%s/teams/%Ld/repos" api id)
+
+    let user_orgs ~user =
+      Uri.of_string (Printf.sprintf "%s/users/%s/orgs" api user)
   end
 
   module C = Cohttp
@@ -1025,6 +1028,10 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
     let teams ?token ~org () =
       let uri = URI.org_teams ~org in
       API.get_stream ?token ~uri (fun b -> return (teams_of_string b))
+
+    let user_orgs ?token ~user () =
+      let uri = URI.user_orgs ~user in
+      API.get_stream ?token ~uri (fun b -> return (orgs_of_string b))
   end
 
   module Team = struct

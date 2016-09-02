@@ -619,7 +619,7 @@ type push_event_commit = {
 type push_event = {
   ?head: string option;
   ref: string;
-  size: int;
+  ~size <ocaml default="0">: int;
   before: string;
   ?after: string option;
   ?created: bool option;

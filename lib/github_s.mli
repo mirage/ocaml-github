@@ -589,7 +589,7 @@ module type Github = sig
       ?token:Token.t ->
       user:string ->
       unit -> Github_t.org Stream.t
-    (** [user_organizations ~user ()] is a stream of the organizations
+    (** [user_orgs ~user ()] is a stream of the organizations
          to which the user [user] belongs. *)
   end
 

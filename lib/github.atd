@@ -731,6 +731,7 @@ type event_type = [
   | Status <json name="status">
   | TeamAdd <json name="team_add">
   | Watch <json name="watch">
+  | All <json name="*">
 ]
 
 type event_constr = [

@@ -565,14 +565,19 @@ type repo_issues_action = [
   | Head_ref_restored <json name="head_ref_restored">
 ]
 
-type repo_issues_event = {
+type repo_issue_event = {
   event: repo_issues_action;
-  issue: issue;
   ?assignee: user_info option;
   ?label: label option;
 } <ocaml field_prefix="issues_event_">
 
+type repo_issues_event = {
+  issue: issue;
+  inherit repo_issue_event
+} <ocaml field_prefix="issues_event_">
+
 type repo_issues_events = repo_issues_event list
+type repo_issue_events = repo_issue_event list
 
 type issue_comment_action = [
   | Created <json name="created">

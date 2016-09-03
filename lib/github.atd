@@ -610,7 +610,8 @@ type push_event_author = {
 
 type push_event_commit = {
   url: string;
-  sha: string;
+  id: string;
+  tree_id: string;
   message: string;
   author: push_event_author;
   distinct: bool;

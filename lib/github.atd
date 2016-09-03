@@ -619,7 +619,7 @@ type push_event_commit = {
 type push_event = {
   ?head: string option;
   ref: string;
-  size: int;
+  ~size <ocaml default="0">: int;
   before: string;
   ?after: string option;
   ?created: bool option;
@@ -786,7 +786,7 @@ type bool_as_string = string wrap <ocaml
 type web_hook_config = {
   url: string;
   content_type: string;
-  insecure_ssl: bool_as_string;
+  ~insecure_ssl <ocaml default="true">: bool_as_string;
   ?secret: string option;
 } <ocaml field_prefix="web_hook_config_">
 

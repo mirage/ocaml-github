@@ -786,7 +786,7 @@ type bool_as_string = string wrap <ocaml
 type web_hook_config = {
   url: string;
   content_type: string;
-  ~insecure_ssl <ocaml default="true">: bool_as_string;
+  ~insecure_ssl <ocaml default="false">: bool_as_string;
   ?secret: string option;
 } <ocaml field_prefix="web_hook_config_">
 

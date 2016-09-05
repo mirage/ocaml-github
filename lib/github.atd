@@ -511,6 +511,35 @@ type gollum_event = {
   pages: wiki_page list;
 } <ocaml field_prefix="gollum_event_">
 
+type repo_issues_action = [
+  | Closed <json name="closed">
+  | Reopened <json name="reopened">
+  | Subscribed <json name="subscribed">
+  | Merged <json name="merged">
+  | Referenced <json name="referenced">
+  | Mentioned <json name="mentioned">
+  | Assigned <json name="assigned">
+  | Unassigned <json name="unassigned">
+  | Labeled <json name="labeled">
+  | Unlabeled <json name="unlabeled">
+  | Milestoned <json name="milestoned">
+  | Demilestoned <json name="demilestoned">
+  | Renamed <json name="renamed">
+  | Locked <json name="locked">
+  | Unlocked <json name="unlocked">
+  | Head_ref_deleted <json name="head_ref_deleted">
+  | Head_ref_restored <json name="head_ref_restored">
+]
+
+type repo_issues_event = {
+  event: repo_issues_action;
+  issue: issue;
+  ?assignee: user_info option;
+  ?label: label option;
+} <ocaml field_prefix="issues_event_">
+
+type repo_issues_events = repo_issues_event list
+
 type issue_comment_action = [
   | Created <json name="created">
 ]

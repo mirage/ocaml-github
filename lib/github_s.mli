@@ -629,7 +629,7 @@ module type Github = sig
     val for_repo_issues :
       ?token:Token.t ->
       user:string ->
-      repo:string -> unit -> Github_t.event Stream.t
+      repo:string -> unit -> Github_t.repo_issues_event Stream.t
     (** [for_repo_issues ~user ~repo ()] is a stream of all issue
         events for [user]/[repo]. *)
 

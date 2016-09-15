@@ -2,6 +2,7 @@
 * Make `tls` the default recommended dependency instead of OpenSSL
 * Add Repo.create
 * Add Repo.delete
+* Add Stream.fold
 
 1.1.0 (2016-06-20):
 * Add new_status_context and status_context fields (#88)

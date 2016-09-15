@@ -217,6 +217,7 @@ $ git upload-release mirage ocaml-uri v1.4.0 release.tar.gz
 ### [Repositories](https://developer.github.com/v3/repos/)
 *Supported*:
 
+ * [Create](https://developer.github.com/v3/repos/#create)
  * [List user
    repositories](https://developer.github.com/v3/repos/#list-user-repositories)
  * [Get](https://developer.github.com/v3/repos/#get)
@@ -243,7 +244,6 @@ $ git upload-release mirage ocaml-uri v1.4.0 release.tar.gz
    repositories](https://developer.github.com/v3/repos/#list-organization-repositories)
  * [List all public
    repositories](https://developer.github.com/v3/repos/#list-all-public-repositories)
- * [Create](https://developer.github.com/v3/repos/#create)
  * [Edit](https://developer.github.com/v3/repos/#edit)
  * [List
    languages](https://developer.github.com/v3/repos/#list-languages)

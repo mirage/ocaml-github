@@ -683,6 +683,14 @@ module type Github = sig
   (** The [Repo] module offers the functionality of GitHub's
       {{:https://developer.github.com/v3/repos/}repository API}. *)
   module Repo : sig
+    val create :
+      ?token:Token.t ->
+      ?organization:string ->
+      Github_t.new_repo ->
+      unit -> Github_t.repository Response.t Monad.t
+    (** [create ?organization new_repo ()] is a new repository owned
+        by the user or organizations if it's provided. *)
+
     val info :
       ?token:Token.t ->
       user:string -> repo:string ->
@@ -754,6 +762,14 @@ module type Github = sig
       unit -> Github_t.contributor Stream.t
     (** [contributors ~user ~repo ()] is a stream of contributors to
         repo [user]/[repo]. *)
+
+    val delete :
+      ?token:Token.t ->
+      user:string -> repo:string ->
+      unit -> unit Response.t Monad.t
+    (** [delete ~user ~repo ()] activates after repo [user]/[repo] has
+        been deleted. *)
+
   end
 
   (** The [Stats] module exposes the functionality of GitHub's

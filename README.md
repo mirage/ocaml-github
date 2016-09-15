@@ -217,9 +217,11 @@ $ git upload-release mirage ocaml-uri v1.4.0 release.tar.gz
 ### [Repositories](https://developer.github.com/v3/repos/)
 *Supported*:
 
+ * [Create](https://developer.github.com/v3/repos/#create)
  * [List user
    repositories](https://developer.github.com/v3/repos/#list-user-repositories)
  * [Get](https://developer.github.com/v3/repos/#get)
+ * [Delete repository](https://developer.github.com/v3/repos/#delete-a-repository)
  * [List tags](https://developer.github.com/v3/repos/#list-tags)
  * [List branches](https://developer.github.com/v3/repos/#list-branches)
  * [Get a single
@@ -243,13 +245,11 @@ $ git upload-release mirage ocaml-uri v1.4.0 release.tar.gz
    repositories](https://developer.github.com/v3/repos/#list-organization-repositories)
  * [List all public
    repositories](https://developer.github.com/v3/repos/#list-all-public-repositories)
- * [Create](https://developer.github.com/v3/repos/#create)
  * [Edit](https://developer.github.com/v3/repos/#edit)
  * [List
    languages](https://developer.github.com/v3/repos/#list-languages)
  * [List teams](https://developer.github.com/v3/repos/#list-teams)
  * [Get branch](https://developer.github.com/v3/repos/#get-branch)
- * [Delete repository](https://developer.github.com/v3/repos/#delete-a-repository)
  * [Collaborators](https://developer.github.com/v3/repos/collaborators/)
  * [Commit comments](https://developer.github.com/v3/repos/comments/)
  * [List

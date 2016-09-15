@@ -1361,6 +1361,10 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
       let uri = URI.repo_issues ~user ~repo in
       API.get_stream ?token ~params ~uri (fun b -> return (issues_of_string b))
 
+    let get ?token ~user ~repo ~num () =
+      let uri = URI.repo_issue ~user ~repo ~num in
+      API.get ?token ~uri (fun b -> return (issue_of_string b))
+
     let create ?token ~user ~repo ~issue () =
       let body = string_of_new_issue issue in
       let uri = URI.repo_issues ~user ~repo in

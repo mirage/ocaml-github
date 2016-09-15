@@ -1523,6 +1523,10 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
       let uri = URI.repo_contributors ~user ~repo in
       API.get_stream ?token ~uri
         (fun b -> return (contributors_of_string b))
+
+    let delete ?token ~user ~repo () =
+      let uri = URI.repo user repo in
+      API.delete ?token ~uri ~expected_code:`No_content (fun b -> return ())
   end
 
   module Stats = struct

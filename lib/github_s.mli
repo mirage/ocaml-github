@@ -762,6 +762,14 @@ module type Github = sig
       unit -> Github_t.contributor Stream.t
     (** [contributors ~user ~repo ()] is a stream of contributors to
         repo [user]/[repo]. *)
+
+    val delete :
+      ?token:Token.t ->
+      user:string -> repo:string ->
+      unit -> unit Response.t Monad.t
+    (** [delete ~user ~repo ()] activates after repo [user]/[repo] has
+        been deleted. *)
+
   end
 
   (** The [Stats] module exposes the functionality of GitHub's

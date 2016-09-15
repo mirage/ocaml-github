@@ -342,6 +342,20 @@ type repo = {
   url: string;
 } <ocaml field_prefix="repo_">
 
+type new_repo = {
+  name : string;
+  description : string;
+  homepage : string;
+  private : bool;
+  has_issues : bool;
+  has_wiki : bool;
+  has_downloads : bool;
+  team_id : int;
+  auto_init : bool;
+  ?gitignore_template : string option;
+  ?license_template : string option;
+} <ocaml field_prefix="new_repo_">
+
 type repository = {
   owner: user;
   full_name: string;

@@ -181,6 +181,9 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
     let user_repos ~user =
       Uri.of_string (Printf.sprintf "%s/users/%s/repos" api user)
 
+    let repos =
+      Uri.of_string (Printf.sprintf "%s/user/repos" api)
+
     let repo ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s" api user repo)
 
@@ -293,6 +296,9 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
 
     let network_events ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/networks/%s/%s/events" api user repo)
+
+    let org_repos ~org =
+      Uri.of_string (Printf.sprintf "%s/orgs/%s/repos" api org)
 
     let org_events ~org =
       Uri.of_string (Printf.sprintf "%s/orgs/%s/events" api org)
@@ -1430,6 +1436,16 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
 
   module Repo = struct
     open Lwt
+
+    let create ?token ?organization new_repo () =
+      let body = string_of_new_repo new_repo in
+      let uri = match organization with
+        | None -> URI.repos
+        | Some org -> URI.org_repos org
+      in
+      API.post ~body ~expected_code:`Created ?token ~uri (fun b ->
+        return (repository_of_string b)
+      )
 
     let info ?token ~user ~repo () =
       let uri = URI.repo ~user ~repo in

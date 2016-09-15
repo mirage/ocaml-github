@@ -555,6 +555,16 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
         refill = Some (refill s);
       }
 
+    let rec fold f a s = Monad.(
+      next s
+      >>= function
+      | None -> return a
+      | Some (v,s) ->
+        f a v
+        >>= fun a ->
+        fold f a s
+    )
+
     let rec find p s = Monad.(
       next s
       >>= function

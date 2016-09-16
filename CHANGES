@@ -4,6 +4,9 @@
 * Add Repo.delete
 * Add Stream.fold
 * Add Issue.get
+* update_issue type added
+* Change Issue.update to accept update_issue rather than new_issue
+  This allows users to change issue state (open/close).
 
 1.1.0 (2016-06-20):
 * Add new_status_context and status_context fields (#88)

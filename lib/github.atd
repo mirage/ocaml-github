@@ -87,9 +87,13 @@ type new_issue = {
 } <ocaml field_prefix="new_issue_">
 
 type update_issue = {
+  ?title: string option;
+  ?body: string option;
   ?state: state option;
-  inherit new_issue
-}
+  ?assignee: string option;
+  ?milestone: int option;
+  ?labels: string list option;
+} <ocaml field_prefix="update_issue_">
 
 type issue_sort = [
   | Created <json name="created">

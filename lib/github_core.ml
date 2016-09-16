@@ -1447,8 +1447,8 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
   module Repo = struct
     open Lwt
 
-    let create ?token ?organization new_repo () =
-      let body = string_of_new_repo new_repo in
+    let create ?token ?organization ~repo () =
+      let body = string_of_new_repo repo in
       let uri = match organization with
         | None -> URI.repos
         | Some org -> URI.org_repos org

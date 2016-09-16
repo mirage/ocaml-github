@@ -691,7 +691,7 @@ module type Github = sig
     val create :
       ?token:Token.t ->
       ?organization:string ->
-      Github_t.new_repo ->
+      repo:Github_t.new_repo ->
       unit -> Github_t.repository Response.t Monad.t
     (** [create ?organization new_repo ()] is a new repository owned
         by the user or organizations if it's provided. *)

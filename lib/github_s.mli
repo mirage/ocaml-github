@@ -975,7 +975,7 @@ module type Github = sig
 
     val update :
       ?token:Token.t -> user:string -> repo:string ->
-      num:int -> issue:Github_t.new_issue ->
+      num:int -> issue:Github_t.update_issue ->
       unit -> Github_t.issue Response.t Monad.t
     (** [update ~user ~repo ~num ~issue ()] is the updated issue [num]
         in [user]/[repo] as described by [issue]. *)

@@ -993,12 +993,121 @@ module type Github = sig
     (** [create_comment ~user ~repo ~num ~body ()] is a newly created
         issue comment on [user]/[repo]#[num] with content [body]. *)
 
+    val labels :
+      ?token:Token.t ->
+      user:string ->
+      repo:string ->
+      num:int ->
+      unit ->
+      Github_t.label Stream.t
+    (** [labels ~user ~repo ~num ()] is a stream of all labels
+        applied to issue [num] in the repo [user]/[repo]. *)
+
+    val add_labels :
+      ?token:Token.t ->
+      user:string ->
+      repo:string ->
+      num:int ->
+      labels:Github_t.new_labels ->
+      unit ->
+      Github_t.label list Response.t Monad.t
+    (** [add_labels ~user ~repo ~num ~labels ()] adds the labels [labels]
+        to issue [num] in the repo [user]/[repo]. *)
+
+    val remove_label :
+      ?token:Token.t ->
+      user:string ->
+      repo:string ->
+      num:int ->
+      name:string ->
+      unit ->
+      unit Response.t Monad.t
+    (** [remove_label ~user ~repo ~num ~name ()] removes the label [name]
+        from the issue [num] in the repo [user]/[repo]. *)
+
+    val replace_labels :
+      ?token:Token.t ->
+      user:string ->
+      repo:string ->
+      num:int ->
+      labels:Github_t.new_labels ->
+      unit ->
+      Github_t.label list Response.t Monad.t
+    (** [replace_labels ~user ~repo ~num ~labels ()] replaces the labels on
+        issue [num] in the repo [user]/[repo] with those provided in [labels]. *)
+
+    val remove_labels :
+      ?token:Token.t ->
+      user:string ->
+      repo:string ->
+      num:int ->
+      unit ->
+      unit Response.t Monad.t
+    (** [remove_labels ~user ~repo ~num ()] removes all labels
+        from the issue [num] in the repo [user]/[repo]. *)
+
+
     val is_issue : Github_t.issue -> bool
     (** [is_issue issue] is true if [issue] is an actual issue and not
         a pull request. *)
 
     val is_pull : Github_t.issue -> bool
     (** [is_pull issue] is true if [issue] is a pull request. *)
+  end
+
+  (** The [Label] module exposes Github's
+      {{:https://developer.github.com/v3/issues/labels/}labels
+      API}. *)
+  module Label : sig
+    val for_repo :
+      ?token:Token.t ->
+      user:string -> 
+      repo:string -> 
+      unit -> 
+      Github_t.label Stream.t
+    (** [for_repo ~user ~repo ()] is a stream of all labels in repo
+        [user]/[repo]. *)
+
+    val get :
+      ?token:Token.t ->
+      user:string -> 
+      repo:string -> 
+      name:string -> 
+      unit -> 
+      Github_t.label Response.t Monad.t
+    (** [get ~user ~repo ~name ()] gets the label [name] from the
+        repo [user]/[repo]. *)
+
+    val create :
+      ?token:Token.t ->
+      user:string -> 
+      repo:string -> 
+      label:Github_t.new_label -> 
+      unit -> 
+      Github_t.label Response.t Monad.t
+    (** [create ~user ~repo ~label ()] creates the label [label] in the
+        repo [user]/[repo]. *)
+
+    val update :
+      ?token:Token.t ->
+      user:string ->
+      repo:string ->
+      name:string ->
+      label:Github_t.new_label -> 
+      unit ->
+      Github_t.label Response.t Monad.t
+    (** [update ~user ~repo ~name ()] updates the label [name] in the
+        repo [user]/[repo]. *)
+
+    val delete :
+      ?token:Token.t ->
+      user:string ->
+      repo:string ->
+      name:string ->
+      unit ->
+      unit Response.t Monad.t
+    (** [delete ~user ~repo ~name ()] deletes the label [name] in the
+        repo [user]/[repo] *)
   end
 
   (** The [Milestone] module exposes GitHub's
@@ -1046,6 +1155,16 @@ module type Github = sig
     (** [update ~user ~repo ~milestone ~num ()] is the updated
         milestone [num] in repo [user]/[repo] as described by
         [milestone]. *)
+
+    val labels :
+      ?token:Token.t ->
+      user:string ->
+      repo:string ->
+      num:int ->
+      unit ->
+      Github_t.label Stream.t
+    (** [labels ~user ~repo ()] is a stream of all labels in repo
+        [user]/[repo] *)
   end
 
   (** The [Release] module provides access to GitHub's

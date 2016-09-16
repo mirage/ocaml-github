@@ -115,6 +115,11 @@ module type Github = sig
     (** [map f s] is the lazy stream of [f] applied to elements of [s]
         as they are demanded. *)
 
+    val fold : ('a -> 'b -> 'a Monad.t) -> 'a -> 'b t -> 'a Monad.t
+    (** [fold f a s] is the left fold of [f] over the elements of [s]
+        with a base value of [a]. {b Warning:} this function may
+        result in {i many} successive API transactions. *)
+
     val find : ('a -> bool) -> 'a t -> ('a * 'a t) option Monad.t
     (** [find p s] is the first value in [s] satisfying [p] if one
         exists and a stream continuation for further ingestion. *)

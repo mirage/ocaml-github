@@ -961,6 +961,12 @@ module type Github = sig
         (default [`Created]) and ordered by [?direction] (default
         [`Desc]). *)
 
+    val get :
+      ?token:Token.t ->
+      user:string ->
+      repo:string -> num:int -> unit -> Github_t.issue Response.t Monad.t
+    (** [get ~user ~repo ~num ()] is the issue [user]/[repo]#[num]. *)
+
     val create :
       ?token:Token.t -> user:string -> repo:string ->
       issue:Github_t.new_issue -> unit -> Github_t.issue Response.t Monad.t

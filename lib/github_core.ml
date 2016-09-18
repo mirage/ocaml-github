@@ -1371,7 +1371,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
       API.post ~body ?token ~uri ~expected_code:`Created (fun b -> return (issue_of_string b))
 
     let update ?token ~user ~repo ~num ~issue () =
-      let body = string_of_new_issue issue in
+      let body = string_of_update_issue issue in
       let uri = URI.repo_issue ~user ~repo ~num in
       API.patch ~body ?token ~uri ~expected_code:`OK
         (fun b -> return (issue_of_string b))

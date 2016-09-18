@@ -73,6 +73,11 @@ type auth = {
 
 type auths = auth list
 
+type state = [
+  | Open <json name="open">
+  | Closed <json name="closed">
+]
+
 type new_issue = {
   title: string;
   ?body: string option;
@@ -81,15 +86,19 @@ type new_issue = {
   ~labels: string list;
 } <ocaml field_prefix="new_issue_">
 
+type update_issue = {
+  ?title: string option;
+  ?body: string option;
+  ?state: state option;
+  ?assignee: string option;
+  ?milestone: int option;
+  ?labels: string list option;
+} <ocaml field_prefix="update_issue_">
+
 type issue_sort = [
   | Created <json name="created">
   | Updated <json name="updated">
   | Comments <json name="comments">
-]
-
-type state = [
-  | Open <json name="open">
-  | Closed <json name="closed">
 ]
 
 type direction = [

@@ -1061,29 +1061,29 @@ module type Github = sig
   module Label : sig
     val for_repo :
       ?token:Token.t ->
-      user:string -> 
-      repo:string -> 
-      unit -> 
+      user:string ->
+      repo:string ->
+      unit ->
       Github_t.label Stream.t
     (** [for_repo ~user ~repo ()] is a stream of all labels in repo
         [user]/[repo]. *)
 
     val get :
       ?token:Token.t ->
-      user:string -> 
-      repo:string -> 
-      name:string -> 
-      unit -> 
+      user:string ->
+      repo:string ->
+      name:string ->
+      unit ->
       Github_t.label Response.t Monad.t
     (** [get ~user ~repo ~name ()] gets the label [name] from the
         repo [user]/[repo]. *)
 
     val create :
       ?token:Token.t ->
-      user:string -> 
-      repo:string -> 
-      label:Github_t.new_label -> 
-      unit -> 
+      user:string ->
+      repo:string ->
+      label:Github_t.new_label ->
+      unit ->
       Github_t.label Response.t Monad.t
     (** [create ~user ~repo ~label ()] creates the label [label] in the
         repo [user]/[repo]. *)
@@ -1093,7 +1093,7 @@ module type Github = sig
       user:string ->
       repo:string ->
       name:string ->
-      label:Github_t.new_label -> 
+      label:Github_t.new_label ->
       unit ->
       Github_t.label Response.t Monad.t
     (** [update ~user ~repo ~name ()] updates the label [name] in the

@@ -266,10 +266,10 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
 
     let milestone ~user ~repo ~num =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/milestones/%d" api user repo num)
-    
+
     let milestone_labels ~user ~repo ~num =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/milestones/%d/labels" api user repo num)
- 
+
     let issue_comments ~user ~repo ~num =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/issues/%d/comments" api user repo num)
 
@@ -370,7 +370,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
 
     let user_orgs ~user =
       Uri.of_string (Printf.sprintf "%s/users/%s/orgs" api user)
- end
+  end
 
   module C = Cohttp
   module CLB = Cohttp_lwt_body

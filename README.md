@@ -168,6 +168,7 @@ $ git upload-release mirage ocaml-uri v1.4.0 release.tar.gz
  * All basic endpoints
  * Basic comments endpoints
  * [Milestones](https://developer.github.com/v3/issues/milestones/)
+ * [Labels](https://developer.github.com/v3/issues/labels/)
 
 *Not yet supported*:
 
@@ -179,7 +180,6 @@ $ git upload-release mirage ocaml-uri v1.4.0 release.tar.gz
  * [Delete an issue comment](https://developer.github.com/v3/issues/comments/#delete-a-comment)
  * [Issue events](https://developer.github.com/v3/issues/events/#list-events-for-an-issue)
  * [Several issue event type](https://developer.github.com/v3/issues/events/)
- * [Labels](https://developer.github.com/v3/issues/labels/)
 
 ### [Miscellaneous](https://developer.github.com/v3/misc/)
 *Supported*:

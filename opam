@@ -10,6 +10,7 @@ authors: [
   "Thomas Gazagnaire"
   "Rudi Grinberg"
   "Qi Li"
+  "Dave Tucker"
 ]
 homepage: "https://github.com/mirage/ocaml-github"
 bug-reports: "https://github.com/mirage/ocaml-github/issues"

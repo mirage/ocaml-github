@@ -231,6 +231,12 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
     let repo_search =
       Uri.of_string (Printf.sprintf "%s/search/repositories" api)
 
+    let repo_label ~user ~repo ~name =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/labels/%s" api user repo name)
+
+    let repo_labels ~user ~repo =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/labels" api user repo)
+
     let hook ~user ~repo ~id =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/hooks/%Ld" api user repo id)
 
@@ -261,11 +267,20 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
     let milestone ~user ~repo ~num =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/milestones/%d" api user repo num)
 
+    let milestone_labels ~user ~repo ~num =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/milestones/%d/labels" api user repo num)
+
     let issue_comments ~user ~repo ~num =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/issues/%d/comments" api user repo num)
 
     let issue_comment ~user ~repo ~num =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/issues/comments/%d" api user repo num)
+
+    let issue_labels ~user ~repo ~num =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/issues/%d/labels" api user repo num)
+
+    let issue_label ~user ~repo ~num ~name =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/issues/%d/labels/%s" api user repo num name)
 
     let repo_releases ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/releases" api user repo)
@@ -1255,6 +1270,10 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
       let uri = URI.milestone ~user ~repo ~num in
       let body = string_of_update_milestone milestone in
       API.patch ?token ~body ~uri ~expected_code:`OK (fun b -> return (milestone_of_string b))
+
+    let labels ?token ~user ~repo ~num () =
+      let uri = URI.milestone_labels ~user ~repo ~num in
+      API.get_stream ?token ~uri (fun b -> return (labels_of_string b))
   end
 
   module Release = struct
@@ -1385,9 +1404,57 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
       let uri = URI.issue_comments ~user ~repo ~num in
       API.post ~body ?token ~uri ~expected_code:`Created (fun b -> return (issue_comment_of_string b))
 
+    let labels ?token ~user ~repo ~num () =
+      let uri = URI.issue_labels ~user ~repo ~num in
+      API.get_stream ?token ~uri (fun b -> return (labels_of_string b))
+
+    let add_labels ?token ~user ~repo ~num ~labels () =
+      let body = string_of_new_labels labels in
+      let uri = URI.issue_labels ~user ~repo ~num in
+      API.post ?token ~body ~uri ~expected_code:`OK (fun b -> return (labels_of_string b))
+
+    let remove_label ?token ~user ~repo ~num ~name () =
+      let uri = URI.issue_label ~user ~repo ~num ~name in
+      API.delete ?token ~uri ~expected_code:`No_content (fun _ -> return ())
+
+    let replace_labels ?token ~user ~repo ~num ~labels () =
+      let body = string_of_new_labels labels in
+      let uri = URI.issue_labels ~user ~repo ~num in
+      API.put ?token ~body ~uri ~expected_code:`OK (fun b -> return (labels_of_string b))
+
+    let remove_labels ?token ~user ~repo ~num () =
+      let uri = URI.issue_labels ~user ~repo ~num in
+      API.delete ?token ~uri ~expected_code:`No_content (fun b -> return ())
+
     let is_issue = function { issue_pull_request = None } -> true | _ -> false
 
     let is_pull = function { issue_pull_request = None } -> false | _ -> true
+  end
+
+  module Label = struct
+    open Lwt
+
+    let for_repo ?token ~user ~repo () =
+      let uri = URI.repo_labels ~user ~repo in
+      API.get_stream ?token ~uri (fun b -> return (labels_of_string b))
+
+    let get ?token ~user ~repo ~name () =
+      let uri = URI.repo_label ~user ~repo ~name in
+      API.get ?token ~uri (fun b -> return (label_of_string b))
+
+    let create ?token ~user ~repo ~label () =
+      let body = string_of_new_label label in
+      let uri = URI.repo_labels ~user ~repo in
+      API.post ?token ~body ~uri ~expected_code:`Created (fun b -> return (label_of_string b))
+
+    let update ?token ~user ~repo ~name ~label () =
+      let body = string_of_new_label label in
+      let uri = URI.repo_label ~user ~repo ~name in
+      API.patch ?token ~body ~uri ~expected_code:`OK (fun b -> return (label_of_string b))
+
+    let delete ?token ~user ~repo ~name () =
+      let uri = URI.repo_label ~user ~repo ~name in
+      API.delete ?token ~uri ~expected_code:`No_content (fun _ -> return ())
   end
 
   module Status = struct
@@ -1739,4 +1806,3 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
       )
   end
 end
-

@@ -23,14 +23,20 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
 
   let string_of_message message =
     message.Github_t.message_message^
-    (List.fold_left
-       (fun s {Github_t.error_resource; error_field; error_code} ->
+    Github_t.(List.fold_left
+       (fun s { error_resource; error_field; error_code; error_message; } ->
           let error_field = match error_field with
             | None -> "\"\""
             | Some x -> x
           in
-          Printf.sprintf "%s\n> Resource type: %s\n  Field: %s\n  Code: %s"
-            s error_resource error_field error_code)
+          let error_message = match error_message with
+            | None -> "\"\""
+            | Some x -> x
+          in
+          Printf.sprintf
+            "%s\n> Resource type: %s\n  Field: %s\n  Code: %s\n  Message: %s"
+            s error_resource error_field error_code error_message
+       )
        "" message.Github_t.message_errors)
 
   exception Message of Cohttp.Code.status_code * Github_t.message

@@ -2,6 +2,7 @@ type error = {
   resource: string;
   ?field: string option;
   code: string;
+  ?message: string option;
 } <ocaml field_prefix="error_">
 
 type message = {

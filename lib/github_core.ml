@@ -853,8 +853,13 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
     let patch ?rate ?(fail_handlers=[]) ~expected_code =
       effectful `PATCH ?rate ~fail_handlers ~expected_code
 
-    let put ?rate ?(fail_handlers=[]) ~expected_code =
-      effectful `PUT ?rate ~fail_handlers ~expected_code
+    let put ?rate ?(fail_handlers=[]) ~expected_code ?headers ?body =
+      let headers = match headers, body with
+        | None, None -> Some (C.Header.init_with "content-length" "0")
+        | Some h, None -> Some (C.Header.add h "content-length" "0")
+        | _, Some _ -> headers
+      in
+      effectful `PUT ?rate ~fail_handlers ~expected_code ?headers ?body
 
     let delete ?rate
         ?(fail_handlers=[]) ?(expected_code=`No_content) ?headers ?token ?params
@@ -1781,9 +1786,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
       API.get_stream ?token ~uri (fun b -> return (gist_commits_of_string b))
 
     (* Star a gist https://developer.github.com/v3/gists/#star-a-gist
-     * PUT /gists/:id/star
-     * Note that you’ll need to set Content-Length to zero when calling
-     * out to this endpoint. For more information, see “HTTP verbs.” *)
+     * PUT /gists/:id/star *)
     let star ?token ~id () =
       let uri = URI.gist_star ~id in
       API.put ?token ~uri ~expected_code:`No_content (fun b -> return ())

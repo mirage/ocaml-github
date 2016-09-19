@@ -237,6 +237,12 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
     let repo_labels ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/labels" api user repo)
 
+    let repo_collaborator ~user ~repo ~name =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/collaborators/%s" api user repo name)
+
+    let repo_collaborators ~user ~repo =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/collaborators" api user repo)
+
     let hook ~user ~repo ~id =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/hooks/%Ld" api user repo id)
 
@@ -1454,6 +1460,34 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
 
     let delete ?token ~user ~repo ~name () =
       let uri = URI.repo_label ~user ~repo ~name in
+      API.delete ?token ~uri ~expected_code:`No_content (fun _ -> return ())
+  end
+
+  module Collaborator = struct
+    open Lwt
+
+    let for_repo ?token ~user ~repo () =
+      let uri = URI.repo_collaborators ~user ~repo in
+      API.get_stream ?token ~uri (fun b -> return (linked_users_of_string b))
+
+    let exists ?token ~user ~repo ~name () =
+      let uri = URI.repo_collaborator ~user ~repo ~name in
+      let fail_handlers = [
+        API.code_handler ~expected_code:`Not_found  (fun _ -> return false);
+      ] in
+      API.get ?token ~uri ~expected_code:`No_content ~fail_handlers
+        (fun _ -> return true)
+
+    let add ?token ~user ~repo ~name ?permission () =
+      let params = match permission with
+        | None -> None
+        | Some p -> Some ["permission", Github_j.string_of_team_permission p]
+      in
+      let uri = URI.repo_collaborator ~user ~repo ~name in
+      API.put ?token ~uri ?params ~expected_code:`No_content (fun _ -> return ())
+
+    let delete ?token ~user ~repo ~name () =
+      let uri = URI.repo_collaborator ~user ~repo ~name in
       API.delete ?token ~uri ~expected_code:`No_content (fun _ -> return ())
   end
 

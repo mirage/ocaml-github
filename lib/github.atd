@@ -124,6 +124,8 @@ type linked_user = {
   inherit user
 } <ocaml field_prefix="linked_user_">
 
+type linked_users = linked_user list
+
 type contributor = {
   contributions: int;
   inherit linked_user

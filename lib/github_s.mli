@@ -629,9 +629,17 @@ module type Github = sig
     val for_repo_issues :
       ?token:Token.t ->
       user:string ->
-      repo:string -> unit -> Github_t.event Stream.t
+      repo:string -> unit -> Github_t.repo_issues_event Stream.t
     (** [for_repo_issues ~user ~repo ()] is a stream of all issue
         events for [user]/[repo]. *)
+
+    val for_repo_issue :
+      ?token:Token.t ->
+      user:string ->
+      repo:string -> 
+      num:int -> unit -> Github_t.repo_issue_event Stream.t
+    (** [for_repo_issue ~user ~repo ~num ()] is a stream of all issue
+        events for [user]/[repo]/issues/[num]. *)
 
     val public_events : unit -> Github_t.event Stream.t
     (** [public_events ()] is a stream of all public events on GitHub. *)

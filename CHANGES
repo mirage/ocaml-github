@@ -8,6 +8,7 @@
 * Add Repo.delete
 * Add Stream.fold
 * Add Issue.get
+* ! Fix Event.for_repo_issues (#107 from @yallop)
 * update_issue type added
 * ! Change Issue.update to accept update_issue rather than new_issue
   This allows users to change issue state (open/close).

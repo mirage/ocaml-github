@@ -310,9 +310,13 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
     let repo_events ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/events" api user repo)
 
-    let repo_issue_events ~user ~repo =
+    let repo_issues_events ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/issues/events"
                        api user repo)
+
+    let repo_issue_events ~user ~repo ~num =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/issues/%d/events"
+                       api user repo num)
 
     let public_events = Uri.of_string (Printf.sprintf "%s/events" api)
 
@@ -1724,8 +1728,12 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
       API.get_stream ?token ~uri (fun b -> return (events_of_string b))
 
     let for_repo_issues ?token ~user ~repo () =
-      let uri = URI.repo_issue_events ~user ~repo in
-      API.get_stream ?token ~uri (fun b -> return (events_of_string b))
+      let uri = URI.repo_issues_events ~user ~repo in
+      API.get_stream ?token ~uri (fun b -> return (repo_issues_events_of_string b))
+
+    let for_repo_issue ?token ~user ~repo ~num () =
+      let uri = URI.repo_issue_events ~user ~repo ~num in
+      API.get_stream ?token ~uri (fun b -> return (repo_issue_events_of_string b))
 
     let public_events () =
       let uri = URI.public_events in

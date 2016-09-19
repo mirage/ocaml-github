@@ -236,6 +236,7 @@ $ git upload-release mirage ocaml-uri v1.4.0 release.tar.gz
  * [List contributors](https://developer.github.com/v3/repos/#list-contributors)
  * Most [Webhooks](https://developer.github.com/v3/repos/hooks/) endpoints
  * [Get contributors list with additions, deletions, and commit counts](https://developer.github.com/v3/repos/statistics/#get-contributors-list-with-additions-deletions-and-commit-counts)
+ * [Collaborators](https://developer.github.com/v3/repos/collaborators/)
 
 *Not yet supported*:
 
@@ -250,7 +251,6 @@ $ git upload-release mirage ocaml-uri v1.4.0 release.tar.gz
    languages](https://developer.github.com/v3/repos/#list-languages)
  * [List teams](https://developer.github.com/v3/repos/#list-teams)
  * [Get branch](https://developer.github.com/v3/repos/#get-branch)
- * [Collaborators](https://developer.github.com/v3/repos/collaborators/)
  * [Commit comments](https://developer.github.com/v3/repos/comments/)
  * [List
    commits](https://developer.github.com/v3/repos/commits/#list-commits-on-a-repository)

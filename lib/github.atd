@@ -563,6 +563,7 @@ type repo_issues_action = [
   | Unlocked <json name="unlocked">
   | Head_ref_deleted <json name="head_ref_deleted">
   | Head_ref_restored <json name="head_ref_restored">
+  | Unknown <json untyped> of (string * json option)
 ]
 
 type repo_issue_event = {

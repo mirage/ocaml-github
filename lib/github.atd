@@ -45,6 +45,7 @@ type scope = [
   | Read_public_key <json name="read:public_key">
   | Write_public_key <json name="write:public_key">
   | Admin_public_key <json name="admin:public_key">
+  | Unknown <json untyped> of (string * json option)
 ]
 
 type app = {
@@ -99,6 +100,7 @@ type issue_sort = [
   | Created <json name="created">
   | Updated <json name="updated">
   | Comments <json name="comments">
+  | Unknown <json untyped> of (string * json option)
 ]
 
 type direction = [
@@ -180,6 +182,7 @@ type team_permission = [
   | Pull <json name="pull">
   | Push <json name="push">
   | Admin <json name="admin">
+  | Unknown <json untyped> of (string * json option)
 ]
 
 type team_info = {
@@ -305,7 +308,7 @@ type repo_branch = {
 type repo_branches = repo_branch list
 
 type obj_type = [
-    Blob <json name="blob">
+  | Blob <json name="blob">
   | Tree <json name="tree">
   | Commit <json name="commit">
   | Tag <json name="tag">
@@ -531,6 +534,7 @@ type fork_event = {
 type wiki_page_action = [
   | Created <json name="created">
   | Edited <json name="edited">
+  | Unknown <json untyped> of (string * json option)
 ]
 
 type wiki_page = {
@@ -547,6 +551,7 @@ type gollum_event = {
 
 type issue_comment_action = [
   | Created <json name="created">
+  | Unknown <json untyped> of (string * json option)
 ]
 
 type issue_comment_event = {
@@ -563,6 +568,7 @@ type issues_action = [
   | Opened <json name="opened">
   | Closed <json name="closed">
   | Reopened <json name="reopened">
+  | Unknown <json untyped> of (string * json option)
 ]
 
 type issues_event = {
@@ -574,6 +580,7 @@ type issues_event = {
 
 type member_action = [
   | Added <json name="added">
+  | Unknown <json untyped> of (string * json option)
 ]
 
 type member_event = {
@@ -590,6 +597,7 @@ type page_build_status = [
   | Building <json name="building">
   | Built <json name="built">
   | Errored <json name="errored">
+  | Unknown <json untyped> of (string * json option)
 ]
 
 type page_build = {
@@ -611,6 +619,7 @@ type pull_request_action = [
   | Closed <json name="closed">
   | Reopened <json name="reopened">
   | Synchronize <json name="synchronize">
+  | Unknown <json untyped> of (string * json option)
 ]
 
 type pull_request_event = {
@@ -621,6 +630,7 @@ type pull_request_event = {
 
 type pull_request_review_comment_action = [
   | Created <json name="created">
+  | Unknown <json untyped> of (string * json option)
 ]
 
 type pull_request_review_comment = {
@@ -683,6 +693,7 @@ type push_event_hook = {
 
 type release_action = [
   | Published <json name="published">
+  | Unknown <json untyped> of (string * json option)
 ]
 
 type release_event = {
@@ -730,6 +741,7 @@ type team_add_event = {
 
 type watch_action = [
   | Started <json name="started">
+  | Unknown <json untyped> of (string * json option)
 ]
 
 type watch_event = {
@@ -913,6 +925,7 @@ type status_state = [
   | Success <json name="success">
   | Failure <json name="failure">
   | Error <json name="error">
+  | Unknown <json untyped> of (string * json option)
 ]
 
 type status = {

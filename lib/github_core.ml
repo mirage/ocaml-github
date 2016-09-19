@@ -92,6 +92,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
       | `Read_public_key -> "read:public_key"
       | `Write_public_key -> "write:public_key"
       | `Admin_public_key -> "admin:public_key"
+      | `Unknown (cons, _json) -> "unknown:"^cons
 
     let of_string x : Github_t.scope option =
       match x with

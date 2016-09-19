@@ -1537,6 +1537,57 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
     let test ?token ~user ~repo ~id () =
       let uri = URI.hook_test ~user ~repo ~id in
       API.post ?token ~uri ~expected_code:`No_content (fun b -> return ())
+
+    let parse_event ~constr ~payload () =
+      let parse_json = function
+        | "" -> None
+        | s -> Some (Yojson.Safe.from_string s)
+      in
+      match Github_j.event_type_of_string ("\"" ^ constr ^ "\"") with
+      | `CommitComment ->
+        `CommitComment (Github_j.commit_comment_event_of_string payload)
+      | `Create ->
+        `Create (Github_j.create_event_of_string payload)
+      | `Delete ->
+        `Delete (Github_j.delete_event_of_string payload)
+      | `Deployment ->
+        `Unknown ("deployment", parse_json payload)
+      | `DeploymentStatus ->
+        `Unknown ("deployment_status", parse_json payload)
+      | `Download -> `Download
+      | `Follow -> `Follow
+      | `Fork ->
+        `Fork (Github_j.fork_event_of_string payload)
+      | `ForkApply -> `ForkApply
+      | `Gist -> `Gist
+      | `Gollum ->
+        `Gollum (Github_j.gollum_event_of_string payload)
+      | `IssueComment ->
+        `IssueComment (Github_j.issue_comment_event_of_string payload)
+      | `Issues ->
+        `Issues (Github_j.issues_event_of_string payload)
+      | `Member ->
+        `Member (Github_j.member_event_of_string payload)
+      | `PageBuild ->
+        `Unknown ("page_build", parse_json payload)
+      | `Public -> `Public
+      | `PullRequest ->
+        `PullRequest (Github_j.pull_request_event_of_string payload)
+      | `PullRequestReviewComment ->
+        `PullRequestReviewComment
+          (Github_j.pull_request_review_comment_event_of_string payload)
+      | `Push ->
+        `Push (Github_j.push_event_hook_of_string payload)
+      | `Release ->
+        `Release (Github_j.release_event_of_string payload)
+      | `Status ->
+        `Status (Github_j.status_event_of_string payload)
+      | `TeamAdd ->
+        `Unknown ("team_add", parse_json payload)
+      | `Watch ->
+        `Watch (Github_j.watch_event_of_string payload)
+      | `All -> `Unknown ("*", parse_json payload)
+      | `Unknown (cons,_) -> `Unknown (cons, parse_json payload)
   end
 
   module Git_obj = struct

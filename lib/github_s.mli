@@ -839,6 +839,12 @@ module type Github = sig
     (** [test ~user ~repo ~id ()] activates after a [push] event
         for the lastest push to [user]/[repo] has been synthesized
         and sent to hook [id]. *)
+
+    val parse_event :
+      constr:string ->
+      payload:string -> unit -> Github_t.event_hook_constr
+    (** [parse_event ~constr ~payload ()] is the event with
+        constructor [constr] that is represented by [payload]. *)
   end
 
   (** The [Status] module provides the functionality of GitHub's

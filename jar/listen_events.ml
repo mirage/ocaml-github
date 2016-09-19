@@ -111,6 +111,8 @@ let print_event event =
       (string_of_status_state status_event_state)
   | `Watch { watch_event_action = `Started } ->
     printf "WatchEvent on %s/%s\n%!" user repo
+  | `Unknown (cons, _json) ->
+    printf "UnknownEvent '%s'\n%!" cons
   );
   return ()
 

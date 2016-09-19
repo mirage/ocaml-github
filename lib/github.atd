@@ -642,15 +642,25 @@ type push_event_author = {
   email: string;
 } <ocaml field_prefix="push_event_author_">
 
-type push_event_commit = {
+type push_event_commit_base = {
   url: string;
-  sha: string;
   message: string;
   author: push_event_author;
   distinct: bool;
+} <ocaml field_prefix="push_event_commit_base_">
+
+type push_event_hook_commit = {
+  id: string;
+  tree_id: string;
+  inherit push_event_commit_base
+} <ocaml field_prefix="push_event_hook_commit_">
+
+type push_event_commit = {
+  sha: string;
+  inherit push_event_commit_base
 } <ocaml field_prefix="push_event_commit_">
 
-type push_event = {
+type push_event_base = {
   ?head: string option;
   ref: string;
   ~size <ocaml default="0">: int;
@@ -659,8 +669,17 @@ type push_event = {
   ?created: bool option;
   ?deleted: bool option;
   ?forced: bool option;
+} <ocaml field_prefix="push_event_base_">
+
+type push_event = {
   commits: push_event_commit list;
+  inherit push_event_base
 } <ocaml field_prefix="push_event_">
+
+type push_event_hook = {
+  commits: push_event_hook_commit list;
+  inherit push_event_base
+} <ocaml field_prefix="push_event_hook_">
 
 type release_action = [
   | Published <json name="published">
@@ -766,6 +785,7 @@ type event_type = [
   | TeamAdd <json name="team_add">
   | Watch <json name="watch">
   | All <json name="*">
+  | Unknown <json untyped> of (string * json option)
 ]
 
 type event_constr = [
@@ -797,6 +817,39 @@ type event_constr = [
   | Status <json name="StatusEvent"> of status_event
   (*| TeamAdd <json name="team_add"> of team_add_event*)
   | Watch <json name="WatchEvent"> of watch_event
+  | Unknown <json untyped> of (string * json option)
+]
+
+type event_hook_constr = [
+  | CommitComment <json name="CommitCommentEvent"> of commit_comment_event
+  | Create <json name="CreateEvent"> of create_event
+  | Delete <json name="DeleteEvent"> of delete_event
+  (*| Deployment <json name="deployment"> of *)
+  (*| DeploymentStatus <json name="deployment_status"> of *)
+  | Download <json name="DownloadEvent">
+  (* Deprecated but there may be a payload object... *)
+  | Follow <json name="FollowEvent">
+  (* Deprecated but there may be a payload object... *)
+  | Fork <json name="ForkEvent"> of fork_event
+  | ForkApply <json name="ForkApplyEvent">
+  (* Deprecated but there may be a payload object... *)
+  | Gist <json name="GistEvent">
+  (* Deprecated but there may be a payload object... *)
+  | Gollum <json name="GollumEvent"> of gollum_event
+  | IssueComment <json name="IssueCommentEvent"> of issue_comment_event
+  | Issues <json name="IssuesEvent"> of issues_event
+  | Member <json name="MemberEvent"> of member_event
+  (*| PageBuild <json name="page_build"> of page_build_event*)
+  | Public <json name="PublicEvent">
+  | PullRequest <json name="PullRequestEvent"> of pull_request_event
+  | PullRequestReviewComment <json name="PullRequestReviewCommentEvent">
+    of pull_request_review_comment_event
+  | Push <json name="PushEvent"> of push_event_hook
+  | Release <json name="ReleaseEvent"> of release_event
+  | Status <json name="StatusEvent"> of status_event
+  (*| TeamAdd <json name="team_add"> of team_add_event*)
+  | Watch <json name="WatchEvent"> of watch_event
+  | Unknown <json untyped> of (string * json option)
 ]
 
 type event = {

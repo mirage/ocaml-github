@@ -1110,6 +1110,51 @@ module type Github = sig
         repo [user]/[repo] *)
   end
 
+  (** The [Collaborator] module exposes Github's
+      {{:https://developer.github.com/v3/repos/collaborators/}collaborators
+      API}. *)
+  module Collaborator : sig
+    val for_repo :
+      ?token:Token.t ->
+      user:string ->
+      repo:string ->
+      unit ->
+      Github_t.linked_user Stream.t
+    (** [for_repo ~user ~repo ()] is a stream of all collaborators in repo
+        [user]/[repo]. *)
+
+    val exists :
+      ?token:Token.t ->
+      user:string ->
+      repo:string ->
+      name:string ->
+      unit ->
+      bool Response.t Monad.t
+    (** [exists ~user ~repo ~name ()] is true if [name] is a collaborator on
+        repo [user]/[repo]. *)
+
+    val add :
+      ?token:Token.t ->
+      user:string ->
+      repo:string ->
+      name:string ->
+      ?permission:Github_t.team_permission ->
+      unit ->
+      unit Response.t Monad.t
+    (** [add ~user ~repo ~name ?permission ()] adds [name] as a collaborator on
+        repo [user]/[repo] with permission [permission] (default [`Push]). *)
+
+    val delete :
+      ?token:Token.t ->
+      user:string ->
+      repo:string ->
+      name:string ->
+      unit ->
+      unit Response.t Monad.t
+    (** [delete ~user ~repo ~name ()] removes [name] as a collaborator on the
+        repo [user]/[repo]. *)
+  end
+
   (** The [Milestone] module exposes GitHub's
       {{:https://developer.github.com/v3/issues/milestones/}milestone
       API}. *)

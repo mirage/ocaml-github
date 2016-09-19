@@ -237,6 +237,12 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
     let repo_labels ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/labels" api user repo)
 
+    let repo_collaborator ~user ~repo ~name =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/collaborators/%s" api user repo name)
+
+    let repo_collaborators ~user ~repo =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/collaborators" api user repo)
+
     let hook ~user ~repo ~id =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/hooks/%Ld" api user repo id)
 
@@ -847,8 +853,13 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
     let patch ?rate ?(fail_handlers=[]) ~expected_code =
       effectful `PATCH ?rate ~fail_handlers ~expected_code
 
-    let put ?rate ?(fail_handlers=[]) ~expected_code =
-      effectful `PUT ?rate ~fail_handlers ~expected_code
+    let put ?rate ?(fail_handlers=[]) ~expected_code ?headers ?body =
+      let headers = match headers, body with
+        | None, None -> Some (C.Header.init_with "content-length" "0")
+        | Some h, None -> Some (C.Header.add h "content-length" "0")
+        | _, Some _ -> headers
+      in
+      effectful `PUT ?rate ~fail_handlers ~expected_code ?headers ?body
 
     let delete ?rate
         ?(fail_handlers=[]) ?(expected_code=`No_content) ?headers ?token ?params
@@ -1457,6 +1468,34 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
       API.delete ?token ~uri ~expected_code:`No_content (fun _ -> return ())
   end
 
+  module Collaborator = struct
+    open Lwt
+
+    let for_repo ?token ~user ~repo () =
+      let uri = URI.repo_collaborators ~user ~repo in
+      API.get_stream ?token ~uri (fun b -> return (linked_users_of_string b))
+
+    let exists ?token ~user ~repo ~name () =
+      let uri = URI.repo_collaborator ~user ~repo ~name in
+      let fail_handlers = [
+        API.code_handler ~expected_code:`Not_found  (fun _ -> return false);
+      ] in
+      API.get ?token ~uri ~expected_code:`No_content ~fail_handlers
+        (fun _ -> return true)
+
+    let add ?token ~user ~repo ~name ?permission () =
+      let params = match permission with
+        | None -> None
+        | Some p -> Some ["permission", Github_j.string_of_team_permission p]
+      in
+      let uri = URI.repo_collaborator ~user ~repo ~name in
+      API.put ?token ~uri ?params ~expected_code:`No_content (fun _ -> return ())
+
+    let delete ?token ~user ~repo ~name () =
+      let uri = URI.repo_collaborator ~user ~repo ~name in
+      API.delete ?token ~uri ~expected_code:`No_content (fun _ -> return ())
+  end
+
   module Status = struct
     open Lwt
 
@@ -1747,9 +1786,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
       API.get_stream ?token ~uri (fun b -> return (gist_commits_of_string b))
 
     (* Star a gist https://developer.github.com/v3/gists/#star-a-gist
-     * PUT /gists/:id/star
-     * Note that you’ll need to set Content-Length to zero when calling
-     * out to this endpoint. For more information, see “HTTP verbs.” *)
+     * PUT /gists/:id/star *)
     let star ?token ~id () =
       let uri = URI.gist_star ~id in
       API.put ?token ~uri ~expected_code:`No_content (fun b -> return ())

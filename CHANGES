@@ -1,5 +1,6 @@
 1.2.0 (dev):
 * Add Labels API support (#146 from @dave-tucker)
+* Add Collaborators API support
 * Make `tls` the default recommended dependency instead of OpenSSL
 * Add Repo.create
 * Add Repo.delete

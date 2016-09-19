@@ -1,4 +1,5 @@
 1.2.0 (dev):
+* Changes marked with ! are type changes
 * Add Labels API support (#146 from @dave-tucker)
 * Add Collaborators API support
 * Make `tls` the default recommended dependency instead of OpenSSL
@@ -8,8 +9,22 @@
 * Add Stream.fold
 * Add Issue.get
 * update_issue type added
-* Change Issue.update to accept update_issue rather than new_issue
+* ! Change Issue.update to accept update_issue rather than new_issue
   This allows users to change issue state (open/close).
+* ! scope variant now has Unknown fall-back constructor
+* ! issue_sort variant now has Unknown fall-back constructor
+* ! team_permission variant now has Unknown fall-back constructor
+* ! wiki_page_action variant now has Unknown fall-back constructor
+* ! issue_comment_action variant now has Unknown fall-back constructor
+* ! issues_action variant now has Unknown fall-back constructor
+* ! member_action variant now has Unknown fall-back constructor
+* ! page_build_status variant now has Unknown fall-back constructor
+* ! pull_request_action variant now has Unknown fall-back constructor
+* ! pull_request_review_comment_action variant now has Unknown fall-back
+  constructor
+* ! release_action variant now has Unknown fall-back constructor
+* ! watch_action variant now has Unknown fall-back constructor
+* ! status_state variant now has Unknown fall-back constructor
 
 1.1.0 (2016-06-20):
 * Add new_status_context and status_context fields (#88)

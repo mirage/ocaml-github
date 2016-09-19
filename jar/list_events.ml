@@ -22,6 +22,11 @@ open Printf
 let string_of_wiki_page_action = function
   | `Created -> "Created"
   | `Edited -> "Edited"
+  | `Unknown (cons, _json) -> "Unknown:"^cons
+
+let string_of_issue_comment_event_action = function
+  | `Created -> "Created"
+  | `Unknown (cons, _json) -> "Unknown:"^cons
 
 let string_of_issue user repo issue = Github_t.(
   sprintf "%s/%s#%d (%s)" user repo issue.issue_number issue.issue_title
@@ -29,11 +34,27 @@ let string_of_issue user repo issue = Github_t.(
 
 let string_of_issues_action = Github_j.string_of_issues_action
 
+let string_of_member_event_action = function
+  | `Added -> "Added"
+  | `Unknown (cons, _json) -> "Unknown:"^cons
+
 let string_of_pull user repo number = sprintf "%s/%s#%d" user repo number
 
 let string_of_pull_request_action = Github_j.string_of_pull_request_action
 
+let string_of_pull_request_review_comment_action = function
+  | `Created -> "Created"
+  | `Unknown (cons, _json) -> "Unknown:"^cons
+
+let string_of_release_event_action = function
+  | `Published -> "Published"
+  | `Unknown (cons, _json) -> "Unknown:"^cons
+
 let string_of_status_state = Github_j.string_of_status_state
+
+let string_of_watch_event_action = function
+  | `Started -> "Started"
+  | `Unknown (cons, _json) -> "Unknown:"^cons
 
 let print_event event =
   let open Github_t in
@@ -71,17 +92,19 @@ let print_event event =
         (string_of_wiki_page_action wiki_page_action)^" "^wiki_page_title
        ) gollum_event_pages))
   | `IssueComment {
-    issue_comment_event_action = `Created;
+    issue_comment_event_action;
     issue_comment_event_issue = issue;
     issue_comment_event_comment = comment;
   } ->
-    printf "IssueCommentEvent on %s: %s\n%!"
+    printf "IssueCommentEvent %s on %s: %s\n%!"
+      (string_of_issue_comment_event_action issue_comment_event_action)
       (string_of_issue user repo issue) comment.issue_comment_body
   | `Issues { issues_event_action = action; issues_event_issue = issue } ->
     printf "IssuesEvent on %s: %s\n%!"
       (string_of_issue user repo issue) (string_of_issues_action action)
-  | `Member { member_event_action = `Added; member_event_member = member } ->
-    printf "MemberEvent on %s/%s: %s added\n%!"
+  | `Member { member_event_action; member_event_member = member } ->
+    printf "MemberEvent %s on %s/%s: %s added\n%!"
+      (string_of_member_event_action member_event_action)
       user repo member.linked_user_login
   | `Public ->
     printf "PublicEvent on %s/%s\n%!" user repo
@@ -93,24 +116,30 @@ let print_event event =
       (string_of_pull user repo pull_request_event_number)
       (string_of_pull_request_action action)
   | `PullRequestReviewComment {
-    pull_request_review_comment_event_action = `Created;
+    pull_request_review_comment_event_action = action;
     pull_request_review_comment_event_pull_request = pull;
     pull_request_review_comment_event_comment = comment;
   } ->
-    printf "PullRequestReviewCommentEvent on %s: %s\n%!"
+    printf "PullRequestReviewCommentEvent %s on %s: %s\n%!"
+      (string_of_pull_request_review_comment_action action)
       (string_of_pull user repo pull.pull_number)
       comment.pull_request_review_comment_body
   | `Push { push_event_ref; push_event_size } ->
     printf "PushEvent on %s/%s ref %s of %d commits\n%!"
       user repo push_event_ref push_event_size
-  | `Release { release_event_action = `Published; release_event_release } ->
-    printf "ReleaseEvent on %s/%s: %s\n%!" user repo
+  | `Release { release_event_action; release_event_release } ->
+    printf "ReleaseEvent %s on %s/%s: %s\n%!" user repo
+      (string_of_release_event_action release_event_action)
       release_event_release.release_tag_name
   | `Status { status_event_state; status_event_sha } ->
     printf "StatusEvent on %s/%s: %s %s\n%!" user repo status_event_sha
       (string_of_status_state status_event_state)
-  | `Watch { watch_event_action = `Started } ->
-    printf "WatchEvent on %s/%s\n%!" user repo
+  | `Watch { watch_event_action } ->
+    printf "WatchEvent %s on %s/%s\n%!"
+      (string_of_watch_event_action watch_event_action)
+      user repo
+  | `Unknown (cons, _json) ->
+    printf "UnknownEvent '%s'\n%!" cons
   );
   return ()
 

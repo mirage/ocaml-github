@@ -45,6 +45,7 @@ type scope = [
   | Read_public_key <json name="read:public_key">
   | Write_public_key <json name="write:public_key">
   | Admin_public_key <json name="admin:public_key">
+  | Unknown <json untyped> of (string * json option)
 ]
 
 type app = {
@@ -99,6 +100,7 @@ type issue_sort = [
   | Created <json name="created">
   | Updated <json name="updated">
   | Comments <json name="comments">
+  | Unknown <json untyped> of (string * json option)
 ]
 
 type direction = [
@@ -180,6 +182,7 @@ type team_permission = [
   | Pull <json name="pull">
   | Push <json name="push">
   | Admin <json name="admin">
+  | Unknown <json untyped> of (string * json option)
 ]
 
 type team_info = {
@@ -305,7 +308,7 @@ type repo_branch = {
 type repo_branches = repo_branch list
 
 type obj_type = [
-    Blob <json name="blob">
+  | Blob <json name="blob">
   | Tree <json name="tree">
   | Commit <json name="commit">
   | Tag <json name="tag">
@@ -531,6 +534,7 @@ type fork_event = {
 type wiki_page_action = [
   | Created <json name="created">
   | Edited <json name="edited">
+  | Unknown <json untyped> of (string * json option)
 ]
 
 type wiki_page = {
@@ -547,6 +551,7 @@ type gollum_event = {
 
 type issue_comment_action = [
   | Created <json name="created">
+  | Unknown <json untyped> of (string * json option)
 ]
 
 type issue_comment_event = {
@@ -563,6 +568,7 @@ type issues_action = [
   | Opened <json name="opened">
   | Closed <json name="closed">
   | Reopened <json name="reopened">
+  | Unknown <json untyped> of (string * json option)
 ]
 
 type issues_event = {
@@ -574,6 +580,7 @@ type issues_event = {
 
 type member_action = [
   | Added <json name="added">
+  | Unknown <json untyped> of (string * json option)
 ]
 
 type member_event = {
@@ -590,6 +597,7 @@ type page_build_status = [
   | Building <json name="building">
   | Built <json name="built">
   | Errored <json name="errored">
+  | Unknown <json untyped> of (string * json option)
 ]
 
 type page_build = {
@@ -611,6 +619,7 @@ type pull_request_action = [
   | Closed <json name="closed">
   | Reopened <json name="reopened">
   | Synchronize <json name="synchronize">
+  | Unknown <json untyped> of (string * json option)
 ]
 
 type pull_request_event = {
@@ -621,6 +630,7 @@ type pull_request_event = {
 
 type pull_request_review_comment_action = [
   | Created <json name="created">
+  | Unknown <json untyped> of (string * json option)
 ]
 
 type pull_request_review_comment = {
@@ -642,15 +652,25 @@ type push_event_author = {
   email: string;
 } <ocaml field_prefix="push_event_author_">
 
-type push_event_commit = {
+type push_event_commit_base = {
   url: string;
-  sha: string;
   message: string;
   author: push_event_author;
   distinct: bool;
+} <ocaml field_prefix="push_event_commit_base_">
+
+type push_event_hook_commit = {
+  id: string;
+  tree_id: string;
+  inherit push_event_commit_base
+} <ocaml field_prefix="push_event_hook_commit_">
+
+type push_event_commit = {
+  sha: string;
+  inherit push_event_commit_base
 } <ocaml field_prefix="push_event_commit_">
 
-type push_event = {
+type push_event_base = {
   ?head: string option;
   ref: string;
   ~size <ocaml default="0">: int;
@@ -659,11 +679,21 @@ type push_event = {
   ?created: bool option;
   ?deleted: bool option;
   ?forced: bool option;
+} <ocaml field_prefix="push_event_base_">
+
+type push_event = {
   commits: push_event_commit list;
+  inherit push_event_base
 } <ocaml field_prefix="push_event_">
+
+type push_event_hook = {
+  commits: push_event_hook_commit list;
+  inherit push_event_base
+} <ocaml field_prefix="push_event_hook_">
 
 type release_action = [
   | Published <json name="published">
+  | Unknown <json untyped> of (string * json option)
 ]
 
 type release_event = {
@@ -711,6 +741,7 @@ type team_add_event = {
 
 type watch_action = [
   | Started <json name="started">
+  | Unknown <json untyped> of (string * json option)
 ]
 
 type watch_event = {
@@ -766,6 +797,7 @@ type event_type = [
   | TeamAdd <json name="team_add">
   | Watch <json name="watch">
   | All <json name="*">
+  | Unknown <json untyped> of (string * json option)
 ]
 
 type event_constr = [
@@ -797,6 +829,39 @@ type event_constr = [
   | Status <json name="StatusEvent"> of status_event
   (*| TeamAdd <json name="team_add"> of team_add_event*)
   | Watch <json name="WatchEvent"> of watch_event
+  | Unknown <json untyped> of (string * json option)
+]
+
+type event_hook_constr = [
+  | CommitComment <json name="CommitCommentEvent"> of commit_comment_event
+  | Create <json name="CreateEvent"> of create_event
+  | Delete <json name="DeleteEvent"> of delete_event
+  (*| Deployment <json name="deployment"> of *)
+  (*| DeploymentStatus <json name="deployment_status"> of *)
+  | Download <json name="DownloadEvent">
+  (* Deprecated but there may be a payload object... *)
+  | Follow <json name="FollowEvent">
+  (* Deprecated but there may be a payload object... *)
+  | Fork <json name="ForkEvent"> of fork_event
+  | ForkApply <json name="ForkApplyEvent">
+  (* Deprecated but there may be a payload object... *)
+  | Gist <json name="GistEvent">
+  (* Deprecated but there may be a payload object... *)
+  | Gollum <json name="GollumEvent"> of gollum_event
+  | IssueComment <json name="IssueCommentEvent"> of issue_comment_event
+  | Issues <json name="IssuesEvent"> of issues_event
+  | Member <json name="MemberEvent"> of member_event
+  (*| PageBuild <json name="page_build"> of page_build_event*)
+  | Public <json name="PublicEvent">
+  | PullRequest <json name="PullRequestEvent"> of pull_request_event
+  | PullRequestReviewComment <json name="PullRequestReviewCommentEvent">
+    of pull_request_review_comment_event
+  | Push <json name="PushEvent"> of push_event_hook
+  | Release <json name="ReleaseEvent"> of release_event
+  | Status <json name="StatusEvent"> of status_event
+  (*| TeamAdd <json name="team_add"> of team_add_event*)
+  | Watch <json name="WatchEvent"> of watch_event
+  | Unknown <json untyped> of (string * json option)
 ]
 
 type event = {
@@ -826,16 +891,10 @@ type web_hook_config = {
 
 type json <ocaml module="Yojson.Safe"> = abstract
 
-type host_config = json wrap <ocaml
-  t="[`Raw of json | `Web of web_hook_config]"
-  wrap="fun x ->
-    let s = Yojson.Safe.to_string x in
-     try `Web (web_hook_config_of_string s)
-     with Ag_oj_run.Error _ -> `Raw x"
-  unwrap="function
-  | `Raw x -> x
-  | `Web w -> Yojson.Safe.from_string (string_of_web_hook_config w)"
->
+type hook_config = [
+  | Web <json name="web"> of web_hook_config
+  | Unknown <json untyped> of (string * json option)
+]
 
 type hook = {
   url: string;
@@ -843,23 +902,20 @@ type hook = {
   created_at: string;
   events: event_type list;
   active: bool;
-  name: string;
-  config: host_config;
+  config <json tag_field="name">: hook_config;
   id: int <ocaml repr="int64">;
 } <ocaml field_prefix="hook_">
 
 type hooks = hook list
 
 type new_hook = {
-  name: string;
-  config: host_config;
+  config <json tag_field="name">: hook_config;
   events: event_type list;
   active: bool;
 } <ocaml field_prefix="new_hook_">
 
 type update_hook = {
-  name: string;
-  config: host_config;
+  config <json tag_field="name">: hook_config;
   ?events: event_type list option;
   active: bool;
 } <ocaml field_prefix="update_hook_">
@@ -869,6 +925,7 @@ type status_state = [
   | Success <json name="success">
   | Failure <json name="failure">
   | Error <json name="error">
+  | Unknown <json untyped> of (string * json option)
 ]
 
 type status = {

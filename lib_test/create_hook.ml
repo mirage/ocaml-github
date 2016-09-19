@@ -24,7 +24,10 @@ let repo = "opam-repository"
 let print_hooks label = Github_t.(Github.(Stream.iter (fun hook ->
   eprintf "%s %s hook %Ld created on %s %b detecting %s\n%!"
     label
-    (match hook.hook_config with `Web _ -> "web")
+    (match hook.hook_config with
+     | `Web _ -> "web"
+     | `Unknown (cons, json) -> cons
+    )
     hook.hook_id
     hook.hook_created_at
     hook.hook_active

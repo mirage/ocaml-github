@@ -10,10 +10,13 @@
 * Add Stream.fold
 * Add Issue.get
 * Add Status.get
+* Add repository_event
 * ! Fix Event.for_repo_issues (#107 from @yallop)
 * update_issue type added
 * ! Change Issue.update to accept update_issue rather than new_issue
   This allows users to change issue state (open/close).
+* ! event_constr now has Repository constructor
+* ! event_hook_constr now has Repository constructor
 * ! scope variant now has Unknown fall-back constructor
 * ! issue_sort variant now has Unknown fall-back constructor
 * ! team_permission variant now has Unknown fall-back constructor

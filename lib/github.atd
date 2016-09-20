@@ -1139,3 +1139,5 @@ type update_gist = {
   description: string;
   files: (string * update_gist) list <json repr="object">
 } <ocaml field_prefix="update_gist_">
+
+type emojis = (string * string) list <json repr="object">

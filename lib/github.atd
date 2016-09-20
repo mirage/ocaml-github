@@ -668,6 +668,7 @@ type pull_request_action = [
   | Labeled <json name="labeled">
   | Unlabeled <json name="unlabeled">
   | Opened <json name="opened">
+  | Edited <json name="edited"> of ticket_changes
   | Closed <json name="closed">
   | Reopened <json name="reopened">
   | Synchronize <json name="synchronize">
@@ -675,7 +676,7 @@ type pull_request_action = [
 ]
 
 type pull_request_event = {
-  action: pull_request_action;
+  action <json name="changes" tag_field="action">: pull_request_action;
   number: int;
   pull_request: pull;
 } <ocaml field_prefix="pull_request_event_">

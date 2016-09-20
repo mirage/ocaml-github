@@ -11,7 +11,12 @@
 * Add Stream.fold
 * Add Issue.get
 * Add Status.get
+* Add Issue.comments_for_repo
+* Add Issue.get_comment
+* Add Issue.update_comment
+* Add Issue.delete_comment
 * Add repository_event
+* Add type Filter.issue_comment_sort
 * ! Fix Event.for_repo_issues (#107 from @yallop)
 * update_issue type added
 * ! Change Issue.update to accept update_issue rather than new_issue
@@ -39,6 +44,8 @@
 * ! watch_action variant now has Unknown fall-back constructor
 * ! status_state variant now has Unknown fall-back constructor
 * ! update_pull_base field added (PR target branch is now updatable)
+* ! URI.issue_comment signature changed
+* ! Issue.comments signature changed
 
 1.1.0 (2016-06-20):
 * Add new_status_context and status_context fields (#88)

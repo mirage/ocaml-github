@@ -476,9 +476,9 @@ module type Github = sig
     (** [issue_comments ~user ~repo ~num] is the API endpoint
         for the comments on issue [user]/[repo]#[num]. *)
 
-    val issue_comment: user:string -> repo:string -> num:int -> Uri.t
-    (** [issue_comment ~user ~repo ~num] is the API endpoint for
-        comment [num] in repo [user]/[repo]. *)
+    val issue_comment: user:string -> repo:string -> id:int64 -> Uri.t
+    (** [issue_comment ~user ~repo ~id] is the API endpoint for
+        comment [id] in repo [user]/[repo]. *)
 
     val milestone : user:string -> repo:string -> num:int -> Uri.t
     (** [milestone ~user ~repo] is the API endpoint for milestone
@@ -501,6 +501,10 @@ module type Github = sig
     type issue_sort = [ `Created | `Updated | `Comments ]
     (** [issue_sort] is the field by which to sort a collection of
         issues. See {!Issue.for_repo}. *)
+
+    type issue_comment_sort = [ `Created | `Updated ]
+    (** [issue_comment_sort] is the field by which to sort a collection of
+        issue comments. See {!Issue.comments_for_repo}. *)
 
     type repo_sort = [ `Stars | `Forks | `Updated ]
     (** [repo_sort] is the field by which to sort a collection of
@@ -1021,10 +1025,23 @@ module type Github = sig
         in [user]/[repo] as described by [issue]. *)
 
     val comments :
-      ?token:Token.t -> user:string -> repo:string ->
+      ?token:Token.t -> ?since:string -> user:string -> repo:string ->
       num:int -> unit -> Github_t.issue_comment Stream.t
-    (** [comments ~user ~repo ~num ()] is a stream of issue comments
-        for [user]/[repo]#[num]. *)
+    (** [comments ?since ~user ~repo ~num ()] is a stream of issue
+        comments for [user]/[repo]#[num]. If [?since], an ISO 8601
+        format timestamp (YYYY-MM-DDTHH:MM:SSZ), is supplied, only
+        comments updated at or after this time are returned. *)
+
+    val comments_for_repo :
+      ?token:Token.t ->
+      ?sort:Filter.issue_comment_sort -> ?direction:Filter.direction ->
+      ?since:string ->
+      user:string -> repo:string ->
+      unit -> Github_t.issue_comment Stream.t
+    (** [comments_for_repo ~user ~repo ()] is a stream of issue
+        comments for repo [user]/[repo] sorted by [?sort] in
+        [?direction] order and having occurred since ISO 8601
+        timestamp (YYYY-MM-DDTHH:MM:SSZ) [?since]. *)
 
     val create_comment :
       ?token:Token.t -> user:string -> repo:string ->
@@ -1032,6 +1049,25 @@ module type Github = sig
       unit -> Github_t.issue_comment Response.t Monad.t
     (** [create_comment ~user ~repo ~num ~body ()] is a newly created
         issue comment on [user]/[repo]#[num] with content [body]. *)
+
+    val get_comment :
+      ?token:Token.t -> user:string -> repo:string ->
+      id:int64 -> unit -> Github_t.issue_comment Response.t Monad.t
+    (** [get_comment ~user ~repo ~id ()] is issue comment [id] in repo
+        [user]/[repo]. *)
+
+    val update_comment :
+      ?token:Token.t -> user:string -> repo:string ->
+      id:int64 -> body:string ->
+      unit -> Github_t.issue_comment Response.t Monad.t
+    (** [update_comment ~user ~repo ~id ~body ()] is issue comment
+        [id] in repo [user]/[repo] updated with content [body]. *)
+
+    val delete_comment :
+      ?token:Token.t -> user:string -> repo:string -> id:int64 ->
+      unit -> unit Response.t Monad.t
+    (** [delete_comment ~user ~repo ~id ()] activates after issue
+        comment [id] has been deleted from repo [user]/[repo]. *)
 
     val labels :
       ?token:Token.t ->

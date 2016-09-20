@@ -572,16 +572,28 @@ type repo_issues_action = [
   | Unknown <json untyped> of (string * json option)
 ]
 
+type issue_rename = {
+  from: string;
+  to: string;
+} <ocaml field_prefix="issue_rename_">
+
 type repo_issue_event = {
+  id: int;
+  url: string;
+  actor: linked_user;
   event: repo_issues_action;
-  ?assignee: user_info option;
+  created_at: string;
   ?label: label option;
-} <ocaml field_prefix="issues_event_">
+  ?assignee: linked_user option;
+  ?assigner: linked_user option;
+  ?milestone: milestone option;
+  ?rename: issue_rename option;
+} <ocaml field_prefix="repo_issue_event_">
 
 type repo_issues_event = {
   issue: issue;
   inherit repo_issue_event
-} <ocaml field_prefix="issues_event_">
+} <ocaml field_prefix="repo_issues_event_">
 
 type repo_issues_events = repo_issues_event list
 type repo_issue_events = repo_issue_event list

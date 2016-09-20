@@ -647,21 +647,6 @@ module type Github = sig
     (** [for_repo ~user ~repo ()] is a stream of all events for
         [user]/[repo]. *)
 
-    val for_repo_issues :
-      ?token:Token.t ->
-      user:string ->
-      repo:string -> unit -> Github_t.repo_issues_event Stream.t
-    (** [for_repo_issues ~user ~repo ()] is a stream of all issue
-        events for [user]/[repo]. *)
-
-    val for_repo_issue :
-      ?token:Token.t ->
-      user:string ->
-      repo:string -> 
-      num:int -> unit -> Github_t.repo_issue_event Stream.t
-    (** [for_repo_issue ~user ~repo ~num ()] is a stream of all issue
-        events for [user]/[repo]/issues/[num]. *)
-
     val public_events : unit -> Github_t.event Stream.t
     (** [public_events ()] is a stream of all public events on GitHub. *)
 
@@ -1023,6 +1008,21 @@ module type Github = sig
       unit -> Github_t.issue Response.t Monad.t
     (** [update ~user ~repo ~num ~issue ()] is the updated issue [num]
         in [user]/[repo] as described by [issue]. *)
+
+    val events_for_repo :
+      ?token:Token.t ->
+      user:string ->
+      repo:string -> unit -> Github_t.repo_issues_event Stream.t
+    (** [events_for_repo ~user ~repo ()] is a stream of all issue
+        events for [user]/[repo]. *)
+
+    val events :
+      ?token:Token.t ->
+      user:string ->
+      repo:string ->
+      num:int -> unit -> Github_t.repo_issue_event Stream.t
+    (** [events ~user ~repo ~num ()] is a stream of all issue events
+        for [user]/[repo]#[num]. *)
 
     val comments :
       ?token:Token.t -> ?since:string -> user:string -> repo:string ->

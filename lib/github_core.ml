@@ -1481,6 +1481,14 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
       API.patch ~body ?token ~uri ~expected_code:`OK
         (fun b -> return (issue_of_string b))
 
+    let events_for_repo ?token ~user ~repo () =
+      let uri = URI.repo_issues_events ~user ~repo in
+      API.get_stream ?token ~uri (fun b -> return (repo_issues_events_of_string b))
+
+    let events ?token ~user ~repo ~num () =
+      let uri = URI.repo_issue_events ~user ~repo ~num in
+      API.get_stream ?token ~uri (fun b -> return (repo_issue_events_of_string b))
+
     let comments ?token ?since ~user ~repo ~num () =
       let params = match since with
         | None -> []
@@ -1836,14 +1844,6 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
     let for_repo ?token ~user ~repo () =
       let uri = URI.repo_events ~user ~repo in
       API.get_stream ?token ~uri (fun b -> return (events_of_string b))
-
-    let for_repo_issues ?token ~user ~repo () =
-      let uri = URI.repo_issues_events ~user ~repo in
-      API.get_stream ?token ~uri (fun b -> return (repo_issues_events_of_string b))
-
-    let for_repo_issue ?token ~user ~repo ~num () =
-      let uri = URI.repo_issue_events ~user ~repo ~num in
-      API.get_stream ?token ~uri (fun b -> return (repo_issue_events_of_string b))
 
     let public_events () =
       let uri = URI.public_events in

@@ -1,4 +1,4 @@
-1.2.0 (dev):
+2.0.0 (dev):
 * Changes marked with ! are type changes
 * Add Labels API support (#146 from @dave-tucker)
 * Add Collaborators API support

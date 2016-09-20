@@ -67,11 +67,32 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
   let rate_table : (string option,rates) Hashtbl.t = Hashtbl.create 4
 
   module Response = struct
-    type 'a t = < value : 'a >
+    type redirect =
+      | Temporary of Uri.t
+      | Permanent of Uri.t
+    type 'a t = < value : 'a; redirects : redirect list >
 
     let value r = r#value
 
-    let wrap : 'a -> 'a t = fun v -> object method value = v end
+    let redirects r = r#redirects
+
+    let rec final_resource = function
+      | [] -> None
+      | (Permanent uri)::rest -> perm_resource uri rest
+      | (Temporary uri)::rest -> temp_resource uri rest
+    and perm_resource uri = function
+      | [] -> Some (Permanent uri)
+      | (Permanent uri)::rest -> perm_resource uri rest
+      | (Temporary uri)::rest -> temp_resource uri rest
+    and temp_resource uri = function
+      | [] -> Some (Temporary uri)
+      | (Temporary uri | Permanent uri)::rest -> temp_resource uri rest
+
+    let wrap : ?redirects:redirect list -> 'a -> 'a t =
+      fun ?(redirects=[]) v -> object
+        method value = v
+        method redirects = redirects
+      end
   end
 
   (* Authorization Scopes *)
@@ -634,15 +655,16 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
 
   module API = struct
     (* Use the highest precedence handler that matches the response. *)
-    let rec handle_response (envelope,body as response) = Lwt.(function
+    let rec handle_response redirects (envelope,body as response) = Lwt.(
+      function
       | (p, handler)::more ->
-        if not (p response) then handle_response response more
+        if not (p response) then handle_response redirects response more
         else
           let bad_response exn = return (Monad.(error (Bad_response exn))) in
           catch (fun () ->
             handler response
             >>= fun r ->
-            return (Monad.response (Response.wrap r))
+            return (Monad.response (Response.wrap ~redirects r))
           ) (fun exn ->
             catch (fun () ->
               CLB.to_string body
@@ -693,13 +715,40 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
       log "Requesting %s" (Uri.to_string uri);
       CL.call ~headers ~body ~chunked:false meth uri
 
-    let request ~rate ~token resp_handlers req = Lwt.(
-      lwt_req req
-      >>= fun response ->
-      update_rate_table rate ?token (fst response);
-      log "Response code %s\n%!"
-        (C.Code.string_of_status (C.Response.status (fst response)));
-      handle_response response resp_handlers
+    let max_redirects = 64
+    let make_redirect target = function
+      | `Moved_permanently -> Response.Permanent target
+      | _ -> Response.Temporary target
+
+    let rec request ?(redirects=[]) ~rate ~token resp_handlers req = Lwt.(
+      if List.length redirects > max_redirects
+      then Lwt.fail (Message (`Too_many_requests, Github_t.{
+        message_message = Printf.sprintf
+            "ocaml-github exceeded max redirects %d" max_redirects;
+        message_errors = [];
+      }))
+      else
+        lwt_req req
+        >>= fun ((resp, body) as response) ->
+        update_rate_table rate ?token resp;
+        let response_code = C.Response.status resp in
+        log "Response code %s\n%!" (C.Code.string_of_status response_code);
+        match response_code with
+        | `Found | `Temporary_redirect | `Moved_permanently -> begin
+            match C.Header.get (C.Response.headers resp) "location" with
+            | None -> Lwt.fail (Message (`Expectation_failed, Github_t.{
+              message_message = "ocaml-github got redirect without location";
+              message_errors = [];
+            }))
+            | Some location_s ->
+              let location = Uri.of_string location_s in
+              let target = Uri.resolve "" req.Monad.uri location in
+              let redirect = make_redirect target response_code in
+              let redirects = redirect::redirects in
+              let req = { req with Monad.uri = target } in
+              request ~redirects ~rate ~token resp_handlers req
+          end
+        | _ -> handle_response (List.rev redirects) response resp_handlers
     )
 
     (* A simple response pattern that matches on HTTP code equivalence *)

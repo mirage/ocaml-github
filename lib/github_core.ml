@@ -244,6 +244,9 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
     let repo_commit ~user ~repo ~sha =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/commits/%s" api user repo sha)
 
+    let repo_commit_status ~user ~repo ~git_ref =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/commits/%s/status" api user repo git_ref)
+
     let repo_statuses ~user ~repo ~git_ref =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/statuses/%s" api user repo git_ref)
 
@@ -1567,6 +1570,10 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
       let uri = URI.repo_statuses ~user ~repo ~git_ref:sha in
       let body = string_of_new_status status in
       API.post ~body ?token ~uri ~expected_code:`Created (fun b -> return (status_of_string b))
+
+    let get ?token ~user ~repo ~sha () =
+      let uri = URI.repo_commit_status ~user ~repo ~git_ref:sha in
+      API.get ?token ~uri (fun b -> return (combined_status_of_string b))
   end
 
   module Hook = struct

@@ -21,11 +21,17 @@
 * ! issue_sort variant now has Unknown fall-back constructor
 * ! team_permission variant now has Unknown fall-back constructor
 * ! wiki_page_action variant now has Unknown fall-back constructor
+* ! issue_comment_action variant now has Edited constructor
+* ! issue_comment_action variant now has Deleted constructor
 * ! issue_comment_action variant now has Unknown fall-back constructor
+* ! issues_action variant now has Edited constructor
 * ! issues_action variant now has Unknown fall-back constructor
 * ! member_action variant now has Unknown fall-back constructor
 * ! page_build_status variant now has Unknown fall-back constructor
+* ! pull_request_action variant now has Edited constructor
 * ! pull_request_action variant now has Unknown fall-back constructor
+* ! pull_request_review_comment_action variant now has Edited constructor
+* ! pull_request_review_comment_action variant now has Deleted constructor
 * ! pull_request_review_comment_action variant now has Unknown fall-back
   constructor
 * ! release_action variant now has Unknown fall-back constructor

@@ -585,13 +585,28 @@ type repo_issues_event = {
 type repo_issues_events = repo_issues_event list
 type repo_issue_events = repo_issue_event list
 
+type change = {
+  from: string;
+} <ocaml field_prefix="change_">
+
+type body_changes = {
+  ?body: change option;
+} <ocaml field_prefix="body_changes_">
+
+type ticket_changes = {
+  ?title: change option;
+  inherit body_changes
+} <ocaml field_prefix="ticket_changes_">
+
 type issue_comment_action = [
   | Created <json name="created">
+  | Edited <json name="edited"> of body_changes
+  | Deleted <json name="deleted">
   | Unknown <json untyped> of (string * json option)
 ]
 
 type issue_comment_event = {
-  action: issue_comment_action;
+  action <json name="changes" tag_field="action">: issue_comment_action;
   issue: issue;
   comment: issue_comment;
 } <ocaml field_prefix="issue_comment_event_">
@@ -602,13 +617,14 @@ type issues_action = [
   | Labeled <json name="labeled">
   | Unlabeled <json name="unlabeled">
   | Opened <json name="opened">
+  | Edited <json name="edited"> of ticket_changes
   | Closed <json name="closed">
   | Reopened <json name="reopened">
   | Unknown <json untyped> of (string * json option)
 ]
 
 type issues_event = {
-  action: issues_action;
+  action <json name="changes" tag_field="action">: issues_action;
   issue: issue;
   ?assignee: user_info option;
   ?label: label option;
@@ -652,6 +668,7 @@ type pull_request_action = [
   | Labeled <json name="labeled">
   | Unlabeled <json name="unlabeled">
   | Opened <json name="opened">
+  | Edited <json name="edited"> of ticket_changes
   | Closed <json name="closed">
   | Reopened <json name="reopened">
   | Synchronize <json name="synchronize">
@@ -659,13 +676,15 @@ type pull_request_action = [
 ]
 
 type pull_request_event = {
-  action: pull_request_action;
+  action <json name="changes" tag_field="action">: pull_request_action;
   number: int;
   pull_request: pull;
 } <ocaml field_prefix="pull_request_event_">
 
 type pull_request_review_comment_action = [
   | Created <json name="created">
+  | Edited <json name="edited"> of body_changes
+  | Deleted <json name="deleted">
   | Unknown <json untyped> of (string * json option)
 ]
 
@@ -678,7 +697,7 @@ type pull_request_review_comment = {
 } <ocaml field_prefix="pull_request_review_comment_">
 
 type pull_request_review_comment_event = {
-  action: pull_request_review_comment_action;
+  action <json name="changes" tag_field="action">: pull_request_review_comment_action;
   pull_request: pull;
   comment: pull_request_review_comment;
 } <ocaml field_prefix="pull_request_review_comment_event_">

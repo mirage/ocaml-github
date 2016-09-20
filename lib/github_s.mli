@@ -1048,11 +1048,11 @@ module type Github = sig
       user:string ->
       repo:string ->
       num:int ->
-      labels:Github_t.new_labels ->
+      labels:string list ->
       unit ->
       Github_t.label list Response.t Monad.t
-    (** [add_labels ~user ~repo ~num ~labels ()] adds the labels [labels]
-        to issue [num] in the repo [user]/[repo]. *)
+    (** [add_labels ~user ~repo ~num ~labels ()] is the list of labels
+        on issue [user]/[repo]#[num] with labels [labels] added. *)
 
     val remove_label :
       ?token:Token.t ->
@@ -1062,19 +1062,20 @@ module type Github = sig
       name:string ->
       unit ->
       unit Response.t Monad.t
-    (** [remove_label ~user ~repo ~num ~name ()] removes the label [name]
-        from the issue [num] in the repo [user]/[repo]. *)
+    (** [remove_label ~user ~repo ~num ~name ()] activates after the
+        label [name] has been removed from issue [user]/[repo]#[num]. *)
 
     val replace_labels :
       ?token:Token.t ->
       user:string ->
       repo:string ->
       num:int ->
-      labels:Github_t.new_labels ->
+      labels:string list ->
       unit ->
       Github_t.label list Response.t Monad.t
-    (** [replace_labels ~user ~repo ~num ~labels ()] replaces the labels on
-        issue [num] in the repo [user]/[repo] with those provided in [labels]. *)
+    (** [replace_labels ~user ~repo ~num ~labels ()] is the list of
+         labels on issue [user]/[repo]#[num] as provided by
+         [labels]. *)
 
     val remove_labels :
       ?token:Token.t ->
@@ -1083,9 +1084,8 @@ module type Github = sig
       num:int ->
       unit ->
       unit Response.t Monad.t
-    (** [remove_labels ~user ~repo ~num ()] removes all labels
-        from the issue [num] in the repo [user]/[repo]. *)
-
+    (** [remove_labels ~user ~repo ~num ()] activates after all labels
+        have been removed from issue [user]/[repo]#[num]. *)
 
     val is_issue : Github_t.issue -> bool
     (** [is_issue issue] is true if [issue] is an actual issue and not
@@ -1115,8 +1115,8 @@ module type Github = sig
       name:string ->
       unit ->
       Github_t.label Response.t Monad.t
-    (** [get ~user ~repo ~name ()] gets the label [name] from the
-        repo [user]/[repo]. *)
+    (** [get ~user ~repo ~name ()] is the label [name] in the repo
+        [user]/[repo]. *)
 
     val create :
       ?token:Token.t ->
@@ -1125,8 +1125,8 @@ module type Github = sig
       label:Github_t.new_label ->
       unit ->
       Github_t.label Response.t Monad.t
-    (** [create ~user ~repo ~label ()] creates the label [label] in the
-        repo [user]/[repo]. *)
+    (** [create ~user ~repo ~label ()] is the newly created label
+        [label] in the repo [user]/[repo]. *)
 
     val update :
       ?token:Token.t ->
@@ -1136,8 +1136,8 @@ module type Github = sig
       label:Github_t.new_label ->
       unit ->
       Github_t.label Response.t Monad.t
-    (** [update ~user ~repo ~name ()] updates the label [name] in the
-        repo [user]/[repo]. *)
+    (** [update ~user ~repo ~name ()] is the newly updated label
+        [name] with properties [label] in the repo [user]/[repo]. *)
 
     val delete :
       ?token:Token.t ->
@@ -1146,8 +1146,8 @@ module type Github = sig
       name:string ->
       unit ->
       unit Response.t Monad.t
-    (** [delete ~user ~repo ~name ()] deletes the label [name] in the
-        repo [user]/[repo] *)
+      (** [delete ~user ~repo ~name ()] activates after the label [name]
+          in the repo [user]/[repo] has been removed. *)
   end
 
   (** The [Collaborator] module exposes Github's
@@ -1184,15 +1184,15 @@ module type Github = sig
     (** [add ~user ~repo ~name ?permission ()] adds [name] as a collaborator on
         repo [user]/[repo] with permission [permission] (default [`Push]). *)
 
-    val delete :
+    val remove :
       ?token:Token.t ->
       user:string ->
       repo:string ->
       name:string ->
       unit ->
       unit Response.t Monad.t
-    (** [delete ~user ~repo ~name ()] removes [name] as a collaborator on the
-        repo [user]/[repo]. *)
+    (** [remove ~user ~repo ~name ()] activates after [name] has been
+        removed from the collaborator set on the repo [user]/[repo]. *)
   end
 
   (** The [Milestone] module exposes GitHub's
@@ -1248,8 +1248,8 @@ module type Github = sig
       num:int ->
       unit ->
       Github_t.label Stream.t
-    (** [labels ~user ~repo ()] is a stream of all labels in repo
-        [user]/[repo] *)
+    (** [labels ~user ~repo ~num ()] is a stream of all labels for
+        milestone [num] in repo [user]/[repo]. *)
   end
 
   (** The [Release] module provides access to GitHub's

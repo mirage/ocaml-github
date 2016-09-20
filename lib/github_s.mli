@@ -41,7 +41,13 @@ module type Github = sig
       available. {!Monad.(>>~)} is a convenience operator that lets
       you bind directly to the carried value. *)
   module Response : sig
-    type 'a t = private < value : 'a; .. >
+    type redirect =
+      | Temporary of Uri.t (** The redirection is temporary. *)
+      | Permanent of Uri.t (** The redirection is permanent. *)
+    (** [redirect] indicates whether the originally requested
+        endpoint should continue to be used in the future. *)
+
+    type 'a t = private < value : 'a; redirects : redirect list; .. >
     (** ['a t] is an API response containing a payload of type
         ['a]. {b Do not} refer to this type explicitly as its identity and
         representation are subject to change (e.g. a family of object
@@ -49,6 +55,17 @@ module type Github = sig
 
     val value : < value : 'a; .. > -> 'a
     (** [value r] is the payload in response [r]. *)
+
+    val redirects : < redirects : redirect list; .. > -> redirect list
+    (** [redirects r] is the sequence of redirects prior to response [r]. *)
+
+    val final_resource : redirect list -> redirect option
+    (** [final_resource rs] is the single redirect, if any redirects
+        occurred, that describes the overall redirect chain [rs]. If
+        any redirect [rs] is temporary, [final_resource rs] will be a
+        temporary redirect to the final URI. If all redirects [rs] are
+        permanent, [final_resource rs] will be a permanent redirect to
+        the final URI. *)
   end
 
   (** All API requests are bound through this monad which encapsulates

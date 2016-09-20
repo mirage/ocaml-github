@@ -185,10 +185,10 @@ $ git upload-release mirage ocaml-uri v1.4.0 release.tar.gz
 *Supported*:
 
  * [Rate limit](https://developer.github.com/v3/rate_limit/)
+ * [Emojis](https://developer.github.com/v3/emojis)
 
 *Not yet supported*:
 
- * [Emojis](https://developer.github.com/v3/emojis)
  * [Gitignore](https://developer.github.com/v3/gitignore)
  * [Markdown](https://developer.github.com/v3/markdown)
  * [Meta](https://developer.github.com/v3/meta)

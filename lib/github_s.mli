@@ -1430,6 +1430,15 @@ module type Github = sig
     (** [delete ~id ()] activates after gist [id] has been deleted. *)
   end
 
+  (** The [Emoji] module exposes GitHub's
+      {{:https://developer.github.com/v3/emojis/}emoji API}. *)
+  module Emoji : sig
+    val list : ?token:Token.t -> unit -> Github_t.emojis Response.t Monad.t
+    (** [list ()] is the list of all available emojis for use on
+        GitHub in GitHub-flavored markdown. *)
+
+  end
+
   (** The [Search] module exposes GitHub's
       {{:https://developer.github.com/v3/search/}search interfaces}. *)
   module Search : sig

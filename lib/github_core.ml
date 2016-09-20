@@ -411,6 +411,9 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
 
     let user_orgs ~user =
       Uri.of_string (Printf.sprintf "%s/users/%s/orgs" api user)
+
+    let emojis =
+      Uri.of_string (Printf.sprintf "%s/emojis" api)
   end
 
   module C = Cohttp
@@ -1965,5 +1968,13 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
       API.get_stream ~rate:Search ?token ~params ~uri (fun b ->
         return [repository_search_of_string b]
       )
+  end
+
+  module Emoji = struct
+    open Lwt
+
+    let list ?token () =
+      let uri = URI.emojis in
+      API.get ?token ~uri (fun b -> return (emojis_of_string b))
   end
 end

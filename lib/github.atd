@@ -596,11 +596,13 @@ type issue_changes = {
 
 type issue_comment_action = [
   | Created <json name="created">
+  | Edited <json name="edited"> of issue_changes
+  | Deleted <json name="deleted">
   | Unknown <json untyped> of (string * json option)
 ]
 
 type issue_comment_event = {
-  action: issue_comment_action;
+  action <json name="changes" tag_field="action">: issue_comment_action;
   issue: issue;
   comment: issue_comment;
 } <ocaml field_prefix="issue_comment_event_">

@@ -893,6 +893,15 @@ module type Github = sig
       unit -> Github_t.status Response.t Monad.t
     (** [create ~user ~repo ~sha ~status ()] is a newly created status
         on SHA [sha] in repo [user]/[repo] as described by [status]. *)
+
+    val get :
+      ?token:Token.t ->
+      user:string ->
+      repo:string ->
+      sha:string ->
+      unit -> Github_t.combined_status Response.t Monad.t
+    (** [get ~user ~repo ~sha ()] is the combined status of the ref
+        [sha] in the repo [user]/[repo]. *)
   end
 
   (** The [Pull] module contains functionality relating to GitHub's

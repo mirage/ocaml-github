@@ -233,6 +233,8 @@ $ git upload-release mirage ocaml-uri v1.4.0 release.tar.gz
    status](https://developer.github.com/v3/repos/statuses/#create-a-status)
  * [List statuses for a specific
    ref](https://developer.github.com/v3/repos/statuses/#list-statuses-for-a-specific-ref)
+ * [Get the combined status for a specific
+   ref](https://developer.github.com/v3/repos/statuses/#get-the-combined-status-for-a-specific-ref)
  * [List contributors](https://developer.github.com/v3/repos/#list-contributors)
  * Most [Webhooks](https://developer.github.com/v3/repos/hooks/) endpoints
  * [Get contributors list with additions, deletions, and commit counts](https://developer.github.com/v3/repos/statistics/#get-contributors-list-with-additions-deletions-and-commit-counts)
@@ -276,8 +278,6 @@ $ git upload-release mirage ocaml-uri v1.4.0 release.tar.gz
  * [Get the number of additions and deletions per week](https://developer.github.com/v3/repos/statistics/#get-the-number-of-additions-and-deletions-per-week) (see [#86](https://github.com/mirage/ocaml-github/issues/86))
  * [Get the weekly commit count for the repository owner and everyone else](https://developer.github.com/v3/repos/statistics/#get-the-weekly-commit-count-for-the-repository-owner-and-everyone-else) (see [#86](https://github.com/mirage/ocaml-github/issues/86))
  * [Get the number of commits per hour in each day](https://developer.github.com/v3/repos/statistics/#get-the-number-of-commits-per-hour-in-each-day) (see [#86](https://github.com/mirage/ocaml-github/issues/86))
- * [Get the combined status for a specific
-   ref](https://developer.github.com/v3/repos/statuses/#get-the-combined-status-for-a-specific-ref)
  * [Ping a
    hook](https://developer.github.com/v3/repos/hooks/#ping-a-hook)
  * [PubSubHubbub](https://developer.github.com/v3/repos/hooks/#pubsubhubbub)

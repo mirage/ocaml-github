@@ -683,6 +683,8 @@ type pull_request_event = {
 
 type pull_request_review_comment_action = [
   | Created <json name="created">
+  | Edited <json name="edited"> of body_changes
+  | Deleted <json name="deleted">
   | Unknown <json untyped> of (string * json option)
 ]
 
@@ -695,7 +697,7 @@ type pull_request_review_comment = {
 } <ocaml field_prefix="pull_request_review_comment_">
 
 type pull_request_review_comment_event = {
-  action: pull_request_review_comment_action;
+  action <json name="changes" tag_field="action">: pull_request_review_comment_action;
   pull_request: pull;
   comment: pull_request_review_comment;
 } <ocaml field_prefix="pull_request_review_comment_event_">

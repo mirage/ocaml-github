@@ -2,6 +2,7 @@
 * Changes marked with ! are type changes
 * Add Labels API support (#146 from @dave-tucker)
 * Add Collaborators API support
+* Add Emojis API support
 * Make `tls` the default recommended dependency instead of OpenSSL
 * Add HTTP redirect support (Response.redirect(s) and Response.final_resource)
 * Add Hook.parse_event

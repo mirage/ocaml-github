@@ -19,6 +19,9 @@ functionality. [jar](https://github.com/mirage/ocaml-github/tree/master/jar)
 contains utility programs that use the [git jar](#git-jar) facility for
 stored tokens.
 
+If you are interested in easily using this library to listen for GitHub
+web hook events, you should look at [dsheets/ocaml-github-hooks](https://github.com/dsheets/ocaml-github-hooks).
+
 ## Debugging
 
 Two environment variables will cause more debugging to be output:

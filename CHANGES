@@ -24,6 +24,7 @@
 * ! issues_action variant now has Unknown fall-back constructor
 * ! member_action variant now has Unknown fall-back constructor
 * ! page_build_status variant now has Unknown fall-back constructor
+* ! pull_request_action variant now has Edited constructor
 * ! pull_request_action variant now has Unknown fall-back constructor
 * ! pull_request_review_comment_action variant now has Unknown fall-back
   constructor

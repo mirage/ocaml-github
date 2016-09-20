@@ -26,6 +26,8 @@ let string_of_wiki_page_action = function
 
 let string_of_issue_comment_event_action = function
   | `Created -> "Created"
+  | `Edited _ -> "Edited"
+  | `Deleted -> "Deleted"
   | `Unknown (cons, _json) -> "Unknown:"^cons
 
 let string_of_issue user repo issue = Github_t.(
@@ -44,6 +46,8 @@ let string_of_pull_request_action = Github_j.string_of_pull_request_action
 
 let string_of_pull_request_review_comment_action = function
   | `Created -> "Created"
+  | `Edited _ -> "Edited"
+  | `Deleted -> "Deleted"
   | `Unknown (cons, _json) -> "Unknown:"^cons
 
 let string_of_release_event_action = function

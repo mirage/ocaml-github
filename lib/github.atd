@@ -496,6 +496,7 @@ type update_pull = {
   ?title: string option;
   ?body: string option;
   ?state: state option;
+  ?base: string option;
 } <ocaml field_prefix="update_pull_">
 
 type commit_comment = {

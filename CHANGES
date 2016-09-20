@@ -1,4 +1,4 @@
-1.2.0 (dev):
+2.0.0 (dev):
 * Changes marked with ! are type changes
 * Add Labels API support (#146 from @dave-tucker)
 * Add Collaborators API support
@@ -38,6 +38,7 @@
 * ! release_action variant now has Unknown fall-back constructor
 * ! watch_action variant now has Unknown fall-back constructor
 * ! status_state variant now has Unknown fall-back constructor
+* ! update_pull_base field added (PR target branch is now updatable)
 
 1.1.0 (2016-06-20):
 * Add new_status_context and status_context fields (#88)

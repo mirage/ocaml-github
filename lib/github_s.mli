@@ -1,6 +1,6 @@
 (*
  * Copyright (c) 2012-2014 Anil Madhavapeddy <anil@recoil.org>
- * Copyright (c) 2013-2015 David Sheets <sheets@alum.mit.edu>
+ * Copyright (c) 2013-2016 David Sheets <sheets@alum.mit.edu>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -51,7 +51,7 @@ module type Github = sig
     (** ['a t] is an API response containing a payload of type
         ['a]. {b Do not} refer to this type explicitly as its identity and
         representation are subject to change (e.g. a family of object
-        types may replace it before 2.0). *)
+        types may replace it before 3.0). *)
 
     val value : < value : 'a; .. > -> 'a
     (** [value r] is the payload in response [r]. *)

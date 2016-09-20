@@ -737,6 +737,19 @@ type release_event = {
   release: release;
 } <ocaml field_prefix="release_event_">
 
+type repository_action = [
+  | Created <json name="created">
+  | Deleted <json name="deleted">
+  | Publicized <json name="publicized">
+  | Privatized <json name="privatized">
+  | Unknown <json untyped> of (string * json option)
+]
+
+type repository_event = {
+  action: repository_action;
+  repository: repository;
+} <ocaml field_prefix="repository_event_">
+
 type status_branch_commit = {
   sha: string;
   url: string;
@@ -829,6 +842,7 @@ type event_type = [
   | PullRequestReviewComment <json name="pull_request_review_comment">
   | Push <json name="push">
   | Release <json name="release">
+  | Repository <json name="repository">
   | Status <json name="status">
   | TeamAdd <json name="team_add">
   | Watch <json name="watch">
@@ -862,6 +876,7 @@ type event_constr = [
     of pull_request_review_comment_event
   | Push <json name="PushEvent"> of push_event
   | Release <json name="ReleaseEvent"> of release_event
+  | Repository <json name="RepositoryEvent"> of repository_event
   | Status <json name="StatusEvent"> of status_event
   (*| TeamAdd <json name="team_add"> of team_add_event*)
   | Watch <json name="WatchEvent"> of watch_event
@@ -894,6 +909,7 @@ type event_hook_constr = [
     of pull_request_review_comment_event
   | Push <json name="PushEvent"> of push_event_hook
   | Release <json name="ReleaseEvent"> of release_event
+  | Repository <json name="RepositoryEvent"> of repository_event
   | Status <json name="StatusEvent"> of status_event
   (*| TeamAdd <json name="team_add"> of team_add_event*)
   | Watch <json name="WatchEvent"> of watch_event

@@ -1647,6 +1647,8 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
         `Push (Github_j.push_event_hook_of_string payload)
       | `Release ->
         `Release (Github_j.release_event_of_string payload)
+      | `Repository ->
+        `Repository (Github_j.repository_event_of_string payload)
       | `Status ->
         `Status (Github_j.status_event_of_string payload)
       | `TeamAdd ->

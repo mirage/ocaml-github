@@ -131,6 +131,15 @@ let print_event event =
     printf "ReleaseEvent %s on %s/%s: %s\n%!" user repo
       (string_of_release_event_action release_event_action)
       release_event_release.release_tag_name
+  | `Repository {
+    repository_event_action;
+    repository_event_repository = {
+      repository_full_name;
+    };
+  } ->
+    printf "RepositoryEvent %s on %s\n%!"
+      (Github_j.string_of_repository_action repository_event_action)
+      repository_full_name
   | `Status { status_event_state; status_event_sha } ->
     printf "StatusEvent on %s/%s: %s %s\n%!" user repo status_event_sha
       (string_of_status_state status_event_state)

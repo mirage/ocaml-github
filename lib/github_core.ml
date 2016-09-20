@@ -307,11 +307,14 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
     let milestone_labels ~user ~repo ~num =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/milestones/%d/labels" api user repo num)
 
+    let issues_comments ~user ~repo =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/issues/comments" api user repo)
+
     let issue_comments ~user ~repo ~num =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/issues/%d/comments" api user repo num)
 
-    let issue_comment ~user ~repo ~num =
-      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/issues/comments/%d" api user repo num)
+    let issue_comment ~user ~repo ~id =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/issues/comments/%Ld" api user repo id)
 
     let issue_labels ~user ~repo ~num =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/issues/%d/labels" api user repo num)
@@ -1175,6 +1178,12 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
       |`Updated -> "updated"
       |`Comments -> "comments"
 
+    type issue_comment_sort = [ `Created | `Updated ]
+    let string_of_issue_comment_sort (s:issue_comment_sort) =
+      match s with
+      |`Created -> "created"
+      |`Updated -> "updated"
+
     type repo_sort = [ `Stars | `Forks | `Updated ]
     let string_of_repo_sort (s:repo_sort) =
       match s with
@@ -1472,14 +1481,48 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
       API.patch ~body ?token ~uri ~expected_code:`OK
         (fun b -> return (issue_of_string b))
 
-    let comments ?token ~user ~repo ~num () =
+    let comments ?token ?since ~user ~repo ~num () =
+      let params = match since with
+        | None -> []
+        | Some s -> ["since", s]
+      in
       let uri = URI.issue_comments ~user ~repo ~num in
-      API.get_stream ?token ~uri (fun b -> return (issue_comments_of_string b))
+      API.get_stream ?token ~params ~uri (fun b -> return (issue_comments_of_string b))
+
+    let comments_for_repo ?token ?sort ?direction ?since ~user ~repo () =
+      let params = [] in
+      let params = match sort with
+        | None -> params
+        | Some s -> ("sort", Filter.string_of_issue_comment_sort s)::params
+      in
+      let params = match direction with
+        | None -> params
+        | Some d -> ("direction", Filter.string_of_direction d)::params
+      in
+      let params = match since with
+        | None -> params
+        | Some s -> ("since", s)::params
+      in
+      let uri = URI.issues_comments ~user ~repo in
+      API.get_stream ?token ~params ~uri (fun b -> return (issue_comments_of_string b))
 
     let create_comment ?token ~user ~repo ~num ~body () =
       let body = string_of_new_issue_comment { new_issue_comment_body=body } in
       let uri = URI.issue_comments ~user ~repo ~num in
       API.post ~body ?token ~uri ~expected_code:`Created (fun b -> return (issue_comment_of_string b))
+
+    let get_comment ?token ~user ~repo ~id () =
+      let uri = URI.issue_comment ~user ~repo ~id in
+      API.get ?token ~uri (fun b -> return (issue_comment_of_string b))
+
+    let update_comment ?token ~user ~repo ~id ~body () =
+      let body = string_of_new_issue_comment { new_issue_comment_body=body } in
+      let uri = URI.issue_comment ~user ~repo ~id in
+      API.patch ?token ~body ~uri ~expected_code:`OK (fun b -> return (issue_comment_of_string b))
+
+    let delete_comment ?token ~user ~repo ~id () =
+      let uri = URI.issue_comment ~user ~repo ~id in
+      API.delete ?token ~uri ~expected_code:`No_content (fun _ -> return ())
 
     let labels ?token ~user ~repo ~num () =
       let uri = URI.issue_labels ~user ~repo ~num in

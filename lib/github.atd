@@ -209,7 +209,7 @@ type new_label = {
   color: string;
 } <ocaml field_prefix="new_label_">
 
-type new_labels = string list
+type label_names = string list
 
 type milestone_sort = [
   | Due_date <json name="due_date">

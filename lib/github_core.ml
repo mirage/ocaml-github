@@ -1483,7 +1483,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
       API.get_stream ?token ~uri (fun b -> return (labels_of_string b))
 
     let add_labels ?token ~user ~repo ~num ~labels () =
-      let body = string_of_new_labels labels in
+      let body = string_of_label_names labels in
       let uri = URI.issue_labels ~user ~repo ~num in
       API.post ?token ~body ~uri ~expected_code:`OK (fun b -> return (labels_of_string b))
 
@@ -1492,7 +1492,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
       API.delete ?token ~uri ~expected_code:`No_content (fun _ -> return ())
 
     let replace_labels ?token ~user ~repo ~num ~labels () =
-      let body = string_of_new_labels labels in
+      let body = string_of_label_names labels in
       let uri = URI.issue_labels ~user ~repo ~num in
       API.put ?token ~body ~uri ~expected_code:`OK (fun b -> return (labels_of_string b))
 
@@ -1554,7 +1554,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
       let uri = URI.repo_collaborator ~user ~repo ~name in
       API.put ?token ~uri ?params ~expected_code:`No_content (fun _ -> return ())
 
-    let delete ?token ~user ~repo ~name () =
+    let remove ?token ~user ~repo ~name () =
       let uri = URI.repo_collaborator ~user ~repo ~name in
       API.delete ?token ~uri ~expected_code:`No_content (fun _ -> return ())
   end

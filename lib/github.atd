@@ -589,14 +589,18 @@ type change = {
   from: string;
 } <ocaml field_prefix="change_">
 
-type issue_changes = {
-  ?title: change option;
+type body_changes = {
   ?body: change option;
-} <ocaml field_prefix="issue_changes_">
+} <ocaml field_prefix="body_changes_">
+
+type ticket_changes = {
+  ?title: change option;
+  inherit body_changes
+} <ocaml field_prefix="ticket_changes_">
 
 type issue_comment_action = [
   | Created <json name="created">
-  | Edited <json name="edited"> of issue_changes
+  | Edited <json name="edited"> of body_changes
   | Deleted <json name="deleted">
   | Unknown <json untyped> of (string * json option)
 ]
@@ -613,7 +617,7 @@ type issues_action = [
   | Labeled <json name="labeled">
   | Unlabeled <json name="unlabeled">
   | Opened <json name="opened">
-  | Edited <json name="edited"> of issue_changes
+  | Edited <json name="edited"> of ticket_changes
   | Closed <json name="closed">
   | Reopened <json name="reopened">
   | Unknown <json untyped> of (string * json option)

@@ -137,11 +137,11 @@ $ git upload-release mirage ocaml-uri v1.4.0 release.tar.gz
  * Event types: commit comment, create, delete, deployment, deployment status,
    download, follow, fork, fork apply, gist, gollum, issue comment,
    issues, member, page build, public, pull request, pull request review
-   comment, push, release, status, team add, watch
+   comment, push, release, repository, status, team add, watch
 
 *Not yet supported*:
 
- * Event types: membership, repository
+ * Event types: membership
  * [Feeds](https://developer.github.com/v3/activity/feeds/)
  * [Notifications](https://developer.github.com/v3/activity/notifications/)
  * [Starring](https://developer.github.com/v3/activity/starring/)

@@ -585,6 +585,15 @@ type repo_issues_event = {
 type repo_issues_events = repo_issues_event list
 type repo_issue_events = repo_issue_event list
 
+type change = {
+  from: string;
+} <ocaml field_prefix="change_">
+
+type issue_changes = {
+  ?title: change option;
+  ?body: change option;
+} <ocaml field_prefix="issue_changes_">
+
 type issue_comment_action = [
   | Created <json name="created">
   | Unknown <json untyped> of (string * json option)
@@ -602,13 +611,14 @@ type issues_action = [
   | Labeled <json name="labeled">
   | Unlabeled <json name="unlabeled">
   | Opened <json name="opened">
+  | Edited <json name="edited"> of issue_changes
   | Closed <json name="closed">
   | Reopened <json name="reopened">
   | Unknown <json untyped> of (string * json option)
 ]
 
 type issues_event = {
-  action: issues_action;
+  action <json name="changes" tag_field="action">: issues_action;
   issue: issue;
   ?assignee: user_info option;
   ?label: label option;

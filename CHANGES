@@ -4,6 +4,7 @@
 * Add Collaborators API support
 * Add Emojis API support
 * Make `tls` the default recommended dependency instead of OpenSSL
+* Require atdgen >= 1.10.0 for <json untyped> support
 * Add HTTP redirect support (Response.redirect(s) and Response.final_resource)
 * Add Hook.parse_event
 * Add Repo.create

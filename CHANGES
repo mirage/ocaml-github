@@ -17,7 +17,9 @@
 * Add Issue.delete_comment
 * Add repository_event
 * Add type Filter.issue_comment_sort
-* ! Fix Event.for_repo_issues (#107 from @yallop)
+* Add Issue.events
+* ! Fix Event.for_repo_issues and rename to Issue.events_for_repo
+  (#107 from @yallop)
 * update_issue type added
 * ! Change Issue.update to accept update_issue rather than new_issue
   This allows users to change issue state (open/close).

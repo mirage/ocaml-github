@@ -176,13 +176,12 @@ $ git upload-release mirage ocaml-uri v1.4.0 release.tar.gz
  * [Get a single issue comment](https://developer.github.com/v3/issues/comments/#get-a-single-comment)
  * [Edit an issue comment](https://developer.github.com/v3/issues/comments/#edit-a-comment) (see [#87](https://github.com/mirage/ocaml-github/issues/87))
  * [Delete an issue comment](https://developer.github.com/v3/issues/comments/#delete-a-comment)
+ * [Issue events](https://developer.github.com/v3/issues/events/)
 
 *Not yet supported*:
 
  * Custom media types
  * [Assignees](https://developer.github.com/v3/issues/assignees/)
- * [Issue events](https://developer.github.com/v3/issues/events/#list-events-for-an-issue)
- * [Several issue event type](https://developer.github.com/v3/issues/events/)
 
 ### [Miscellaneous](https://developer.github.com/v3/misc/)
 *Supported*:

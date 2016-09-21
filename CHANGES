@@ -5,8 +5,10 @@
 * update_issue type added
 * ! Change Issue.update to accept update_issue rather than new_issue
   This allows users to change issue state (open/close).
+* ! event_type now has Repository constructor
+* ! event_type now has All constructor
+* ! event_type now has Unknown fall-back constructor
 * ! event_constr now has Repository constructor
-* ! event_hook_constr now has Repository constructor
 * ! scope variant now has Unknown fall-back constructor
 * ! issue_sort variant now has Unknown fall-back constructor
 * ! team_permission variant now has Unknown fall-back constructor
@@ -36,7 +38,10 @@
 * Make `tls` the default recommended dependency instead of OpenSSL
 * Require atdgen >= 1.10.0 for <json untyped> support
 * Add HTTP redirect support (Response.redirect(s) and Response.final_resource)
+* Improve GitHub error reporting (#151)
+* Add Organization.user_orgs (#130 from @yallop)
 * Add Hook.parse_event
+* Add event_hook_constr type for the web hook event variants
 * Add Repo.create
 * Add Repo.delete
 * Add Stream.fold

@@ -30,7 +30,14 @@
 * ! watch_action variant now has Unknown fall-back constructor
 * ! status_state variant now has Unknown fall-back constructor
 * ! update_pull_base field added (PR target branch is now updatable)
-* ! URI.issue_comment signature changed
+* ! URI.repo_issues was removed
+* ! URI.repo_issue was removed
+* ! URI.repo_pulls was removed
+* ! URI.repo_milestones was removed
+* ! URI.repo_contributors_stats was removed
+* ! URI.issue_comments was removed
+* ! URI.issue_comment was removed
+* ! URI.milestone was removed
 * ! Issue.comments signature changed
 * Add Labels API support (#146 from @dave-tucker)
 * Add Collaborators API support

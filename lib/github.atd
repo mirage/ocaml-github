@@ -739,22 +739,22 @@ type push_event_commit = {
 } <ocaml field_prefix="push_event_commit_">
 
 type push_event_base = {
-  ?head: string option;
   ref: string;
-  ~size <ocaml default="0">: int;
   before: string;
-  ?after: string option;
-  ?created: bool option;
-  ?deleted: bool option;
-  ?forced: bool option;
 } <ocaml field_prefix="push_event_base_">
 
 type push_event = {
+  head: string;
+  size: int;
   commits: push_event_commit list;
   inherit push_event_base
 } <ocaml field_prefix="push_event_">
 
 type push_event_hook = {
+  after: string;
+  created: bool;
+  deleted: bool;
+  forced: bool;
   commits: push_event_hook_commit list;
   inherit push_event_base
 } <ocaml field_prefix="push_event_hook_">

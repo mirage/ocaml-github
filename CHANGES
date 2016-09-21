@@ -1,24 +1,5 @@
 2.0.0 (dev):
 * Changes marked with ! are type changes
-* Add Labels API support (#146 from @dave-tucker)
-* Add Collaborators API support
-* Add Emojis API support
-* Make `tls` the default recommended dependency instead of OpenSSL
-* Require atdgen >= 1.10.0 for <json untyped> support
-* Add HTTP redirect support (Response.redirect(s) and Response.final_resource)
-* Add Hook.parse_event
-* Add Repo.create
-* Add Repo.delete
-* Add Stream.fold
-* Add Issue.get
-* Add Status.get
-* Add Issue.comments_for_repo
-* Add Issue.get_comment
-* Add Issue.update_comment
-* Add Issue.delete_comment
-* Add repository_event
-* Add type Filter.issue_comment_sort
-* Add Issue.events
 * ! Fix Event.for_repo_issues and rename to Issue.events_for_repo
   (#107 from @yallop)
 * update_issue type added
@@ -49,6 +30,26 @@
 * ! update_pull_base field added (PR target branch is now updatable)
 * ! URI.issue_comment signature changed
 * ! Issue.comments signature changed
+* Add Labels API support (#146 from @dave-tucker)
+* Add Collaborators API support
+* Add Emojis API support
+* Make `tls` the default recommended dependency instead of OpenSSL
+* Require atdgen >= 1.10.0 for <json untyped> support
+* Add HTTP redirect support (Response.redirect(s) and Response.final_resource)
+* Add Hook.parse_event
+* Add Repo.create
+* Add Repo.delete
+* Add Stream.fold
+* Add Issue.get
+* Add Status.get
+* Add Issue.comments_for_repo
+* Add Issue.get_comment
+* Add Issue.update_comment
+* Add Issue.delete_comment
+* Add repository_event
+* Add type Filter.issue_comment_sort
+* Add Issue.events
+* push_event_before field added
 
 1.1.0 (2016-06-20):
 * Add new_status_context and status_context fields (#88)

@@ -41,6 +41,7 @@
 * Improve GitHub error reporting (#151)
 * Add Organization.user_orgs (#130 from @yallop)
 * Add Hook.parse_event
+* Add event_hook_constr type for the web hook event variants
 * Add Repo.create
 * Add Repo.delete
 * Add Stream.fold

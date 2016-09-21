@@ -1,4 +1,4 @@
-2.0.0 (dev):
+2.0.0 (2016-09-21):
 * Changes marked with ! are type changes
 * ! Fix Event.for_repo_issues and rename to Issue.events_for_repo
   (#107 from @yallop)

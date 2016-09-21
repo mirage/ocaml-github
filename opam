@@ -32,7 +32,8 @@ remove: [
   ["ocamlfind" "remove" "github"]
 ]
 depends: [
-  "ocamlfind"
+  "ocamlfind" {build}
+  "ocamlbuild" {build}
   "tls"
   "uri" {>= "1.9.0"}
   "cohttp" {>= "0.17.0"}
@@ -50,3 +51,4 @@ depopts: [
 conflicts: [
   "js_of_ocaml" {< "2.4.0"}
 ]
+available: [ ocaml-version >= "4.02.3" ]

@@ -451,38 +451,6 @@ module type Github = sig
     (** [token ~client_id ~client_secret ~code ()] is the API endpoint
         used by {!Token.of_code} to finish the OAuth2 web flow and
         convert a temporary OAuth code into a real API access token. *)
-
-    val repo_issues : user:string -> repo:string -> Uri.t
-    (** [repo_issues ~user ~repo] is the API endpoint for all issues
-        on repo [user]/[repo]. *)
-
-    val repo_issue : user:string -> repo:string -> num:int ->  Uri.t
-    (** [repo_issue ~user ~repo ~num] is the API endpoint for the
-        issue [user]/[repo]#[num]. *)
-
-    val repo_pulls : user:string -> repo:string -> Uri.t
-    (** [repo_pulls ~user ~repo] is the API endpoint for all pull
-        requests on repo [user]/[repo]. *)
-
-    val repo_milestones : user:string -> repo:string -> Uri.t
-    (** [repo_milestones ~user ~repo] is the API endpoint for all
-        milestones on repo [user]/[repo]. *)
-
-    val repo_contributors_stats : user:string -> repo:string -> Uri.t
-    (** [repo_contributors_stats ~user ~repo] is the API endpoint for
-        contributors' statistics on repo [user]/[repo]*)
-
-    val issue_comments: user:string -> repo:string -> num:int -> Uri.t
-    (** [issue_comments ~user ~repo ~num] is the API endpoint
-        for the comments on issue [user]/[repo]#[num]. *)
-
-    val issue_comment: user:string -> repo:string -> id:int64 -> Uri.t
-    (** [issue_comment ~user ~repo ~id] is the API endpoint for
-        comment [id] in repo [user]/[repo]. *)
-
-    val milestone : user:string -> repo:string -> num:int -> Uri.t
-    (** [milestone ~user ~repo] is the API endpoint for milestone
-        [num] on repo [user]/[repo]. *)
   end
 
   (** The [Filter] module contains types used by search and

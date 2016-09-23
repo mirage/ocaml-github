@@ -1,3 +1,10 @@
+2.0.1 (2016-09-23):
+* Changes marked with ! are type changes
+* ! web_hook_config_content_type field is now optional because GitHub
+  does not appear to byte-wise validate the field and some web hook
+  users (e.g. CircleCI) set a `content-type` field rather than a
+  `content_type` field.
+
 2.0.0 (2016-09-21):
 * Changes marked with ! are type changes
 * ! Fix Event.for_repo_issues and rename to Issue.events_for_repo

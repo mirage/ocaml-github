@@ -1543,7 +1543,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
 
     let remove_label ?token ~user ~repo ~num ~name () =
       let uri = URI.issue_label ~user ~repo ~num ~name in
-      API.delete ?token ~uri ~expected_code:`No_content (fun _ -> return ())
+      API.delete ?token ~uri ~expected_code:`OK (fun b -> return (labels_of_string b))
 
     let replace_labels ?token ~user ~repo ~num ~labels () =
       let body = string_of_label_names labels in

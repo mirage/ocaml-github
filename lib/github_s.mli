@@ -1065,9 +1065,9 @@ module type Github = sig
       num:int ->
       name:string ->
       unit ->
-      unit Response.t Monad.t
-    (** [remove_label ~user ~repo ~num ~name ()] activates after the
-        label [name] has been removed from issue [user]/[repo]#[num]. *)
+      Github_t.label list Response.t Monad.t
+    (** [remove_label ~user ~repo ~num ~name ()] is the list of labels
+        on issue [user]/[repo]#[num] after [name] has been removed. *)
 
     val replace_labels :
       ?token:Token.t ->

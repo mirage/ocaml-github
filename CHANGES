@@ -1,3 +1,13 @@
+2.0.2 (2016-09-26):
+* Changes marked with ! are type changes
+* ! Issue.remove_label now returns a label list Response.t Monad.t like
+  the other issue label modification functions because GitHub does not
+  treat this DELETE endpoint like others and return 204 No Content. The
+  GitHub docs are wrong on this point (a support ticket has been filed
+  as they have now moved their developer API docs into a closed source
+  repo). Because any previous user of the API would have immediately
+  encountered this exception, this is a patch release.
+
 2.0.1 (2016-09-23):
 * Changes marked with ! are type changes
 * ! web_hook_config_content_type field is now optional because GitHub

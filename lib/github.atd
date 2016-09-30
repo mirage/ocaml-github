@@ -196,10 +196,14 @@ type team_info = {
 
 type team_infos = team_info list
 
-type label = {
-  url: string;
+type base_label = {
   name: string;
   color: string;
+} <ocaml field_prefix="base_label_">
+
+type label = {
+  url: string;
+  inherit base_label
 } <ocaml field_prefix="label_">
 
 type labels = label list
@@ -583,7 +587,7 @@ type repo_issue_event = {
   actor: linked_user;
   event: repo_issues_action;
   created_at: string;
-  ?label: label option;
+  ?label: base_label option;
   ?assignee: linked_user option;
   ?assigner: linked_user option;
   ?milestone: milestone option;

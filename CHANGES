@@ -1,3 +1,11 @@
+2.0.3 (2016-09-30):
+* Changes marked with ! are type changes
+* ! repo_issue_event_label and repo_issues_event_label have changed type
+  from label option to base_label option as the GitHub APIs for Issue
+  Events and Issue Labels are not consistent with the inclusion of the
+  url field
+* base_label type added (label without the url field)
+
 2.0.2 (2016-09-26):
 * Changes marked with ! are type changes
 * ! Issue.remove_label now returns a label list Response.t Monad.t like

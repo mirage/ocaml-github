@@ -760,6 +760,7 @@ type push_event_hook = {
   deleted: bool;
   forced: bool;
   commits: push_event_hook_commit list;
+  head_commit: push_event_hook_commit nullable;
   inherit push_event_base
 } <ocaml field_prefix="push_event_hook_">
 

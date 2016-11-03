@@ -1,3 +1,7 @@
+2.1.0 (2016-11-03):
+* Changes marked with ! are type changes
+* ! push_event_hook_head_commit field added
+
 2.0.3 (2016-09-30):
 * Changes marked with ! are type changes
 * ! repo_issue_event_label and repo_issues_event_label have changed type

@@ -737,6 +737,15 @@ module type Github = sig
         {{:https://developer.github.com/v3/git/refs/}git references}
         with prefix [?ty] for repo [user]/[repo]. *)
 
+    val get_ref :
+      ?token:Token.t ->
+      user:string -> repo:string ->
+      name:string ->
+      unit -> Github_t.git_ref Response.t Monad.t
+    (** [get_ref ~user ~repo ~name] is the
+        {{:https://developer.github.com/v3/git/refs/}git reference}
+        with name [name] for repo [user]/[repo]. *)
+
     val get_commit :
       ?token:Token.t ->
       user:string -> repo:string -> sha:string ->

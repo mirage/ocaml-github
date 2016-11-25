@@ -306,10 +306,10 @@ module type Github = sig
       ?rate:rate ->
       ?fail_handlers:'a parse handler list ->
       ?expected_code:Cohttp.Code.status_code ->
-      ?headers:Cohttp.Header.t -> 
-      ?token:Token.t -> 
+      ?headers:Cohttp.Header.t ->
+      ?token:Token.t ->
       ?params:(string * string) list ->
-      uri:Uri.t -> 
+      uri:Uri.t ->
       'a parse -> 'a Response.t Monad.t
     (** [get ?rate ?fail_handlers ?expected_code ?headers ?token
         ?params uri p] is the [p]-parsed response to a GitHub API HTTP
@@ -357,10 +357,10 @@ module type Github = sig
       ?rate:rate ->
       ?fail_handlers:'a parse handler list ->
       ?expected_code:Cohttp.Code.status_code ->
-      ?headers:Cohttp.Header.t -> 
-      ?token:Token.t -> 
+      ?headers:Cohttp.Header.t ->
+      ?token:Token.t ->
       ?params:(string * string) list ->
-      uri:Uri.t -> 
+      uri:Uri.t ->
       'a parse -> 'a Response.t Monad.t
     (** [delete uri p] is the [p]-parsed response to a GitHub API HTTP
         DELETE request to [uri]. For an explanation of the other

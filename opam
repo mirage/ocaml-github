@@ -22,14 +22,9 @@ tags: [
   "git"
 ]
 build: [
-  ["ocaml" "setup.ml" "-configure" "--%{base-unix:enable}%-unix" "--%{js_of_ocaml:enable}%-js" "--prefix" prefix]
-  ["ocaml" "setup.ml" "-build"]
-]
-install: [
-  ["ocaml" "setup.ml" "-install"]
-]
-remove: [
-  ["ocamlfind" "remove" "github"]
+   "ocaml" "pkg/pkg.ml" "build" "--pinned" "%{pinned}%"
+      "--with-unix" "%{base-unix:installed}%"
+      "--with-js"   "%{js_of_ocaml:installed}%"
 ]
 depends: [
   "ocamlfind" {build}

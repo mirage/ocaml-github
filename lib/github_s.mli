@@ -306,10 +306,10 @@ module type Github = sig
       ?rate:rate ->
       ?fail_handlers:'a parse handler list ->
       ?expected_code:Cohttp.Code.status_code ->
-      ?headers:Cohttp.Header.t -> 
-      ?token:Token.t -> 
+      ?headers:Cohttp.Header.t ->
+      ?token:Token.t ->
       ?params:(string * string) list ->
-      uri:Uri.t -> 
+      uri:Uri.t ->
       'a parse -> 'a Response.t Monad.t
     (** [get ?rate ?fail_handlers ?expected_code ?headers ?token
         ?params uri p] is the [p]-parsed response to a GitHub API HTTP
@@ -357,10 +357,10 @@ module type Github = sig
       ?rate:rate ->
       ?fail_handlers:'a parse handler list ->
       ?expected_code:Cohttp.Code.status_code ->
-      ?headers:Cohttp.Header.t -> 
-      ?token:Token.t -> 
+      ?headers:Cohttp.Header.t ->
+      ?token:Token.t ->
       ?params:(string * string) list ->
-      uri:Uri.t -> 
+      uri:Uri.t ->
       'a parse -> 'a Response.t Monad.t
     (** [delete uri p] is the [p]-parsed response to a GitHub API HTTP
         DELETE request to [uri]. For an explanation of the other
@@ -736,6 +736,15 @@ module type Github = sig
     (** [refs ?ty ~user ~repo ()] is a stream of all
         {{:https://developer.github.com/v3/git/refs/}git references}
         with prefix [?ty] for repo [user]/[repo]. *)
+
+    val get_ref :
+      ?token:Token.t ->
+      user:string -> repo:string ->
+      name:string ->
+      unit -> Github_t.git_ref Response.t Monad.t
+    (** [get_ref ~user ~repo ~name] is the
+        {{:https://developer.github.com/v3/git/refs/}git reference}
+        with name [name] for repo [user]/[repo]. *)
 
     val get_commit :
       ?token:Token.t ->

@@ -1776,6 +1776,10 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
         ~fail_handlers
         (fun b -> return (git_refs_of_string b))
 
+    let get_ref ?token ~user ~repo ~name () =
+      let uri = URI.repo_refs ~user ~ty:name ~repo in
+      API.get ?token ~uri (fun b -> return (git_ref_of_string b))
+
     let branches ?token ~user ~repo () =
       let uri = URI.repo_branches ~user ~repo in
       API.get_stream ?token ~uri (fun b -> return (repo_branches_of_string b))

@@ -6,4 +6,4 @@ all:
 	ocaml pkg/pkg.ml build --with-unix true --with-js $(JS)
 
 doc:
-	topkg doc -r
+	topkg doc -r --build-flags ''

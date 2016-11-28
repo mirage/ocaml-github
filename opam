@@ -36,7 +36,6 @@ depends: [
   "atdgen" {>= "1.10.0"}
   "yojson" {>= "1.2.0"}
   "stringext"
-  "lambda-term"
   "cmdliner" {>= "0.9.8"}
   "base-unix"
 ]

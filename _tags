@@ -2,11 +2,13 @@ true: principal, strict_sequence, debug
 true: warn(@5@8@10@11@12@14@23@24@26@29)
 
 true: package(lwt)
+true: -no-plugin
 
 <lib>: include
 
-<lib/*>: std_json
-<lib/*>: package(cohttp uri cohttp.lwt-core yojson atdgen)
+<lib/*>: package(cohttp uri cohttp.lwt-core yojson atdgen stringext tls)
 
 <unix/*>: package(lwt.unix cohttp.lwt bytes)
 <js/*>  : package(js_of_ocaml js_of_ocaml.ppx cohttp.lwt-core cohttp.js)
+
+<jar/*>: package(cmdliner)

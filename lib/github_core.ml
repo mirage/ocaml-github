@@ -500,7 +500,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
     let return r = fun state -> Lwt.return (state, Response r)
     let map f m = bind (fun x -> return (f x)) m
 
-    let fail err = fun state -> Lwt.return (state, Error err)
+    let with_error err = fun state -> Lwt.return (state, Error err)
 
     let initial_state = {user_agent=None; token=None}
 
@@ -517,6 +517,11 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
 
     let embed lw =
       Lwt.(fun state -> lw >>= (fun v -> return (state, Response v)))
+
+    let fail exn _state = Lwt.fail exn
+
+    let catch try_ with_ state =
+      Lwt.catch (fun () -> try_ () state) (fun exn -> with_ exn state)
   end
 
   module Endpoint = struct
@@ -1385,7 +1390,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
           Printf.sprintf "tag %s not found in repository %s/%s" tag user repo
         in
         let msg = {Github_t.message_message=msg; message_errors=[]} in
-        fail (Semantic (`Not_found,msg))
+        with_error (Semantic (`Not_found,msg))
 
     let delete ?token ~user ~repo ~id () =
       let uri = URI.repo_release ~user ~repo ~id in

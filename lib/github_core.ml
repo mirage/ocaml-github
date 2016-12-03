@@ -520,13 +520,30 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
   end
 
   module Endpoint = struct
-    type ident = Etag of string | Last_modified of string
+    module Version = struct
+      type t = Etag of string | Last_modified of string
+
+      let of_headers headers =
+        match C.Header.get headers "etag" with
+        | Some etag -> Some (Etag etag)
+        | None -> match C.Header.get headers "last-modified" with
+          | Some last -> Some (Last_modified last)
+          | None -> None
+
+      let add_conditional_headers headers = function
+        | None -> headers
+        | Some (Etag etag) ->
+          C.Header.add headers "If-None-Match" etag
+        | Some (Last_modified time) ->
+          C.Header.add headers "If-Modified-Since" time
+    end
+
     type t = {
-      uri   : Uri.t;
-      ident : ident option;
+      uri     : Uri.t;
+      version : Version.t option;
     }
 
-    let empty = { uri = Uri.empty; ident = None; }
+    let empty = { uri = Uri.empty; version = None; }
 
     let poll_after : (string, float) Hashtbl.t = Hashtbl.create 8
 
@@ -541,21 +558,9 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
       if t_0 < poll_limit then Hashtbl.replace poll_after uri_s poll_limit
 
     let poll_result uri ({ C.Response.headers } as envelope) =
-      let ident = match C.Header.get headers "etag" with
-        | Some etag -> Some (Etag etag)
-        | None -> match C.Header.get headers "last-modified" with
-          | Some last -> Some (Last_modified last)
-          | None -> None
-      in
+      let version = Version.of_headers headers in
       update_poll_after uri envelope;
-      { uri; ident; }
-
-    let add_conditional_headers headers = function
-      | { ident = None } -> headers
-      | { ident = Some (Etag etag) } ->
-        C.Header.add headers "If-None-Match" etag
-      | { ident = Some (Last_modified time) } ->
-        C.Header.add headers "If-Modified-Since" time
+      { uri; version; }
 
     (* TODO: multiple polling threads need to queue *)
     let wait_to_poll uri =
@@ -653,6 +658,14 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
     let of_list buffer = { empty with buffer; refill=None; }
 
     let poll stream = stream.restart stream.endpoint
+
+    let since stream version =
+      { stream with endpoint = {
+          stream.endpoint with Endpoint.version = Some version;
+        };
+      }
+
+    let version stream = stream.endpoint.Endpoint.version
   end
 
   type 'a authorization =
@@ -828,7 +841,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
       ) fhs
 
     let rec stream_next restart request uri fn endpoint (envelope, body) = Lwt.(
-      let endpoint = match endpoint.Endpoint.ident with
+      let endpoint = match endpoint.Endpoint.version with
         | None -> Endpoint.poll_result uri envelope
         | Some _ -> endpoint
       in
@@ -871,7 +884,9 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
           | None -> C.Header.init ()
           | Some h -> h
         in
-        let headers = Endpoint.add_conditional_headers headers endpoint in
+        let headers =
+          Endpoint.(Version.add_conditional_headers headers endpoint.version)
+        in
         Monad.(
           Endpoint.wait_to_poll uri
           >>= fun () ->

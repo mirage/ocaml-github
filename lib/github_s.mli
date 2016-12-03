@@ -108,6 +108,22 @@ module type Github = sig
         values bound before it. *)
   end
 
+  (** Each request to GitHub is made to a specific [Endpoint] in
+      GitHub's REST-like API. *)
+  module Endpoint : sig
+    (** Some endpoints expose resources which change over time and
+        responses from those endpoints may contain version metadata
+        which can be used to make low-cost conditional requests
+        (e.g. cache validation). *)
+    module Version : sig
+      type t =
+        | Etag of string (** An entity tag identifier *)
+        | Last_modified of string
+          (** A timestamp conforming to the HTTP-date production *)
+          (** [t] is a version of a resource representation. *)
+    end
+  end
+
   (** The [Stream] module provides an abstraction to GitHub's paginated
       endpoints. Stream creation does not initiate any network
       activity. When requests are made, results are buffered
@@ -160,6 +176,18 @@ module type Github = sig
         items and will not resolve until any timeouts indicated by
         GitHub have elapsed. By default, GitHub throttles polling
         requests to once per minute per URL endpoint. *)
+
+    val since : 'a t -> Endpoint.Version.t -> 'a t
+    (** [since stream version] is [stream] with [version] but without
+        any other change, i.e. the stream is not reset to its
+        beginning. Used in conjunction with [poll], [since] enables
+        low-cost conditional re-synchronization of local state with
+        GitHub state. *)
+
+    val version : 'a t -> Endpoint.Version.t option
+    (** [version stream] is the version of [stream] if one is
+        known. After any stream element is forced, the stream version
+        will be available unless GitHub violates its API specification. *)
   end
 
   type rate = Core | Search (**)

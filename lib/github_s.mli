@@ -95,6 +95,15 @@ module type Github = sig
     val (>>~) : 'a Response.t t -> ('a -> 'b t) -> 'b t
     (** [m >>~ f] is [m >|= {!Response.value} >>= f]. *)
 
+    val catch : (unit -> 'a t) -> (exn -> 'a t) -> 'a t
+    (** [catch try with] is the result of trying [try]. If [try]
+        succeeds, its result is returned. If [try] raises an
+        exception, [with] is applied to the exception and the result
+        of [with] is returned. *)
+
+    val fail : exn -> 'a t
+    (** [fail exn] raises exception [exn] inside of the monad. *)
+
     val run : 'a t -> 'a Lwt.t
     (** [run m] is the Lwt thread corresponding to the sequence of API
         actions represented by [m]. Once a {!t} has been [run], any

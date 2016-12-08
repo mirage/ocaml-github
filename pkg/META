@@ -1,0 +1,31 @@
+version = "%%VERSION_NUM%%"
+description = "Github API interface"
+requires = "cohttp uri cohttp.lwt-core yojson atdgen"
+
+archive(byte)   = "github_core.cma"
+plugin(byte)    = "github_core.cma"
+archive(native) = "github_core.cmxa"
+plugin(native)  = "github_core.cmxs"
+exists_if       = "github_core.cma"
+
+package "unix" (
+ version = "%%VERSION_NUM%%"
+ description = "Unix binings for the Github API"
+ requires = "lwt.unix cohttp.lwt github bytes"
+ archive(byte)   = "github_unix.cma"
+ plugin(byte)    = "github_unix.cma"
+ archive(native) = "github_unix.cmxa"
+ plugin(native)  = "github_unix.cmxs"
+ exists_if       = "github_unix.cma"
+)
+
+package "js" (
+ version = "%%VERSION_NUM%%"
+ description = "JS bindings for the Github API"
+ requires = "lwt js_of_ocaml cohttp.lwt-core cohttp.js github"
+ archive(byte)   = "github_js.cma"
+ plugin(byte)    = "github_js.cma"
+ archive(native) = "github_js.cmxa"
+ plugin(native)  = "github_js.cmxs"
+ exists_if       = "github_js.cma"
+)

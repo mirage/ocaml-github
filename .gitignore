@@ -10,3 +10,4 @@ setup.bin
 lib_test/config.ml
 lib_test/test_javascript.js
 *~
+github.install

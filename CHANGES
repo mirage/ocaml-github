@@ -1,3 +1,11 @@
+2.2.0 (2016-12-10):
+* Add Repo.get_ref (#175 from @samoht)
+* Add Endpoint.Version.t
+* Add Stream.since
+* Add Stream.version
+* Add Monad.catch
+* Add Monad.fail
+
 2.1.0 (2016-11-03):
 * Changes marked with ! are type changes
 * ! push_event_hook_head_commit field added

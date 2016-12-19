@@ -1684,6 +1684,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
         | "" -> None
         | s -> Some (Yojson.Safe.from_string s)
       in
+      Github_j.event_hook_metadata_of_string payload,
       match Github_j.event_type_of_string ("\"" ^ constr ^ "\"") with
       | `CommitComment ->
         `CommitComment (Github_j.commit_comment_event_of_string payload)

@@ -830,43 +830,57 @@ module type Github = sig
     (** [for_repo ~user ~repo ()] is a stream of hooks for repo
         [user]/[repo]. *)
 
+    val for_org: ?token:Token.t -> org:string -> unit -> Github_t.hook Stream.t
+    (** [for_org ~org ()] is a stream of hooks for org [org]. *)
+
     val get :
       ?token:Token.t ->
-      user:string ->
-      repo:string -> id:int64 -> unit -> Github_t.hook Response.t Monad.t
-    (** [get ~user ~repo ~id ()] is hook [id] for repo [user]/[repo]. *)
+      ?org:string ->
+      ?user:string ->
+      ?repo:string -> id:int64 -> unit -> Github_t.hook Response.t Monad.t
+    (** [get ~user ~repo ~id ()] is hook [id] for repo [user]/[repo]
+        or the org [org]. Exactly one [org] or [user/repo] has to be
+        set. *)
 
     val create :
       ?token:Token.t ->
-      user:string ->
-      repo:string ->
+      ?org:string ->
+      ?user:string ->
+      ?repo:string ->
       hook:Github_t.new_hook -> unit -> Github_t.hook Response.t Monad.t
     (** [create ~user ~repo ~hook ()] is a newly created post-receive
-        hook for repo [user]/[repo] as described by [hook]. *)
+        hook for repo [user]/[repo] or org [org] as described by
+        [hook]. Exactly one of [org] or [user/repo] has to be set.  *)
 
     val update :
       ?token:Token.t ->
-      user:string ->
-      repo:string ->
+      ?org:string ->
+      ?user:string ->
+      ?repo:string ->
       id:int64 ->
       hook:Github_t.update_hook -> unit -> Github_t.hook Response.t Monad.t
-    (** [update ~user ~repo ~id ~hook ()] is the updated hook [id]
-        in [user]/[repo] as described by [hook]. *)
+    (** [update ~user ~repo ~id ~hook ()] is the updated hook [id] in
+        repo [user]/[repo] or org [org] as described by
+        [hook]. Exactly one of [org] or [user/repo] has to be set. *)
 
     val delete :
       ?token:Token.t ->
-      user:string ->
-      repo:string -> id:int64 -> unit -> unit Response.t Monad.t
-    (** [delete ~user ~repo ~id ()] activates after hook [id] in
-        repo [user]/[repo] has been deleted. *)
+      ?org:string ->
+      ?user:string ->
+      ?repo:string -> id:int64 -> unit -> unit Response.t Monad.t
+    (** [delete ~user ~repo ~id ()] activates after hook [id] in repo
+        [user]/[repo] or org [org] has been deleted. Exactly one of
+        [org] or [user/repo] has to be set. *)
 
     val test :
       ?token:Token.t ->
-      user:string ->
-      repo:string -> id:int64 -> unit -> unit Response.t Monad.t
-    (** [test ~user ~repo ~id ()] activates after a [push] event
-        for the lastest push to [user]/[repo] has been synthesized
-        and sent to hook [id]. *)
+      ?org:string ->
+      ?user:string ->
+      ?repo:string -> id:int64 -> unit -> unit Response.t Monad.t
+    (** [test ~user ~repo ~id ()] activates after a [push] event for
+        the lastest push to [user]/[repo] has been synthesized and
+        sent to hook [id]. Exactly one of [org] or [user/repo] has to
+        be set. *)
 
     val parse_event :
       constr:string ->

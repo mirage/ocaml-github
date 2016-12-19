@@ -274,10 +274,10 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
     let repo_collaborators ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/collaborators" api user repo)
 
-    let hook ~user ~repo ~id =
+    let repo_hook ~user ~repo ~id =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/hooks/%Ld" api user repo id)
 
-    let hook_test ~user ~repo ~id =
+    let repo_hook_test ~user ~repo ~id =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/hooks/%Ld/tests" api user repo id)
 
     let repo_pulls ~user ~repo =
@@ -355,6 +355,15 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
 
     let network_events ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/networks/%s/%s/events" api user repo)
+
+    let org_hooks ~org =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/hooks" api org)
+
+    let org_hook ~org ~id =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/hooks/%Ld" api org id)
+
+    let org_hook_test ~org ~id =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/hooks/%Ld/tests" api org id)
 
     let org_repos ~org =
       Uri.of_string (Printf.sprintf "%s/orgs/%s/repos" api org)
@@ -1657,26 +1666,51 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
       let uri = URI.repo_hooks ~user ~repo in
       API.get_stream ?token ~uri (fun b -> return (hooks_of_string b))
 
-    let get ?token ~user ~repo ~id () =
-      let uri = URI.hook ~user ~repo ~id in
+    let for_org ?token ~org () =
+      let uri = URI.org_hooks ~org in
+      API.get_stream ?token ~uri (fun b -> return (hooks_of_string b))
+
+    let uri_hook ?org ?user ?repo ~id =
+      match org, user, repo with
+      | None, Some user, Some repo -> URI.repo_hook ~user ~repo ~id
+      | Some org, None, None -> URI.org_hook ~org ~id
+      | Some _, Some _, Some _  -> failwith "Hook.get: too many parameters"
+      | _  -> failwith "Hook.get: missing parameters"
+
+    let uri_hooks ?org ?user ?repo () =
+      match org, user, repo with
+      | None, Some user, Some repo -> URI.repo_hooks ~user ~repo
+      | Some org, None, None -> URI.org_hooks ~org
+      | Some _, Some _, Some _  -> failwith "Hook.get: too many parameters"
+      | _  -> failwith "Hook.get: missing parameters"
+
+    let uri_hook_test ?org ?user ?repo ~id =
+      match org, user, repo with
+      | None, Some user, Some repo -> URI.repo_hook_test ~user ~repo ~id
+      | Some org, None, None -> URI.org_hook_test ~org ~id
+      | Some _, Some _, Some _  -> failwith "Hook.get: too many parameters"
+      | _  -> failwith "Hook.get: missing parameters"
+
+    let get ?token ?org ?user ?repo ~id () =
+      let uri = uri_hook ?org ?user ?repo ~id in
       API.get ?token ~uri (fun b -> return (hook_of_string b))
 
-    let create ?token ~user ~repo ~hook () =
-      let uri = URI.repo_hooks ~user ~repo in
+    let create ?token ?org ?user ?repo ~hook () =
+      let uri = uri_hooks ?org ?user ?repo () in
       let body = string_of_new_hook hook in
       API.post ~body ?token ~uri ~expected_code:`Created (fun b -> return (hook_of_string b))
 
-    let update ?token ~user ~repo ~id ~hook () =
-      let uri = URI.hook ~user ~repo ~id in
+    let update ?token ?org ?user ?repo ~id ~hook () =
+      let uri = uri_hook ?org ?user ?repo ~id in
       let body = string_of_update_hook hook in
       API.patch ?token ~body ~uri ~expected_code:`OK (fun b -> return (hook_of_string b))
 
-    let delete ?token ~user ~repo ~id () =
-      let uri = URI.hook ~user ~repo ~id in
+    let delete ?token ?org ?user ?repo ~id () =
+      let uri = uri_hook ?org ?user ?repo ~id in
       API.delete ?token ~uri (fun _ -> return ())
 
-    let test ?token ~user ~repo ~id () =
-      let uri = URI.hook_test ~user ~repo ~id in
+    let test ?token ?org ?user ?repo ~id () =
+      let uri = uri_hook_test ?org ?user ?repo ~id in
       API.post ?token ~uri ~expected_code:`No_content (fun b -> return ())
 
     let parse_event ~constr ~payload () =

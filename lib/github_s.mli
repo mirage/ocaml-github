@@ -339,10 +339,26 @@ module type Github = sig
         fires for responses with status [expected_code] and applies
         [parse]. *)
 
+    (** The [Media_type] module exposes a range of HTTP [Accept]
+        header values suitable for use in GitHub API requests *)
+    module Media_type : sig
+      val v3 : string
+      (** [v3] corresponds to [application/vnd.github.v3+json], the
+          media-type used by the
+          {{:https://developer.github.com/v3/} GitHub API v3} *)
+
+      val experimental : string
+      (** [experimental] corresponds to
+          [application/vnd.github.mockingbird-preview], the media-type
+          used by some experimental GitHub API bindings, such as 
+          {{:https://developer.github.com/v3/issues/timeline/} timeline} *)
+    end
+
     val get :
       ?rate:rate ->
       ?fail_handlers:'a parse handler list ->
       ?expected_code:Cohttp.Code.status_code ->
+      ?media_type:string ->
       ?headers:Cohttp.Header.t ->
       ?token:Token.t ->
       ?params:(string * string) list ->
@@ -364,6 +380,7 @@ module type Github = sig
       ?rate:rate ->
       ?fail_handlers:'a Stream.parse handler list ->
       ?expected_code:Cohttp.Code.status_code ->
+      ?media_type:string ->
       ?headers:Cohttp.Header.t ->
       ?token:Token.t ->
       ?params:(string * string) list ->
@@ -1037,6 +1054,13 @@ module type Github = sig
       num:int -> unit -> Github_t.repo_issue_event Stream.t
     (** [events ~user ~repo ~num ()] is a stream of all issue events
         for [user]/[repo]#[num]. *)
+
+    val timeline_events :
+      ?token:Token.t -> user:string -> repo:string -> num:int -> unit ->
+      Github_t.timeline_event Stream.t
+
+    (** [timeline_events ~user ~repo ~num ()] is a stream of all timeline
+        events for [user]/[repo]#[num]. *)
 
     val comments :
       ?token:Token.t -> ?since:string -> user:string -> repo:string ->

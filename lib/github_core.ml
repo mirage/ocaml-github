@@ -351,6 +351,10 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/issues/%d/events"
                        api user repo num)
 
+    let issue_timeline ~user ~repo ~num =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/issues/%d/timeline"
+                       api user repo num)
+
     let public_events = Uri.of_string (Printf.sprintf "%s/events" api)
 
     let network_events ~user ~repo =
@@ -785,17 +789,23 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
     (* Convert a request body into a stream *)
     let realize_body = function None -> None | Some b -> Some (CLB.of_string b)
 
+    module Media_type =
+    struct
+      let v3 = "application/vnd.github.v3+json"
+      let experimental = "application/vnd.github.mockingbird-preview"
+    end
+    
     (* Add the correct mime-type header *)
-    let realize_headers headers =
-      C.Header.add_opt headers "accept" "application/vnd.github.v3+json"
+    let realize_headers ?(media_type=Media_type.v3) headers =
+      C.Header.add_opt headers "accept" media_type
 
     let idempotent meth
-        ?(rate=Core) ?headers ?token ?params ~fail_handlers ~expected_code ~uri
+        ?(rate=Core) ?media_type ?headers ?token ?params ~fail_handlers ~expected_code ~uri
         fn =
       fun state -> Lwt.return
         (state,
          (Monad.(request ?token ?params
-                   {meth; uri; headers=realize_headers headers; body=CLB.empty})
+                   {meth; uri; headers=realize_headers ?media_type headers; body=CLB.empty})
             (request ~rate ~token
                ((code_handler ~expected_code fn)::fail_handlers))))
 
@@ -812,7 +822,8 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
       fun state -> Lwt.return
         (state,
         (Monad.(request ?token ?params
-                  {meth; uri; headers=realize_headers headers; body })
+                  {meth; uri; headers=realize_headers headers;
+                   body })
            (request ~rate ~token
               ((code_handler ~expected_code fn)::fail_handlers))))
 
@@ -821,11 +832,13 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
     ) fhs
 
     let get ?rate
-        ?(fail_handlers=[]) ?(expected_code=`OK) ?headers ?token ?params ~uri fn =
+        ?(fail_handlers=[]) ?(expected_code=`OK) ?media_type ?headers
+        ?token ?params ~uri fn =
       let fail_handlers =
         map_fail_handlers Lwt.(fun f x -> just_body x >>= f) fail_handlers
       in
-      idempotent `GET ?rate ~fail_handlers ~expected_code ?headers ?token ?params
+      idempotent `GET ?rate ~fail_handlers ~expected_code 
+        ?media_type ?headers ?token ?params
         ~uri Lwt.(fun x -> just_body x >>= fn)
 
     let rec next_link base = Cohttp.Link.(function
@@ -863,7 +876,8 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
     )
 
     let rec restart_stream
-        ?rate ~fail_handlers ~expected_code ?headers ?token ?params fn endpoint =
+        ?rate ~fail_handlers ~expected_code ?media_type ?headers ?token
+        ?params fn endpoint =
       let restart = restart_stream
           ?rate ~fail_handlers ~expected_code ?headers ?token ?params fn
       in
@@ -896,14 +910,16 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
           Endpoint.wait_to_poll uri
           >>= fun () ->
           idempotent ?rate
-            `GET ~headers ?token ?params ~fail_handlers ~expected_code ~uri f
+            `GET ?media_type ~headers ?token ?params ~fail_handlers
+            ~expected_code ~uri f
         )
       in
       let request ~uri f =
         let fail_handlers = stream_fail_handlers restart fail_handlers in
         Monad.map Response.value
           (idempotent ?rate
-             `GET ?headers ?token ?params ~fail_handlers ~expected_code ~uri f)
+             `GET ?media_type ?headers ?token ?params ~fail_handlers
+             ~expected_code ~uri f)
       in
       let uri = endpoint.Endpoint.uri in
       Monad.map Response.value
@@ -913,6 +929,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
         ?rate
         ?(fail_handlers:a Stream.parse handler list=[])
         ?(expected_code:Cohttp.Code.status_code=`OK)
+        ?media_type
         ?(headers:Cohttp.Header.t option) ?(token:string option)
         ?(params:(string * string) list option)
         ~(uri:Uri.t) (fn : a Stream.parse) =
@@ -923,7 +940,8 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
         let fail_handlers = stream_fail_handlers restart fail_handlers in
         Monad.map Response.value
           (idempotent ?rate
-             `GET ?headers ?token ?params ~fail_handlers ~expected_code ~uri f)
+             `GET ?media_type ?headers ?token ?params ~fail_handlers
+             ~expected_code ~uri f)
       in
       let endpoint = Endpoint.({ empty with uri }) in
       let refill = Some (fun () ->
@@ -1508,6 +1526,14 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
     let events ?token ~user ~repo ~num () =
       let uri = URI.repo_issue_events ~user ~repo ~num in
       API.get_stream ?token ~uri (fun b -> return (repo_issue_events_of_string b))
+
+    let timeline_events ?token ~user ~repo ~num () =
+      let uri = URI.issue_timeline ~user ~repo ~num in
+      let headers =
+        C.Header.(add (init ()) "accept"
+                    "application/vnd.github.mockingbird-preview") in
+      API.get_stream ?token ~uri ~media_type:API.Media_type.experimental
+        ~headers (fun b -> return (timeline_events_of_string b))
 
     let comments ?token ?since ~user ~repo ~num () =
       let params = match since with

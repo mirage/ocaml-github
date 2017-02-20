@@ -1193,4 +1193,66 @@ type update_gist = {
   files: (string * update_gist) list <json repr="object">
 } <ocaml field_prefix="update_gist_">
 
+
 type emojis = (string * string) list <json repr="object">
+
+type timeline_action = [
+  | Assigned <json name="assigned">
+  | Closed <json name="closed">
+  | Commented <json name="commented">
+  | Committed <json name="committed">
+  | Cross_referenced <json name="cross-referenced">
+  | Demilestoned <json name="demilestoned">
+  | Head_ref_deleted <json name="head_ref_deleted">
+  | Head_ref_restored <json name="head_ref_restored">
+  | Labeled <json name="labeled">
+  | Locked <json name="locked">
+  | Mentioned <json name="mentioned">
+  | Merged <json name="merged">
+  | Milestoned <json name="milestoned">
+  | Referenced <json name="referenced">
+  | Renamed <json name="renamed">
+  | Reopened <json name="reopened">
+  | Review_dismissed <json name="review_dismissed">
+  | Review_requested <json name="review_requested">
+  | Review_request_removed <json name="review_request_removed">
+  | Subscribed <json name="subscribed">
+  | Unassigned <json name="unassigned">
+  | Unlabeled <json name="unlabeled">
+  | Unlocked <json name="unlocked">
+  | Unsubscribed <json name="unsubscribed">
+]
+
+type rename = {
+  from: string;
+  to_: string <json name="to">;
+} <ocaml field_prefix="rename_">
+
+type source = {
+  ?id: int option <ocaml repr="int64 option">;
+  ?url: string option;
+  ?actor: user option;
+  ?issue: issue option;
+} <ocaml field_prefix="source_">
+
+type timeline_label = {
+  name: string;
+  color: string;
+} <ocaml field_prefix="timeline_label_">
+
+type timeline_event = {
+  ?id: int option <ocaml repr="int64 option">;
+  ?url: string option;
+  ?actor: user option;
+  ?commit_id: string option;
+  event: timeline_action;
+  created_at: string;
+  ?label: timeline_label option;
+  ?assignee: user option;
+  ?milestone: milestone option;
+  ?source: source option;
+  ?rename: rename option;
+} <ocaml field_prefix="timeline_event_">
+
+type timeline_events = timeline_event list
+

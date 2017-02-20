@@ -339,21 +339,6 @@ module type Github = sig
         fires for responses with status [expected_code] and applies
         [parse]. *)
 
-    (** The [Media_type] module exposes a range of HTTP [Accept]
-        header values suitable for use in GitHub API requests *)
-    module Media_type : sig
-      val v3 : string
-      (** [v3] corresponds to [application/vnd.github.v3+json], the
-          media-type used by the
-          {{:https://developer.github.com/v3/} GitHub API v3} *)
-
-      val experimental : string
-      (** [experimental] corresponds to
-          [application/vnd.github.mockingbird-preview], the media-type
-          used by some experimental GitHub API bindings, such as 
-          {{:https://developer.github.com/v3/issues/timeline/} timeline} *)
-    end
-
     val get :
       ?rate:rate ->
       ?fail_handlers:'a parse handler list ->
@@ -1058,7 +1043,6 @@ module type Github = sig
     val timeline_events :
       ?token:Token.t -> user:string -> repo:string -> num:int -> unit ->
       Github_t.timeline_event Stream.t
-
     (** [timeline_events ~user ~repo ~num ()] is a stream of all timeline
         events for [user]/[repo]#[num]. *)
 

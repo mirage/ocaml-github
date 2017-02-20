@@ -1193,7 +1193,6 @@ type update_gist = {
   files: (string * update_gist) list <json repr="object">
 } <ocaml field_prefix="update_gist_">
 
-
 type emojis = (string * string) list <json repr="object">
 
 type timeline_action = [
@@ -1223,22 +1222,12 @@ type timeline_action = [
   | Unsubscribed <json name="unsubscribed">
 ]
 
-type rename = {
-  from: string;
-  to_: string <json name="to">;
-} <ocaml field_prefix="rename_">
-
-type source = {
+type timeline_source = {
   ?id: int option <ocaml repr="int64 option">;
   ?url: string option;
   ?actor: user option;
   ?issue: issue option;
-} <ocaml field_prefix="source_">
-
-type timeline_label = {
-  name: string;
-  color: string;
-} <ocaml field_prefix="timeline_label_">
+} <ocaml field_prefix="timeline_source_">
 
 type timeline_event = {
   ?id: int option <ocaml repr="int64 option">;
@@ -1247,11 +1236,11 @@ type timeline_event = {
   ?commit_id: string option;
   event: timeline_action;
   created_at: string;
-  ?label: timeline_label option;
+  ?label: base_label option;
   ?assignee: user option;
   ?milestone: milestone option;
-  ?source: source option;
-  ?rename: rename option;
+  ?source: timeline_source option;
+  ?rename: issue_rename option;
 } <ocaml field_prefix="timeline_event_">
 
 type timeline_events = timeline_event list

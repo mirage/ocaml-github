@@ -789,14 +789,8 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
     (* Convert a request body into a stream *)
     let realize_body = function None -> None | Some b -> Some (CLB.of_string b)
 
-    module Media_type =
-    struct
-      let v3 = "application/vnd.github.v3+json"
-      let experimental = "application/vnd.github.mockingbird-preview"
-    end
-    
     (* Add the correct mime-type header *)
-    let realize_headers ?(media_type=Media_type.v3) headers =
+    let realize_headers ?(media_type="application/vnd.github.v3+json") headers =
       C.Header.add_opt headers "accept" media_type
 
     let idempotent meth
@@ -822,8 +816,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
       fun state -> Lwt.return
         (state,
         (Monad.(request ?token ?params
-                  {meth; uri; headers=realize_headers headers;
-                   body })
+                  {meth; uri; headers=realize_headers headers; body })
            (request ~rate ~token
               ((code_handler ~expected_code fn)::fail_handlers))))
 
@@ -1529,11 +1522,8 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
 
     let timeline_events ?token ~user ~repo ~num () =
       let uri = URI.issue_timeline ~user ~repo ~num in
-      let headers =
-        C.Header.(add (init ()) "accept"
-                    "application/vnd.github.mockingbird-preview") in
-      API.get_stream ?token ~uri ~media_type:API.Media_type.experimental
-        ~headers (fun b -> return (timeline_events_of_string b))
+      API.get_stream ?token ~uri ~media_type:"application/vnd.github.mockingbird-preview"
+        (fun b -> return (timeline_events_of_string b))
 
     let comments ?token ?since ~user ~repo ~num () =
       let params = match since with

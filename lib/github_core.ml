@@ -1684,7 +1684,6 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
         | "" -> None
         | s -> Some (Yojson.Safe.from_string s)
       in
-      Github_j.event_hook_metadata_of_string payload,
       match Github_j.event_type_of_string ("\"" ^ constr ^ "\"") with
       | `CommitComment ->
         `CommitComment (Github_j.commit_comment_event_of_string payload)
@@ -1732,6 +1731,9 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
         `Watch (Github_j.watch_event_of_string payload)
       | `All -> `Unknown ("*", parse_json payload)
       | `Unknown (cons,_) -> `Unknown (cons, parse_json payload)
+
+    let parse_event_metadata ~payload () =
+      Github_j.event_hook_metadata_of_string payload
   end
 
   module Git_obj = struct

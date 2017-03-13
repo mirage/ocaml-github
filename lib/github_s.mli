@@ -873,6 +873,11 @@ module type Github = sig
       payload:string -> unit -> Github_t.event_hook_constr
     (** [parse_event ~constr ~payload ()] is the event with
         constructor [constr] that is represented by [payload]. *)
+
+    val parse_event_metadata :
+      payload:string -> unit -> Github_t.event_hook_metadata
+    (** [parse_event_metadata ~payload ()] is the event metadata for
+        the serialized event [payload]. *)
   end
 
   (** The [Status] module provides the functionality of GitHub's

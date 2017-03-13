@@ -920,6 +920,18 @@ type event_constr = [
   | Unknown <json untyped> of (string * json option)
 ]
 
+type event = {
+  public: bool;
+  payload <json tag_field="type">: event_constr;
+  actor: user;
+  ?org: org option;
+  created_at: string;
+  repo: repo;
+  id: int <ocaml repr="int64">;
+} <ocaml field_prefix="event_">
+
+type events = event list
+
 type event_hook_constr = [
   | CommitComment <json name="CommitCommentEvent"> of commit_comment_event
   | Create <json name="CreateEvent"> of create_event
@@ -953,17 +965,13 @@ type event_hook_constr = [
   | Unknown <json untyped> of (string * json option)
 ]
 
-type event = {
-  public: bool;
-  payload <json tag_field="type">: event_constr;
-  actor: user;
-  ?org: org option;
+type event_hook_metadata = {
+  sender: user;
+  ?organisation: org option;
   created_at: string;
-  repo: repo;
+  repository: repository;
   id: int <ocaml repr="int64">;
-} <ocaml field_prefix="event_">
-
-type events = event list
+} <ocaml field_prefix="event_hook_metadata_">
 
 type bool_as_string = string wrap <ocaml
   t="bool"

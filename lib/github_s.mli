@@ -343,6 +343,7 @@ module type Github = sig
       ?rate:rate ->
       ?fail_handlers:'a parse handler list ->
       ?expected_code:Cohttp.Code.status_code ->
+      ?media_type:string ->
       ?headers:Cohttp.Header.t ->
       ?token:Token.t ->
       ?params:(string * string) list ->
@@ -364,6 +365,7 @@ module type Github = sig
       ?rate:rate ->
       ?fail_handlers:'a Stream.parse handler list ->
       ?expected_code:Cohttp.Code.status_code ->
+      ?media_type:string ->
       ?headers:Cohttp.Header.t ->
       ?token:Token.t ->
       ?params:(string * string) list ->
@@ -1160,6 +1162,12 @@ module type Github = sig
       num:int -> unit -> Github_t.repo_issue_event Stream.t
     (** [events ~user ~repo ~num ()] is a stream of all issue events
         for [user]/[repo]#[num]. *)
+
+    val timeline_events :
+      ?token:Token.t -> user:string -> repo:string -> num:int -> unit ->
+      Github_t.timeline_event Stream.t
+    (** [timeline_events ~user ~repo ~num ()] is a stream of all timeline
+        events for [user]/[repo]#[num]. *)
 
     val comments :
       ?token:Token.t -> ?since:string -> user:string -> repo:string ->

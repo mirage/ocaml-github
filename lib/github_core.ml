@@ -274,10 +274,10 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
     let repo_collaborators ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/collaborators" api user repo)
 
-    let hook ~user ~repo ~id =
+    let repo_hook ~user ~repo ~id =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/hooks/%Ld" api user repo id)
 
-    let hook_test ~user ~repo ~id =
+    let repo_hook_test ~user ~repo ~id =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/hooks/%Ld/tests" api user repo id)
 
     let repo_pulls ~user ~repo =
@@ -355,6 +355,15 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
 
     let network_events ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/networks/%s/%s/events" api user repo)
+
+    let org_hooks ~org =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/hooks" api org)
+
+    let org_hook ~org ~id =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/hooks/%Ld" api org id)
+
+    let org_hook_test ~org ~id =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/hooks/%Ld/tests" api org id)
 
     let org_repos ~org =
       Uri.of_string (Printf.sprintf "%s/orgs/%s/repos" api org)
@@ -1154,6 +1163,94 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
   end
 
   module Organization = struct
+    module Hook = struct
+      open Lwt
+
+      let for_org ?token ~org () =
+        let uri = URI.org_hooks ~org in
+        API.get_stream ?token ~uri (fun b -> return (hooks_of_string b))
+
+      let get ?token ~org ~id () =
+        let uri = URI.org_hook ~org ~id in
+        API.get ?token ~uri (fun b -> return (hook_of_string b))
+
+      let create ?token ~org ~hook () =
+        let uri = URI.org_hooks ~org in
+        let body = string_of_new_hook hook in
+        API.post ~body ?token ~uri ~expected_code:`Created
+          (fun b -> return (hook_of_string b))
+
+      let update ?token ~org ~id ~hook () =
+        let uri = URI.org_hook ~org ~id in
+        let body = string_of_update_hook hook in
+        API.patch ?token ~body ~uri ~expected_code:`OK
+          (fun b -> return (hook_of_string b))
+
+      let delete ?token ~org ~id () =
+        let uri = URI.org_hook ~org ~id in
+        API.delete ?token ~uri (fun _ -> return ())
+
+      let test ?token ~org ~id () =
+        let uri = URI.org_hook_test ~org ~id in
+        API.post ?token ~uri ~expected_code:`No_content (fun b -> return ())
+
+      let parse_event ~constr ~payload () =
+        let parse_json = function
+          | "" -> None
+          | s -> Some (Yojson.Safe.from_string s)
+        in
+        match Github_j.event_type_of_string ("\"" ^ constr ^ "\"") with
+        | `CommitComment ->
+          `CommitComment (Github_j.commit_comment_event_of_string payload)
+        | `Create ->
+          `Create (Github_j.create_event_of_string payload)
+        | `Delete ->
+          `Delete (Github_j.delete_event_of_string payload)
+        | `Deployment ->
+          `Unknown ("deployment", parse_json payload)
+        | `DeploymentStatus ->
+          `Unknown ("deployment_status", parse_json payload)
+        | `Download -> `Download
+        | `Follow -> `Follow
+        | `Fork ->
+          `Fork (Github_j.fork_event_of_string payload)
+        | `ForkApply -> `ForkApply
+        | `Gist -> `Gist
+        | `Gollum ->
+          `Gollum (Github_j.gollum_event_of_string payload)
+        | `IssueComment ->
+          `IssueComment (Github_j.issue_comment_event_of_string payload)
+        | `Issues ->
+          `Issues (Github_j.issues_event_of_string payload)
+        | `Member ->
+          `Member (Github_j.member_event_of_string payload)
+        | `PageBuild ->
+          `Unknown ("page_build", parse_json payload)
+        | `Public -> `Public
+        | `PullRequest ->
+          `PullRequest (Github_j.pull_request_event_of_string payload)
+        | `PullRequestReviewComment ->
+          `PullRequestReviewComment
+            (Github_j.pull_request_review_comment_event_of_string payload)
+        | `Push ->
+          `Push (Github_j.push_event_hook_of_string payload)
+        | `Release ->
+          `Release (Github_j.release_event_of_string payload)
+        | `Repository ->
+          `Repository (Github_j.repository_event_of_string payload)
+        | `Status ->
+          `Status (Github_j.status_event_of_string payload)
+        | `TeamAdd ->
+          `Unknown ("team_add", parse_json payload)
+        | `Watch ->
+          `Watch (Github_j.watch_event_of_string payload)
+        | `All -> `Unknown ("*", parse_json payload)
+        | `Unknown (cons,_) -> `Unknown (cons, parse_json payload)
+
+      let parse_event_metadata ~payload () =
+        Github_j.event_hook_metadata_of_string payload
+    end
+
     open Lwt
 
     let teams ?token ~org () =
@@ -1658,82 +1755,32 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
       API.get_stream ?token ~uri (fun b -> return (hooks_of_string b))
 
     let get ?token ~user ~repo ~id () =
-      let uri = URI.hook ~user ~repo ~id in
+      let uri = URI.repo_hook ~user ~repo ~id in
       API.get ?token ~uri (fun b -> return (hook_of_string b))
 
     let create ?token ~user ~repo ~hook () =
       let uri = URI.repo_hooks ~user ~repo in
       let body = string_of_new_hook hook in
-      API.post ~body ?token ~uri ~expected_code:`Created (fun b -> return (hook_of_string b))
+      API.post ~body ?token ~uri ~expected_code:`Created
+        (fun b -> return (hook_of_string b))
 
     let update ?token ~user ~repo ~id ~hook () =
-      let uri = URI.hook ~user ~repo ~id in
+      let uri = URI.repo_hook ~user ~repo ~id in
       let body = string_of_update_hook hook in
-      API.patch ?token ~body ~uri ~expected_code:`OK (fun b -> return (hook_of_string b))
+      API.patch ?token ~body ~uri ~expected_code:`OK
+        (fun b -> return (hook_of_string b))
 
     let delete ?token ~user ~repo ~id () =
-      let uri = URI.hook ~user ~repo ~id in
+      let uri = URI.repo_hook ~user ~repo ~id in
       API.delete ?token ~uri (fun _ -> return ())
 
     let test ?token ~user ~repo ~id () =
-      let uri = URI.hook_test ~user ~repo ~id in
+      let uri = URI.repo_hook_test ~user ~repo ~id in
       API.post ?token ~uri ~expected_code:`No_content (fun b -> return ())
 
-    let parse_event ~constr ~payload () =
-      let parse_json = function
-        | "" -> None
-        | s -> Some (Yojson.Safe.from_string s)
-      in
-      match Github_j.event_type_of_string ("\"" ^ constr ^ "\"") with
-      | `CommitComment ->
-        `CommitComment (Github_j.commit_comment_event_of_string payload)
-      | `Create ->
-        `Create (Github_j.create_event_of_string payload)
-      | `Delete ->
-        `Delete (Github_j.delete_event_of_string payload)
-      | `Deployment ->
-        `Unknown ("deployment", parse_json payload)
-      | `DeploymentStatus ->
-        `Unknown ("deployment_status", parse_json payload)
-      | `Download -> `Download
-      | `Follow -> `Follow
-      | `Fork ->
-        `Fork (Github_j.fork_event_of_string payload)
-      | `ForkApply -> `ForkApply
-      | `Gist -> `Gist
-      | `Gollum ->
-        `Gollum (Github_j.gollum_event_of_string payload)
-      | `IssueComment ->
-        `IssueComment (Github_j.issue_comment_event_of_string payload)
-      | `Issues ->
-        `Issues (Github_j.issues_event_of_string payload)
-      | `Member ->
-        `Member (Github_j.member_event_of_string payload)
-      | `PageBuild ->
-        `Unknown ("page_build", parse_json payload)
-      | `Public -> `Public
-      | `PullRequest ->
-        `PullRequest (Github_j.pull_request_event_of_string payload)
-      | `PullRequestReviewComment ->
-        `PullRequestReviewComment
-          (Github_j.pull_request_review_comment_event_of_string payload)
-      | `Push ->
-        `Push (Github_j.push_event_hook_of_string payload)
-      | `Release ->
-        `Release (Github_j.release_event_of_string payload)
-      | `Repository ->
-        `Repository (Github_j.repository_event_of_string payload)
-      | `Status ->
-        `Status (Github_j.status_event_of_string payload)
-      | `TeamAdd ->
-        `Unknown ("team_add", parse_json payload)
-      | `Watch ->
-        `Watch (Github_j.watch_event_of_string payload)
-      | `All -> `Unknown ("*", parse_json payload)
-      | `Unknown (cons,_) -> `Unknown (cons, parse_json payload)
+    let parse_event = Organization.Hook.parse_event
 
-    let parse_event_metadata ~payload () =
-      Github_j.event_hook_metadata_of_string payload
+    let parse_event_metadata = Organization.Hook.parse_event_metadata
   end
 
   module Git_obj = struct
@@ -1752,6 +1799,8 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
   end
 
   module Repo = struct
+    module Hook = Hook
+
     open Lwt
 
     let create ?token ?organization ~repo () =

@@ -22,33 +22,15 @@ tags: [
   "git"
 ]
 build: [
-  ["ocaml" "setup.ml" "-configure" "--%{base-unix:enable}%-unix" "--%{js_of_ocaml:enable}%-js" "--prefix" prefix]
-  ["ocaml" "setup.ml" "-build"]
-]
-install: [
-  ["ocaml" "setup.ml" "-install"]
-]
-remove: [
-  ["ocamlfind" "remove" "github"]
+  ["jbuilder" "build" "-p" name "-j" jobs]
 ]
 depends: [
-  "ocamlfind" {build}
-  "ocamlbuild" {build}
-  "tls"
+  "jbuilder" {build}
   "uri" {>= "1.9.0"}
   "cohttp" {>= "0.17.0"}
   "lwt" {>= "2.4.4"}
   "atdgen" {>= "1.10.0"}
   "yojson" {>= "1.2.0"}
   "stringext"
-  "lambda-term"
-  "cmdliner" {>= "0.9.8"}
-  "base-unix"
-]
-depopts: [
-  "js_of_ocaml"
-]
-conflicts: [
-  "js_of_ocaml" {< "2.4.0"}
 ]
 available: [ ocaml-version >= "4.02.3" ]

@@ -1,0 +1,7 @@
+(jbuild_version 1)
+
+(executables
+ ((libraries (cohttp.lwt github.unix cmdliner lambda-term))
+  (public_names (git-gist))
+  (package github-unix)
+  (names (gist))))

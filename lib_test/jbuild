@@ -1,0 +1,10 @@
+(jbuild_version 1)
+
+(executables
+ ((libraries (cohttp.lwt github.unix atdgen stringext))
+  (package github-unix)
+  (names
+   (current_user
+    rwo
+    get_token
+    repo_info))))

@@ -1,0 +1,7 @@
+(jbuild_version 1)
+
+(library
+ ((name github_jsoo)
+  (public_name github-jsoo)
+  (wrapped false)
+  (libraries (github lwt js_of_ocaml cohttp.lwt-core cohttp.js))))

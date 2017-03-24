@@ -1,0 +1,8 @@
+(jbuild_version 1)
+
+(library
+ ((name github_unix)
+  (public_name github.unix)
+  (wrapped false)
+  (modules (github github_cookie_jar))
+  (libraries (lwt.unix cohttp.lwt github bytes))))

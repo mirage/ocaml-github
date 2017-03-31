@@ -1,6 +1,6 @@
 OASISFormat: 0.4
 Name:        github
-Version:     2.2.0
+Version:     2.3.0
 Synopsis:    Github API interface
 Authors:     Anil Madhavapeddy, David Sheets, Andy Ray, Jeff Hammerbacher, Thomas Gazagnaire, Rudi Grinberg, Qi Li, Dave Tucker, Jeremy Yallop
 License:     ISC
@@ -171,6 +171,15 @@ Executable list_issues
   Path:               lib_test
   Build$:             flag(tests)
   MainIs:             issues.ml
+  Custom:             true
+  CompiledObject:     best
+  Install:            false
+  BuildDepends:       cohttp.lwt, github.unix, atdgen
+
+Executable formac
+  Path:               lib_test
+  Build$:             flag(tests)
+  MainIs:             formac.ml
   Custom:             true
   CompiledObject:     best
   Install:            false

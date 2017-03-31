@@ -53,6 +53,7 @@ let t =
     update_pull_title=Some "ocaml-github regression test pull request";
     update_pull_body=Some "ocaml-github pull request body";
     update_pull_state=None;
+    update_pull_base=None;
   }) in
 
   Github.(Monad.(run (

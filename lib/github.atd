@@ -584,7 +584,7 @@ type issue_rename = {
 type repo_issue_event = {
   id: int;
   url: string;
-  actor: linked_user;
+  ?actor: linked_user option;
   event: repo_issues_action;
   created_at: string;
   ?label: base_label option;

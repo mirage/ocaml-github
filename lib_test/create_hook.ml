@@ -38,7 +38,7 @@ let print_hooks label = Github_t.(Github.(Stream.iter (fun hook ->
 
 let make_web_hook_config url secret = Github_t.({
   web_hook_config_url=url;
-  web_hook_config_content_type="json";
+  web_hook_config_content_type=Some "json";
   web_hook_config_insecure_ssl=false;
   web_hook_config_secret=secret;
 })

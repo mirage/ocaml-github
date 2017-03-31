@@ -9,7 +9,7 @@ let t = Github.(Monad.(run (
     let token = Token.of_auth auth in
     prerr_endline (Token.to_string token);
     return ()
-  | Two_factor _ -> embed (fail (Failure "get_token doesn't support 2fa, yet"))
+  | Two_factor _ -> fail (Failure "get_token doesn't support 2fa, yet")
 )))
 
 ;;

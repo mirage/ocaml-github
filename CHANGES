@@ -1,3 +1,9 @@
+2.3.0
+* Changes marked with ! are type changes
+* ! repo_issue_event has changed the actor type to a linked_user option
+  since GitHub sometimes returns a null response.
+* Fix various test cases that were not compiling due to API changes.
+
 2.2.0 (2016-12-10):
 * Add Repo.get_ref (#175 from @samoht)
 * Add Endpoint.Version.t

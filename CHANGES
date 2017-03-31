@@ -1,4 +1,4 @@
-2.3.0
+2.3.0 (2017-03-31):
 * Changes marked with ! are type changes
 * ! repo_issue_event has changed the actor type to a linked_user option
   since GitHub sometimes returns a null response.

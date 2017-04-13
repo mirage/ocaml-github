@@ -1,8 +1,13 @@
-2.3.0 (2017-03-31):
+2.3.0 (2017-04-13):
 * Changes marked with ! are type changes
 * ! repo_issue_event has changed the actor type to a linked_user option
   since GitHub sometimes returns a null response.
 * Fix various test cases that were not compiling due to API changes.
+* Add Issue.timeline_events
+* Add Organization.Hook
+* Expose Hook as Repo.Hook and deprecate Hook
+* Add Repo.Hook.parse_event_metadata
+* Add an optional `media_type` argument to API.get and API.get_stream
 
 2.2.0 (2016-12-10):
 * Add Repo.get_ref (#175 from @samoht)

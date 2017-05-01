@@ -1,7 +1,7 @@
 (jbuild_version 1)
 
 (executables
- ((libraries (cohttp.lwt github.unix cmdliner lambda-term))
+ ((libraries (cohttp.lwt github_unix cmdliner lambda-term))
   (package github-unix)
   (public_names
    (git-create-release

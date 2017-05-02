@@ -262,6 +262,9 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
     let repo_search =
       Uri.of_string (Printf.sprintf "%s/search/repositories" api)
 
+    let repo_search_issues =
+      Uri.of_string (Printf.sprintf "%s/search/issues" api)
+
     let repo_label ~user ~repo ~name =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/labels/%s" api user repo name)
 
@@ -1309,6 +1312,12 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
       |`Created -> "created"
       |`Updated -> "updated"
 
+    type issue_type = [ `Pr | `Issue ]
+    let string_of_issue_type (s:issue_type) =
+      match s with
+      |`Pr -> "pr"
+      |`Issue -> "issue"
+
     type repo_sort = [ `Stars | `Forks | `Updated ]
     let string_of_repo_sort (s:repo_sort) =
       match s with
@@ -1375,6 +1384,50 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
 
     type date = string
 
+    type issue_qualifier = [
+    (*| `In of repo_issue_field list TODO *)
+      | `Author of string
+      | `Assignee of string
+      | `Mentions of string
+      | `Commenter of string
+      | `Involves of string
+      | `Team of string
+    (*| `State of repo_issue_status TODO open or closed? *)
+      | `Label of string
+      | `Without_label of string
+    (*| `No of TODO "certain metadata" TODO *)
+      | `Language of string
+    (*| `Is of certain metadata TODO *)
+      | `Created of date range
+      | `Updated of date range
+      | `Merged of date range
+    (*| `Status of commit status TODO *)
+    (*| `Head | `Base branch TODO *)
+      | `Closed of date range
+    (*| `Comments of quantity? TODO *)
+      | `User of string
+      | `Repo of string
+      | `Project of string
+    ]
+    let string_of_issue_qualifier (x:issue_qualifier) =
+      match x with
+      | `Author a -> "author:"^a
+      | `Assignee a -> "assignee:"^a
+      | `Mentions a -> "mentions:"^a
+      | `Commenter a -> "commenter:"^a
+      | `Involves a -> "involves:"^a
+      | `Team t -> "team:"^t
+      | `Label l -> "label:"^l
+      | `Without_label l -> "-label:"^l
+      | `Language l -> "language:"^l
+      | `Created r -> "created:"^(string_of_range (fun x -> x) r)
+      | `Updated r -> "updated:"^(string_of_range (fun x -> x) r)
+      | `Merged r -> "merged:"^(string_of_range (fun x -> x) r)
+      | `Closed r -> "closed:"^(string_of_range (fun x -> x) r)
+      | `User u -> "user:"^u
+      | `Repo r -> "repo:"^r
+      | `Project p -> "project:"^p
+
     type qualifier = [
       | `In of repo_field list
       | `Size of int range
@@ -1386,7 +1439,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
       | `User of string
       | `Language of string
     ]
-    let string_of_qualifier = function
+    let string_of_qualifier: qualifier -> string = function
       |`In fields ->
         "in:"^(String.concat "," (List.map string_of_repo_field fields))
       |`Size r  -> "size:" ^(string_of_range string_of_int r)
@@ -2086,23 +2139,35 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
   module Search = struct
     open Lwt
 
-    let repos ?token ?sort ?(direction=`Desc) ~qualifiers ~keywords () =
-      let qs = List.rev_map Filter.string_of_qualifier qualifiers in
+    let search uri string_of_qualifier mk
+        ?token ?sort ?(direction=`Desc) ~qualifiers ~keywords () =
+      let qs = List.rev_map string_of_qualifier qualifiers in
       let q = String.concat " " (List.rev_append qs keywords) in
       let sort = match sort with
         | Some sort -> Some (Filter.string_of_repo_sort sort)
         | None -> None
       in
       let direction = Filter.string_of_direction direction in
-      let uri = URI.repo_search in
       let params = [
         "q", q;
         "order",direction;
         "per_page",string_of_int 100;
       ]@(match sort with None -> [] | Some s -> ["sort",s]) in
       API.get_stream ~rate:Search ?token ~params ~uri (fun b ->
-        return [repository_search_of_string b]
+        return [mk b]
       )
+
+    let repos =
+      search
+        URI.repo_search
+        Filter.string_of_qualifier
+        repository_search_of_string
+
+    let issues =
+      search
+        URI.repo_search_issues
+        Filter.string_of_issue_qualifier
+        repository_issue_search_of_string
   end
 
   module Emoji = struct

@@ -19,5 +19,6 @@
  ((name github)
   (public_name github)
   (wrapped false)
+  (flags (:standard -w "@5@8@10@11@12@14@23@24@26@29"))
   (modules (github_s github_core github_j github_t))
   (libraries (cohttp uri cohttp.lwt-core yojson atdgen))))

@@ -3,6 +3,7 @@
 (executables
  ((libraries (cohttp.lwt github_unix cmdliner lambda-term))
   (package github-unix)
+  (flags (:standard -w "@5@8@10@11@12@14@23@24@26@29"))
   (public_names
    (git-create-release
     git-sync-releases

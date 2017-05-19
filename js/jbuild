@@ -4,4 +4,5 @@
  ((name github_jsoo)
   (public_name github-jsoo)
   (wrapped false)
+  (flags (:standard -w "@5@8@10@11@12@14@23@24@26@29"))
   (libraries (github lwt js_of_ocaml cohttp.lwt-core cohttp.js))))

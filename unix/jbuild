@@ -4,5 +4,6 @@
  ((name github_unix)
   (public_name github-unix)
   (wrapped false)
+  (flags (:standard -w "@5@8@10@11@12@14@23@24@26@29"))
   (modules (github github_cookie_jar))
   (libraries (lwt.unix cohttp.lwt github bytes))))

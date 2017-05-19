@@ -29,7 +29,7 @@ let upload_release token user repo tag content_type filename =
   print_endline (sprintf "uploading to release id %Ld" id);
   begin
     Lwt_io.file_length filename >|= Int64.to_int >>= fun len ->
-    let buf = String.create len in
+    let buf = Bytes.create len in
     Lwt_io.with_file ~mode:Lwt_io.input filename
       (fun ic -> Lwt_io.read_into_exactly ic buf 0 len)
     >>= fun () -> return buf

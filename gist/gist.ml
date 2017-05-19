@@ -34,13 +34,12 @@ let pretty_json pretty = if pretty then very_pretty_json else quite_pretty_json
 
 module Passwd = struct
   open Lwt_react
-  open LTerm_style
 
   class read_password term = object(self)
     inherit LTerm_read_line.read_password () as super
     inherit [Zed_utf8.t] LTerm_read_line.term term
 
-    method send_action = function
+    method! send_action = function
       | LTerm_read_line.Break ->
           (* Ignore Ctrl+C *)
           ()
@@ -71,7 +70,7 @@ exception Gist_file_not_found of string
    We could query github for it instead. *)
 let get_auth_token_from_jar auth_id =
   Github_cookie_jar.init () >>= fun jar ->
-  Github_cookie_jar.(get jar auth_id) >>= function
+  Github_cookie_jar.(get jar ~name:auth_id) >>= function
   | Some x -> return x
   | None -> Lwt.fail (Auth_token_not_found "given id not in cookie jar")
 
@@ -151,7 +150,7 @@ let list_user_gists auth_id user pass token_name json pretty username =
 
 (************************************************************************)
 (* Post gists *)
-let post_gist auth_id user pass token_name json pretty new_gist_public new_gist_description files =
+let post_gist auth_id user pass token_name _json _pretty new_gist_public new_gist_description files =
   Lwt_main.run (
     get_auth auth_id user pass token_name >>= fun code ->
     let token = G.Token.of_auth code in
@@ -161,7 +160,11 @@ let post_gist auth_id user pass token_name json pretty new_gist_public new_gist_
       Lwt.return (fname, {Github_t.new_gist_content})
     in
     Lwt_list.map_s contents files >>= fun new_gist_files ->
-    let gist = Github_t.{ new_gist_files; new_gist_description; new_gist_public } in
+    let gist = {
+      Github_t.new_gist_files;
+      new_gist_description;
+      new_gist_public;
+    } in
     M.(run (Gist.create ~token ~gist () >|= G.Response.value)) >>= fun gist ->
     return (describe_gist gist)
   )
@@ -186,7 +189,7 @@ let string_of_opt =
   function Some x -> x
          | None -> ""
 
-let rec comma_sep x =
+let comma_sep x =
   List.fold_left
     (fun a x ->
       match a,x with
@@ -238,7 +241,7 @@ let gist_file_info auth_id user pass token_name json pretty gist_id file =
 (************************************************************************)
 (* gists files *)
 
-let gist_get auth_id user pass token_name json pretty gist_id file_or_dir =
+let gist_get _auth_id _user _pass _token_name _json _pretty _gist_id _file_or_dir =
   ()
 
 (************************************************************************)

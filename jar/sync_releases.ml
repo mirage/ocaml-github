@@ -28,7 +28,7 @@ let sync_releases token src_user src_repo dst_user dst_repo =
   Github.(Monad.(run (
     let releases = Release.for_repo ~token ~user:dst_user ~repo:dst_repo () in
     Stream.to_list releases
-  ))) >>= fun dst ->
+  ))) >>= fun _dst ->
   Github.(Monad.(run (
     let releases = Repo.tags ~token ~user:src_user ~repo:src_repo () in
     Stream.to_list releases

@@ -4,6 +4,7 @@
  ((name github_unix)
   (public_name github-unix)
   (wrapped false)
-  (flags (:standard -w "@5@8@10@11@12@14@23@24@26@29"))
+  (flags (:standard -principal -strict-sequence -g
+                    -warn-error "+1..47-D+49" -w "A-E-41-42-44-48"))
   (modules (github github_cookie_jar))
   (libraries (lwt.unix cohttp.lwt github bytes))))

@@ -15,9 +15,7 @@
  *
  *)
 
-open Lwt
 open Cmdliner
-open Printf
 
 module T = Github_t
 
@@ -32,6 +30,7 @@ let print_repository ({
   repository_stargazers_count;
   repository_language;
   repository_html_url;
+  _
 }) =
   let language = match repository_language with
     | None -> ""
@@ -52,7 +51,8 @@ let search token ?language ?sort keywords =
     let results = Github.Search.repos ~token ?sort ~qualifiers ~keywords () in
     Stream.next results (* TODO: option for count? *)
     >>= function
-    | Some ({ T.repository_search_items; repository_search_total_count }, _) ->
+    | Some ({ T.repository_search_items;
+              repository_search_total_count; _ }, _) ->
       embed (Lwt_io.printf "%d results returned of %d total\n\n"
                (List.length repository_search_items)
                repository_search_total_count)

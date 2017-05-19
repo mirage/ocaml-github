@@ -20,7 +20,7 @@ open Cmdliner
 open Printf
 
 let parse_iso8601_from_github t =
-  (** This parses just a subset of ISO8601 that GitHub returns:
+  (* This parses just a subset of ISO8601 that GitHub returns:
         e.g. 2014-02-21T13:39:04Z *)
   Scanf.sscanf t "%4d-%2d-%2dT%2d:%2d:%2dZ"
     (fun tm_year tm_mon tm_mday tm_hour tm_min tm_sec ->

@@ -24,7 +24,7 @@ let auth cookie = Lwt.(
   Lwt_main.run (
     Github_cookie_jar.init ()
     >>= fun jar ->
-    Github_cookie_jar.get jar cookie
+    Github_cookie_jar.get jar ~name:cookie
     >|= function
     | None ->
       eprintf "Missing cookie: use git-jar to create cookie `%s`.\n%!" cookie;

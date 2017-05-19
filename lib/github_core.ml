@@ -286,7 +286,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
     let pull ~user ~repo ~num =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/pulls/%d" api user repo num)
 
-    let pull_diff_text ~user ~repo ~num =
+    let _pull_diff_text ~user ~repo ~num =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/pull/%d.diff" api user repo num)
 
     let pull_commits ~user ~repo ~num =
@@ -445,7 +445,6 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
     type error =
       | Generic of (C.Response.t * CLB.t)
       | Semantic of C.Code.status_code * Github_t.message
-      | No_response
       | Bad_response of exn
     type request = {
       meth: C.Code.meth; uri: Uri.t;
@@ -459,7 +458,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
     type 'a signal =
       | Request of request * (request -> 'a signal Lwt.t)
       | Response of 'a
-      | Error of error
+      | Err of error
     type 'a t = state -> (state * 'a signal) Lwt.t
 
     let string_of_message = string_of_message
@@ -474,13 +473,12 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
              body_s)
       | Semantic (_,message) ->
         Lwt.return ("GitHub API error: "^string_of_message message)
-      | No_response -> Lwt.return "No response"
       | Bad_response exn ->
         Lwt.return (sprintf "Bad response: %s\n" (Printexc.to_string exn))
 
-    let error err = Error err
+    let error err = Err err
     let response r = Response r
-    let request ?token ?(params=[]) ({uri} as req) reqfn =
+    let request ?token ?(params=[]) ({ uri; _ } as req) reqfn =
       let uri = Uri.add_query_params' uri begin match token with
         | None -> params
         | Some token -> ("access_token", token)::params
@@ -492,7 +490,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
         | None -> hdrs
         | Some ua -> C.Header.prepend_user_agent hdrs ua
 
-    let prepare_request state ({headers; uri} as req) =
+    let prepare_request state ({ headers; uri; _} as req) =
       { req with
         headers=add_ua headers state.user_agent;
         uri=if List.mem_assoc "access_token" (Uri.query req.uri)
@@ -508,20 +506,20 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
         >>= fun r ->
         bind fn (fun state -> Lwt.return (state, r)) state
       | state, Response r -> fn r state
-      | state, ((Error _) as x) -> Lwt.return (state, x)
+      | state, ((Err _) as x) -> Lwt.return (state, x)
 
     let return r = fun state -> Lwt.return (state, Response r)
     let map f m = bind (fun x -> return (f x)) m
 
-    let with_error err = fun state -> Lwt.return (state, Error err)
+    let with_error err = fun state -> Lwt.return (state, Err err)
 
     let initial_state = {user_agent=None; token=None}
 
     let run th = bind return th initial_state >>= function
       | _, Request (_,_) -> Lwt.fail (Failure "Impossible: can't run unapplied request")
       | _, Response r -> Lwt.return r
-      | _, Error (Semantic (status,msg)) -> Lwt.(fail (Message (status,msg)))
-      | _, Error e -> Lwt.(error_to_string e >>= fun err ->
+      | _, Err (Semantic (status,msg)) -> Lwt.(fail (Message (status,msg)))
+      | _, Err e -> Lwt.(error_to_string e >>= fun err ->
                            Printf.eprintf "%s%!" err; fail (Failure err))
 
     let (>>=) m f = bind f m
@@ -565,7 +563,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
 
     let poll_after : (string, float) Hashtbl.t = Hashtbl.create 8
 
-    let update_poll_after uri { C.Response.headers } =
+    let update_poll_after uri { C.Response.headers; _ } =
       let now = Time.now () in
       let poll_limit = match C.Header.get headers "x-poll-interval" with
         | Some interval -> now +. (float_of_string interval)
@@ -575,7 +573,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
       let t_0 = try Hashtbl.find poll_after uri_s with Not_found -> 0. in
       if t_0 < poll_limit then Hashtbl.replace poll_after uri_s poll_limit
 
-    let poll_result uri ({ C.Response.headers } as envelope) =
+    let poll_result uri ({ C.Response.headers; _ } as envelope) =
       let version = Version.of_headers headers in
       update_poll_after uri envelope;
       { uri; version; }
@@ -608,9 +606,9 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
     }
 
     let rec next = Monad.(function
-      | { buffer=[]; refill=None } -> return None
-      | { buffer=[]; refill=Some refill } -> refill () >>= next
-      | { buffer=h::buffer } as s -> return (Some (h, { s with buffer }))
+      | { buffer=[]; refill=None; _ } -> return None
+      | { buffer=[]; refill=Some refill; _ } -> refill () >>= next
+      | { buffer=h::buffer; _ } as s -> return (Some (h, { s with buffer }))
     )
 
     let map f s =
@@ -769,7 +767,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
       }))
       else
         lwt_req req
-        >>= fun ((resp, body) as response) ->
+        >>= fun ((resp, _body) as response) ->
         update_rate_table rate ?token resp;
         let response_code = C.Response.status resp in
         log "Response code %s\n%!" (C.Code.string_of_status response_code);
@@ -794,9 +792,6 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
     (* A simple response pattern that matches on HTTP code equivalence *)
     let code_handler ~expected_code handler =
       (fun (res,_) -> C.Response.status res = expected_code), handler
-
-    (* Convert a request body into a stream *)
-    let realize_body = function None -> None | Some b -> Some (CLB.of_string b)
 
     (* Add the correct mime-type header *)
     let realize_headers ?(media_type="application/vnd.github.v3+json") headers =
@@ -844,7 +839,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
         ~uri Lwt.(fun x -> just_body x >>= fn)
 
     let rec next_link base = Cohttp.Link.(function
-    | { context; arc = { Arc.relation; }; target }::_
+    | { context; arc = { Arc.relation; _ }; target }::_
       when Uri.(equal context empty) && List.mem Rel.next relation ->
       Some (Uri.resolve "" base target)
     | _::rest -> next_link base rest
@@ -852,7 +847,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
     )
 
     let stream_fail_handlers restart fhs =
-      map_fail_handlers Lwt.(fun f (envelope, body) ->
+      map_fail_handlers Lwt.(fun f (_envelope, body) ->
         CLB.to_string body
         >>= f >>= fun buffer ->
         return {
@@ -1009,16 +1004,16 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
       cached_rates ?token ()
       >>= fun rates ->
       let rec get_core_rate = function
-        | { core = None } ->
+        | { core = None; _ } ->
           Monad.map rates_of_resources (request_rate_limit ?token ())
           >>= get_core_rate
-        | { core = Some rate } -> return rate
+        | { core = Some rate; _ } -> return rate
       in
       let rec get_search_rate = function
-        | { search = None } ->
+        | { search = None; _ } ->
           Monad.map rates_of_resources (request_rate_limit ?token ())
           >>= get_search_rate
-        | { search = Some rate } -> return rate
+        | { search = Some rate; _ } -> return rate
       in
       match rate with
       | Core -> get_core_rate rates
@@ -1027,24 +1022,23 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
 
     let get_rate_limit ?token () = Monad.(
       get_rate ?token ()
-      >>= fun { Github_t.rate_limit } -> return rate_limit
+      >>= fun { Github_t.rate_limit; _ } -> return rate_limit
     )
 
     let get_rate_remaining ?token () = Monad.(
       get_rate ?token ()
-      >>= fun { Github_t.rate_remaining } -> return rate_remaining
+      >>= fun { Github_t.rate_remaining; _ } -> return rate_remaining
     )
 
     let get_rate_reset ?token () = Monad.(
       get_rate ?token ()
-      >>= fun { Github_t.rate_reset } -> return rate_reset
+      >>= fun { Github_t.rate_reset; _ } -> return rate_reset
     )
 
     let string_of_message = Monad.string_of_message
 
   end
 
-  open Github_t
   open Github_j
 
   module Rate_limit = struct
@@ -1054,11 +1048,11 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
 
     let for_core ?token () =
       all ?token ()
-      >>= fun { rate_resources_core } -> return rate_resources_core
+      >>= fun { rate_resources_core; _ } -> return rate_resources_core
 
     let for_search ?token () =
       all ?token ()
-      >>= fun { rate_resources_search } -> return rate_resources_search
+      >>= fun { rate_resources_search; _ } -> return rate_resources_search
 
   end
 
@@ -1111,7 +1105,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
       )
 
     let get ?otp ~user ~pass ~id () =
-      let uri = URI.authorization id in
+      let uri = URI.authorization ~id in
       let headers =
         add_otp C.Header.(add_authorization (init ()) (`Basic (user,pass))) otp
       in
@@ -1125,13 +1119,13 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
       )
 
     let delete ?otp ~user ~pass ~id () =
-      let uri = URI.authorization id in
+      let uri = URI.authorization ~id in
       let headers =
         add_otp C.Header.(add_authorization (init ()) (`Basic (user,pass))) otp
       in
       let fail_handlers = [two_factor_auth_handler ()] in
       API.delete ~headers ~uri ~fail_handlers ~expected_code:`No_content
-        (fun body -> return (Result ()))
+        (fun _body -> return (Result ()))
 
     (* Convert a code after a user oAuth into an access token that can
        be used in subsequent requests.
@@ -1140,7 +1134,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
     let of_code ~client_id ~client_secret ~code () =
       let uri = URI.token ~client_id ~client_secret ~code () in
       CL.post uri
-      >>= fun (res, body) ->
+      >>= fun (_res, body) ->
       CLB.to_string body
       >>= fun body ->
       try
@@ -1203,7 +1197,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
 
       let test ?token ~org ~id () =
         let uri = URI.org_hook_test ~org ~id in
-        API.post ?token ~uri ~expected_code:`No_content (fun b -> return ())
+        API.post ?token ~uri ~expected_code:`No_content (fun _b -> return ())
 
       let parse_event ~constr ~payload () =
         let parse_json = function
@@ -1462,7 +1456,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
         ~user ~repo () =
       let params = Filter.([
         "direction", string_of_direction direction;
-        "sort", string_of_milestone_sort sort;
+        "sort", string_of_sort sort;
         "state", string_of_state state ]) in
       API.get_stream ?token ~params ~uri:(URI.repo_milestones ~user ~repo)
         (fun b -> return (milestones_of_string b))
@@ -1533,7 +1527,8 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
       let headers = Cohttp.Header.init_with "content-type" content_type in
       let params = ["name", filename] in
       let uri = URI.upload_release_asset ~user ~repo ~id in
-      API.post ?token ~params ~headers ~body ~uri ~expected_code:`Created (fun b -> return ())
+      API.post ?token ~params ~headers ~body ~uri ~expected_code:`Created
+        (fun _b -> return ())
   end
 
   module Deploy_key = struct
@@ -1685,11 +1680,15 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
 
     let remove_labels ?token ~user ~repo ~num () =
       let uri = URI.issue_labels ~user ~repo ~num in
-      API.delete ?token ~uri ~expected_code:`No_content (fun b -> return ())
+      API.delete ?token ~uri ~expected_code:`No_content (fun _b -> return ())
 
-    let is_issue = function { issue_pull_request = None } -> true | _ -> false
+    let is_issue = function
+      | { issue_pull_request = None; _ } -> true
+      | _ -> false
 
-    let is_pull = function { issue_pull_request = None } -> false | _ -> true
+    let is_pull = function
+      | { issue_pull_request = None; _ } -> false
+      | _ -> true
   end
 
   module Label = struct
@@ -1792,7 +1791,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
 
     let test ?token ~user ~repo ~id () =
       let uri = URI.repo_hook_test ~user ~repo ~id in
-      API.post ?token ~uri ~expected_code:`No_content (fun b -> return ())
+      API.post ?token ~uri ~expected_code:`No_content (fun _b -> return ())
 
     let parse_event = Organization.Hook.parse_event
 
@@ -1823,7 +1822,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
       let body = string_of_new_repo repo in
       let uri = match organization with
         | None -> URI.repos
-        | Some org -> URI.org_repos org
+        | Some org -> URI.org_repos ~org
       in
       API.post ~body ~expected_code:`Created ?token ~uri (fun b ->
         return (repository_of_string b)
@@ -1911,8 +1910,8 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
         (fun b -> return (contributors_of_string b))
 
     let delete ?token ~user ~repo () =
-      let uri = URI.repo user repo in
-      API.delete ?token ~uri ~expected_code:`No_content (fun b -> return ())
+      let uri = URI.repo ~user ~repo in
+      API.delete ?token ~uri ~expected_code:`No_content (fun _b -> return ())
   end
 
   module Stats = struct
@@ -2051,13 +2050,13 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
      * PUT /gists/:id/star *)
     let star ?token ~id () =
       let uri = URI.gist_star ~id in
-      API.put ?token ~uri ~expected_code:`No_content (fun b -> return ())
+      API.put ?token ~uri ~expected_code:`No_content (fun _b -> return ())
 
     (* Unstar a gist https://developer.github.com/v3/gists/#unstar-a-gist
      * DELETE /gists/:id/star *)
     let unstar ?token ~id () =
       let uri = URI.gist_star ~id in
-      API.delete ?token ~uri ~expected_code:`No_content (fun b -> return ())
+      API.delete ?token ~uri ~expected_code:`No_content (fun _b -> return ())
 
     (* Check if a gist is starred https://developer.github.com/v3/gists/#check-if-a-gist-is-starred
      * GET /gists/:id/star
@@ -2080,7 +2079,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
      * DELETE /gists/:id *)
     let delete ?token ~id () =
       let uri = URI.gist ~id in
-      API.delete ?token ~uri ~expected_code:`No_content (fun b -> return ())
+      API.delete ?token ~uri ~expected_code:`No_content (fun _b -> return ())
   end
 
   module Search = struct

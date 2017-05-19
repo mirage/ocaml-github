@@ -19,6 +19,11 @@
  ((name github)
   (public_name github)
   (wrapped false)
-  (flags (:standard -w "@5@8@10@11@12@14@23@24@26@29"))
+  #| 27 and 32 should be enabled once
+     https://github.com/janestreet/jbuilder/issues/61 is done
+   |#
+  (flags (:standard -principal -strict-sequence -g
+                    -warn-error "+1..47-D+49"
+                    -w "A-E-41-42-44-48" -w "-27-32"))
   (modules (github_s github_core github_j github_t))
   (libraries (cohttp uri cohttp.lwt-core yojson atdgen))))

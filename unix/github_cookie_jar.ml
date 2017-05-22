@@ -33,7 +33,7 @@ let jar_path { jar_path } = jar_path
 
 let file_kind_match path ~reg ~dir ~other = Lwt_unix.(
   stat path
-  >>= fun { st_kind } -> match st_kind with
+  >>= fun { st_kind; _ } -> match st_kind with
     | S_REG -> reg ()
     | S_DIR -> dir ()
     | S_CHR | S_BLK | S_LNK | S_FIFO | S_SOCK -> other ()
@@ -120,7 +120,7 @@ let delete jar ~name =
 (* Read a JSON auth file in and parse it *)
 let read_auth_file { jar_path } name =
   let fname = Filename.concat jar_path name in
-  let { Unix.st_perm } = Unix.stat fname in
+  let { Unix.st_perm; _ } = Unix.stat fname in
   let safe_perm = 0o7770 land st_perm in
   begin if safe_perm <> st_perm
     then Unix.chmod fname safe_perm
@@ -156,7 +156,7 @@ let get_all ({ jar_path } as jar) =
   in traverse ""
 
 (* Get one cookie by name *)
-let get ({ jar_path } as jar) ~name =
+let get jar ~name =
   catch (fun () ->
     read_auth_file jar name
     >>= fun auth ->

@@ -1,0 +1,29 @@
+(jbuild_version 1)
+
+(rule
+ ((targets (github_t.ml github_t.mli))
+  (deps    (github.atd))
+  (action  (run atdgen -t ${<}))))
+
+(rule
+ ((targets (github_j.ml github_j.mli))
+  (deps    (github.atd))
+  (action  (run atdgen -j ${<}))))
+
+(rule
+ ((targets (github_s.ml))
+   (deps   (github_s.mli))
+   (action (copy-and-add-line-directive ${<} ${@}))))
+
+(library
+ ((name github)
+  (public_name github)
+  (wrapped false)
+  #| 27 and 32 should be enabled once
+     https://github.com/janestreet/jbuilder/issues/61 is done
+   |#
+  (flags (:standard -principal -strict-sequence -g
+                    -warn-error "+1..47-D+49"
+                    -w "A-E-41-42-44-48" -w "-27-32"))
+  (modules (github_s github_core github_j github_t))
+  (libraries (cohttp uri cohttp.lwt-core yojson atdgen))))

@@ -15,7 +15,6 @@
  *
  *)
 
-open Lwt
 open Cmdliner
 open Printf
 
@@ -24,7 +23,7 @@ module T = Github_t
 let ask_github fn = Github.(Monad.run (fn ()))
 
 let string_of_labels labels =
-  let names = List.map (fun { T.label_name } -> label_name) labels in
+  let names = List.map (fun { T.label_name; _ } -> label_name) labels in
   String.concat ", " names
 
 let print_issue user repo issue =
@@ -36,6 +35,7 @@ let print_issue user repo issue =
     issue_state;
     issue_created_at;
     issue_closed_at;
+    _
   } = issue in
   printf "%s/%s#%d %s\n" user repo issue_number issue_title;
   printf "  Labels: %s\n" (string_of_labels issue_labels);
@@ -60,8 +60,10 @@ let list_issues token repos ~all ~closed ~prs ~issues =
       let issues_s = Issue.for_repo ~token ~state ~user ~repo () in
       Stream.to_list issues_s (* TODO: bound?!?! *)
       >>= fun list -> return (List.iter (fun i -> match i with
-        | { T.issue_pull_request=None } when issues -> print_issue user repo i
-        | { T.issue_pull_request=Some _ } when prs -> print_issue user repo i
+        | { T.issue_pull_request = None; _ } when issues ->
+          print_issue user repo i
+        | { T.issue_pull_request = Some _; _ } when prs ->
+          print_issue user repo i
         | _ -> ()
       ) list))))
   ) repos

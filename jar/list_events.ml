@@ -72,11 +72,11 @@ let print_event event =
   | `CommitComment { commit_comment_event_comment = comment } ->
     printf "CommitComment on %s/%s %s\n%!"
       user repo comment.commit_comment_commit_id
-  | `Create { create_event_ref = `Repository } ->
+  | `Create { create_event_ref = `Repository; _ } ->
     printf "CreateEvent on repository %s/%s\n%!" user repo
-  | `Create { create_event_ref = `Branch branch } ->
+  | `Create { create_event_ref = `Branch branch; _ } ->
     printf "CreateEvent on branch %s/%s %s\n%!" user repo branch
-  | `Create { create_event_ref = `Tag tag } ->
+  | `Create { create_event_ref = `Tag tag; _ } ->
     printf "CreateEvent on tag %s/%s %s\n%!" user repo tag
   | `Delete { delete_event_ref = `Repository } ->
     printf "DeleteEvent on repository %s/%s\n%!" user repo
@@ -86,15 +86,16 @@ let print_event event =
     printf "DeleteEvent on tag %s/%s %s\n%!" user repo tag
   | `Download -> printf "DownloadEvent deprecated\n%!"
   | `Follow -> printf "FollowEvent deprecated\n%!"
-  | `Fork { fork_event_forkee = { repository_full_name } } ->
+  | `Fork { fork_event_forkee = { repository_full_name; _ } } ->
     printf "ForkEvent on %s/%s to %s\n%!" user repo repository_full_name
   | `ForkApply -> printf "ForkApplyEvent deprecated\n%!"
   | `Gist -> printf "GistEvent deprecated\n%!"
   | `Gollum { gollum_event_pages } ->
     printf "GollumEvent on %s/%s: %s\n%!" user repo
-      (String.concat ", " (List.map (fun { wiki_page_title; wiki_page_action } ->
-        (string_of_wiki_page_action wiki_page_action)^" "^wiki_page_title
-       ) gollum_event_pages))
+      (String.concat ", "
+         (List.map (fun { wiki_page_title; wiki_page_action; _ } ->
+            (string_of_wiki_page_action wiki_page_action)^" "^wiki_page_title
+          ) gollum_event_pages))
   | `IssueComment {
     issue_comment_event_action;
     issue_comment_event_issue = issue;
@@ -103,7 +104,7 @@ let print_event event =
     printf "IssueCommentEvent %s on %s: %s\n%!"
       (string_of_issue_comment_event_action issue_comment_event_action)
       (string_of_issue user repo issue) comment.issue_comment_body
-  | `Issues { issues_event_action = action; issues_event_issue = issue } ->
+  | `Issues { issues_event_action = action; issues_event_issue = issue; _ } ->
     printf "IssuesEvent on %s: %s\n%!"
       (string_of_issue user repo issue) (string_of_issues_action action)
   | `Member { member_event_action; member_event_member = member } ->
@@ -114,7 +115,7 @@ let print_event event =
     printf "PublicEvent on %s/%s\n%!" user repo
   | `PullRequest {
     pull_request_event_action = action;
-    pull_request_event_number;
+    pull_request_event_number; _
   } ->
     printf "PullRequestEvent on %s: %s\n%!"
       (string_of_pull user repo pull_request_event_number)
@@ -128,7 +129,7 @@ let print_event event =
       (string_of_pull_request_review_comment_action action)
       (string_of_pull user repo pull.pull_number)
       comment.pull_request_review_comment_body
-  | `Push { push_event_ref; push_event_size } ->
+  | `Push { push_event_ref; push_event_size; _ } ->
     printf "PushEvent on %s/%s ref %s of %d commits\n%!"
       user repo push_event_ref push_event_size
   | `Release { release_event_action; release_event_release } ->
@@ -138,13 +139,13 @@ let print_event event =
   | `Repository {
     repository_event_action;
     repository_event_repository = {
-      repository_full_name;
-    };
+      repository_full_name; _
+    }
   } ->
     printf "RepositoryEvent %s on %s\n%!"
       (Github_j.string_of_repository_action repository_event_action)
       repository_full_name
-  | `Status { status_event_state; status_event_sha } ->
+  | `Status { status_event_state; status_event_sha; _ } ->
     printf "StatusEvent on %s/%s: %s %s\n%!" user repo status_event_sha
       (string_of_status_state status_event_state)
   | `Watch { watch_event_action } ->

@@ -18,7 +18,6 @@
 
 open Lwt
 open Cmdliner
-open Printf
 
 let create_release ~token
       ~user ~repo ~tag ~release_name ~target_commitish ~body:new_release_body
@@ -48,7 +47,7 @@ let create_release ~token
       Release.upload_asset
         ~token ~user ~repo ~id ~filename ~content_type ~body ()
       >|= Response.value
-    ))) >>= fun a ->
+    ))) >>= fun () ->
     return_unit) assets
 
 let run token user repo tag release_name target_commitish body assets

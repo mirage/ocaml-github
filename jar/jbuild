@@ -1,0 +1,27 @@
+(jbuild_version 1)
+
+(executables
+ ((libraries (cohttp.lwt github_unix cmdliner lambda-term))
+  (package github-unix)
+  (flags (:standard -principal -strict-sequence -g
+                    -warn-error "+1..47-D+49" -w "A-E-41-42-44-48"))
+  (public_names
+   (git-create-release
+    git-sync-releases
+    git-upload-release
+    git-list-releases
+    git-list-events
+    git-list-issues
+    git-jar
+    git-search
+    git-listen-events))
+  (names
+   (create_release
+    sync_releases
+    upload_release
+    list_releases
+    list_events
+    list_issues
+    jar
+    search
+    listen_events))))

@@ -834,7 +834,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
       let fail_handlers =
         map_fail_handlers Lwt.(fun f x -> just_body x >>= f) fail_handlers
       in
-      idempotent `GET ?rate ~fail_handlers ~expected_code 
+      idempotent `GET ?rate ~fail_handlers ~expected_code
         ?media_type ?headers ?token ?params
         ~uri Lwt.(fun x -> just_body x >>= fn)
 

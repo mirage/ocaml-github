@@ -2,7 +2,6 @@
 
 (library
  ((name github_jsoo)
-  (public_name github-jsoo)
   (wrapped false)
   (flags (:standard -principal -strict-sequence -g
                     -warn-error "+1..47-D+49" -w "A-E-41-42-44-48"))

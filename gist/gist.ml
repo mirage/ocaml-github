@@ -123,7 +123,7 @@ let login auth_id user pass token_name json pretty =
 (* List gists *)
 
 let describe_gist g =
-  printf "%.20s" g.gist_id;
+  printf "%20s" g.gist_id;
   (match g.gist_description with
   | Some(d) when d <> "" -> printf " '%s'" d
   | _ -> ());

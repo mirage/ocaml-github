@@ -343,4 +343,3 @@ let cmds = [list_your_gists; list_user_gists; login; gist_info; gist_file_info; 
 let () =
   match Term.eval_choice default_cmd cmds with
   | `Error _ -> exit 1 | _ -> exit 0
-

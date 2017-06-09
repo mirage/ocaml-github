@@ -1252,4 +1252,3 @@ type timeline_event = {
 } <ocaml field_prefix="timeline_event_">
 
 type timeline_events = timeline_event list
-

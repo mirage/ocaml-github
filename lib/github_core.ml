@@ -289,6 +289,12 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
     let _pull_diff_text ~user ~repo ~num =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/pull/%d.diff" api user repo num)
 
+    let pull_comments ~user ~repo ~num =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/pulls/%d/comments" api user repo num)
+
+    let pull_comment ~user ~repo ~num ~id =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/pulls/%d/comments/%d" api user repo num id)
+
     let pull_commits ~user ~repo ~num =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/pulls/%d/commits" api user repo num)
 
@@ -1425,6 +1431,18 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
       let uri = URI.pull ~user ~repo ~num in
       let body = string_of_update_pull update_pull in
       API.patch ?token ~body ~uri ~expected_code:`OK (fun b -> return (pull_of_string b))
+
+    let comments ?token ~user ~repo ~num () =
+      let uri = URI.pull_comments ~user ~repo ~num in
+      API.get_stream ?token ~uri (fun b -> return (pull_comments_of_string b))
+
+    let add_comment ?token ~user ~repo ~num ~body () =
+      let uri = URI.pull_comments ~user ~repo ~num in
+      API.post ?token ~body ~uri ~expected_code:`Created (fun b -> return (pull_comment_of_string b))
+
+    let update_comment ?token ~user ~repo ~num ~id ~body () =
+      let uri = URI.pull_comment ~user ~repo ~num ~id in
+      API.patch ?token ~body ~uri ~expected_code:`Created (fun b -> return (pull_comment_of_string b))
 
     let commits ?token ~user ~repo ~num () =
       let uri = URI.pull_commits ~user ~repo ~num in

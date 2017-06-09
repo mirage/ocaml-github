@@ -1084,6 +1084,30 @@ module type Github = sig
     (** [commits ~user ~repo ~num ()] is the stream of commits
         included in pull request [user]/[repo]#[num]. *)
 
+    val comments:
+      ?token:Token.t ->
+      user:string ->
+      repo:string ->
+      num:int -> unit -> Github_t.pull_comment Stream.t
+    (** [comments ~user ~repo ~num ()] is the stream of comments
+        associated with pull request [user]/[repo]#[num]. *)
+
+    val add_comment:
+      ?token:Token.t ->
+      user:string ->
+      repo:string ->
+      num:int -> body:string -> unit -> Github_t.pull_comment Response.t Monad.t
+    (** [add_comment ~user ~repo ~num ~body ()] add a new comment to
+        pull request [user]/[repo]#[num] containing [body]. *)
+
+    val update_comment:
+      ?token:Token.t ->
+      user:string ->
+      repo:string ->
+      num:int -> id:int -> body:string -> unit -> Github_t.pull_comment Response.t Monad.t
+    (** [update_comment ~user ~repo ~num ~id ~body ()] update the [id]-nth
+        comment on pull request [user]/[repo]#[num] with [body]. *)
+
     val files :
       ?token:Token.t ->
       user:string ->

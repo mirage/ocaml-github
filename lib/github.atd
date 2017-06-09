@@ -287,6 +287,12 @@ type issue_comment = {
 
 type issue_comments = issue_comment list
 
+type pull_comment = {
+  inherit comment
+} <ocaml field_prefix="pull_comment_">
+
+type pull_comments = pull_comment list
+
 type new_issue_comment = {
   body: string;
 } <ocaml field_prefix="new_issue_comment_">

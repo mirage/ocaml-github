@@ -13,7 +13,7 @@
 (rule
  ((targets (github_s.ml))
    (deps   (github_s.mli))
-   (action (copy-and-add-line-directive ${<} ${@}))))
+   (action (copy# ${<} ${@}))))
 
 (library
  ((name github)

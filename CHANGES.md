@@ -1,5 +1,6 @@
 ## 2.4.0 (2017-07-03):
 * Port to Jbuilder (#202 by @rgrinberg @dsheets @samoht)
+* Minimum supported OCaml version is now 4.03.0 or higher.
 
 ## 2.3.0 (2017-04-13):
 * Changes marked with ! are type changes

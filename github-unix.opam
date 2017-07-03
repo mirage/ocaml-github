@@ -1,6 +1,4 @@
 opam-version: "1.2"
-name: "github-unix"
-version: "3.0.0"
 maintainer: "sheets@alum.mit.edu"
 authors: [
   "Anil Madhavapeddy"

@@ -1,5 +1,19 @@
-## 2.4.0 (2017-07-03):
-* Port to Jbuilder (#202 by @rgrinberg @dsheets @samoht)
+## 3.0.0 (2017-07-03):
+
+Port to Jbuilder (#202 by @rgrinberg @dsheets @samoht). This
+splits up the `opam` packages into three separate ones:
+
+- `github`: the `github_s`, `github_core`, `github_j` and `github_t` modules.
+- `github-unix`: the `Github` and `Github_cookie_jar` modules.
+- `github-jsoo`: the js_of_ocaml `Github_js` module.
+
+Tools that depended on github-unix previously will now need to 
+adjust their `opam` files to depend on the `github-[unix|jsoo]`
+packages, and should also to rename `github.unix` to `github-unix`
+and `github.js` to `github-jsoo`.  However, transitional packages
+are available for the older findlib names, so you only need to
+immediately rename your `opam` files for the moment.
+
 * Minimum supported OCaml version is now 4.03.0 or higher.
 
 ## 2.3.0 (2017-04-13):

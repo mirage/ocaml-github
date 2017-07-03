@@ -1,4 +1,4 @@
-# GitHub APIv3 OCaml Library
+## ocaml-github: GitHub APIv3 OCaml Library
 
 [![Build Status](https://travis-ci.org/mirage/ocaml-github.svg)](https://travis-ci.org/mirage/ocaml-github)
 [![docs](https://img.shields.io/badge/doc-online-blue.svg)](https://mirage.github.io/ocaml-github/)

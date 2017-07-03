@@ -1,14 +1,5 @@
 *.swp
 _build/
-setup.data
-setup.log
-setup.bin
-*.docdir
-*.native
-*.byte
-*.bak
-lib_test/config.ml
-lib_test/test_javascript.js
-*~
 .merlin
 *.install
+lib_test/config.ml

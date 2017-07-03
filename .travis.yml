@@ -7,16 +7,15 @@ script: bash ./.travis-docker.sh
 env:
  global:
    - REVDEPS=true
-   - PINS="github.dev:. github-unix.dev:. github-jsoo.dev:."
+   - PINS="github-unix:. github-jsoo:."
+   - DEPOPTS="github-unix github-jsoo"
  matrix:
-   - DISTRO=debian-stable OCAML_VERSION=4.02.3 PACKAGE="github"
-   - DISTRO=debian-stable OCAML_VERSION=4.02.3 PACKAGE="github-jsoo"
-   - DISTRO=debian-stable OCAML_VERSION=4.02.3 PACKAGE="github-unix"
-   - DISTRO=debian-testing OCAML_VERSION=4.02.3 PACKAGE="github-unix"
+   - DISTRO=debian-stable OCAML_VERSION=4.04.2 PACKAGE="github"
+   - DISTRO=debian-testing OCAML_VERSION=4.04.2 PACKAGE="github-unix"
    - DISTRO=debian-unstable OCAML_VERSION=4.04.0 PACKAGE="github-unix"
-   - DISTRO=ubuntu-12.04 OCAML_VERSION=4.02.3 PACKAGE="github-unix"
+   - DISTRO=ubuntu-12.04 OCAML_VERSION=4.04.2 PACKAGE="github-unix"
    - DISTRO=ubuntu-16.04 OCAML_VERSION=4.03.0 PACKAGE="github-unix"
-   - DISTRO=centos-6 OCAML_VERSION=4.02.3 PACKAGE="github-unix"
-   - DISTRO=centos-7 OCAML_VERSION=4.02.3 PACKAGE="github-unix"
-   - DISTRO=fedora-24 OCAML_VERSION=4.02.3 PACKAGE="github-unix"
-   - DISTRO=alpine-3.4 OCAML_VERSION=4.03.0 PACKAGE="github-unix"
+   - DISTRO=centos-6 OCAML_VERSION=4.04.2 PACKAGE="github-unix"
+   - DISTRO=centos-7 OCAML_VERSION=4.04.2 PACKAGE="github-unix"
+   - DISTRO=fedora-25 OCAML_VERSION=4.04.2 PACKAGE="github-unix"
+   - DISTRO=alpine OCAML_VERSION=4.03.0 PACKAGE="github-unix"

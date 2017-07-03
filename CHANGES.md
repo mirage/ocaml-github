@@ -1,4 +1,22 @@
-2.3.0 (2017-04-13):
+## 3.0.0 (2017-07-03):
+
+Port to Jbuilder (#202 by @rgrinberg @dsheets @samoht). This
+splits up the `opam` packages into three separate ones:
+
+- `github`: the `github_s`, `github_core`, `github_j` and `github_t` modules.
+- `github-unix`: the `Github` and `Github_cookie_jar` modules.
+- `github-jsoo`: the js_of_ocaml `Github_js` module.
+
+Tools that depended on github-unix previously will now need to 
+adjust their `opam` files to depend on the `github-[unix|jsoo]`
+packages, and should also to rename `github.unix` to `github-unix`
+and `github.js` to `github-jsoo`.  However, transitional packages
+are available for the older findlib names, so you only need to
+immediately rename your `opam` files for the moment.
+
+* Minimum supported OCaml version is now 4.03.0 or higher.
+
+## 2.3.0 (2017-04-13):
 * Changes marked with ! are type changes
 * ! repo_issue_event has changed the actor type to a linked_user option
   since GitHub sometimes returns a null response.
@@ -9,7 +27,7 @@
 * Add Repo.Hook.parse_event_metadata
 * Add an optional `media_type` argument to API.get and API.get_stream
 
-2.2.0 (2016-12-10):
+## 2.2.0 (2016-12-10):
 * Add Repo.get_ref (#175 from @samoht)
 * Add Endpoint.Version.t
 * Add Stream.since
@@ -17,11 +35,11 @@
 * Add Monad.catch
 * Add Monad.fail
 
-2.1.0 (2016-11-03):
+## 2.1.0 (2016-11-03):
 * Changes marked with ! are type changes
 * ! push_event_hook_head_commit field added
 
-2.0.3 (2016-09-30):
+## 2.0.3 (2016-09-30):
 * Changes marked with ! are type changes
 * ! repo_issue_event_label and repo_issues_event_label have changed type
   from label option to base_label option as the GitHub APIs for Issue
@@ -29,7 +47,7 @@
   url field
 * base_label type added (label without the url field)
 
-2.0.2 (2016-09-26):
+## 2.0.2 (2016-09-26):
 * Changes marked with ! are type changes
 * ! Issue.remove_label now returns a label list Response.t Monad.t like
   the other issue label modification functions because GitHub does not
@@ -39,14 +57,14 @@
   repo). Because any previous user of the API would have immediately
   encountered this exception, this is a patch release.
 
-2.0.1 (2016-09-23):
+## 2.0.1 (2016-09-23):
 * Changes marked with ! are type changes
 * ! web_hook_config_content_type field is now optional because GitHub
   does not appear to byte-wise validate the field and some web hook
   users (e.g. CircleCI) set a `content-type` field rather than a
   `content_type` field.
 
-2.0.0 (2016-09-21):
+## 2.0.0 (2016-09-21):
 * Changes marked with ! are type changes
 * ! Fix Event.for_repo_issues and rename to Issue.events_for_repo
   (#107 from @yallop)
@@ -111,7 +129,7 @@
 * Add Issue.events
 * push_event_before field added
 
-1.1.0 (2016-06-20):
+## 1.1.0 (2016-06-20):
 * Add new_status_context and status_context fields (#88)
 * Add setting the jar cookie by the `GH_COOKIE` env var (#100 by @rgrinberg)
 * Remove camlp4 as a build time dependency (#99, #104, #106 by @rgrinberg)
@@ -132,7 +150,7 @@
 * Add `git-gist create [--public] --descr <descr> <file1> <fileN>` to
   upload new gists.
 
-1.0.0 (2015-06-01):
+## 1.0.0 (2015-06-01):
 * Changes marked with ! are type changes (not including field additions)
 * ! Monad.bind now accepts a function first and then a Monad.t
 * ! API.{get,post,delete,patch,put} now take optional fail_handlers
@@ -403,7 +421,7 @@
 * events type added
 * hook_config type added
 
-0.9.4 (2014-12-18):
+## 0.9.4 (2014-12-18):
 * Add bindings for organisation teams and repositories (#45).
 * Use `Bytes` instead of `String` for future `safe-string` support.
 * Use the Cohttp 0.14.0 API in the test cases and make them optional
@@ -411,57 +429,57 @@
 * Add a `--json` option to `git-list-releases` so that it can emit
   the release information in JSON rather than Markdown.
 
-0.9.3 (2014-11-28):
+## 0.9.3 (2014-11-28):
 * Add `repo_branches` and `branches` query functions (#44 from Jeff Hammerbacher).
 * Improve `opam` 1.2 metadata.
 
-0.9.2 (2014-11-09):
+## 0.9.2 (2014-11-09):
 * Better log error messages (#39).
 * Tweak Makefile to build JavaScript version by default if `js_of_ocaml` is installed.
 
-0.9.1 (2014-11-04):
+## 0.9.1 (2014-11-04):
 * Mark `published_at` and `created_at` fields in Releases to be optional,
   as they may not be set in the case of draft tags.
 
-0.9.0 (2014-11-02):
+## 0.9.0 (2014-11-02):
 * Add `Jar_cli` module for use by applications that use the Git Jar (#34).
 * Add bindings to the Gist APIs for storing text fragments (#36).
 * Add a JavaScript port, using Cohttp and js_of_ocaml (#36).
 * Build `ocamldoc` HTML documentation by default.
 
-0.8.6 (2014-08-10):
+## 0.8.6 (2014-08-10):
 * Fix `pull_action_type` `synchronize` tag typo (#33 from Philipp Gesang).
 * Add a `git create-release` to create a GitHub release, including binary assets
   (#32 from Markus Mottl).
 
-0.8.5 (2014-05-08):
+## 0.8.5 (2014-05-08):
 * The `master_branch` field in the `repo` is actually optional, to fix the schema.
 
-0.8.4 (2014-04-26):
+## 0.8.4 (2014-04-26):
 * Add `git list-releases` to list releases in sorted Markdown format.
 
-0.8.3 (2014-04-13):
+## 0.8.3 (2014-04-13):
 * Add `git sync-releases` to copy release metadata between GitHub repos.
 * Add `git upload-release` to upload a binary file to a GitHub release tag.
 
-0.8.2 (2014-04-01):
+## 0.8.2 (2014-04-01):
 * Remove use of `Re_str` to add POSIX thread safety.
 * Add deployment key support in the `Deploy_key` module.
 
-0.8.1 (2014-03-07):
+## 0.8.1 (2014-03-07):
 * Sync to latest GitHub scopes API.
 
-0.8.0 (2014-03-02):
+## 0.8.0 (2014-03-02):
 * Port to cohttp.0.10.x interfaces.
 * Make the `note` field in oAuth token creation mandatory to reflect GitHub API.
 * Pull requests are now allowed to have `null` bodys (#31).
 
-0.7.1 (2014-02-28):
+## 0.7.1 (2014-02-28):
 * Log response bodies in the event of an API parsing failure. (#29)
 * Expose `log_active` as a reference so it can be used from the toplevel. (#30)
 * Add `Github.URI.pull_raw_diff` to point to the location of a pull request diff.
 
-0.7.0 (2014-01-03):
+## 0.7.0 (2014-01-03):
 * Add a User.repos call to list a users repositories.
 * Change repo type such that the field 'pushed_at' is now an option type.
 * Accept optional page argument in Pull, Milestone, and Issue.
@@ -471,13 +489,13 @@
 * Regenerate build files with OASIS 0.4.1.
 * OCamldoc improvements for the `GitHub` module.
 
-0.6.1 (2013-06-21):
+## 0.6.1 (2013-06-21):
 * Abstract `Github_cookie_jar.t` and add `Github_cookie_jar.jar_path` accessor.
 
-0.6.0 (2013-05-24):
+## 0.6.0 (2013-05-24):
 * Update to the Cohttp-0.9.8 interface.
 
-0.5.0 (2013-05-10):
+## 0.5.0 (2013-05-10):
 * Force `-j-std` to ATDgen to always use standards-compliant JSON (#11).
 * Rename `Github.Issues` to `Github.Issue` to parallel other submodules.
 * Rename `Github.Issue.edit` to `Github.Issue.update` to parallel other CRUD interfaces.
@@ -496,17 +514,17 @@
 * Support GitHub cookie jar names with slashes in.
 * Change the signature of `Github_cookie_jar.init` from `... -> unit` to `... -> unit Lwt.t`.
 
-0.4.3 (2013-01-14):
+## 0.4.3 (2013-01-14):
 * Add filters and sort order parameters for `Issues` and `Milestones` for a repository.
 
-0.4.2 (2012-12-29):
+## 0.4.2 (2012-12-29):
 * Add a `redirect_uri` option to `URI.authorize`, to permit the redirection URL to be parameterizable.
 * Add `User.current_info` and `User.info` to retrieve information about the logged in user, or a public one.
 * Add `Issues.edit` to patch an existing issue.
 * Correct the type of `Issues.milestone` to be an integer.
 * `Issues.labels` is now a `string list`, instead of a `string list option` (with the empty list denoting `None`).
 
-0.4.1 (2012-12-27):
+## 0.4.1 (2012-12-27):
 * Add `Github.Issues.comments` to retrieve issue comments, and an `issue_comment`
   type in the ATD specification for the returned value.
 * Add `Github.Issues.create_comment` to add a new issue comment.
@@ -514,7 +532,7 @@
 * Create a default `lib_test/config.ml` if one doesnt exist (from the template
   in `lib_test/config.ml.in`.
 
-0.4.0 (2012-12-25):
+## 0.4.0 (2012-12-25):
 * Add a `git-jar` command which provides a convenient command-line interface
   to list, create and save tokens.
 * Add a `github.unix` subpackage which provides a `Github_cookie_jar` module
@@ -525,17 +543,17 @@
  `Token.create` for constructing them. The API also includes support for adding
   notes and URLs, which are stored on the Github side.
 
-0.3.3 (2012-12-18):
+## 0.3.3 (2012-12-18):
 * Add `Repo.info` to retrieve repository metadata.
 
-0.3.2 (2012-12-14):
+## 0.3.2 (2012-12-14):
 * Add ATD descriptions for commits, tags, author info, and repo tags.
 * Add API calls to retrieve tags, dates and refs.
 
-0.3.1 (2012-10-14):
+## 0.3.1 (2012-10-14):
 * Support PREFIX during build for installation prefix.
 * Adapt to uri-1.3.3 interface (which now supports multi-value
   queries, as per the RFC).
 
-0.3.0 (2012-09-11):
+## 0.3.0 (2012-09-11):
 * Initial public release.

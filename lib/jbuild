@@ -8,7 +8,7 @@
 (rule
  ((targets (github_j.ml github_j.mli))
   (deps    (github.atd))
-  (action  (run atdgen -j ${<}))))
+  (action  (run atdgen -j -j-std ${<}))))
 
 (rule
  ((targets (github_s.ml))

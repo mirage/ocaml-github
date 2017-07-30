@@ -1,7 +1,7 @@
 (jbuild_version 1)
 
 (executables
- ((libraries (cohttp.lwt github_unix atdgen stringext))
+ ((libraries (cohttp-lwt-unix github_unix atdgen stringext))
   (flags (:standard -principal -strict-sequence -g
                     -warn-error "+1..47-D+49" -w "A-E-41-42-44-48"))
   (names

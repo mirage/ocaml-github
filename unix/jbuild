@@ -7,4 +7,4 @@
   (flags (:standard -principal -strict-sequence -g
                     -warn-error "+1..47-D+49" -w "A-E-41-42-44-48"))
   (modules (github github_cookie_jar))
-  (libraries (lwt.unix cohttp.lwt github bytes))))
+  (libraries (lwt.unix cohttp-lwt-unix github bytes))))

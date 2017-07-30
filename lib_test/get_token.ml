@@ -1,6 +1,3 @@
-open Lwt
-open Printf
-
 let t = Github.(Monad.(run (
   let note = "get_token via ocaml-github" in
   Token.create ~user:Config.user ~pass:Config.pass ~note ()

@@ -41,7 +41,7 @@ let download_hour_file file_name =
   if not (Code.is_success (Code.code_of_status status))
   then fail (Failure (sprintf "Retrieving %s got status %s" uri_s status_s))
   else Lwt_io.(with_file ~mode:output gz_name (fun oc ->
-    Lwt_stream.iter_s (write oc) (Cohttp_lwt_body.to_stream body)
+    Lwt_stream.iter_s (write oc) (Cohttp_lwt.Body.to_stream body)
   )) >>= fun () ->
     let gunzip = sprintf "gunzip %s" gz_name in
     Lwt_unix.system gunzip

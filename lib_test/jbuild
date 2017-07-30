@@ -9,3 +9,16 @@
     rwo
     get_token
     repo_info))))
+
+(rule
+ ((targets (config.ml))
+  (deps (config.ml.in))
+  (action (copy ${<} ${@}))))
+
+(alias
+ ((name DEFAULT)
+  (deps
+   (current_user.exe
+    rwo.exe
+    get_token.exe
+    repo_info.exe))))

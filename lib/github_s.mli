@@ -938,68 +938,6 @@ module type Github = sig
         data are not cached yet *)
   end
 
-  (** The [Hook] module provides access to GitHub's
-      {{:https://developer.github.com/v3/repos/hooks/}webhooks API}
-      which lets you manage a repository's post-receive hooks.
-      @deprecated in 2.3 to be removed by 3.0, use Repo.Hook instead *)
-  module Hook : sig
-    val for_repo :
-      ?token:Token.t ->
-      user:string ->
-      repo:string -> unit -> Github_t.hook Stream.t
-    (** [for_repo ~user ~repo ()] is a stream of hooks for repo
-        [user]/[repo]. *)
-
-    val get :
-      ?token:Token.t ->
-      user:string ->
-      repo:string -> id:int64 -> unit -> Github_t.hook Response.t Monad.t
-    (** [get ~user ~repo ~id ()] is hook [id] for repo [user]/[repo]. *)
-
-    val create :
-      ?token:Token.t ->
-      user:string ->
-      repo:string ->
-      hook:Github_t.new_hook -> unit -> Github_t.hook Response.t Monad.t
-    (** [create ~user ~repo ~hook ()] is a newly created post-receive
-        hook for repo [user]/[repo] as described by [hook]. *)
-
-    val update :
-      ?token:Token.t ->
-      user:string ->
-      repo:string ->
-      id:int64 ->
-      hook:Github_t.update_hook -> unit -> Github_t.hook Response.t Monad.t
-    (** [update ~user ~repo ~id ~hook ()] is the updated hook [id] in
-        repo [user]/[repo] as described by [hook]. *)
-
-    val delete :
-      ?token:Token.t ->
-      user:string ->
-      repo:string -> id:int64 -> unit -> unit Response.t Monad.t
-    (** [delete ~user ~repo ~id ()] activates after hook [id] in repo
-        [user]/[repo] has been deleted. *)
-
-    val test :
-      ?token:Token.t ->
-      user:string ->
-      repo:string -> id:int64 -> unit -> unit Response.t Monad.t
-    (** [test ~user ~repo ~id ()] activates after a [push] event for
-        the lastest push to [user]/[repo] has been synthesized and
-        sent to hook [id]. *)
-
-    val parse_event :
-      constr:string ->
-      payload:string -> unit -> Github_t.event_hook_constr
-    (** [parse_event ~constr ~payload ()] is the event with
-        constructor [constr] that is represented by [payload]. *)
-
-    val parse_event_metadata :
-      payload:string -> unit -> Github_t.event_hook_metadata
-    (** [parse_event_metadata ~payload ()] is the event metadata for
-        the serialized event [payload]. *)
-  end
-
   (** The [Status] module provides the functionality of GitHub's
       {{:https://developer.github.com/v3/repos/statuses/}status API}. *)
   module Status : sig

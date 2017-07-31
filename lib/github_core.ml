@@ -1762,42 +1762,6 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
       API.get ?token ~uri (fun b -> return (combined_status_of_string b))
   end
 
-  module Hook = struct
-    open Lwt
-
-    let for_repo ?token ~user ~repo () =
-      let uri = URI.repo_hooks ~user ~repo in
-      API.get_stream ?token ~uri (fun b -> return (hooks_of_string b))
-
-    let get ?token ~user ~repo ~id () =
-      let uri = URI.repo_hook ~user ~repo ~id in
-      API.get ?token ~uri (fun b -> return (hook_of_string b))
-
-    let create ?token ~user ~repo ~hook () =
-      let uri = URI.repo_hooks ~user ~repo in
-      let body = string_of_new_hook hook in
-      API.post ~body ?token ~uri ~expected_code:`Created
-        (fun b -> return (hook_of_string b))
-
-    let update ?token ~user ~repo ~id ~hook () =
-      let uri = URI.repo_hook ~user ~repo ~id in
-      let body = string_of_update_hook hook in
-      API.patch ?token ~body ~uri ~expected_code:`OK
-        (fun b -> return (hook_of_string b))
-
-    let delete ?token ~user ~repo ~id () =
-      let uri = URI.repo_hook ~user ~repo ~id in
-      API.delete ?token ~uri (fun _ -> return ())
-
-    let test ?token ~user ~repo ~id () =
-      let uri = URI.repo_hook_test ~user ~repo ~id in
-      API.post ?token ~uri ~expected_code:`No_content (fun _b -> return ())
-
-    let parse_event = Organization.Hook.parse_event
-
-    let parse_event_metadata = Organization.Hook.parse_event_metadata
-  end
-
   module Git_obj = struct
 
     let type_to_string (o:obj_type)=
@@ -1814,7 +1778,41 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
   end
 
   module Repo = struct
-    module Hook = Hook
+    module Hook = struct
+      open Lwt
+
+      let for_repo ?token ~user ~repo () =
+        let uri = URI.repo_hooks ~user ~repo in
+        API.get_stream ?token ~uri (fun b -> return (hooks_of_string b))
+
+      let get ?token ~user ~repo ~id () =
+        let uri = URI.repo_hook ~user ~repo ~id in
+        API.get ?token ~uri (fun b -> return (hook_of_string b))
+
+      let create ?token ~user ~repo ~hook () =
+        let uri = URI.repo_hooks ~user ~repo in
+        let body = string_of_new_hook hook in
+        API.post ~body ?token ~uri ~expected_code:`Created
+          (fun b -> return (hook_of_string b))
+
+      let update ?token ~user ~repo ~id ~hook () =
+        let uri = URI.repo_hook ~user ~repo ~id in
+        let body = string_of_update_hook hook in
+        API.patch ?token ~body ~uri ~expected_code:`OK
+          (fun b -> return (hook_of_string b))
+
+      let delete ?token ~user ~repo ~id () =
+        let uri = URI.repo_hook ~user ~repo ~id in
+        API.delete ?token ~uri (fun _ -> return ())
+
+      let test ?token ~user ~repo ~id () =
+        let uri = URI.repo_hook_test ~user ~repo ~id in
+        API.post ?token ~uri ~expected_code:`No_content (fun _b -> return ())
+
+      let parse_event = Organization.Hook.parse_event
+
+      let parse_event_metadata = Organization.Hook.parse_event_metadata
+    end
 
     open Lwt
 

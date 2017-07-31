@@ -21,5 +21,5 @@
     [Cohttp_lwt_unix.Client], but also by the JavaScript Cohttp
     client for use in a browser. *)
 
-module Make(Env: Github_s.Env)(Time: Github_s.Time)(CL : Cohttp_lwt.Client)
+module Make(Env: Github_s.Env)(Time: Github_s.Time)(CL : Cohttp_lwt.S.Client)
   : Github_s.Github

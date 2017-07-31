@@ -433,7 +433,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
   end
 
   module C = Cohttp
-  module CLB = Cohttp_lwt_body
+  module CLB = Cohttp_lwt.Body
 
   module Monad = struct
     open Printf

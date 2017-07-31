@@ -29,6 +29,7 @@ build-test: [
 depends: [
   "jbuilder" {build & >= "1.0+beta10"}
   "github"
+  "cohttp-lwt-unix"
   "tls"
   "stringext"
   "lambda-term"

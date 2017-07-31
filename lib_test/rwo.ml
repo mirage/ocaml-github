@@ -29,7 +29,7 @@ module Resp = struct
     sprintf "<html><body>%s</body></html>" s
 
   (* respond with an error *)
-  let not_found req err =
+  let not_found _req err =
     let status = `Not_found in
     let headers = Header.of_list [ "Cache-control", "no-cache" ] in
     let body = sprintf "<html><body><h1>Error</h1><p>%s</p></body></html>" err in
@@ -43,7 +43,7 @@ module Resp = struct
     Server.respond_string ~headers ~status ~body
 
   (* dynamic response *)
-  let dyn req body =
+  let dyn _req body =
     let status = `OK in
     Server.respond_string ~body ~status ()
 
@@ -79,7 +79,7 @@ module Resp = struct
 end
 
 (* main callback function *)
-let callback con_id req body =
+let callback _conn_id req _body =
   let uri = Request.uri req in
   let path = Uri.path uri in
   printf "%s %s [%s]\n%!" (Code.string_of_method (Request.meth req)) path
@@ -91,7 +91,7 @@ let callback con_id req body =
 
 let server_t =
   let port = 8080 in
-  let conn_closed con_id = () in
+  let conn_closed _conn_id = () in
   let spec = Cohttp_lwt_unix.Server.make ~callback ~conn_closed () in
   let ctx = Cohttp_lwt_unix_net.init () in
   let mode = `TCP (`Port port) in

@@ -28,7 +28,8 @@ build-test: [
 ]
 depends: [
   "jbuilder" {build & >= "1.0+beta10"}
-  "cohttp" {>= "0.17.0"}
+  "cohttp" {>= "0.99.0"}
+  "cohttp-lwt-jsoo" {>= "0.99.0"}
   "js_of_ocaml"
   "github"
 ]

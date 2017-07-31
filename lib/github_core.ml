@@ -18,7 +18,7 @@
 
 let user_agent = "ocaml-github" (* TODO: add version from build system *)
 
-module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.Client)
+module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
 = struct
 
   let string_of_message message =

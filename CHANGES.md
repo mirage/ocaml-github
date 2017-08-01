@@ -1,3 +1,8 @@
+## 3.0.1 (2017-08-01):
+* Update to work with latest cohttp (#205 from @rgrinberg)
+* Fix atdgen JSON codec generation bug in 3.0.0 (#205)
+* Remove deprecated Hook module (#206)
+
 ## 3.0.0 (2017-07-03):
 
 Port to Jbuilder (#202 by @rgrinberg @dsheets @samoht). This

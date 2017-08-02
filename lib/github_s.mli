@@ -218,8 +218,7 @@ module type Github = sig
   (** ['a parse] is the type of functions which extract meaningful
       values from GitHub responses. *)
 
-  type 'a handler =
-    (Cohttp.Response.t * Cohttp_lwt.Body.t -> bool) * 'a
+  type 'a handler = (Cohttp.Response.t * string -> bool) * 'a
   (** ['a handler] is the type of response handlers which consist of
       an activation predicate (fst) and a parse function (snd). *)
 

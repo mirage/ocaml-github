@@ -443,12 +443,12 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
     * an HTTP error. Depending on the error status code, it may
     * be retried within the monad, or a permanent failure returned *)
     type error =
-      | Generic of (C.Response.t * CLB.t)
+      | Generic of (C.Response.t * string)
       | Semantic of C.Code.status_code * Github_t.message
-      | Bad_response of exn
+      | Bad_response of exn * [ `None | `Json of Yojson.Basic.json | `Raw of string ]
     type request = {
       meth: C.Code.meth; uri: Uri.t;
-      headers: C.Header.t; body: CLB.t;
+      headers: C.Header.t; body: string;
     }
 
     type state = {
@@ -465,16 +465,20 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
 
     let error_to_string = function
       | Generic (res, body) ->
-        CLB.to_string body >>= fun body_s ->
         Lwt.return
           (sprintf "HTTP Error %s\nHeaders:\n%s\nBody:\n%s\n"
              (C.Code.string_of_status (C.Response.status res))
              (String.concat "" (C.Header.to_lines (C.Response.headers res)))
-             body_s)
+             body)
       | Semantic (_,message) ->
         Lwt.return ("GitHub API error: "^string_of_message message)
-      | Bad_response exn ->
-        Lwt.return (sprintf "Bad response: %s\n" (Printexc.to_string exn))
+      | Bad_response (exn,j) ->
+        Lwt.return (sprintf "Bad response: %s\n%s"
+          (Printexc.to_string exn)
+          (match j with
+           |`None -> "<none>"
+           |`Raw r -> sprintf "Raw body:\n%s" r
+           |`Json j -> sprintf "JSON body:\n%s" (Yojson.Basic.pretty_to_string j)))
 
     let error err = Err err
     let response r = Response r
@@ -689,7 +693,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
     | Two_factor of string
 
   type 'a parse = string -> 'a Lwt.t
-  type 'a handler = (C.Response.t * CLB.t -> bool) * 'a
+  type 'a handler = (C.Response.t * string -> bool) * 'a
 
   module API = struct
     (* Use the highest precedence handler that matches the response. *)
@@ -698,29 +702,28 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
       | (p, handler)::more ->
         if not (p response) then handle_response redirects response more
         else
-          let bad_response exn = return (Monad.(error (Bad_response exn))) in
+          let bad_response exn body = return (Monad.(error (Bad_response (exn,body)))) in
           catch (fun () ->
             handler response
             >>= fun r ->
             return (Monad.response (Response.wrap ~redirects r))
           ) (fun exn ->
             catch (fun () ->
-              CLB.to_string body
-              >>= fun body ->
-              let json = Yojson.Basic.from_string body in
-              log "response body:\n%s" (Yojson.Basic.pretty_to_string json);
-              bad_response exn
-            ) (fun _exn -> bad_response exn)
+              catch (fun () ->
+                let json = Yojson.Basic.from_string body in
+                log "response body:\n%s" (Yojson.Basic.pretty_to_string json);
+                bad_response exn (`Json json)
+              ) (fun _exn -> bad_response exn (`Raw body))
+            ) (fun _exn -> bad_response exn `None)
           )
       | [] ->
         let status = C.Response.status envelope in
         match status with
         | `Unprocessable_entity | `Gone | `Unauthorized | `Forbidden ->
-          CLB.to_string body
-          >>= fun message ->
-          let message = Github_j.message_of_string message in
+          let message = Github_j.message_of_string body in
           return Monad.(error (Semantic (status,message)))
-        | _ -> return Monad.(error (Generic (envelope, body)))
+        | _ ->
+          return Monad.(error (Generic (envelope, body)))
     )
 
     let update_rate_table rate ?token response =
@@ -751,6 +754,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
      * to a chunked-encoding POST request). *)
     let lwt_req {Monad.uri; meth; headers; body} =
       log "Requesting %s" (Uri.to_string uri);
+      let body = CLB.of_string body in
       CL.call ~headers ~body ~chunked:false meth uri
 
     let max_redirects = 64
@@ -767,7 +771,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
       }))
       else
         lwt_req req
-        >>= fun ((resp, _body) as response) ->
+        >>= fun (resp, body) ->
         update_rate_table rate ?token resp;
         let response_code = C.Response.status resp in
         log "Response code %s\n%!" (C.Code.string_of_status response_code);
@@ -786,7 +790,9 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
               let req = { req with Monad.uri = target } in
               request ~redirects ~rate ~token resp_handlers req
           end
-        | _ -> handle_response (List.rev redirects) response resp_handlers
+        | _ ->
+          CLB.to_string body >>= fun body ->
+          handle_response (List.rev redirects) (resp,body) resp_handlers
     )
 
     (* A simple response pattern that matches on HTTP code equivalence *)
@@ -803,16 +809,16 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
       fun state -> Lwt.return
         (state,
          (Monad.(request ?token ?params
-                   {meth; uri; headers=realize_headers ?media_type headers; body=CLB.empty})
+                   {meth; uri; headers=realize_headers ?media_type headers; body=""})
             (request ~rate ~token
                ((code_handler ~expected_code fn)::fail_handlers))))
 
-    let just_body (_,body) = CLB.to_string body
+    let just_body (_,(body:string)):string Lwt.t = Lwt.return body
 
     let effectful meth
         ?(rate=Core) ?headers ?body ?token ?params
         ~fail_handlers ~expected_code ~uri fn =
-      let body = match body with None -> CLB.empty | Some b -> CLB.of_string b in
+      let body = match body with None -> ""| Some b -> b in
       let fn x = Lwt.(just_body x >>= fn) in
       let fail_handlers = List.map (fun (p,fn) ->
         p,Lwt.(fun x -> just_body x >>= fn)
@@ -847,9 +853,8 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
     )
 
     let stream_fail_handlers restart fhs =
-      map_fail_handlers Lwt.(fun f (_envelope, body) ->
-        CLB.to_string body
-        >>= f >>= fun buffer ->
+      map_fail_handlers Lwt.(fun f (envelope, body) ->
+        f body >>= fun buffer ->
         return {
           Stream.restart; buffer; refill=None; endpoint=Endpoint.empty;
         }
@@ -860,8 +865,6 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
         | None -> Endpoint.poll_result uri envelope
         | Some _ -> endpoint
       in
-      CLB.to_string body
-      >>= fun body ->
       let refill = Some (fun () ->
         let links = Cohttp.(Header.get_links envelope.Response.headers) in
         match next_link uri links with

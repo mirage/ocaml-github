@@ -6,7 +6,7 @@ let repo = "opam-repository"
 
 let get_auth_token_from_jar auth_id = Lwt.(
   Github_cookie_jar.init () >>= fun jar ->
-  Github_cookie_jar.(get jar auth_id) >>= function
+  Github_cookie_jar.(get ~name:auth_id jar) >>= function
   | Some x -> return x
   | None -> Lwt.fail (Failure ("id '"^auth_id^"' not in cookie jar"))
 )
@@ -54,21 +54,24 @@ let t = Github.(Monad.(run (
     printf "login%s:\ttotal commits in %s/%s\t:\tlast month of contribution\n"
       (space_after "login") user repo;
     List.iter (fun c ->
-      let user = c.repo_contributor_stats_author.user_login in
-      let from_table =
-        try string_of_int (Hashtbl.find table user)
-        with Not_found -> "?"
-      in
-      let commits =
-        sprintf "%d (%s)" c.repo_contributor_stats_total from_table
-      in
-      printf "%s%s:\t%s%s:\t%s\n"
-        user
-        (space_after user)
-        commits
-        (space_after commits)
-        (month_of_time_opt (last_seen c.repo_contributor_stats_weeks));
-      Hashtbl.remove table user
+      match c.repo_contributor_stats_author with
+      | Some author ->
+        let user = author.user_login in
+        let from_table =
+          try string_of_int (Hashtbl.find table user)
+          with Not_found -> "?"
+        in
+        let commits =
+          sprintf "%d (%s)" c.repo_contributor_stats_total from_table
+        in
+        printf "%s%s:\t%s%s:\t%s\n"
+          user
+          (space_after user)
+          commits
+          (space_after commits)
+          (month_of_time_opt (last_seen c.repo_contributor_stats_weeks));
+        Hashtbl.remove table user
+      | None -> ()
     ) stats;
     let remaining = Hashtbl.fold (fun k v l -> (k, v)::l) table [] in
     let remaining = List.sort (fun (_,x) (_,y) -> compare y x) remaining in

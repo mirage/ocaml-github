@@ -3,6 +3,6 @@
 (library
  ((name github_jsoo)
   (wrapped false)
-  (flags (:standard -principal -strict-sequence -g
+  (flags (:standard -principal -strict-sequence -g -safe-string
                     -warn-error "+1..47-D+49" -w "A-E-41-42-44-48"))
   (libraries (github lwt js_of_ocaml cohttp-lwt cohttp-lwt-jsoo))))

@@ -43,6 +43,7 @@ let create_release ~token
     Lwt_io.with_file ~mode:Lwt_io.input filename
       (fun ic -> Lwt_io.read_into_exactly ic body 0 len)
     >>= fun () ->
+    let body = Bytes.to_string body in
     Github.(Monad.(run (
       Release.upload_asset
         ~token ~user ~repo ~id ~filename ~content_type ~body ()

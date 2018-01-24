@@ -23,7 +23,6 @@
      https://github.com/janestreet/jbuilder/issues/61 is done
    |#
   (flags (:standard -principal -strict-sequence -g -safe-string
-                    -warn-error "+1..47-D+49"
                     -w "A-E-41-42-44-48" -w "-27-32"))
   (modules (github_s github_core github_j github_t))
   (libraries (cohttp uri cohttp-lwt yojson atdgen))))

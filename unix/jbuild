@@ -5,6 +5,6 @@
   (public_name github-unix)
   (wrapped false)
   (flags (:standard -principal -strict-sequence -g -safe-string
-                    -warn-error "+1..47-D+49" -w "A-E-41-42-44-48"))
+                    -w "A-E-41-42-44-48"))
   (modules (github github_cookie_jar))
   (libraries (lwt.unix cohttp-lwt-unix github bytes))))

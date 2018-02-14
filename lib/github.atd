@@ -453,7 +453,7 @@ type contribution_week = {
 } <ocaml field_prefix="repo_contribution_week_">
 
 type contributor_stats = {
-  author: user;
+  author: user nullable;
   total: int;
   weeks: contribution_week list;
 } <ocaml field_prefix="repo_contributor_stats_">

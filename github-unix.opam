@@ -11,9 +11,11 @@ authors: [
   "Jeremy Yallop"
   "Dave Tucker"
 ]
-homepage: "https://github.com/mirage/ocaml-github"
+homepage:    "https://github.com/mirage/ocaml-github"
 bug-reports: "https://github.com/mirage/ocaml-github/issues"
-dev-repo: "https://github.com/mirage/ocaml-github.git"
+dev-repo:    "https://github.com/mirage/ocaml-github.git"
+doc:         "https://mirage.github.io/ocaml-github/"
+
 tags: [
   "org:mirage"
   "org:xapi-project"

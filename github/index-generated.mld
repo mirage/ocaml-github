@@ -1,0 +1,2 @@
+{1 Library github}
+This library exposes the following toplevel modules: {!modules:Github_core Github_j Github_s Github_t}.

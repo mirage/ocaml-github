@@ -1,3 +1,10 @@
+## 3.1.0 (2018-02-14)
+
+- Make contributor stats author field nullable (#211, @rvantonder)
+- Support OCaml 4.06 by enabling `-safe-string` compatibility (#212, @jpdeplaix)
+- Add support for repository issue search (#196, @avsm and @samoht)
+- TLS isn't a hard dependency of githug (#208, @rgrinberg)
+
 ## 3.0.1 (2017-08-01):
 * Update to work with latest cohttp (#205 from @rgrinberg)
 * Fix atdgen JSON codec generation bug in 3.0.0 (#205)
@@ -12,7 +19,7 @@ splits up the `opam` packages into three separate ones:
 - `github-unix`: the `Github` and `Github_cookie_jar` modules.
 - `github-jsoo`: the js_of_ocaml `Github_js` module.
 
-Tools that depended on github-unix previously will now need to 
+Tools that depended on github-unix previously will now need to
 adjust their `opam` files to depend on the `github-[unix|jsoo]`
 packages, and should also to rename `github.unix` to `github-unix`
 and `github.js` to `github-jsoo`.  However, transitional packages

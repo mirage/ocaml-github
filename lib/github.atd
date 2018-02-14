@@ -234,17 +234,21 @@ type update_milestone = {
   ?due_on: string option;
 } <ocaml field_prefix="update_milestone_">
 
+type milestone_reference = {
+  ~title: string;
+} <ocaml field_prefix="milestone_reference_">
+
 type milestone = {
   url: string;
   number: int;
   ~state <ocaml default="`Open">: state;
-  ~title: string;
   ~description: string;
   ?creator: user option;
   open_issues: int;
   closed_issues: int;
   created_at: string;
   ?due_on: string option;
+  inherit milestone_reference
 } <ocaml field_prefix="milestone_">
 
 type milestones = milestone list
@@ -423,6 +427,12 @@ type repository_search = {
   items: repositories;
 } <ocaml field_prefix="repository_search_">
 
+type repository_issue_search = {
+  total_count: int;
+  incomplete_results: bool;
+  items: issues;
+} <ocaml field_prefix="repository_issue_search_">
+
 type branch = {
   label: string;
   ref: string;
@@ -590,7 +600,7 @@ type repo_issue_event = {
   ?label: base_label option;
   ?assignee: linked_user option;
   ?assigner: linked_user option;
-  ?milestone: milestone option;
+  ?milestone: milestone_reference option;
   ?rename: issue_rename option;
 } <ocaml field_prefix="repo_issue_event_">
 
@@ -1246,7 +1256,7 @@ type timeline_event = {
   created_at: string;
   ?label: base_label option;
   ?assignee: user option;
-  ?milestone: milestone option;
+  ?milestone: milestone_reference option;
   ?source: timeline_source option;
   ?rename: issue_rename option;
 } <ocaml field_prefix="timeline_event_">

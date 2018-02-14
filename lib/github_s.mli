@@ -218,8 +218,7 @@ module type Github = sig
   (** ['a parse] is the type of functions which extract meaningful
       values from GitHub responses. *)
 
-  type 'a handler =
-    (Cohttp.Response.t * Cohttp_lwt.Body.t -> bool) * 'a
+  type 'a handler = (Cohttp.Response.t * string -> bool) * 'a
   (** ['a handler] is the type of response handlers which consist of
       an activation predicate (fst) and a parse function (snd). *)
 
@@ -553,6 +552,26 @@ module type Github = sig
 
     type date = string
     (** [date] is the YYYY-MM-DD representation of a day. *)
+
+    type issue_qualifier = [
+      | `Author of string
+      | `Assignee of string
+      | `Mentions of string
+      | `Commenter of string
+      | `Involves of string
+      | `Team of string
+      | `Label of string
+      | `Without_label of string
+      | `Language of string
+      | `Created of date range
+      | `Updated of date range
+      | `Merged of date range
+      | `Closed of date range
+      | `User of string
+      | `Repo of string
+      | `Project of string
+    ]
+    (** [issue_qualifier] is the type of issue search query predicates. *)
 
     type qualifier = [
       | `In of repo_field list
@@ -1570,6 +1589,19 @@ module type Github = sig
       unit -> Github_t.repository_search Stream.t
     (** [repos ?sort ?direction ~qualifiers ~keywords ()] is a
         stream of repository search results for [keywords] and
+        matching [qualifiers] predicates. Results are sorted by
+        [?sort] (default best match) and ordered by [?direction]
+        (default [`Desc]). *)
+
+     val issues :
+       ?token:Token.t ->
+       ?sort:Filter.repo_sort ->
+       ?direction:Filter.direction ->
+       qualifiers:Filter.issue_qualifier list ->
+       keywords:string list ->
+       unit -> Github_t.repository_issue_search Stream.t
+    (** [issues ?sort ?direction ~qualifiers ~keywords ()] is a
+        stream of issue search results for [keywords] and
         matching [qualifiers] predicates. Results are sorted by
         [?sort] (default best match) and ordered by [?direction]
         (default [`Desc]). *)

@@ -34,6 +34,7 @@ let upload_release token user repo tag content_type filename =
       (fun ic -> Lwt_io.read_into_exactly ic buf 0 len)
     >>= fun () -> return buf
   end >>= fun body ->
+  let body = Bytes.to_string body in
   ask_github (Github.Release.upload_asset
                 ~token ~user ~repo ~id ~filename ~content_type ~body)
   >>= fun _a ->

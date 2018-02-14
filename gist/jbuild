@@ -2,8 +2,8 @@
 
 (executables
  ((libraries (cohttp-lwt-unix github_unix cmdliner lambda-term))
-  (flags (:standard -principal -strict-sequence -g
-                    -warn-error "+1..47-D+49" -w "A-E-41-42-44-48"))
+  (flags (:standard -principal -strict-sequence -g -safe-string
+                    -w "A-E-41-42-44-48"))
   (public_names (git-gist))
   (package github-unix)
   (names (gist))))

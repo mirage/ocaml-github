@@ -488,6 +488,7 @@ type pull = {
   base: branch;
   links <json name="_links">: pull_links;
   user: user;
+  ?merge_commit_sha: string option;
   inherit pull_ref
 } <ocaml field_prefix="pull_">
 

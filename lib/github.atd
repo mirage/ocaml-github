@@ -46,8 +46,8 @@ type scope = [
   | Read_public_key <json name="read:public_key">
   | Write_public_key <json name="write:public_key">
   | Admin_public_key <json name="admin:public_key">
-  | Unknown <json untyped> of (string * json option)
-]
+  | Unknown of string
+] <json open_enum>
 
 type app = {
   name: string;
@@ -101,8 +101,8 @@ type issue_sort = [
   | Created <json name="created">
   | Updated <json name="updated">
   | Comments <json name="comments">
-  | Unknown <json untyped> of (string * json option)
-]
+  | Unknown of string
+] <json open_enum>
 
 type direction = [
   | Asc <json name="asc">
@@ -183,8 +183,8 @@ type team_permission = [
   | Pull <json name="pull">
   | Push <json name="push">
   | Admin <json name="admin">
-  | Unknown <json untyped> of (string * json option)
-]
+  | Unknown of string
+] <json open_enum>
 
 type team_info = {
   permission: team_permission;
@@ -553,8 +553,8 @@ type fork_event = {
 type wiki_page_action = [
   | Created <json name="created">
   | Edited <json name="edited">
-  | Unknown <json untyped> of (string * json option)
-]
+  | Unknown of string
+] <json open_enum>
 
 type wiki_page = {
   name <json name="page_name">: string;
@@ -586,8 +586,8 @@ type repo_issues_action = [
   | Unlocked <json name="unlocked">
   | Head_ref_deleted <json name="head_ref_deleted">
   | Head_ref_restored <json name="head_ref_restored">
-  | Unknown <json untyped> of (string * json option)
-]
+  | Unknown string
+] <json open_enum>
 
 type issue_rename = {
   from: string;
@@ -664,8 +664,8 @@ type issues_event = {
 
 type member_action = [
   | Added <json name="added">
-  | Unknown <json untyped> of (string * json option)
-]
+  | Unknown of string
+] <json open_enum>
 
 type member_event = {
   action: member_action;
@@ -681,8 +681,8 @@ type page_build_status = [
   | Building <json name="building">
   | Built <json name="built">
   | Errored <json name="errored">
-  | Unknown <json untyped> of (string * json option)
-]
+  | Unknown of string
+] <json open_enum>
 
 type page_build = {
   url: string;
@@ -783,8 +783,8 @@ type push_event_hook = {
 
 type release_action = [
   | Published <json name="published">
-  | Unknown <json untyped> of (string * json option)
-]
+  | Unknown of string
+] <json open_enum>
 
 type release_event = {
   action: release_action;
@@ -796,8 +796,8 @@ type repository_action = [
   | Deleted <json name="deleted">
   | Publicized <json name="publicized">
   | Privatized <json name="privatized">
-  | Unknown <json untyped> of (string * json option)
-]
+  | Unknown of string
+] <json open_enum>
 
 type repository_event = {
   action: repository_action;
@@ -844,8 +844,8 @@ type team_add_event = {
 
 type watch_action = [
   | Started <json name="started">
-  | Unknown <json untyped> of (string * json option)
-]
+  | Unknown of string
+] <json open_enum>
 
 type watch_event = {
   action: watch_action;
@@ -901,8 +901,8 @@ type event_type = [
   | TeamAdd <json name="team_add">
   | Watch <json name="watch">
   | All <json name="*">
-  | Unknown <json untyped> of (string * json option)
-]
+  | Unknown of string
+] <json open_enum>
 
 type event_constr = [
   | CommitComment <json name="CommitCommentEvent"> of commit_comment_event
@@ -1008,8 +1008,8 @@ type json <ocaml module="Yojson.Safe"> = abstract
 
 type hook_config = [
   | Web <json name="web"> of web_hook_config
-  | Unknown <json untyped> of (string * json option)
-]
+  | Unknown of string
+] <json open_enum>
 
 type hook = {
   url: string;
@@ -1043,8 +1043,8 @@ type status_state = [
   | Success <json name="success">
   | Failure <json name="failure">
   | Error <json name="error">
-  | Unknown <json untyped> of (string * json option)
-]
+  | Unknown of string
+] <json open_enum>
 
 type base_status = {
   url: string;

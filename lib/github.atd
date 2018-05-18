@@ -538,13 +538,13 @@ type create_event = {
   ?description: string option;
   (* pusher_type *)
 } <ocaml field_prefix="create_event_">
-  <json adapter.ocaml="Github_json.Adapter.Ref_type">
+  <json adapter.ocaml="Github_json.Adapter.Ref">
 
 type delete_event = {
   ref <json tag_field="ref_type">: ref;
   (* pusher_type *)
 } <ocaml field_prefix="delete_event_">
-  <json adapter.ocaml="Github_json.Adapter.Ref_type">
+  <json adapter.ocaml="Github_json.Adapter.Ref">
 
 type fork_event = {
   forkee: repository;
@@ -586,7 +586,7 @@ type repo_issues_action = [
   | Unlocked <json name="unlocked">
   | Head_ref_deleted <json name="head_ref_deleted">
   | Head_ref_restored <json name="head_ref_restored">
-  | Unknown string
+  | Unknown of string
 ] <json open_enum>
 
 type issue_rename = {
@@ -640,7 +640,7 @@ type issue_comment_event = {
   issue: issue;
   comment: issue_comment;
 } <ocaml field_prefix="issue_comment_event_">
-  <json adapter.ocaml="Github_json.Adapter.Action">
+  <json adapter.ocaml="Github_json.Adapter.Changes">
 
 type issues_action = [
   | Assigned <json name="assigned">
@@ -660,7 +660,7 @@ type issues_event = {
   ?assignee: user_info option;
   ?label: label option;
 } <ocaml field_prefix="issues_event_">
-  <json adapter.ocaml="Github_json.Adapter.Action">
+  <json adapter.ocaml="Github_json.Adapter.Changes">
 
 type member_action = [
   | Added <json name="added">
@@ -712,7 +712,7 @@ type pull_request_event = {
   number: int;
   pull_request: pull;
 } <ocaml field_prefix="pull_request_event_">
-  <json adapter.ocaml="Github_json.Adapter.Action">
+  <json adapter.ocaml="Github_json.Adapter.Changes">
 
 type pull_request_review_comment_action = [
   | Created <json name="created">
@@ -734,7 +734,7 @@ type pull_request_review_comment_event = {
   pull_request: pull;
   comment: pull_request_review_comment;
 } <ocaml field_prefix="pull_request_review_comment_event_">
-  <json adapter.ocaml="Github_json.Adapter.Action">
+  <json adapter.ocaml="Github_json.Adapter.Changes">
 
 type push_event_author = {
   name: string;

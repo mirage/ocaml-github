@@ -24,5 +24,5 @@
    |#
   (flags (:standard -principal -strict-sequence -g -safe-string
                     -w "A-E-41-42-44-48" -w "-27-32"))
-  (modules (github_s github_core github_j github_t))
+  (modules (github_s github_core github_json github_j github_t))
   (libraries (cohttp uri cohttp-lwt yojson atdgen))))

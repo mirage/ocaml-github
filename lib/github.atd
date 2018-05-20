@@ -632,7 +632,7 @@ type issue_comment_action = [
   | Created <json name="created">
   | Edited <json name="edited"> of body_changes
   | Deleted <json name="deleted">
-  | Unknown <json untyped> of (string * json option)
+  | Unknown of (string * json nullable)
 ]
 
 type issue_comment_event = {
@@ -640,7 +640,7 @@ type issue_comment_event = {
   issue: issue;
   comment: issue_comment;
 } <ocaml field_prefix="issue_comment_event_">
-  <json adapter.ocaml="Github_json.Adapter.Changes">
+  <json adapter.ocaml="Github_json.Adapter.Issue_comment_event">
 
 type issues_action = [
   | Assigned <json name="assigned">
@@ -651,7 +651,7 @@ type issues_action = [
   | Edited <json name="edited"> of ticket_changes
   | Closed <json name="closed">
   | Reopened <json name="reopened">
-  | Unknown <json untyped> of (string * json option)
+  | Unknown of (string * json nullable)
 ]
 
 type issues_event = {
@@ -660,7 +660,7 @@ type issues_event = {
   ?assignee: user_info option;
   ?label: label option;
 } <ocaml field_prefix="issues_event_">
-  <json adapter.ocaml="Github_json.Adapter.Changes">
+  <json adapter.ocaml="Github_json.Adapter.Issues_event">
 
 type member_action = [
   | Added <json name="added">
@@ -704,7 +704,7 @@ type pull_request_action = [
   | Closed <json name="closed">
   | Reopened <json name="reopened">
   | Synchronize <json name="synchronize">
-  | Unknown <json untyped> of (string * json option)
+  | Unknown of (string * json nullable)
 ]
 
 type pull_request_event = {
@@ -712,13 +712,13 @@ type pull_request_event = {
   number: int;
   pull_request: pull;
 } <ocaml field_prefix="pull_request_event_">
-  <json adapter.ocaml="Github_json.Adapter.Changes">
+  <json adapter.ocaml="Github_json.Adapter.Pull_request_event">
 
 type pull_request_review_comment_action = [
   | Created <json name="created">
   | Edited <json name="edited"> of body_changes
   | Deleted <json name="deleted">
-  | Unknown <json untyped> of (string * json option)
+  | Unknown of (string * json nullable)
 ]
 
 type pull_request_review_comment = {
@@ -734,7 +734,7 @@ type pull_request_review_comment_event = {
   pull_request: pull;
   comment: pull_request_review_comment;
 } <ocaml field_prefix="pull_request_review_comment_event_">
-  <json adapter.ocaml="Github_json.Adapter.Changes">
+  <json adapter.ocaml="Github_json.Adapter.Pull_request_review_comment_event">
 
 type push_event_author = {
   name: string;
@@ -934,7 +934,9 @@ type event_constr = [
   | Status <json name="StatusEvent"> of status_event
   (*| TeamAdd <json name="team_add"> of team_add_event*)
   | Watch <json name="WatchEvent"> of watch_event
-  | Unknown <json untyped> of (string * json option)
+
+  (* Catch-all *)
+  | Unknown of (string * json nullable)
 ]
 
 type event = {
@@ -946,7 +948,7 @@ type event = {
   repo: repo;
   id: int <ocaml repr="int64">;
 } <ocaml field_prefix="event_">
-  <json adapter.ocaml="Github_json.Adapter.Payload">
+  <json adapter.ocaml="Github_json.Adapter.Event">
 
 type events = event list
 
@@ -980,7 +982,9 @@ type event_hook_constr = [
   | Status <json name="StatusEvent"> of status_event
   (*| TeamAdd <json name="team_add"> of team_add_event*)
   | Watch <json name="WatchEvent"> of watch_event
-  | Unknown <json untyped> of (string * json option)
+
+  (* Catch-all for unsupported event types *)
+  | Unknown of (string * json nullable)
 ]
 
 type event_hook_metadata = {
@@ -1008,8 +1012,8 @@ type json <ocaml module="Yojson.Safe"> = abstract
 
 type hook_config = [
   | Web <json name="web"> of web_hook_config
-  | Unknown of string
-] <json open_enum>
+  | Unknown of (string * json nullable)
+]
 
 type hook = {
   url: string;
@@ -1020,7 +1024,7 @@ type hook = {
   config <json tag_field="name">: hook_config;
   id: int <ocaml repr="int64">;
 } <ocaml field_prefix="hook_">
-  <json adapter.ocaml="Github_json.Adapter.Config">
+  <json adapter.ocaml="Github_json.Adapter.Hook">
 
 type hooks = hook list
 
@@ -1029,14 +1033,14 @@ type new_hook = {
   events: event_type list;
   active: bool;
 } <ocaml field_prefix="new_hook_">
-  <json adapter.ocaml="Github_json.Adapter.Config">
+  <json adapter.ocaml="Github_json.Adapter.Hook">
 
 type update_hook = {
   config <json tag_field="name">: hook_config;
   ?events: event_type list option;
   active: bool;
 } <ocaml field_prefix="update_hook_">
-  <json adapter.ocaml="Github_json.Adapter.Config">
+  <json adapter.ocaml="Github_json.Adapter.Hook">
 
 type status_state = [
   | Pending <json name="pending">

@@ -22,7 +22,7 @@ open Printf
 let string_of_wiki_page_action = function
   | `Created -> "Created"
   | `Edited -> "Edited"
-  | `Unknown (cons, _json) -> "Unknown:"^cons
+  | `Unknown cons -> "Unknown:"^cons
 
 let string_of_issue_comment_event_action = function
   | `Created -> "Created"
@@ -38,7 +38,7 @@ let string_of_issues_action = Github_j.string_of_issues_action
 
 let string_of_member_event_action = function
   | `Added -> "Added"
-  | `Unknown (cons, _json) -> "Unknown:"^cons
+  | `Unknown cons -> "Unknown:"^cons
 
 let string_of_pull user repo number = sprintf "%s/%s#%d" user repo number
 
@@ -52,13 +52,13 @@ let string_of_pull_request_review_comment_action = function
 
 let string_of_release_event_action = function
   | `Published -> "Published"
-  | `Unknown (cons, _json) -> "Unknown:"^cons
+  | `Unknown cons -> "Unknown:"^cons
 
 let string_of_status_state = Github_j.string_of_status_state
 
 let string_of_watch_event_action = function
   | `Started -> "Started"
-  | `Unknown (cons, _json) -> "Unknown:"^cons
+  | `Unknown cons -> "Unknown:"^cons
 
 let print_event event =
   let open Github_t in

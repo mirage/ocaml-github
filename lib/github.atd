@@ -533,7 +533,7 @@ type ref = [
 ]
 
 type create_event = {
-  ref <json tag_field="ref_type">: ref;
+  ref: ref;
   master_branch: string;
   ?description: string option;
   (* pusher_type *)
@@ -541,7 +541,7 @@ type create_event = {
   <json adapter.ocaml="Github_json.Adapter.Ref">
 
 type delete_event = {
-  ref <json tag_field="ref_type">: ref;
+  ref: ref;
   (* pusher_type *)
 } <ocaml field_prefix="delete_event_">
   <json adapter.ocaml="Github_json.Adapter.Ref">
@@ -636,7 +636,7 @@ type issue_comment_action = [
 ]
 
 type issue_comment_event = {
-  action <json name="changes" tag_field="action">: issue_comment_action;
+  action <json name="changes">: issue_comment_action;
   issue: issue;
   comment: issue_comment;
 } <ocaml field_prefix="issue_comment_event_">
@@ -655,7 +655,7 @@ type issues_action = [
 ]
 
 type issues_event = {
-  action <json name="changes" tag_field="action">: issues_action;
+  action <json name="changes">: issues_action;
   issue: issue;
   ?assignee: user_info option;
   ?label: label option;
@@ -708,7 +708,7 @@ type pull_request_action = [
 ]
 
 type pull_request_event = {
-  action <json name="changes" tag_field="action">: pull_request_action;
+  action <json name="changes">: pull_request_action;
   number: int;
   pull_request: pull;
 } <ocaml field_prefix="pull_request_event_">
@@ -730,7 +730,7 @@ type pull_request_review_comment = {
 } <ocaml field_prefix="pull_request_review_comment_">
 
 type pull_request_review_comment_event = {
-  action <json name="changes" tag_field="action">: pull_request_review_comment_action;
+  action <json name="changes">: pull_request_review_comment_action;
   pull_request: pull;
   comment: pull_request_review_comment;
 } <ocaml field_prefix="pull_request_review_comment_event_">
@@ -941,7 +941,7 @@ type event_constr = [
 
 type event = {
   public: bool;
-  payload <json tag_field="type">: event_constr;
+  payload: event_constr;
   actor: user;
   ?org: org option;
   created_at: string;
@@ -1021,7 +1021,7 @@ type hook = {
   created_at: string;
   events: event_type list;
   active: bool;
-  config <json tag_field="name">: hook_config;
+  config: hook_config;
   id: int <ocaml repr="int64">;
 } <ocaml field_prefix="hook_">
   <json adapter.ocaml="Github_json.Adapter.Hook">
@@ -1029,14 +1029,14 @@ type hook = {
 type hooks = hook list
 
 type new_hook = {
-  config <json tag_field="name">: hook_config;
+  config: hook_config;
   events: event_type list;
   active: bool;
 } <ocaml field_prefix="new_hook_">
   <json adapter.ocaml="Github_json.Adapter.Hook">
 
 type update_hook = {
-  config <json tag_field="name">: hook_config;
+  config: hook_config;
   ?events: event_type list option;
   active: bool;
 } <ocaml field_prefix="update_hook_">

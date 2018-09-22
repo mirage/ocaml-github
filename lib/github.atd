@@ -46,8 +46,8 @@ type scope = [
   | Read_public_key <json name="read:public_key">
   | Write_public_key <json name="write:public_key">
   | Admin_public_key <json name="admin:public_key">
-  | Unknown <json untyped> of (string * json option)
-]
+  | Unknown of string
+] <json open_enum>
 
 type app = {
   name: string;
@@ -101,8 +101,8 @@ type issue_sort = [
   | Created <json name="created">
   | Updated <json name="updated">
   | Comments <json name="comments">
-  | Unknown <json untyped> of (string * json option)
-]
+  | Unknown of string
+] <json open_enum>
 
 type direction = [
   | Asc <json name="asc">
@@ -183,8 +183,8 @@ type team_permission = [
   | Pull <json name="pull">
   | Push <json name="push">
   | Admin <json name="admin">
-  | Unknown <json untyped> of (string * json option)
-]
+  | Unknown of string
+] <json open_enum>
 
 type team_info = {
   permission: team_permission;
@@ -533,16 +533,18 @@ type ref = [
 ]
 
 type create_event = {
-  ref <json tag_field="ref_type">: ref;
+  ref: ref;
   master_branch: string;
   ?description: string option;
   (* pusher_type *)
 } <ocaml field_prefix="create_event_">
+  <json adapter.ocaml="Github_json.Adapter.Ref">
 
 type delete_event = {
-  ref <json tag_field="ref_type">: ref;
+  ref: ref;
   (* pusher_type *)
 } <ocaml field_prefix="delete_event_">
+  <json adapter.ocaml="Github_json.Adapter.Ref">
 
 type fork_event = {
   forkee: repository;
@@ -551,8 +553,8 @@ type fork_event = {
 type wiki_page_action = [
   | Created <json name="created">
   | Edited <json name="edited">
-  | Unknown <json untyped> of (string * json option)
-]
+  | Unknown of string
+] <json open_enum>
 
 type wiki_page = {
   name <json name="page_name">: string;
@@ -584,8 +586,8 @@ type repo_issues_action = [
   | Unlocked <json name="unlocked">
   | Head_ref_deleted <json name="head_ref_deleted">
   | Head_ref_restored <json name="head_ref_restored">
-  | Unknown <json untyped> of (string * json option)
-]
+  | Unknown of string
+] <json open_enum>
 
 type issue_rename = {
   from: string;
@@ -630,14 +632,15 @@ type issue_comment_action = [
   | Created <json name="created">
   | Edited <json name="edited"> of body_changes
   | Deleted <json name="deleted">
-  | Unknown <json untyped> of (string * json option)
+  | Unknown of (string * json nullable)
 ]
 
 type issue_comment_event = {
-  action <json name="changes" tag_field="action">: issue_comment_action;
+  action <json name="changes">: issue_comment_action;
   issue: issue;
   comment: issue_comment;
 } <ocaml field_prefix="issue_comment_event_">
+  <json adapter.ocaml="Github_json.Adapter.Issue_comment_event">
 
 type issues_action = [
   | Assigned <json name="assigned">
@@ -648,20 +651,21 @@ type issues_action = [
   | Edited <json name="edited"> of ticket_changes
   | Closed <json name="closed">
   | Reopened <json name="reopened">
-  | Unknown <json untyped> of (string * json option)
+  | Unknown of (string * json nullable)
 ]
 
 type issues_event = {
-  action <json name="changes" tag_field="action">: issues_action;
+  action <json name="changes">: issues_action;
   issue: issue;
   ?assignee: user_info option;
   ?label: label option;
 } <ocaml field_prefix="issues_event_">
+  <json adapter.ocaml="Github_json.Adapter.Issues_event">
 
 type member_action = [
   | Added <json name="added">
-  | Unknown <json untyped> of (string * json option)
-]
+  | Unknown of string
+] <json open_enum>
 
 type member_event = {
   action: member_action;
@@ -677,8 +681,8 @@ type page_build_status = [
   | Building <json name="building">
   | Built <json name="built">
   | Errored <json name="errored">
-  | Unknown <json untyped> of (string * json option)
-]
+  | Unknown of string
+] <json open_enum>
 
 type page_build = {
   url: string;
@@ -700,20 +704,21 @@ type pull_request_action = [
   | Closed <json name="closed">
   | Reopened <json name="reopened">
   | Synchronize <json name="synchronize">
-  | Unknown <json untyped> of (string * json option)
+  | Unknown of (string * json nullable)
 ]
 
 type pull_request_event = {
-  action <json name="changes" tag_field="action">: pull_request_action;
+  action <json name="changes">: pull_request_action;
   number: int;
   pull_request: pull;
 } <ocaml field_prefix="pull_request_event_">
+  <json adapter.ocaml="Github_json.Adapter.Pull_request_event">
 
 type pull_request_review_comment_action = [
   | Created <json name="created">
   | Edited <json name="edited"> of body_changes
   | Deleted <json name="deleted">
-  | Unknown <json untyped> of (string * json option)
+  | Unknown of (string * json nullable)
 ]
 
 type pull_request_review_comment = {
@@ -725,10 +730,11 @@ type pull_request_review_comment = {
 } <ocaml field_prefix="pull_request_review_comment_">
 
 type pull_request_review_comment_event = {
-  action <json name="changes" tag_field="action">: pull_request_review_comment_action;
+  action <json name="changes">: pull_request_review_comment_action;
   pull_request: pull;
   comment: pull_request_review_comment;
 } <ocaml field_prefix="pull_request_review_comment_event_">
+  <json adapter.ocaml="Github_json.Adapter.Pull_request_review_comment_event">
 
 type push_event_author = {
   name: string;
@@ -777,8 +783,8 @@ type push_event_hook = {
 
 type release_action = [
   | Published <json name="published">
-  | Unknown <json untyped> of (string * json option)
-]
+  | Unknown of string
+] <json open_enum>
 
 type release_event = {
   action: release_action;
@@ -790,8 +796,8 @@ type repository_action = [
   | Deleted <json name="deleted">
   | Publicized <json name="publicized">
   | Privatized <json name="privatized">
-  | Unknown <json untyped> of (string * json option)
-]
+  | Unknown of string
+] <json open_enum>
 
 type repository_event = {
   action: repository_action;
@@ -838,8 +844,8 @@ type team_add_event = {
 
 type watch_action = [
   | Started <json name="started">
-  | Unknown <json untyped> of (string * json option)
-]
+  | Unknown of string
+] <json open_enum>
 
 type watch_event = {
   action: watch_action;
@@ -895,8 +901,8 @@ type event_type = [
   | TeamAdd <json name="team_add">
   | Watch <json name="watch">
   | All <json name="*">
-  | Unknown <json untyped> of (string * json option)
-]
+  | Unknown of string
+] <json open_enum>
 
 type event_constr = [
   | CommitComment <json name="CommitCommentEvent"> of commit_comment_event
@@ -928,18 +934,21 @@ type event_constr = [
   | Status <json name="StatusEvent"> of status_event
   (*| TeamAdd <json name="team_add"> of team_add_event*)
   | Watch <json name="WatchEvent"> of watch_event
-  | Unknown <json untyped> of (string * json option)
+
+  (* Catch-all *)
+  | Unknown of (string * json nullable)
 ]
 
 type event = {
   public: bool;
-  payload <json tag_field="type">: event_constr;
+  payload: event_constr;
   actor: user;
   ?org: org option;
   created_at: string;
   repo: repo;
   id: int <ocaml repr="int64">;
 } <ocaml field_prefix="event_">
+  <json adapter.ocaml="Github_json.Adapter.Event">
 
 type events = event list
 
@@ -973,7 +982,9 @@ type event_hook_constr = [
   | Status <json name="StatusEvent"> of status_event
   (*| TeamAdd <json name="team_add"> of team_add_event*)
   | Watch <json name="WatchEvent"> of watch_event
-  | Unknown <json untyped> of (string * json option)
+
+  (* Catch-all for unsupported event types *)
+  | Unknown of (string * json nullable)
 ]
 
 type event_hook_metadata = {
@@ -1001,7 +1012,7 @@ type json <ocaml module="Yojson.Safe"> = abstract
 
 type hook_config = [
   | Web <json name="web"> of web_hook_config
-  | Unknown <json untyped> of (string * json option)
+  | Unknown of (string * json nullable)
 ]
 
 type hook = {
@@ -1010,31 +1021,34 @@ type hook = {
   created_at: string;
   events: event_type list;
   active: bool;
-  config <json tag_field="name">: hook_config;
+  config: hook_config;
   id: int <ocaml repr="int64">;
 } <ocaml field_prefix="hook_">
+  <json adapter.ocaml="Github_json.Adapter.Hook">
 
 type hooks = hook list
 
 type new_hook = {
-  config <json tag_field="name">: hook_config;
+  config: hook_config;
   events: event_type list;
   active: bool;
 } <ocaml field_prefix="new_hook_">
+  <json adapter.ocaml="Github_json.Adapter.Hook">
 
 type update_hook = {
-  config <json tag_field="name">: hook_config;
+  config: hook_config;
   ?events: event_type list option;
   active: bool;
 } <ocaml field_prefix="update_hook_">
+  <json adapter.ocaml="Github_json.Adapter.Hook">
 
 type status_state = [
   | Pending <json name="pending">
   | Success <json name="success">
   | Failure <json name="failure">
   | Error <json name="error">
-  | Unknown <json untyped> of (string * json option)
-]
+  | Unknown of string
+] <json open_enum>
 
 type base_status = {
   url: string;

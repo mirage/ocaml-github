@@ -119,7 +119,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
       | `Read_public_key -> "read:public_key"
       | `Write_public_key -> "write:public_key"
       | `Admin_public_key -> "admin:public_key"
-      | `Unknown (cons, _json) -> "unknown:"^cons
+      | `Unknown cons -> "unknown:"^cons
 
     let of_string x : Github_t.scope option =
       match x with
@@ -1205,7 +1205,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
         let uri = URI.org_hook_test ~org ~id in
         API.post ?token ~uri ~expected_code:`No_content (fun _b -> return ())
 
-      let parse_event ~constr ~payload () =
+      let parse_event ~constr ~payload () : Github_t.event_hook_constr =
         let parse_json = function
           | "" -> None
           | s -> Some (Yojson.Safe.from_string s)
@@ -1256,7 +1256,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
         | `Watch ->
           `Watch (Github_j.watch_event_of_string payload)
         | `All -> `Unknown ("*", parse_json payload)
-        | `Unknown (cons,_) -> `Unknown (cons, parse_json payload)
+        | `Unknown cons -> `Unknown (cons, parse_json payload)
 
       let parse_event_metadata ~payload () =
         Github_j.event_hook_metadata_of_string payload

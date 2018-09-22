@@ -1,5 +1,5 @@
 opam-version: "1.2"
-maintainer: "sheets@alum.mit.edu"
+maintainer: "anil@recoil.org"
 authors: [
   "Anil Madhavapeddy"
   "David Sheets"
@@ -22,14 +22,14 @@ tags: [
   "git"
 ]
 build: [
-  ["jbuilder" "subst"] {pinned}
-  ["jbuilder" "build" "-p" name "-j" jobs]
+  ["dune" "subst"] {pinned}
+  ["dune" "build" "-p" name "-j" jobs]
 ]
 build-test: [
-  ["jbuilder" "runtest" "-p" name]
+  ["dune" "runtest" "-p" name]
 ]
 depends: [
-  "jbuilder" {build & >= "1.0+beta10"}
+  "dune" {build}
   "cohttp" {>= "0.99.0"}
   "cohttp-lwt-jsoo" {>= "0.99.0"}
   "js_of_ocaml-lwt"

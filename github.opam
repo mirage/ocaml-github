@@ -1,5 +1,5 @@
 opam-version: "1.2"
-maintainer: "sheets@alum.mit.edu"
+maintainer: "anil@recoil.org"
 authors: [
   "Anil Madhavapeddy"
   "David Sheets"
@@ -22,19 +22,19 @@ tags: [
   "git"
 ]
 build: [
-  ["jbuilder" "subst"] {pinned}
-  ["jbuilder" "build" "-p" name "-j" jobs]
+  ["dune" "subst"] {pinned}
+  ["dune" "build" "-p" name "-j" jobs]
 ]
 build-test: [
-  ["jbuilder" "runtest" "-p" name]
+  ["dune" "runtest" "-p" name]
 ]
 depends: [
-  "jbuilder" {build & >= "1.0+beta10"}
+  "dune" {build}
   "uri" {>= "1.9.0"}
   "cohttp" {>= "0.99.0"}
   "cohttp-lwt" {>= "0.99"}
   "lwt" {>= "2.4.4"}
-  "atdgen" {>= "1.10.0"}
+  "atdgen" {>= "2.0.0"}
   "yojson" {>= "1.2.0"}
   "stringext"
 ]

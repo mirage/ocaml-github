@@ -12,8 +12,8 @@ env:
    - DISTRO=debian-stable OCAML_VERSION=4.07 PACKAGE="github" REVDEPS=true
    - DISTRO=debian-testing OCAML_VERSION=4.06 PACKAGE="github-unix" REVDEPS=true
    - DISTRO=debian-unstable OCAML_VERSION=4.04 PACKAGE="github-unix"
-   - DISTRO=ubuntu-12.04 OCAML_VERSION=4.04 PACKAGE="github-unix"
    - DISTRO=ubuntu-16.04 OCAML_VERSION=4.05 PACKAGE="github-unix"
+   - DISTRO=ubuntu-18.04 OCAML_VERSION=4.05 PACKAGE="github-unix"
    - DISTRO=centos-6 OCAML_VERSION=4.04 PACKAGE="github-unix"
    - DISTRO=centos-7 OCAML_VERSION=4.04 PACKAGE="github-unix"
    - DISTRO=fedora-28 OCAML_VERSION=4.04 PACKAGE="github-unix"

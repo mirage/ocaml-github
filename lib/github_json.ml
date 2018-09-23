@@ -4,21 +4,21 @@
 *)
 module Adapter = struct
   module Ref =
-    Atdgen_runtime.Util.Json.Adapter.Type_and_value_fields.Make (struct
+    Atdgen_runtime.Json_adapter.Type_and_value_fields.Make (struct
       let type_field_name = "ref_type"
       let value_field_name = "ref"
       let known_tags = None
     end)
 
   module Payload =
-    Atdgen_runtime.Util.Json.Adapter.Type_and_value_fields.Make (struct
+    Atdgen_runtime.Json_adapter.Type_and_value_fields.Make (struct
       let type_field_name = "type"
       let value_field_name = "payload"
       let known_tags = None
     end)
 
   module Issue_comment_event =
-    Atdgen_runtime.Util.Json.Adapter.Type_and_value_fields.Make (struct
+    Atdgen_runtime.Json_adapter.Type_and_value_fields.Make (struct
       let type_field_name = "action"
       let value_field_name = "changes"
       let known_tags =
@@ -26,7 +26,7 @@ module Adapter = struct
     end)
 
   module Issues_event =
-    Atdgen_runtime.Util.Json.Adapter.Type_and_value_fields.Make (struct
+    Atdgen_runtime.Json_adapter.Type_and_value_fields.Make (struct
       let type_field_name = "action"
       let value_field_name = "changes"
       let known_tags =
@@ -46,7 +46,7 @@ module Adapter = struct
     end)
 
   module Pull_request_event =
-    Atdgen_runtime.Util.Json.Adapter.Type_and_value_fields.Make (struct
+    Atdgen_runtime.Json_adapter.Type_and_value_fields.Make (struct
       let type_field_name = "action"
       let value_field_name = "changes"
       let known_tags =
@@ -67,7 +67,7 @@ module Adapter = struct
     end)
 
   module Pull_request_review_comment_event =
-    Atdgen_runtime.Util.Json.Adapter.Type_and_value_fields.Make (struct
+    Atdgen_runtime.Json_adapter.Type_and_value_fields.Make (struct
       let type_field_name = "action"
       let value_field_name = "changes"
       let known_tags =
@@ -75,7 +75,7 @@ module Adapter = struct
     end)
 
   module Event =
-    Atdgen_runtime.Util.Json.Adapter.Type_and_value_fields.Make (struct
+    Atdgen_runtime.Json_adapter.Type_and_value_fields.Make (struct
       let type_field_name = "type"
       let value_field_name = "payload"
       let known_tags =
@@ -107,7 +107,7 @@ module Adapter = struct
     end)
 
   module Hook =
-    Atdgen_runtime.Util.Json.Adapter.Type_and_value_fields.Make (struct
+    Atdgen_runtime.Json_adapter.Type_and_value_fields.Make (struct
       let type_field_name = "name"
       let value_field_name = "config"
       let known_tags = Some (["web"], "Unknown")

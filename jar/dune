@@ -1,12 +1,10 @@
-(jbuild_version 1)
-
 (executables
- ((libraries (cohttp-lwt-unix github_unix cmdliner lambda-term))
+ (libraries cohttp-lwt-unix github_unix cmdliner lambda-term)
   (package github-unix)
   (flags (:standard -principal -strict-sequence -g -safe-string
                     -w "A-E-41-42-44-48"))
   (public_names
-   (git-create-release
+   git-create-release
     git-sync-releases
     git-upload-release
     git-list-releases
@@ -14,9 +12,9 @@
     git-list-issues
     git-jar
     git-search
-    git-listen-events))
+    git-listen-events)
   (names
-   (create_release
+   create_release
     sync_releases
     upload_release
     list_releases
@@ -24,4 +22,4 @@
     list_issues
     jar
     search
-    listen_events))))
+    listen_events))

@@ -10,8 +10,7 @@ env:
    - DEPOPTS="github-unix github-jsoo"
  matrix:
    - DISTRO=debian-stable OCAML_VERSION=4.07 PACKAGE="github" REVDEPS=true
-   - DISTRO=debian-testing OCAML_VERSION=4.06 PACKAGE="github-unix" REVDEPS=true
-   - DISTRO=debian-unstable OCAML_VERSION=4.04 PACKAGE="github-unix"
+   - DISTRO=debian-stable OCAML_VERSION=4.06 PACKAGE="github-unix" REVDEPS=true
    - DISTRO=ubuntu OCAML_VERSION=4.05 PACKAGE="github-unix"
    - DISTRO=ubuntu-lts OCAML_VERSION=4.05 PACKAGE="github-unix"
    - DISTRO=centos OCAML_VERSION=4.04 PACKAGE="github-unix"

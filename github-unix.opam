@@ -1,5 +1,10 @@
-opam-version: "1.2"
+opam-version: "2.0"
 maintainer: "anil@recoil.org"
+synopsis: "GitHub APIv3 Unix library"
+description: """
+This library provides an OCaml interface to the [GitHub APIv3](https://developer.github.com/v3/)
+(JSON).  This package installs the Unix (Lwt) version.
+"""
 authors: [
   "Anil Madhavapeddy"
   "David Sheets"
@@ -11,24 +16,12 @@ authors: [
   "Jeremy Yallop"
   "Dave Tucker"
 ]
-homepage:    "https://github.com/mirage/ocaml-github"
+tags: ["org:mirage" "org:xapi-project" "git"]
+homepage: "https://github.com/mirage/ocaml-github"
+doc: "https://mirage.github.io/ocaml-github/"
 bug-reports: "https://github.com/mirage/ocaml-github/issues"
-dev-repo:    "https://github.com/mirage/ocaml-github.git"
-doc:         "https://mirage.github.io/ocaml-github/"
-
-tags: [
-  "org:mirage"
-  "org:xapi-project"
-  "git"
-]
-build: [
-  ["dune" "subst"] {pinned}
-  ["dune" "build" "-p" name "-j" jobs]
-]
-build-test: [
-  ["dune" "runtest" "-p" name]
-]
 depends: [
+  "ocaml" {>= "4.03.0"}
   "dune" {build}
   "github"
   "cohttp-lwt-unix"
@@ -37,4 +30,9 @@ depends: [
   "cmdliner" {>= "0.9.8"}
   "base-unix"
 ]
-available: [ ocaml-version >= "4.03.0" ]
+build: [
+  ["dune" "subst"] {pinned}
+  ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "runtest" "-p" name] {with-test}
+]
+dev-repo: "git+https://github.com/mirage/ocaml-github.git"

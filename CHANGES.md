@@ -4,6 +4,7 @@
 - Port build system to Dune (@avsm)
 - Properly expose the GitHub JavaScript library and fix dependencies (#216 by @samoht)
 - Add `pull.merge_commit_sha` (#217 from @AltGr)
+- Convert local opam files to the 2.0 format. (@avsm)
 
 ## 3.1.0 (2018-02-14)
 

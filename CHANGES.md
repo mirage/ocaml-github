@@ -1,7 +1,9 @@
-## dev
+## 4.0.0 (2018-12-11)
 
-- Port to latest Atd 2.0.0 interfaces
-- Port build system to Dune
+- Port to latest Atd 2.0.0 interfaces (#218 by @mjambon and @avsm)
+- Port build system to Dune (@avsm)
+- Properly expose the GitHub JavaScript library and fix dependencies (#216 by @samoht)
+- Add `pull.merge_commit_sha` (#217 from @AltGr)
 
 ## 3.1.0 (2018-02-14)
 

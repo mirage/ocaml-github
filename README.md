@@ -77,16 +77,16 @@ Your Github application can now use it via the `Github_cookie_jar` module:
 
 ```ocaml
 # #require "github.unix";;
-# Github_cookie_jar.get ~name:"rwo";;
-- : Github_t.auth option = Some
-  { Github_t.auth_scopes = [`Public_repo];
-    Github_t.auth_token = "<token>";
-    Github_t.auth_app = {
-      Github_t.app_name = "Real World OCaml";
-      Github_t.app_url = "http://realworldocaml.org/" };
-    Github_t.auth_url = "https://api.github.com/authorizations/236241";
-    Github_t.auth_id = 236241; Github_t.auth_note = None;
-    Github_t.auth_note_url = None }
+# Github_cookie_jar.(init () |> Lwt_main.run |> get ~name:"rwo");;
+- : Github_t.auth option = 
+Some
+ {Github_t.auth_scopes = [`Public_repo];
+  auth_token = "<token>";
+  auth_app =
+   {Github_t.app_name = "Real World OCaml";
+    app_url = "https://developer.github.com/v3/oauth_authorizations/"};
+  auth_url = "https://api.github.com/authorizations/236241";
+  auth_id = 236241; auth_note = Some "rwo"; auth_note_url = None}
 ```
 
 ## Manipulate GitHub releases

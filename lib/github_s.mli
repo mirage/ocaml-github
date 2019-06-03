@@ -644,6 +644,13 @@ module type Github = sig
     (** [user_orgs ~user ()] is a stream of the organizations
          to which the user [user] belongs. *)
 
+    val current_user_orgs:
+      ?token:Token.t ->
+      unit -> Github_t.org Stream.t
+    (** [current_user ()] is a stream of the organizations to which
+        the user linked to current token belongs, and for which the user
+        granted access to the organizations to the current token. *)
+
     (** The [Hook] module provides access to GitHub's
         {{:https://developer.github.com/v3/orgs/hooks/}organization
         webhooks API} which lets you manage an organization's

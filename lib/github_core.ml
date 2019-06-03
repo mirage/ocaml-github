@@ -448,7 +448,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
     type error =
       | Generic of (C.Response.t * string)
       | Semantic of C.Code.status_code * Github_t.message
-      | Bad_response of exn * [ `None | `Json of Yojson.Basic.json | `Raw of string ]
+      | Bad_response of exn * [ `None | `Json of Yojson.Basic.t | `Raw of string ]
     type request = {
       meth: C.Code.meth; uri: Uri.t;
       headers: C.Header.t; body: string;

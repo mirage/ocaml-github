@@ -28,7 +28,7 @@ module M = Github.Monad
 
 let gist_version = "0.1.0"
 
-let very_pretty_json s = Json.to_string (Yojson.Safe.from_string s :> Yojson.json)
+let very_pretty_json s = Json.to_string (Yojson.Safe.from_string s :> Yojson.t)
 let quite_pretty_json s = Yojson.Safe.pretty_to_string (Yojson.Safe.from_string s)
 let pretty_json pretty = if pretty then very_pretty_json else quite_pretty_json
 
@@ -37,7 +37,7 @@ module Passwd = struct
 
   class read_password term = object(self)
     inherit LTerm_read_line.read_password () as super
-    inherit [Zed_utf8.t] LTerm_read_line.term term
+    inherit [Zed_string.t] LTerm_read_line.term term
 
     method! send_action = function
       | LTerm_read_line.Break ->
@@ -46,7 +46,7 @@ module Passwd = struct
       | action ->
           super#send_action action
     initializer
-      self#set_prompt (S.const (LTerm_text.of_string "Enter Github password: "))
+      self#set_prompt (S.const (LTerm_text.of_utf8 "Enter Github password: "))
   end
 
   let get =
@@ -56,7 +56,7 @@ module Passwd = struct
       Lazy.force LTerm.stdout >>= fun term ->
       (new read_password term)#run >>= fun p ->
       print_endline "";
-      return p
+      return (Zed_string.to_utf8 p)
     |p -> return p
 end
 

@@ -23,7 +23,7 @@ let tuple = { list with
 let variant = { list with
 		  space_before_closing = false; }
 
-let rec format std (x : Yojson.json) =
+let rec format std (x : Yojson.t) =
   match x with
       `Null -> Atom ("null", atom)
     | `Bool x -> Atom ((if x then "true" else "false"), atom)
@@ -75,7 +75,7 @@ let format ?(std = false) x =
     Yojson.json_error
       "Root is not an object or array as requested by the JSON standard"
   else
-    format std (x :> Yojson.json)
+    format std (x :> Yojson.t)
 
 let to_string ?std x =
   Easy_format.Pretty.to_string (format ?std x)

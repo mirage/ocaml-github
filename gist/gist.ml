@@ -28,7 +28,7 @@ module M = Github.Monad
 
 let gist_version = "0.1.0"
 
-let very_pretty_json s = Json.to_string (Yojson.Safe.from_string s :> Yojson.json)
+let very_pretty_json s = Json.to_string (Yojson.Safe.from_string s :> Yojson.t)
 let quite_pretty_json s = Yojson.Safe.pretty_to_string (Yojson.Safe.from_string s)
 let pretty_json pretty = if pretty then very_pretty_json else quite_pretty_json
 

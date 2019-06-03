@@ -632,7 +632,7 @@ type issue_comment_action = [
   | Created <json name="created">
   | Edited <json name="edited"> of body_changes
   | Deleted <json name="deleted">
-  | Unknown of (string * json nullable)
+  | Unknown of (string * t nullable)
 ]
 
 type issue_comment_event = {
@@ -651,7 +651,7 @@ type issues_action = [
   | Edited <json name="edited"> of ticket_changes
   | Closed <json name="closed">
   | Reopened <json name="reopened">
-  | Unknown of (string * json nullable)
+  | Unknown of (string * t nullable)
 ]
 
 type issues_event = {
@@ -704,7 +704,7 @@ type pull_request_action = [
   | Closed <json name="closed">
   | Reopened <json name="reopened">
   | Synchronize <json name="synchronize">
-  | Unknown of (string * json nullable)
+  | Unknown of (string * t nullable)
 ]
 
 type pull_request_event = {
@@ -718,7 +718,7 @@ type pull_request_review_comment_action = [
   | Created <json name="created">
   | Edited <json name="edited"> of body_changes
   | Deleted <json name="deleted">
-  | Unknown of (string * json nullable)
+  | Unknown of (string * t nullable)
 ]
 
 type pull_request_review_comment = {
@@ -936,7 +936,7 @@ type event_constr = [
   | Watch <json name="WatchEvent"> of watch_event
 
   (* Catch-all *)
-  | Unknown of (string * json nullable)
+  | Unknown of (string * t nullable)
 ]
 
 type event = {
@@ -984,7 +984,7 @@ type event_hook_constr = [
   | Watch <json name="WatchEvent"> of watch_event
 
   (* Catch-all for unsupported event types *)
-  | Unknown of (string * json nullable)
+  | Unknown of (string * t nullable)
 ]
 
 type event_hook_metadata = {
@@ -1008,11 +1008,11 @@ type web_hook_config = {
   ?secret: string option;
 } <ocaml field_prefix="web_hook_config_">
 
-type json <ocaml module="Yojson.Safe"> = abstract
+type t <ocaml module="Yojson.Safe"> = abstract
 
 type hook_config = [
   | Web <json name="web"> of web_hook_config
-  | Unknown of (string * json nullable)
+  | Unknown of (string * t nullable)
 ]
 
 type hook = {

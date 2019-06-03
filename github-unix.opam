@@ -24,7 +24,7 @@ depends: [
   "ocaml" {>= "4.03.0"}
   "dune" 
   "github" {=version}
-  "cohttp-lwt-unix" {>="1.2.0"}
+  "cohttp-lwt-unix"
   "stringext"
   "lambda-term" {>="2.0"}
   "cmdliner" {>= "0.9.8"}

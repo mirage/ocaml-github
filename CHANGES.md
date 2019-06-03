@@ -1,3 +1,8 @@
+## dev
+
+- Switch to dune-release instead of topkg (@avsm)
+- Do not use deprecated `Yojson.Safe.json` (@avsm)
+
 ## 4.0.0 (2018-12-11)
 
 - Port to latest Atd 2.0.0 interfaces (#218 by @mjambon and @avsm)

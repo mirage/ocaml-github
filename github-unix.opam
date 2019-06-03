@@ -26,7 +26,7 @@ depends: [
   "github" {=version}
   "cohttp-lwt-unix" {>="1.2.0"}
   "stringext"
-  "lambda-term" {>="2.0.0"}
+  "lambda-term" {>="2.0"}
   "cmdliner" {>= "0.9.8"}
   "base-unix"
 ]

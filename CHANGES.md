@@ -1,8 +1,9 @@
-## dev
+## 4.1.0 (2019-06-03)
 
-- Switch to dune-release instead of topkg (@avsm)
-- Do not use deprecated `Yojson.Safe.json` (@avsm)
-- Support lambda-term/zed 2.0.0 interfaces (@avsm)
+- Add the interface for `/user/orgs` (#222 @Aaylor)
+- Switch to dune-release instead of topkg (#224 @avsm)
+- Do not use deprecated `Yojson.Safe.json` (#224 @avsm)
+- Support lambda-term/zed 2.0.0 interfaces (#224 @avsm)
 
 ## 4.0.0 (2018-12-11)
 

@@ -2,6 +2,7 @@
 
 - Switch to dune-release instead of topkg (@avsm)
 - Do not use deprecated `Yojson.Safe.json` (@avsm)
+- Support lambda-term/zed 2.0.0 interfaces (@avsm)
 
 ## 4.0.0 (2018-12-11)
 

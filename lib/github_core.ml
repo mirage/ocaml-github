@@ -212,6 +212,9 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
     let repos =
       Uri.of_string (Printf.sprintf "%s/user/repos" api)
 
+    let orgs =
+      Uri.of_string (Printf.sprintf "%s/user/orgs" api)
+
     let repo ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s" api user repo)
 
@@ -1270,6 +1273,10 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
 
     let user_orgs ?token ~user () =
       let uri = URI.user_orgs ~user in
+      API.get_stream ?token ~uri (fun b -> return (orgs_of_string b))
+
+    let current_user_orgs ?token () =
+      let uri = URI.orgs in
       API.get_stream ?token ~uri (fun b -> return (orgs_of_string b))
   end
 

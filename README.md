@@ -203,6 +203,7 @@ $ git upload-release mirage ocaml-uri v1.4.0 release.tar.gz
  * [List teams](https://developer.github.com/v3/orgs/teams/#list-teams)
  * [Get team](https://developer.github.com/v3/orgs/teams/#get-team)
  * [List team repos](https://developer.github.com/v3/orgs/teams/#list-team-repos)
+ * [List your organizations](https://developer.github.com/v3/orgs/#list-your-organizations)
  * [List (public) user organizations](https://developer.github.com/v3/orgs/#list-user-organizations)
  * [Webhooks](https://developer.github.com/v3/orgs/hooks/)
 

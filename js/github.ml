@@ -17,7 +17,7 @@
 
 module Time = struct
   let now = Unix.gettimeofday
-  let sleep = Lwt_js.sleep
+  let sleep = Js_of_ocaml_lwt.Lwt_js.sleep
 end
 
 module Env = struct

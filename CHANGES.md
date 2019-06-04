@@ -4,6 +4,7 @@
 - Switch to dune-release instead of topkg (#224 @avsm)
 - Do not use deprecated `Yojson.Safe.json` (#224 @avsm)
 - Support lambda-term/zed 2.0.0 interfaces (#224 @avsm)
+- Use wrapped `js_of_ocaml` 3.4.0 interfaces (@avsm)
 
 ## 4.0.0 (2018-12-11)
 

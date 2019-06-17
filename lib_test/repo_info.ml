@@ -14,6 +14,14 @@ let t =
       | None -> ""
     in
     eprintf "repo %s\n" descr;
+    begin match info.repository_permissions with
+      | Some permissions ->
+        eprintf "permissions admin(%B) push(%B) pull(%B)\n"
+          permissions.repository_permissions_admin
+          permissions.repository_permissions_push
+          permissions.repository_permissions_pull
+      | None -> ()
+    end;
     let branches = Repo.branches ~token ~user:"ocaml" ~repo:"opam" () in
     Stream.to_list branches
     >>= fun branches ->

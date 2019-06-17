@@ -388,6 +388,12 @@ type new_repo = {
   ?license_template : string option;
 } <ocaml field_prefix="new_repo_">
 
+type repository_permissions = {
+  admin: bool;
+  push: bool;
+  pull: bool
+} <ocaml field_prefix="repository_permissions_">
+
 type repository = {
   owner: user;
   full_name: string;
@@ -416,6 +422,7 @@ type repository = {
   has_wiki: bool;
   has_downloads: bool;
   has_pages: bool;
+  ?permissions: repository_permissions option;
   inherit repo
 } <ocaml field_prefix="repository_">
 

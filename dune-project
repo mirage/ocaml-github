@@ -37,7 +37,7 @@ JavaScript via [js_of_ocaml](http://ocsigen.org/js_of_ocaml)."))
  (depends
   (ocaml (>= 4.03.0))
   (dune (>= 1.10))
-  (github (= version))
+  (github (= :version))
   (cohttp (>= 0.99.0))
   (cohttp-lwt-jsoo (>= 0.99.0))
   (js_of_ocaml-lwt (>= 3.4.0)))
@@ -51,7 +51,7 @@ JavaScript via [js_of_ocaml](http://ocsigen.org/js_of_ocaml)."))
  (depends
   (ocaml (>= 4.03.0))
   (dune (>= 1.10))
-  (github (= version))
+  (github (= :version))
   (cohttp (>= 0.99.0))
   (cohttp-lwt-unix (>= 0.99.0))
   stringext

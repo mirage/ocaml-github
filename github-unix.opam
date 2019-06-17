@@ -30,7 +30,7 @@ This library provides an OCaml interface to the [GitHub APIv3](https://developer
 depends: [
   "ocaml" {>= "4.03.0"}
   "dune" {>= "1.10"}
-  "github" {= "version"}
+  "github" {= version}
   "cohttp" {>= "0.99.0"}
   "cohttp-lwt-unix" {>= "0.99.0"}
   "stringext"

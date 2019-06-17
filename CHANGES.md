@@ -1,7 +1,7 @@
 ## 4.2.0 (2019-06-17)
 
 - Add repository permissions support (#226 @Aaylor)
-- Regenerate opam files automatically via dune-project (@avsm)
+- Regenerate opam files automatically via dune-project (#227 @avsm)
 
 ## 4.1.0 (2019-06-03)
 

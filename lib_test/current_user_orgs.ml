@@ -9,6 +9,7 @@ let t = Github.(Monad.(run (
     | None -> Printf.eprintf "no orgs for current user\n"; exit 1
     | Some (first_org, _) ->
       Printf.eprintf "org %Ld: %s\n%!" first_org.org_id first_org.org_login;
+      assert (first_org.org_ty = `Org);
       return ()
 )))
 

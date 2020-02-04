@@ -262,7 +262,12 @@ module type Github = sig
       tokens} and
       {{:https://help.github.com/articles/creating-an-access-token-for-command-line-use/}"personal
       tokens"}.
+
+      Note: the OAuth Authorizations API has been deprecated by GitHub.
+
       @see <https://developer.github.com/v3/oauth_authorizations/> OAuth Authorizations API
+      @see <https://developer.github.com/changes/2019-11-05-deprecated-passwords-and-authorizations-api/#deprecating-and-adding-endpoints-for-the-oauth-authorizations-and-oauth-applications-apis>
+      for the OAuth Authorizations deprecation.
   *)
   module Token : sig
     type t

@@ -489,25 +489,29 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
     let error err = Err err
     let response r = Response r
     let request ?token ?(params=[]) ({ uri; _ } as req) reqfn =
-      let uri = Uri.add_query_params' uri begin match token with
-        | None -> params
-        | Some token -> ("access_token", token)::params
-      end in Request ({req with uri}, reqfn)
+      let uri = Uri.add_query_params' uri params in
+      Request ({req with uri}, reqfn)
 
-    let add_ua hdrs ua =
-      let hdrs = C.Header.prepend_user_agent hdrs (user_agent^" "^C.Header.user_agent) in
-      match ua with
-        | None -> hdrs
-        | Some ua -> C.Header.prepend_user_agent hdrs ua
+    let prepare_headers state headers =
+      (* Add User-Agent *)
+      let headers =
+        C.Header.prepend_user_agent
+          headers
+          (user_agent^" "^C.Header.user_agent)
+      in
+      let headers =
+        match state.user_agent with
+        | None -> headers
+        | Some ua -> C.Header.prepend_user_agent headers ua
+      in
+      (* Add access token *)
+      match state.token with
+      | None -> headers
+      | Some token -> C.Header.add headers "Authorization" ("token " ^ token)
 
     let prepare_request state ({ headers; uri; _} as req) =
       { req with
-        headers=add_ua headers state.user_agent;
-        uri=if List.mem_assoc "access_token" (Uri.query req.uri)
-            then uri
-            else match state.token with
-              | Some token -> Uri.add_query_param' uri ("access_token",token)
-              | None -> uri
+        headers=prepare_headers state headers;
       }
 
     let rec bind fn x = fun state -> x state >>= function
@@ -805,9 +809,14 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
     let code_handler ~expected_code handler =
       (fun (res,_) -> C.Response.status res = expected_code), handler
 
-    (* Add the correct mime-type header *)
-    let realize_headers ?(media_type="application/vnd.github.v3+json") headers =
-      C.Header.add_opt headers "accept" media_type
+    (* Add the correct mime-type header and the authentication token. *)
+    let realize_headers
+        ?token ?(media_type="application/vnd.github.v3+json")
+        headers =
+      let headers = C.Header.add_opt headers "accept" media_type in
+      match token with
+      | None -> headers
+      | Some token -> C.Header.add headers "Authorization" ("token " ^ token)
 
     let idempotent meth
         ?(rate=Core) ?media_type ?headers ?token ?params ~fail_handlers ~expected_code ~uri
@@ -815,7 +824,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
       fun state -> Lwt.return
         (state,
          (Monad.(request ?token ?params
-                   {meth; uri; headers=realize_headers ?media_type headers; body=""})
+                   {meth; uri; headers=realize_headers ?token ?media_type headers; body=""})
             (request ~rate ~token
                ((code_handler ~expected_code fn)::fail_handlers))))
 

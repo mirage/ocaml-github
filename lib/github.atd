@@ -109,10 +109,16 @@ type direction = [
   | Desc <json name="desc">
 ]
 
+type user_type = [
+  | User <json name="User">
+  | Org <json name="Organization">
+]
+
 type org = {
   login: string;
   id: int <ocaml repr="int64">;
   url: string;
+  ty <json name="type">: user_type;
   ?avatar_url: string option;
 } <ocaml field_prefix="org_">
 
@@ -151,7 +157,6 @@ type user_info = {
   html_url: string;
   created_at: string;
   updated_at: string;
-  (*ty <json name="type">: user_type;*)
   inherit linked_user
 } <ocaml field_prefix="user_info_">
 

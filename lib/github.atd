@@ -118,14 +118,15 @@ type org = {
   login: string;
   id: int <ocaml repr="int64">;
   url: string;
-  ty <json name="type">: user_type;
+  ~ty <json name="type"> <ocaml default="`Org">: user_type;
   ?avatar_url: string option;
 } <ocaml field_prefix="org_">
 
 type orgs = org list
 
 type user = {
-  inherit org
+  inherit org;
+  ~ty <json name="type"> <ocaml default="`User">: user_type;
 } <ocaml field_prefix="user_">
 
 type linked_user = {

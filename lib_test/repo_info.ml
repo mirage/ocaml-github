@@ -3,6 +3,8 @@ open Github_t
 
 let token = Config.access_token
 
+let opam_first_commit = "3656b4d1b03a8ae356cf82f7052f1976df8787be"
+
 let t =
   let open Github in
   let open Monad in
@@ -29,7 +31,15 @@ let t =
       eprintf "branch %s %s\n"
         b.repo_branch_name
         b.repo_branch_commit.repo_commit_sha
-    ) branches;
+      ) branches;
+    Repo.get_commit ~token ~user:"ocaml" ~repo:"opam" ~sha:opam_first_commit ()
+    >>~ fun commit ->
+    eprintf
+      "opam first commit author date: %s\n"
+      commit.commit_git.git_commit_author.info_date;
+    eprintf
+      "opam first commit committer date: %s\n"
+      commit.commit_git.git_commit_author.info_date;
     return ()
   )
 

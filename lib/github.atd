@@ -360,6 +360,7 @@ type tag = {
 type git_commit = {
   url: string;
   author: info;
+  committer: info;
   message: string;
 } <ocaml field_prefix="git_commit_">
 

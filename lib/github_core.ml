@@ -533,8 +533,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
       | _, Request (_,_) -> Lwt.fail (Failure "Impossible: can't run unapplied request")
       | _, Response r -> Lwt.return r
       | _, Err (Semantic (status,msg)) -> Lwt.(fail (Message (status,msg)))
-      | _, Err e -> Lwt.(error_to_string e >>= fun err ->
-                           Printf.eprintf "%s%!" err; fail (Failure err))
+      | _, Err e -> Lwt.(error_to_string e >>= fun err -> fail (Failure err))
 
     let (>>=) m f = bind f m
     let (>|=) m f = map f m

@@ -1,6 +1,6 @@
 ## ocaml-github: GitHub APIv3 OCaml Library
 
-[![Build Status](https://travis-ci.org/mirage/ocaml-github.svg)](https://travis-ci.org/mirage/ocaml-github)
+[![OCaml-CI Build Status](https://img.shields.io/endpoint?url=https://ci.ocamllabs.io/badge/mirage/ocaml-github/master&logo=ocaml)](https://ci.ocamllabs.io/github/mirage/ocaml-github/)
 [![docs](https://img.shields.io/badge/doc-online-blue.svg)](https://mirage.github.io/ocaml-github/)
 
 This library provides an OCaml interface to the [GitHub

@@ -1,3 +1,9 @@
+## 4.3.1 (2020-08-18)
+
+- Fix a bug introduced by #228, by adding a default value when `user_type` is
+  not defined (#232 @Aaylor)
+- Do not print errors on `stderr`. (#234 @emillon)
+
 ## 4.3.0 (2020-07-20)
 
 - Remove deprecated authentication method as GitHub has removed

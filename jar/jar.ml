@@ -146,7 +146,7 @@ let revoke_auth user pass name_or_id =
 let user = Arg.(required & pos 0 (some string) None & info [] ~docv:"USERNAME"
                   ~doc:"GitHub username.")
 let pass = Arg.(
-  value & opt string "" & info ["p";"password"] ~docv:"PASSWORD"
+  value & opt (some string) None & info ["p";"password"] ~docv:"PASSWORD"
     ~doc:"GitHub password. If not specified, this will be obtained interactively."
 )
 let name_or_id = Arg.(

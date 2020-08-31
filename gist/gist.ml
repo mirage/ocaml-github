@@ -225,8 +225,8 @@ let gist_get _auth_id _user _pass _token_name _json _pretty _gist_id _file_or_di
 let user = Arg.(value & opt string "" & info ["u";"username"] ~docv:"USERNAME"
                   ~doc:"Authentication username.")
 
-let pass = Arg.(value & opt string "" & info ["p";"password"] ~docv:"PASSWORD"
-                  ~doc:"Authentication password.")
+let pass = Arg.(value & opt (some string) None & info ["p";"password"]
+                  ~docv:"PASSWORD" ~doc:"Authentication password.")
 
 let auth_id = Arg.(value & opt string "" & info ["a";"auth-id"] ~docv:"AUTH-ID"
                   ~doc:"GitHub cookie jar token name.")

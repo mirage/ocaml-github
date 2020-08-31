@@ -9,5 +9,5 @@ let get ~prompt =
   input
 
 let get_if_unset ~prompt = function
-  | "" -> get ~prompt
-  | p -> Lwt.return p
+  | None -> get ~prompt
+  | Some p -> Lwt.return p

@@ -55,7 +55,6 @@ JavaScript via [js_of_ocaml](http://ocsigen.org/js_of_ocaml)."))
   (cohttp (>= 0.99.0))
   (cohttp-lwt-unix (>= 0.99.0))
   stringext
-  (lambda-term (>= 2.0))
   (cmdliner (>= 0.9.8))
   base-unix)
  (synopsis "GitHub APIv3 Unix library")

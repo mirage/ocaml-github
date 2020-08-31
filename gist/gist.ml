@@ -32,34 +32,6 @@ let very_pretty_json s = Json.to_string (Yojson.Safe.from_string s :> Yojson.t)
 let quite_pretty_json s = Yojson.Safe.pretty_to_string (Yojson.Safe.from_string s)
 let pretty_json pretty = if pretty then very_pretty_json else quite_pretty_json
 
-module Passwd = struct
-  open Lwt_react
-
-  class read_password term = object(self)
-    inherit LTerm_read_line.read_password () as super
-    inherit [Zed_string.t] LTerm_read_line.term term
-
-    method! send_action = function
-      | LTerm_read_line.Break ->
-          (* Ignore Ctrl+C *)
-          ()
-      | action ->
-          super#send_action action
-    initializer
-      self#set_prompt (S.const (LTerm_text.of_utf8 "Enter Github password: "))
-  end
-
-  let get =
-    function
-    |"" ->
-      LTerm_inputrc.load () >>= fun () ->
-      Lazy.force LTerm.stdout >>= fun term ->
-      (new read_password term)#run >>= fun p ->
-      print_endline "";
-      return (Zed_string.to_utf8 p)
-    |p -> return p
-end
-
 exception Auth_token_not_found of string
 exception Gist_file_not_found of string
 
@@ -92,7 +64,7 @@ let complete_2fa c =
 (* find a personal access token with either the given name,
  * or the first one to include Gist scope *)
 let get_personal_access_token_from_github user pass token_name =
-  Passwd.get pass >>= fun pass ->
+  Passwd.get_if_unset ~prompt:"Enter Github password: " pass >>= fun pass ->
   M.run (complete_2fa (G.Token.get_all ~user ~pass)) >>= fun tokens ->
   try
     match token_name with

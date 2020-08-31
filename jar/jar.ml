@@ -19,6 +19,8 @@ open Cmdliner
 open Printf
 open Lwt
 
+let prompt = "Enter Github password: "
+
 (* Cmdliner converter for Github scope lists *)
 let scope =
   let parse s =
@@ -48,7 +50,7 @@ let list_auth user pass =
   Lwt_main.run (
     Github_cookie_jar.init ()
     >>= fun jar ->
-    Passwd.get pass
+    Passwd.get_if_unset ~prompt pass
     >>= fun (pass : string) ->
     Github.(Monad.(run (complete_2fa (Token.get_all ~user ~pass))))
     >>= fun auths ->
@@ -95,7 +97,7 @@ let make_auth
   Lwt_main.run (
     Github_cookie_jar.init ()
     >>= fun jar ->
-    Passwd.get pass
+    Passwd.get_if_unset ~prompt pass
     >>= fun pass ->
     Github.Monad.run
       (complete_2fa
@@ -127,7 +129,7 @@ let revoke_auth user pass name_or_id =
            exit 1
         ))
     >>= fun id ->
-    Passwd.get pass
+    Passwd.get_if_unset ~prompt pass
     >>= fun pass ->
     Github.Monad.run (complete_2fa (Github.Token.delete ~user ~pass ~id))
     >>= fun () ->

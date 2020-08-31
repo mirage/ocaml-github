@@ -1,5 +1,5 @@
 (executables
- (libraries cohttp-lwt-unix github_unix cmdliner lambda-term)
+ (libraries cohttp-lwt-unix github_unix cmdliner passwd)
   (flags (:standard -principal -strict-sequence -g -safe-string
                     -w "A-E-41-42-44-48"))
   (public_names git-gist)

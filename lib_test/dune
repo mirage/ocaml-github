@@ -5,6 +5,8 @@
   (names 
    current_user
    current_user_orgs
+   organizations
+   organization_repos
     rwo
     get_token
     repo_info
@@ -18,6 +20,8 @@
   (deps
    current_user.exe
    current_user_orgs.exe
+   organizations.exe
+   organization_repos.exe
     rwo.exe
     get_token.exe
     repo_info.exe

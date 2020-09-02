@@ -1,10 +1,9 @@
-open Lwt
 open Printf
 open Github_t
 
 let token = Config.access_token
 
-let org = "hammerlab"
+let org = "mirage"
 
 let t = Github.(Monad.(run (
   let get_teams = Organization.teams ~token:token ~org in

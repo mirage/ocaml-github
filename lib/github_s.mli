@@ -656,6 +656,14 @@ module type Github = sig
         the user linked to current token belongs, and for which the user
         granted access to the organizations to the current token. *)
 
+    val repositories:
+      ?token:Token.t ->
+      org:string  ->
+      unit ->
+      Github_t.repository Stream.t
+    (** [repositories ~org ()] is a stream of repositories belonging to the
+        organization [org]. *)
+
     (** The [Hook] module provides access to GitHub's
         {{:https://developer.github.com/v3/orgs/hooks/}organization
         webhooks API} which lets you manage an organization's

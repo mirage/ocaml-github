@@ -974,7 +974,47 @@ module type Github = sig
       unit -> Github_t.contributor_stats Stream.t
     (** [contributors ~user ~repo ()] is a stream of all contributor
         statistics for [user]/[repo]. The stream is empty if the
-        data are not cached yet *)
+        data are not cached yet. *)
+
+    val yearly_commit_activity :
+      ?token:Token.t ->
+      user:string -> repo:string ->
+      unit -> Github_t.commit_activity Stream.t
+    (** [yearly_commit_activity ~user ~repo ()] returns the last year of commit activity
+        grouped by week for [user]/[repo]. The days array is a group of commits per day,
+        starting on Sunday. The stream is empty if the
+        data are not cached yet. *)
+
+    val weekly_commit_activity :
+      ?token:Token.t ->
+      user:string -> repo:string ->
+      unit -> Github_t.code_frequency Stream.t
+    (** [weekly_commit_activity ~user ~repo ()] returns a weekly aggregate of the number of
+        additions and deletions pushed to [user]/[repo]. The stream is empty if the
+        data are not cached yet. *)
+
+    val weekly_commit_count :
+      ?token:Token.t ->
+      user:string -> repo:string ->
+      unit -> Github_t.participation Response.t Monad.t
+    (** [weekly_commit_count ~user ~repo ()] returns the total commit counts for the owner
+        and total commit counts in all. all is everyone combined, including the owner in the
+        last 52 weeks. If you'd like to get the commit counts for non-owners, you can subtract owner from all.
+
+        The array order is oldest week (index 0) to most recent week.*)
+
+    val hourly_commit_count :
+      ?token:Token.t ->
+      user:string -> repo:string ->
+      unit -> Github_t.punch_card Stream.t
+    (** [hourly_commit_count ~user ~repo ()] returns the hourly commit count for each day.
+        Each array contains the day number, hour number, and number of commits:
+         - 0-6: Sunday - Saturday
+         - 0-23: Hour of day
+         - Number of commits
+        For example, [2, 14, 25] indicates that there were 25 total commits, during
+        the 2:00pm hour on Tuesdays. All times are based on the time zone of individual commits.*)
+
   end
 
   (** The [Status] module provides the functionality of GitHub's

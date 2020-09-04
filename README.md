@@ -246,6 +246,11 @@ $ git upload-release mirage ocaml-uri v1.4.0 release.tar.gz
  * [Collaborators](https://developer.github.com/v3/repos/collaborators/)
  * [List organization
    repositories](https://developer.github.com/v3/repos/#list-organization-repositories)
+ * [Get the last year of commit activity
+   data](https://developer.github.com/v3/repos/statistics/#get-the-last-year-of-commit-activity-data) (see [#86](https://github.com/mirage/ocaml-github/issues/86))
+ * [Get the number of additions and deletions per week](https://developer.github.com/v3/repos/statistics/#get-the-number-of-additions-and-deletions-per-week) (see [#86](https://github.com/mirage/ocaml-github/issues/86))
+ * [Get the weekly commit count for the repository owner and everyone else](https://developer.github.com/v3/repos/statistics/#get-the-weekly-commit-count-for-the-repository-owner-and-everyone-else) (see [#86](https://github.com/mirage/ocaml-github/issues/86))
+ * [Get the number of commits per hour in each day](https://developer.github.com/v3/repos/statistics/#get-the-number-of-commits-per-hour-in-each-day) (see [#86](https://github.com/mirage/ocaml-github/issues/86))
 
 *Not yet supported*:
 
@@ -278,11 +283,6 @@ $ git upload-release mirage ocaml-uri v1.4.0 release.tar.gz
    asset](https://developer.github.com/v3/repos/releases/#edit-a-release-asset)
  * [Delete a release
    asset](https://developer.github.com/v3/repos/releases/#delete-a-release-asset)
- * [Get the last year of commit activity
-   data](https://developer.github.com/v3/repos/statistics/#get-the-last-year-of-commit-activity-data) (see [#86](https://github.com/mirage/ocaml-github/issues/86))
- * [Get the number of additions and deletions per week](https://developer.github.com/v3/repos/statistics/#get-the-number-of-additions-and-deletions-per-week) (see [#86](https://github.com/mirage/ocaml-github/issues/86))
- * [Get the weekly commit count for the repository owner and everyone else](https://developer.github.com/v3/repos/statistics/#get-the-weekly-commit-count-for-the-repository-owner-and-everyone-else) (see [#86](https://github.com/mirage/ocaml-github/issues/86))
- * [Get the number of commits per hour in each day](https://developer.github.com/v3/repos/statistics/#get-the-number-of-commits-per-hour-in-each-day) (see [#86](https://github.com/mirage/ocaml-github/issues/86))
  * [Ping a
    hook](https://developer.github.com/v3/repos/hooks/#ping-a-hook)
  * [PubSubHubbub](https://developer.github.com/v3/repos/hooks/#pubsubhubbub)

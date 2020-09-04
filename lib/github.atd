@@ -136,12 +136,33 @@ type linked_user = {
 
 type linked_users = linked_user list
 
+type commit_activity = {
+  days: int list;
+  total: int;
+  week: int
+} <ocaml field_prefix="commit_activity_">
+
+type commit_activities = commit_activity list
+
 type contributor = {
   contributions: int;
   inherit linked_user
 } <ocaml field_prefix="contributor_">
 
 type contributors = contributor list
+
+type code_frequency = int list
+
+type code_frequencies = code_frequency list
+
+type participation = {
+  all: int list;
+  owner: int list
+} <ocaml field_prefix="participation_">
+
+type punch_card = int list
+
+type punch_cards = punch_card list
 
 type user_info = {
   ?name: string option;

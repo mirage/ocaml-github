@@ -78,7 +78,7 @@ Your Github application can now use it via the `Github_cookie_jar` module:
 ```ocaml
 # #require "github.unix";;
 # Github_cookie_jar.(init () |> Lwt_main.run |> get ~name:"rwo");;
-- : Github_t.auth option = 
+- : Github_t.auth option =
 Some
  {Github_t.auth_scopes = [`Public_repo];
   auth_token = "<token>";
@@ -244,13 +244,13 @@ $ git upload-release mirage ocaml-uri v1.4.0 release.tar.gz
  * Most [Webhooks](https://developer.github.com/v3/repos/hooks/) endpoints
  * [Get contributors list with additions, deletions, and commit counts](https://developer.github.com/v3/repos/statistics/#get-contributors-list-with-additions-deletions-and-commit-counts)
  * [Collaborators](https://developer.github.com/v3/repos/collaborators/)
+ * [List organization
+   repositories](https://developer.github.com/v3/repos/#list-organization-repositories)
 
 *Not yet supported*:
 
  * [List your
    repositories](https://developer.github.com/v3/repos/#list-your-repositories)
- * [List organization
-   repositories](https://developer.github.com/v3/repos/#list-organization-repositories)
  * [List all public
    repositories](https://developer.github.com/v3/repos/#list-all-public-repositories)
  * [Edit](https://developer.github.com/v3/repos/#edit)

@@ -1286,6 +1286,12 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
     let current_user_orgs ?token () =
       let uri = URI.orgs in
       API.get_stream ?token ~uri (fun b -> return (orgs_of_string b))
+
+    let repositories ?token ~org () =
+      let uri = URI.org_repos ~org in
+      API.get_stream ?token ~uri (fun b ->
+          return (repositories_of_string b)
+        )
   end
 
   module Team = struct

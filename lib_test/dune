@@ -10,6 +10,7 @@
     rwo
     get_token
     repo_info
+    repo_stats
     contributors
     user_type))
 
@@ -25,5 +26,6 @@
     rwo.exe
     get_token.exe
     repo_info.exe
+    repo_stats.exe
     contributors.exe
     user_type.exe))

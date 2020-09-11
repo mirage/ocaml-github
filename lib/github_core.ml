@@ -232,7 +232,8 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
 
     let repo_tag ~user ~repo ~sha =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/git/tags/%s" api user repo sha)
-
+    let repo_tag_name ~user ~repo ~tag =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/releases/tags/%s" api user repo tag)
     let repo_branches ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/branches" api user repo)
 
@@ -538,8 +539,6 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
 
     let return r = fun state -> Lwt.return (state, Response r)
     let map f m = bind (fun x -> return (f x)) m
-
-    let with_error err = fun state -> Lwt.return (state, Err err)
 
     let initial_state = {user_agent=None; token=None}
 
@@ -1581,19 +1580,9 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
       let uri = URI.repo_release ~user ~repo ~id in
       API.get ?token ~uri (fun b -> return (release_of_string b))
 
-    (** We need to stream down releases until we find the target *)
     let get_by_tag_name ?token ~user ~repo ~tag () =
-      let open Monad in
-      let releases = for_repo ?token ~user ~repo () in
-      Stream.find (fun r -> r.release_tag_name = tag) releases
-      >>= function
-      | Some (r,_) -> return r
-      | None ->
-        let msg =
-          Printf.sprintf "tag %s not found in repository %s/%s" tag user repo
-        in
-        let msg = {Github_t.message_message=msg; message_errors=[]} in
-        with_error (Semantic (`Not_found,msg))
+      let uri = URI.repo_tag_name ~user ~repo ~tag in
+      API.get ?token ~uri (fun b -> return (release_of_string b))
 
     let get_latest ?token ~user ~repo () =
       let uri = URI.repo_release_latest ~user ~repo in

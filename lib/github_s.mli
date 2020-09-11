@@ -1475,7 +1475,7 @@ module type Github = sig
     val get_by_tag_name:
       ?token:Token.t ->
       user:string -> repo:string -> tag:string ->
-      unit -> Github_t.release Monad.t
+      unit -> Github_t.release Response.t Monad.t
     (** [get_by_tag_name ~user ~repo ~tag ()] is the release in repo
         [user]/[repo] which is using git tag [tag]. *)
 

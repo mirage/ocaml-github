@@ -23,7 +23,7 @@ let ask_github fn = Github.(Monad.run (fn ()))
 
 let upload_release token user repo tag content_type filename =
   let open Github_t in
-  ask_github (Github.Release.get_by_tag_name ~token ~user ~repo ~tag)
+  ask_github (Github.Release.get_by_tag_name ~token ~user ~repo ~tag) >|= Github.Response.value
   >>= fun r ->
   let id = r.release_id in
   print_endline (sprintf "uploading to release id %Ld" id);

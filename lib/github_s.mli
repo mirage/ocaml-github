@@ -1479,6 +1479,13 @@ module type Github = sig
     (** [get_by_tag_name ~user ~repo ~tag ()] is the release in repo
         [user]/[repo] which is using git tag [tag]. *)
 
+    val get_latest:
+      ?token:Token.t ->
+      user:string -> repo:string ->
+      unit -> Github_t.release Response.t Monad.t
+    (** [get_latest ~user ~repo ()] is the latest published full release
+        in [user]/[repo]. *)
+
     val create :
       ?token:Token.t ->
       user:string -> repo:string ->

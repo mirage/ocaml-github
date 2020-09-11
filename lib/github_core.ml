@@ -345,6 +345,9 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
     let repo_release ~user ~repo ~id =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/releases/%Ld" api user repo id)
 
+    let repo_release_latest ~user ~repo=
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/releases/latest" api user repo)
+
     let upload_release_asset ~user ~repo ~id =
       Uri.of_string (
         Printf.sprintf
@@ -1591,6 +1594,10 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
         in
         let msg = {Github_t.message_message=msg; message_errors=[]} in
         with_error (Semantic (`Not_found,msg))
+
+    let get_latest ?token ~user ~repo () =
+      let uri = URI.repo_release_latest ~user ~repo in
+      API.get ?token ~uri (fun b -> return (release_of_string b))
 
     let delete ?token ~user ~repo ~id () =
       let uri = URI.repo_release ~user ~repo ~id in

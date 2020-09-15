@@ -25,7 +25,7 @@ license: "MIT"
 dev-repo: "git+https://github.com/mirage/ocaml-github.git"
 synopsis: "GitHub APIv3 JavaScript library"
 description: """
-This library provides an OCaml interface to the [GitHub APIv3](https://developer.github.com/v3/)
+This library provides an OCaml interface to the [GitHub APIv3](https://docs.github.com/v3/)
 (JSON). This library installs the JavaScript version, which uses [js_of_ocaml](http://ocsigen.org/js_of_ocaml)."""
 depends: [
   "ocaml" {>= "4.03.0"}

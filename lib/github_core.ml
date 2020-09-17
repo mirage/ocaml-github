@@ -821,7 +821,8 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
 
     (* Add the correct mime-type header and the authentication token. *)
     let realize_headers
-        ?token ?(media_type="application/vnd.github.v3+json")
+        ~token
+        ?(media_type="application/vnd.github.v3+json")
         headers =
       let headers = C.Header.add_opt headers "accept" media_type in
       match token with
@@ -834,7 +835,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
       fun state -> Lwt.return
         (state,
          (Monad.(request ?token ?params
-                   {meth; uri; headers=realize_headers ?token ?media_type headers; body=""})
+                   {meth; uri; headers=realize_headers ~token ?media_type headers; body=""})
             (request ~rate ~token
                ((code_handler ~expected_code fn)::fail_handlers))))
 
@@ -851,7 +852,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
       fun state -> Lwt.return
         (state,
         (Monad.(request ?token ?params
-                  {meth; uri; headers=realize_headers headers; body })
+                  {meth; uri; headers=realize_headers ~token headers; body })
            (request ~rate ~token
               ((code_handler ~expected_code fn)::fail_handlers))))
 

@@ -1,4 +1,4 @@
-## DEV
+## 4.3.2 (2020-09-21)
 
 - Fix authentication on POST/PATCH/PUT requests. (#242 @Aaylor)
 - Add support for statistics endpoint. (#240 @tmcgilchrist)

@@ -26,7 +26,7 @@
   stringext)
  (synopsis "GitHub APIv3 OCaml library")
  (description "This library provides an OCaml interface to the
-[GitHub APIv3](https://developer.github.com/v3/) (JSON).
+[GitHub APIv3](https://docs.github.com/rest/) (JSON).
 
 It is compatible with [MirageOS](https://mirage.io) and also compiles to pure
 JavaScript via [js_of_ocaml](http://ocsigen.org/js_of_ocaml)."))
@@ -42,7 +42,7 @@ JavaScript via [js_of_ocaml](http://ocsigen.org/js_of_ocaml)."))
   (cohttp-lwt-jsoo (>= 0.99.0))
   (js_of_ocaml-lwt (>= 3.4.0)))
  (synopsis "GitHub APIv3 JavaScript library")
- (description "This library provides an OCaml interface to the [GitHub APIv3](https://developer.github.com/v3/)
+ (description "This library provides an OCaml interface to the [GitHub APIv3](https://docs.github.com/rest/)
 (JSON). This library installs the JavaScript version, which uses [js_of_ocaml](http://ocsigen.org/js_of_ocaml)."))
 
 (package
@@ -58,5 +58,5 @@ JavaScript via [js_of_ocaml](http://ocsigen.org/js_of_ocaml)."))
   (cmdliner (>= 0.9.8))
   base-unix)
  (synopsis "GitHub APIv3 Unix library")
- (description "This library provides an OCaml interface to the [GitHub APIv3](https://developer.github.com/v3/)
+ (description "This library provides an OCaml interface to the [GitHub APIv3](https://docs.github.com/rest/)
 (JSON).  This package installs the Unix (Lwt) version."))

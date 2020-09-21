@@ -2098,7 +2098,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
   module Gist = struct
     open Lwt
 
-    (* List gists https://developer.github.com/v3/gists/#list-gists
+    (* List gists https://docs.github.com/v3/gists/#list-gists
      * Parameters
      *  since : string   A timestamp in ISO 8601 format:
      *                   YYYY-MM-DDTHH:MM:SSZ. Only gists updated at
@@ -2137,13 +2137,13 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
       let uri = uri_param_since uri since in
       API.get_stream ?token ~uri (fun b -> return (gists_of_string b))
 
-    (* Get a single gist https://developer.github.com/v3/gists/#get-a-single-gist
+    (* Get a single gist https://docs.github.com/rest/reference/gists#get-a-gist
      * GET /gists/:id  *)
     let get ?token ~id () =
       let uri = URI.gist ~id in
       API.get ?token ~uri (fun b -> return (gist_of_string b))
 
-    (* Create a gist https://developer.github.com/v3/gists/#create-a-gist
+    (* Create a gist https://docs.github.com/rest/reference/gists#create-a-gist
      * POST /gists
      * input
      *  files       hash      Required. Files that make up this gist.
@@ -2154,7 +2154,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
       let body = string_of_new_gist gist in
       API.post ~body ?token ~uri ~expected_code:`Created (fun b -> return (gist_of_string b))
 
-    (* Edit a gist https://developer.github.com/v3/gists/#edit-a-gist
+    (* Edit a gist https://docs.github.com/rest/reference/gists#update-a-gist
      * PATCH /gists/:id
      * input
      *  description string  A description of the gist.
@@ -2166,42 +2166,42 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
       let body = string_of_update_gist gist in
       API.patch ~body ?token ~uri ~expected_code:`OK (fun b -> return (gist_of_string b))
 
-    (* List gist commits https://developer.github.com/v3/gists/#list-gist-commits
+    (* List gist commits https://docs.github.com/rest/reference/gists#list-gist-commits
      * GET /gists/:id/commits *)
     let commits ?token ~id () =
       let uri = URI.gist_commits ~id in
       API.get_stream ?token ~uri (fun b -> return (gist_commits_of_string b))
 
-    (* Star a gist https://developer.github.com/v3/gists/#star-a-gist
+    (* Star a gist https://docs.github.com/rest/reference/gists#star-a-gist
      * PUT /gists/:id/star *)
     let star ?token ~id () =
       let uri = URI.gist_star ~id in
       API.put ?token ~uri ~expected_code:`No_content (fun _b -> return ())
 
-    (* Unstar a gist https://developer.github.com/v3/gists/#unstar-a-gist
+    (* Unstar a gist https://docs.github.com/rest/reference/gists#unstar-a-gist
      * DELETE /gists/:id/star *)
     let unstar ?token ~id () =
       let uri = URI.gist_star ~id in
       API.delete ?token ~uri ~expected_code:`No_content (fun _b -> return ())
 
-    (* Check if a gist is starred https://developer.github.com/v3/gists/#check-if-a-gist-is-starred
+    (* Check if a gist is starred https://docs.github.com/rest/reference/gists#check-if-a-gist-is-starred
      * GET /gists/:id/star
      * Response if gist is starred : 204 No Content
      * Response if gist is not starred : 404 Not Found *)
 
-    (* Fork a gist https://developer.github.com/v3/gists/#fork-a-gist
+    (* Fork a gist https://docs.github.com/rest/reference/gists#fork-a-gist
      * POST /gists/:id/forks *)
     let fork ?token ~id () =
       let uri = URI.gist_forks ~id in
       API.post ?token ~uri ~expected_code:`Created (fun b -> return (gist_of_string b))
 
-    (* List gist forks https://developer.github.com/v3/gists/#list-gist-forks
+    (* List gist forks https://docs.github.com/rest/reference/gists#list-gist-forks
      * GET /gists/:id/forks *)
     let forks ?token ~id () =
       let uri = URI.gist_forks ~id in
       API.get_stream ?token ~uri (fun b -> return (gist_forks_of_string b))
 
-    (* Delete a gist https://developer.github.com/v3/gists/#delete-a-gist
+    (* Delete a gist https://docs.github.com/rest/reference/gists#delete-a-gist
      * DELETE /gists/:id *)
     let delete ?token ~id () =
       let uri = URI.gist ~id in

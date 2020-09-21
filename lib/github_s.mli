@@ -17,7 +17,7 @@
  *)
 
 (**
-   {3 {{:https://developer.github.com/v3/}GitHub APIv3} client library}
+   {3 {{:https://docs.github.com/rest}GitHub APIv3} client library}
 
    This library offers thin but natural bindings to GitHub's developer API.
 *)
@@ -201,9 +201,9 @@ module type Github = sig
 
   type rate = Core | Search (**)
   (** [rate] is a type used to indicate which
-      {{:https://developer.github.com/v3/#rate-limiting}rate-limiting
-      regime} is to be used for query quota accounting. [rate] is used
-      by the function in {!API}. *)
+      {{:https://docs.github.com/rest/overview/resources-in-the-rest-api#rate-limiting}rate-limiting
+      regime} is to be used for query quota accounting. [rate] is used by the
+      function in {!API}. *)
 
   type 'a authorization =
     | Result of 'a
@@ -227,7 +227,7 @@ module type Github = sig
       when the environment variable [GITHUB_DEBUG] is set to 1. *)
 
   (** The [Scope] module abstracts GitHub's
-      {{:https://developer.github.com/v3/oauth/#scopes}authorization
+      {{:https://docs.github.com/developers/apps/scopes-for-oauth-apps#available-scopes}authorization
       scopes}. *)
   module Scope : sig
     val to_string : Github_t.scope -> string
@@ -258,15 +258,15 @@ module type Github = sig
 
   (** The [Token] module manipulates authorization tokens. GitHub has
       two types of tokens:
-      {{:https://developer.github.com/v3/oauth/}OAuth application
+      {{:https://docs.github.com/developers/apps/authorizing-oauth-apps}OAuth application
       tokens} and
-      {{:https://help.github.com/articles/creating-an-access-token-for-command-line-use/}"personal
+      {{:https://docs.github.com/github/authenticating-to-github/creating-a-personal-access-token}"personal
       tokens"}.
 
       Note: the OAuth Authorizations API has been deprecated by GitHub.
 
-      @see <https://developer.github.com/v3/oauth_authorizations/> OAuth Authorizations API
-      @see <https://developer.github.com/changes/2019-11-05-deprecated-passwords-and-authorizations-api/#deprecating-and-adding-endpoints-for-the-oauth-authorizations-and-oauth-applications-apis>
+      @see <https://docs.github.com/rest/reference/oauth-authorizations> OAuth Authorizations API
+      @see <https://developer.github.com/changes/2019-11-05-deprecated-passwords-and-authorizations-api/#deprecating-and-adding-endpoints-for-the-oauth-authorizations-and-oauth-applications>
       for the OAuth Authorizations deprecation.
   *)
   module Token : sig
@@ -278,7 +278,7 @@ module type Github = sig
       unit -> t option Lwt.t
     (** [of_code ~client_id ~client_secret ~code ()] is the {!t}
         granted by a [code] from an
-        {{:https://developer.github.com/v3/oauth/#github-redirects-back-to-your-site}OAuth
+        {{:https://docs.github.com/developers/apps/authorizing-oauth-apps#web-application-flow}OAuth
         web flow redirect}. *)
 
     val create : ?scopes:Github_t.scope list -> ?note:string ->
@@ -328,7 +328,7 @@ module type Github = sig
       entirety of the GitHub API and these bindings. In particular,
       this module contains:
 
-      - {{:https://developer.github.com/v3/#http-verbs}generic accessor functions},
+      - {{:https://docs.github.com/rest/overview/resources-in-the-rest-api#http-verbs}generic accessor functions},
         not normally used directly, but useful if you wish to invoke
         API endpoints not yet bound.
       - handler constructors to help with using the generic accessors
@@ -378,7 +378,7 @@ module type Github = sig
     (** [get_stream uri stream_p] is the {!Stream.t} encapsulating
         lazy [stream_p]-parsed responses to GitHub API HTTP GET
         requests to [uri] and
-        {{:https://developer.github.com/v3/#pagination}its
+        {{:https://docs.github.com/rest/overview/resources-in-the-rest-api#pagination}its
         successors}. For an explanation of the other
         parameters, see {!get}. *)
 
@@ -481,7 +481,7 @@ module type Github = sig
       client_id:string -> state:string -> unit -> Uri.t
     (** [authorize ?scopes ?redirect_uri ~client_id ~state ()] is the
         URL to
-        {{:https://developer.github.com/v3/oauth/#redirect-users-to-request-github-access}redirect
+        {{:https://docs.github.com/developers/apps/authorizing-oauth-apps#redirect-urls}redirect
         users} to in an OAuth2 flow to create an authorization
         token. [?redirect_url] is the URL in your Web application
         where users will be sent after authorization. If omitted, it
@@ -632,7 +632,7 @@ module type Github = sig
   end
 
   (** The [Organization] module exposes the functionality of the
-      GitHub {{:https://developer.github.com/v3/orgs/}organization
+      GitHub {{:https://docs.github.com/rest/reference/orgs}organization
       API}. *)
   module Organization : sig
     val teams :
@@ -665,7 +665,7 @@ module type Github = sig
         organization [org]. *)
 
     (** The [Hook] module provides access to GitHub's
-        {{:https://developer.github.com/v3/orgs/hooks/}organization
+        {{:https://docs.github.com/rest/reference/orgs#webhooks}organization
         webhooks API} which lets you manage an organization's
         remote notification hooks. *)
     module Hook : sig
@@ -722,7 +722,7 @@ module type Github = sig
   end
 
   (** The [Team] module contains functionality relating to GitHub's
-      {{:https://developer.github.com/v3/orgs/teams/}team API}. *)
+      {{:https://docs.github.com/rest/reference/teams}team API}. *)
   module Team : sig
     val info :
       ?token:Token.t ->
@@ -739,7 +739,7 @@ module type Github = sig
   end
 
   (** The [Event] module exposes GitHub's
-      {{:https://developer.github.com/v3/activity/events/}event API}
+      {{:https://docs.github.com/rest/reference/activity#events}event API}
       functionality. *)
   module Event : sig
     val for_repo :
@@ -802,7 +802,7 @@ module type Github = sig
   end
 
   (** The [Repo] module offers the functionality of GitHub's
-      {{:https://developer.github.com/v3/repos/}repository API}. *)
+      {{:https://docs.github.com/rest/reference/repos}repository API}. *)
   module Repo : sig
     val create :
       ?token:Token.t ->
@@ -868,7 +868,7 @@ module type Github = sig
       ?ty:string -> user:string -> repo:string ->
       unit -> Github_t.git_ref Stream.t
     (** [refs ?ty ~user ~repo ()] is a stream of all
-        {{:https://developer.github.com/v3/git/refs/}git references}
+        {{:https://docs.github.com/rest/reference/git#references}git references}
         with prefix [?ty] for repo [user]/[repo]. *)
 
     val get_ref :
@@ -877,7 +877,7 @@ module type Github = sig
       name:string ->
       unit -> Github_t.git_ref Response.t Monad.t
     (** [get_ref ~user ~repo ~name] is the
-        {{:https://developer.github.com/v3/git/refs/}git reference}
+        {{:https://docs.github.com/rest/reference/git#references}git reference}
         with name [name] for repo [user]/[repo]. *)
 
     val get_commit :
@@ -901,7 +901,7 @@ module type Github = sig
         been deleted. *)
 
     (** The [Hook] module provides access to GitHub's
-        {{:https://developer.github.com/v3/repos/hooks/}webhooks API}
+        {{:https://docs.github.com/rest/reference/repos#webhooks}webhooks API}
         which lets you manage a repository's post-receive hooks. *)
     module Hook : sig
       val for_repo :
@@ -964,7 +964,7 @@ module type Github = sig
   end
 
   (** The [Stats] module exposes the functionality of GitHub's
-      {{:https://developer.github.com/v3/repos/statistics/}repository
+      {{:https://docs.github.com/rest/reference/repos#statistics}repository
       statistics API} which provides historical data regarding the
       aggregate behavior of a repository. *)
   module Stats : sig
@@ -1018,7 +1018,7 @@ module type Github = sig
   end
 
   (** The [Status] module provides the functionality of GitHub's
-      {{:https://developer.github.com/v3/repos/statuses/}status API}. *)
+      {{:https://docs.github.com/rest/reference/repos#statuses}status API}. *)
   module Status : sig
     val for_ref :
       ?token:Token.t ->
@@ -1050,7 +1050,7 @@ module type Github = sig
   end
 
   (** The [Pull] module contains functionality relating to GitHub's
-      {{:https://developer.github.com/v3/pulls/}pull request API}. *)
+      {{:https://docs.github.com/rest/reference/pulls}pull request API}. *)
   module Pull : sig
     val for_repo :
       ?token:Token.t ->
@@ -1128,7 +1128,7 @@ module type Github = sig
   end
 
   (** The [Issue] module gives users access to GitHub's
-      {{:https://developer.github.com/v3/issues/}issue API}. *)
+      {{:https://docs.github.com/rest/reference/issues}issue API}. *)
   module Issue: sig
     val for_repo :
       ?token:Token.t -> ?creator:string -> ?mentioned:string ->
@@ -1294,7 +1294,7 @@ module type Github = sig
   end
 
   (** The [Label] module exposes Github's
-      {{:https://developer.github.com/v3/issues/labels/}labels
+      {{:https://docs.github.com/rest/reference/issues#labels}labels
       API}. *)
   module Label : sig
     val for_repo :
@@ -1349,7 +1349,7 @@ module type Github = sig
   end
 
   (** The [Collaborator] module exposes Github's
-      {{:https://developer.github.com/v3/repos/collaborators/}collaborators
+      {{:https://docs.github.com/rest/reference/repos#collaborators}collaborators
       API}. *)
   module Collaborator : sig
     val for_repo :
@@ -1394,7 +1394,7 @@ module type Github = sig
   end
 
   (** The [Milestone] module exposes GitHub's
-      {{:https://developer.github.com/v3/issues/milestones/}milestone
+      {{:https://docs.github.com/rest/reference/issues#milestones}milestone
       API}. *)
   module Milestone : sig
     val for_repo:
@@ -1451,7 +1451,7 @@ module type Github = sig
   end
 
   (** The [Release] module provides access to GitHub's
-      {{:https://developer.github.com/v3/repos/releases/}release API}
+      {{:https://docs.github.com/rest/reference/repos#releases}release API}
       features. *)
   module Release : sig
     val for_repo:
@@ -1510,9 +1510,9 @@ module type Github = sig
 
   (** The [Deploy_key] module provides the means to manage
       per-repository
-      {{:https://developer.github.com/guides/managing-deploy-keys/#deploy-keys}deploy
+      {{:https://docs.github.com/developers/overview/managing-deploy-keys#deploy-keys}deploy
       keys}.
-      @see <https://developer.github.com/v3/repos/keys/> deploy key API docs
+      @see <https://docs.github.com/rest/reference/repos#deploy-keys> deploy key API docs
   *)
   module Deploy_key : sig
     val for_repo:
@@ -1544,7 +1544,7 @@ module type Github = sig
   end
 
   (** The [Gist] module provides access to the GitHub
-      {{:https://developer.github.com/v3/gists/}gist API}. *)
+      {{:https://docs.github.com/rest/reference/gists}gist API}. *)
   module Gist : sig
     val for_user :
       ?token:Token.t ->
@@ -1629,7 +1629,7 @@ module type Github = sig
   end
 
   (** The [Emoji] module exposes GitHub's
-      {{:https://developer.github.com/v3/emojis/}emoji API}. *)
+      {{:https://docs.github.com/rest/reference/emojis}emoji API}. *)
   module Emoji : sig
     val list : ?token:Token.t -> unit -> Github_t.emojis Response.t Monad.t
     (** [list ()] is the list of all available emojis for use on
@@ -1638,7 +1638,7 @@ module type Github = sig
   end
 
   (** The [Search] module exposes GitHub's
-      {{:https://developer.github.com/v3/search/}search interfaces}. *)
+      {{:https://docs.github.com/rest/reference/search}search interfaces}. *)
   module Search : sig
     val repos :
       ?token:Token.t ->

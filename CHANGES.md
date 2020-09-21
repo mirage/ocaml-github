@@ -1,5 +1,6 @@
 ## DEV
 
+- Fix authentication on POST/PATCH/PUT requests. (#242 @Aaylor)
 - Add support for statistics endpoint. (#240 @tmcgilchrist)
 - Add support for listing organization's repository. (#239 @tmcgilchrist)
 - Remove the dependency `lambda-term`, which was only used to read password, for

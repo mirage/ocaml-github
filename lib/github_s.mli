@@ -1508,6 +1508,11 @@ module type Github = sig
     (** [update ~user ~repo ~release ~id ()] is the updated release
         [id] in [user]/[repo] as described by [release]. *)
 
+    val list_assets:
+      ?token:Token.t ->
+      user:string -> repo:string -> id:int64 ->
+      unit -> Github_t.release_assets Response.t Monad.t
+
     val upload_asset :
       ?token:Token.t ->
       user:string -> repo:string ->

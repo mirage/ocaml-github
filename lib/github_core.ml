@@ -355,6 +355,9 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
           "https://uploads.github.com/repos/%s/%s/releases/%Ld/assets"
           user repo id)
 
+    let get_release_assets ~user ~repo ~id =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/releases/%Ld/assets" api user repo id)
+
     let repo_deploy_keys ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/keys" api user repo)
 
@@ -1608,6 +1611,16 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
       let uri = URI.upload_release_asset ~user ~repo ~id in
       API.post ?token ~params ~headers ~body ~uri ~expected_code:`Created
         (fun _b -> return ())
+
+    (* let delete_asset Delete a release asset
+       DELETE /repos/{owner}/{repo}/releases/assets/{asset_id}
+     *)
+
+    (* let get_asset  GET '/repos/{owner}/{repo}/releases/assets/{asset_id}' *)
+
+    let list_assets ?token ~user ~repo ~id () =
+      let uri = URI.get_release_assets ~user ~repo ~id in
+      API.get ?token ~uri (fun b -> return (release_assets_of_string b))
   end
 
   module Deploy_key = struct

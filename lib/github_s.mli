@@ -17,9 +17,10 @@
  *)
 
 (**
-   {3 {{:https://docs.github.com/rest}GitHub APIv3} client library}
+   {3 GitHub APIv3 client library}
 
-   This library offers thin but natural bindings to GitHub's developer API.
+   This library offers thin but natural bindings to
+   {{:https://docs.github.com/rest}GitHub's developer API}.
 *)
 
 (** Modules of this type are returned from the {!Github_core.Make}
@@ -258,14 +259,15 @@ module type Github = sig
 
   (** The [Token] module manipulates authorization tokens. GitHub has
       two types of tokens:
-      {{:https://docs.github.com/developers/apps/authorizing-oauth-apps}OAuth application
-      tokens} and
-      {{:https://docs.github.com/github/authenticating-to-github/creating-a-personal-access-token}"personal
-      tokens"}.
+      {{:https://docs.github.com/developers/apps/authorizing-oauth-apps}OAuth
+      application tokens} and
+      {{:https://docs.github.com/github/authenticating-to-github/creating-a-personal-access-token}
+      "personal tokens"}.
 
       Note: the OAuth Authorizations API has been deprecated by GitHub.
 
-      @see <https://docs.github.com/rest/reference/oauth-authorizations> OAuth Authorizations API
+      @see <https://docs.github.com/rest/reference/oauth-authorizations> OAuth
+      Authorizations API
       @see <https://developer.github.com/changes/2019-11-05-deprecated-passwords-and-authorizations-api/#deprecating-and-adding-endpoints-for-the-oauth-authorizations-and-oauth-applications>
       for the OAuth Authorizations deprecation.
   *)
@@ -278,8 +280,8 @@ module type Github = sig
       unit -> t option Lwt.t
     (** [of_code ~client_id ~client_secret ~code ()] is the {!t}
         granted by a [code] from an
-        {{:https://docs.github.com/developers/apps/authorizing-oauth-apps#web-application-flow}OAuth
-        web flow redirect}. *)
+        {{:https://docs.github.com/developers/apps/authorizing-oauth-apps#web-application-flow}
+        OAuth web flow redirect}. *)
 
     val create : ?scopes:Github_t.scope list -> ?note:string ->
       ?note_url:string -> ?client_id:string -> ?client_secret:string ->
@@ -288,9 +290,9 @@ module type Github = sig
       Github_t.auth authorization Response.t Monad.t
     (** [create ?otp ~user ~pass ()] is a new authorization with the
         provided fields. When a user has enabled two-factor
-        authentication, the return value will be a {!const:Two_factor}
+        authentication, the return value will be a {!constructor:Two_factor}
         constructor with the one-time password delivery
-        mode. Including a valid [?otp] will yield a {!const:Result} return
+        mode. Including a valid [?otp] will yield a {!constructor:Result} return
         value. *)
 
     val get_all : ?otp:string -> user:string -> pass:string -> unit ->
@@ -449,19 +451,19 @@ module type Github = sig
         authentication token. *)
 
     val get_rate : ?rate:rate -> ?token:Token.t -> unit -> Github_t.rate Monad.t
-    (** [get_rate ?rate ()] is the, possibly cached, rate limit
-        information for the rate limit regime [?rate] (default {!const:Core}). *)
+    (** [get_rate ?rate ()] is the, possibly cached, rate limit information for
+        the rate limit regime [?rate] (default {!constructor:Core}). *)
 
     val get_rate_limit : ?token:Token.t -> unit -> int Monad.t
-    (** [get_rate_limit ()] is the, possibly cached, {!const:Core} total request
-        quota for the current token. *)
-
-    val get_rate_remaining : ?token:Token.t -> unit -> int Monad.t
-    (** [get_rate_remaining ()] is the, possibly cached, {!const:Core} remaining
+    (** [get_rate_limit ()] is the, possibly cached, {!constructor:Core} total
         request quota for the current token. *)
 
+    val get_rate_remaining : ?token:Token.t -> unit -> int Monad.t
+    (** [get_rate_remaining ()] is the, possibly cached, {!constructor:Core}
+        remaining request quota for the current token. *)
+
     val get_rate_reset : ?token:Token.t -> unit -> float Monad.t
-    (** [get_rate_reset ()] is the, possibly cached, {!const:Core} UNIX
+    (** [get_rate_reset ()] is the, possibly cached, {!constructor:Core} UNIX
         epoch expiry time (s) when the remaining request quota will be
         reset to the total request quota for the current token. *)
 
@@ -481,8 +483,8 @@ module type Github = sig
       client_id:string -> state:string -> unit -> Uri.t
     (** [authorize ?scopes ?redirect_uri ~client_id ~state ()] is the
         URL to
-        {{:https://docs.github.com/developers/apps/authorizing-oauth-apps#redirect-urls}redirect
-        users} to in an OAuth2 flow to create an authorization
+        {{:https://docs.github.com/developers/apps/authorizing-oauth-apps#redirect-urls}
+        redirect users} to in an OAuth2 flow to create an authorization
         token. [?redirect_url] is the URL in your Web application
         where users will be sent after authorization. If omitted, it
         will default to the callback URL in GitHub's OAuth application
@@ -605,11 +607,11 @@ module type Github = sig
 
     val for_core : ?token:Token.t -> unit -> Github_t.rate Monad.t
     (** [for_core ()] is the current token's rate limit information
-        for the {!const:Core} rate limit regime. *)
+        for the {!constructor:Core} rate limit regime. *)
 
     val for_search : ?token:Token.t -> unit -> Github_t.rate Monad.t
     (** [for_search ()] is the current token's rate limit information
-        for the {!const:Search} rate limit regime. *)
+        for the {!constructor:Search} rate limit regime. *)
 
   end
 
@@ -980,26 +982,27 @@ module type Github = sig
       ?token:Token.t ->
       user:string -> repo:string ->
       unit -> Github_t.commit_activity Stream.t
-    (** [yearly_commit_activity ~user ~repo ()] returns the last year of commit activity
-        grouped by week for [user]/[repo]. The days array is a group of commits per day,
-        starting on Sunday. The stream is empty if the
-        data are not cached yet. *)
+    (** [yearly_commit_activity ~user ~repo ()] returns the last year of commit
+        activity grouped by week for [user]/[repo]. The days array is a group of
+        commits per day, starting on Sunday. The stream is empty if the data are
+        not cached yet. *)
 
     val weekly_commit_activity :
       ?token:Token.t ->
       user:string -> repo:string ->
       unit -> Github_t.code_frequency Stream.t
-    (** [weekly_commit_activity ~user ~repo ()] returns a weekly aggregate of the number of
-        additions and deletions pushed to [user]/[repo]. The stream is empty if the
-        data are not cached yet. *)
+    (** [weekly_commit_activity ~user ~repo ()] returns a weekly aggregate of
+        the number of additions and deletions pushed to [user]/[repo]. The
+        stream is empty if the data are not cached yet. *)
 
     val weekly_commit_count :
       ?token:Token.t ->
       user:string -> repo:string ->
       unit -> Github_t.participation Response.t Monad.t
-    (** [weekly_commit_count ~user ~repo ()] returns the total commit counts for the owner
-        and total commit counts in all. all is everyone combined, including the owner in the
-        last 52 weeks. If you'd like to get the commit counts for non-owners, you can subtract owner from all.
+    (** [weekly_commit_count ~user ~repo ()] returns the total commit counts for
+        the owner and total commit counts in all. all is everyone combined,
+        including the owner in the last 52 weeks. If you'd like to get the
+        commit counts for non-owners, you can subtract owner from all.
 
         The array order is oldest week (index 0) to most recent week.*)
 
@@ -1007,13 +1010,15 @@ module type Github = sig
       ?token:Token.t ->
       user:string -> repo:string ->
       unit -> Github_t.punch_card Stream.t
-    (** [hourly_commit_count ~user ~repo ()] returns the hourly commit count for each day.
+    (** [hourly_commit_count ~user ~repo ()] returns the hourly commit count for
+        each day.
         Each array contains the day number, hour number, and number of commits:
          - 0-6: Sunday - Saturday
          - 0-23: Hour of day
          - Number of commits
-        For example, [2, 14, 25] indicates that there were 25 total commits, during
-        the 2:00pm hour on Tuesdays. All times are based on the time zone of individual commits.*)
+        For example, [2, 14, 25] indicates that there were 25 total commits,
+        during the 2:00pm hour on Tuesdays. All times are based on the time
+        zone of individual commits.*)
 
   end
 
@@ -1349,8 +1354,8 @@ module type Github = sig
   end
 
   (** The [Collaborator] module exposes Github's
-      {{:https://docs.github.com/rest/reference/repos#collaborators}collaborators
-      API}. *)
+      {{:https://docs.github.com/rest/reference/repos#collaborators}
+      collaborators API}. *)
   module Collaborator : sig
     val for_repo :
       ?token:Token.t ->
@@ -1510,9 +1515,10 @@ module type Github = sig
 
   (** The [Deploy_key] module provides the means to manage
       per-repository
-      {{:https://docs.github.com/developers/overview/managing-deploy-keys#deploy-keys}deploy
-      keys}.
-      @see <https://docs.github.com/rest/reference/repos#deploy-keys> deploy key API docs
+      {{:https://docs.github.com/developers/overview/managing-deploy-keys#deploy-keys}
+      deploy keys}.
+      @see <https://docs.github.com/rest/reference/repos#deploy-keys> deploy key
+      API docs
   *)
   module Deploy_key : sig
     val for_repo:
@@ -1564,10 +1570,10 @@ module type Github = sig
     val all_public :
       ?token:Token.t ->
       ?since:string -> unit -> Github_t.gist Stream.t
-    (** [all_public ?since ()] is a stream of all of the public gists
-        for the current token's user or all public gists if invoked
-        without a current token. If [?since] is an ISO 8601 timestamp, only gists
-        updated since this time are returned. *)
+    (** [all_public ?since ()] is a stream of all of the public gists for the
+        current token's user or all public gists if invoked without a current
+        token. If [?since] is an ISO 8601 timestamp, only gists updated since
+        this time are returned. *)
 
     val starred :
       ?token:Token.t ->

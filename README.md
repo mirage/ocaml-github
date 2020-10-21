@@ -253,7 +253,13 @@ $ git upload-release mirage ocaml-uri v1.4.0 release.tar.gz
  * [Get the number of commits per hour in each day](https://docs.github.com/rest/reference/repos#get-the-hourly-commit-count-for-each-day) (see [#86](https://github.com/mirage/ocaml-github/issues/86))
  * [Get the latest
    release](https://docs.github.com/rest/reference/repos#get-the-latest-release)
+ * [List assets for a
+   release](https://docs.github.com/rest/reference/repos#list-release-assets)
  * [Get a release by tag name](https://docs.github.com/rest/reference/repos#get-a-release-by-tag-name)
+ * [Get a single release
+   asset](https://docs.github.com/rest/reference/repos#get-a-release-asset)
+ * [Delete a release
+   asset](https://docs.github.com/rest/reference/repos#delete-a-release-asset)
 
 *Not yet supported*:
 
@@ -275,14 +281,10 @@ $ git upload-release mirage ocaml-uri v1.4.0 release.tar.gz
  * [Deployments](https://docs.github.com/rest/reference/repos#deployments)
  * [Merging](https://docs.github.com/rest/reference/repos#merging)
  * [Pages](https://docs.github.com/rest/reference/repos#pages)
- * [List assets for a
-   release](https://docs.github.com/rest/reference/repos#list-release-assets)
- * [Get a single release
-   asset](https://docs.github.com/rest/reference/repos#get-a-release-asset)
+ * [Get the latest
+   release](https://docs.github.com/rest/reference/repos#get-the-latest-release)
  * [Edit a release
    asset](https://docs.github.com/rest/reference/repos#update-a-release-asset)
- * [Delete a release
-   asset](https://docs.github.com/rest/reference/repos#delete-a-release-asset)
  * [Ping a
    hook](https://docs.github.com/rest/reference/repos#ping-a-repository-webhook)
  * [PubSubHubbub](https://docs.github.com/rest/reference/repos#pubsubhubbub)

@@ -355,6 +355,12 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
           "https://uploads.github.com/repos/%s/%s/releases/%Ld/assets"
           user repo id)
 
+    let get_asset ~user ~repo ~id =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/releases/assets/%Ld" api user repo id)
+
+    let delete_asset ~user ~repo ~id =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/releases/assets/%Ld" api user repo id)
+
     let get_release_assets ~user ~repo ~id =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/releases/%Ld/assets" api user repo id)
 
@@ -1591,14 +1597,14 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
       let uri = URI.repo_release_latest ~user ~repo in
       API.get ?token ~uri (fun b -> return (release_of_string b))
 
-    let delete ?token ~user ~repo ~id () =
-      let uri = URI.repo_release ~user ~repo ~id in
-      API.delete ?token ~uri (fun _ -> return ())
-
     let create ?token ~user ~repo ~release () =
       let uri = URI.repo_releases ~user ~repo in
       let body = string_of_new_release release in
       API.post ?token ~body ~uri ~expected_code:`Created (fun b -> return (release_of_string b))
+
+    let delete ?token ~user ~repo ~id () =
+      let uri = URI.repo_release ~user ~repo ~id in
+      API.delete ?token ~uri (fun _ -> return ())
 
     let update ?token ~user ~repo ~release ~id () =
       let uri = URI.repo_release ~user ~repo ~id in
@@ -1612,11 +1618,13 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
       API.post ?token ~params ~headers ~body ~uri ~expected_code:`Created
         (fun _b -> return ())
 
-    (* let delete_asset Delete a release asset
-       DELETE /repos/{owner}/{repo}/releases/assets/{asset_id}
-     *)
+    let delete_asset ?token ~user ~repo ~id () =
+      let uri = URI.delete_asset ~user ~repo ~id in
+      API.delete ?token ~uri (fun _ -> return ())
 
-    (* let get_asset  GET '/repos/{owner}/{repo}/releases/assets/{asset_id}' *)
+    let get_asset ?token ~user ~repo ~id () =
+      let uri = URI.get_asset ~user ~repo ~id in
+      API.get ?token ~uri (fun b -> return (release_asset_of_string b))
 
     let list_assets ?token ~user ~repo ~id () =
       let uri = URI.get_release_assets ~user ~repo ~id in

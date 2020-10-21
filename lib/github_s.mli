@@ -1512,6 +1512,22 @@ module type Github = sig
       ?token:Token.t ->
       user:string -> repo:string -> id:int64 ->
       unit -> Github_t.release_assets Response.t Monad.t
+    (** [list_assets ~user ~repo ~id ()] lists the assets in release
+        [id] in [user]/[repo]. *)
+
+    val get_asset:
+      ?token:Token.t ->
+      user:string -> repo:string -> id:int64 ->
+      unit -> Github_t.release_asset Response.t Monad.t
+    (** [get_asset ~user ~repo ~id ()] gets an asset from a release
+        [id] in [user]/[repo]. *)
+
+    val delete_asset:
+      ?token:Token.t ->
+      user:string -> repo:string -> id:int64 ->
+      unit -> unit Response.t Monad.t
+    (** [delete_asset ~user ~repo ~id ()] deletes an asset from a release
+        [id] in [user]/[repo]. *)
 
     val upload_asset :
       ?token:Token.t ->

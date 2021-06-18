@@ -1,4 +1,3 @@
-open Lwt
 open Printf
 
 let token = Config.access_token

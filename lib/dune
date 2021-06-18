@@ -1,16 +1,5 @@
-(rule
- (targets github_t.ml github_t.mli)
-  (deps    github.atd)
-  (action  (run atdgen -t %{deps})))
-
-(rule
- (targets github_j.ml github_j.mli)
-  (deps    github.atd)
-  (action  (run atdgen -j -j-std %{deps})))
-
-
 (library
   (public_name github)
   (wrapped false)
   (modules_without_implementation github_s)
-  (libraries cohttp uri cohttp-lwt yojson atdgen))
+  (libraries cohttp uri cohttp-lwt yojson github_data))

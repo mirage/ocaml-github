@@ -201,6 +201,36 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
     let authorization ~id =
       Uri.of_string (Printf.sprintf "%s/authorizations/%Ld" api id)
 
+    let check_run_create ~owner ~repo =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/check-runs" api owner repo)
+
+    let check_run ~owner ~repo ~check_run_id =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/check-runs/%s" api owner repo check_run_id)
+
+    let check_runs_list_annotation ~owner ~repo ~check_run_id =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/check-runs/%s/annotations" api owner repo check_run_id)
+
+    let check_runs_for_ref ~owner ~repo ~sha =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/commits/%s/check-runs" api owner repo sha)
+
+    let check_runs_for_id ~owner ~repo ~check_suite_id =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/check-suites/%s/check-runs" api owner repo check_suite_id)
+
+    let check_suite_create ~owner ~repo =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/check-suites" api owner repo)
+
+    let check_suite ~owner ~repo ~check_suite_id =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/check-suites/%d" api owner repo check_suite_id)
+
+    let check_suite_rerequest ~owner ~repo ~check_suite_id =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/check-suites/%d/rerequest" api owner repo check_suite_id)
+
+    let check_suite_preferences ~owner ~repo =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/check-suites/preferences" api owner repo)
+
+    let check_suite_list ~owner ~repo ~sha =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/commits/%s/check-suites" api owner repo sha)
+    
     let user ?user () =
       match user with
       |None -> Uri.of_string (Printf.sprintf "%s/user" api)
@@ -2202,6 +2232,81 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
       API.delete ?token ~uri ~expected_code:`No_content (fun _b -> return ())
   end
 
+  module Check = struct
+    open Lwt
+
+    let check_name_param check_name uri = match check_name with
+      | None -> uri
+      | Some check_name -> Uri.add_query_params' uri [("check_name", check_name)]
+
+    let app_id_param app_id uri = match app_id with
+      | None -> uri
+      | Some app_id -> Uri.add_query_params' uri [("app_id", app_id)]
+
+    let status_param status uri = match status with
+      | None -> uri
+      | Some status -> Uri.add_query_params' uri [("status", status)]
+
+    let create_check_run ?token ~owner ~repo ~body () =
+      let uri = URI.check_run_create ~owner ~repo in
+      API.post ?token ~uri ~body ~expected_code:`Created (fun b ->
+        return (check_run_of_string b))
+      
+    let update_check_run ?token ~owner ~repo ~check_run_id ~body () =
+      let uri = URI.check_run ~owner ~repo ~check_run_id in
+      API.patch ?token ~uri ~body ~expected_code:`OK (fun b ->
+        return (check_run_of_string b))
+      
+    let get_check_run ?token ~owner ~repo ~check_run_id () =
+      let uri = URI.check_run ~owner ~repo ~check_run_id in
+      API.get ?token ~uri (fun b -> 
+          return (check_run_of_string b))
+
+    let list_annotations ?token ~owner ~repo ~check_run_id () =
+      let uri = URI.check_runs_list_annotation ~owner ~repo ~check_run_id in
+      API.get ?token ~uri (fun b -> 
+          return (check_run_annotations_of_string b))
+
+    let list_check_runs ?token ~owner ~repo ~check_suite_id () =
+      let uri = URI.check_runs_for_id ~owner ~repo ~check_suite_id in
+      API.get ?token ~uri (fun b ->
+          return (check_runs_list_of_string b))
+
+    let list_check_runs_for_ref ?token ~owner ~repo ~sha ?check_name ?app_id ?status () =
+      let uri = URI.check_runs_for_ref ~owner ~repo ~sha 
+                |> check_name_param check_name
+                |> app_id_param app_id
+                |> status_param status
+      in
+      API.get ?token ~uri (fun b ->
+          return (check_runs_list_of_string b))
+
+    let create_check_suite ?token ~owner ~repo ~body () =
+      let uri = URI.check_suite_create ~owner ~repo in
+      API.post ?token ~uri ~body ~expected_code:`Created (fun b ->
+          return (check_suite_of_string b))
+
+    let update_preferences_for_check_suites ?token ~owner ~repo ~body () =
+      let uri = URI.check_suite_preferences ~owner ~repo in
+      API.patch ?token ~uri ~body ~expected_code:`OK (fun b ->
+          return (check_suite_preferences_of_string b))
+
+    let get_check_suite ?token ~owner ~repo ~check_suite_id () =
+      let uri = URI.check_suite ~owner ~repo ~check_suite_id in
+      API.get ?token ~uri (fun b -> 
+          return (check_suite_of_string b))
+
+    let rerequest_check_suite ?token ~owner ~repo ~check_suite_id () =
+      let uri = URI.check_suite_rerequest ~owner ~repo ~check_suite_id in
+      API.post ?token ~uri ~expected_code:`OK (fun _ -> return ())
+
+    let list_check_suites_for_ref ?token ~owner ~repo ~sha () =
+      let uri = URI.check_suite_list ~owner ~repo ~sha in
+      API.get ?token ~uri (fun b -> 
+          return (check_suite_list_of_string b))
+    
+  end
+    
   module Search = struct
     open Lwt
 

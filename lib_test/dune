@@ -5,6 +5,7 @@
    current_user_orgs
    organizations
    organization_repos
+   checks
     rwo
     get_token
     repo_info
@@ -21,6 +22,7 @@
    current_user_orgs.exe
    organizations.exe
    organization_repos.exe
+   checks.exe
     rwo.exe
     get_token.exe
     repo_info.exe

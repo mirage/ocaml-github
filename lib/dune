@@ -14,9 +14,7 @@
   (public_name github)
   (wrapped false)
   (modules_without_implementation github_s)
-;; 27 and 32 should be enabled once
-;; https://github.com/janestreet/jbuilder/issues/61 is done
   (flags (:standard -principal -strict-sequence -g -safe-string
-                    -w "A-E-41-42-44-48" -w "-27-32"))
+                    -w "A-E-41-42-44-48" ))
   (modules github_s github_core github_json github_j github_t)
   (libraries cohttp uri cohttp-lwt yojson atdgen))

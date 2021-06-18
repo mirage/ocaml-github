@@ -2,6 +2,4 @@
  (name github_jsoo)
   (public_name github-jsoo)
   (wrapped false)
-  (flags (:standard -principal -strict-sequence -g -safe-string
-                    -w "A-E-41-42-44-48"))
   (libraries github lwt js_of_ocaml-lwt cohttp-lwt cohttp-lwt-jsoo))

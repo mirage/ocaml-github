@@ -1,4 +1,3 @@
-open Lwt
 open Printf
 
 let token = Config.access_token
@@ -31,9 +30,9 @@ let t = Github.(Monad.(run (
   API.set_token token >>= fun () ->
   let milestones = Milestone.for_repo
       ~sort:`Completeness ~direction:`Desc ~user ~repo ()
-  in Stream.iter (fun { Github_t.milestone_number = num } ->
+  in Stream.iter (fun { Github_t.milestone_number = num; _ } ->
     Milestone.get ~user ~repo ~num ()
-    >>~ fun { Github_t.milestone_title } ->
+    >>~ fun { Github_t.milestone_title; _ } ->
     eprintf "Inside monad: milestone %d: %s\n" num milestone_title;
     return ()
   ) milestones

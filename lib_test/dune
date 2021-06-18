@@ -1,5 +1,5 @@
 (executables
- (libraries cohttp-lwt-unix github_unix atdgen stringext)
+ (libraries cohttp-lwt-unix github_unix atdgen stringext cmdliner)
   (flags (:standard -principal -strict-sequence -g -safe-string
                     -w "A-E-41-42-44-48"))
   (names 

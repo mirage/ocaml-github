@@ -1,11 +1,10 @@
 open Lwt
 open Printf
-open Github_t
 
 let get_auth_token_from_jar auth_id =
   Github_cookie_jar.init ()
   >>= fun jar ->
-  Github_cookie_jar.get jar auth_id
+  Github_cookie_jar.get jar ~name:auth_id
   >>= function
   | Some auth -> return auth
   | None -> Lwt.fail (Failure ("id '"^auth_id^"' not in cookie jar"))

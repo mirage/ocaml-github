@@ -1,11 +1,10 @@
-open Lwt
 open Printf
 
 let token = Config.access_token
 
 let name_of_release = Github_t.(function
-  | { release_name=Some name } -> name
-  | { release_name=None      } -> "NULL"
+  | { release_name=Some name ;_} -> name
+  | { release_name=None      ;_} -> "NULL"
 )
 
 let print_releases m = Github.(Monad.(

@@ -26,7 +26,7 @@ let print_hooks label = Github_t.(Github.(Stream.iter (fun hook ->
     label
     (match hook.hook_config with
      | `Web _ -> "web"
-     | `Unknown (cons, json) -> cons
+     | `Unknown (cons, _) -> cons
     )
     hook.hook_id
     hook.hook_created_at
@@ -49,7 +49,7 @@ let make_hook url events = Github_t.({
   new_hook_active=true;
 })
 
-let get_hooks = Github.Hook.for_repo ~token ~user ~repo ()
+let get_hooks = Github.Repo.Hook.for_repo ~token ~user ~repo ()
 
 let t = Github.(Monad.(run Github_t.(
   API.set_user_agent "create_hook"
@@ -57,18 +57,18 @@ let t = Github.(Monad.(run Github_t.(
   print_hooks "Present:" get_hooks
   >>= fun () ->
   let hook = make_hook "http://example.com/" [`Push; `PullRequest; `Status] in
-  Hook.create ~token ~user ~repo ~hook ()
+  Repo.Hook.create ~token ~user ~repo ~hook ()
   >>~ fun hook_a -> print_hooks "Created:" (Stream.of_list [hook_a])
   >>= fun () ->
   let hook = make_hook "http://example.org/"
     [`CommitComment; `IssueComment; `PullRequestReviewComment] in
-  Hook.create ~token ~user ~repo ~hook ()
+  Repo.Hook.create ~token ~user ~repo ~hook ()
   >>~ fun hook_b -> print_hooks "Created:" (Stream.of_list [hook_b])
   >>= fun () ->
-  Hook.get ~token ~user ~repo ~id:hook_b.hook_id ()
+  Repo.Hook.get ~token ~user ~repo ~id:hook_b.hook_id ()
   >>~ fun hook -> print_hooks "Just:" (Stream.of_list [hook])
   >>= fun () ->
-  Hook.update ~token ~user ~repo ~id:hook.hook_id ~hook:{
+  Repo.Hook.update ~token ~user ~repo ~id:hook.hook_id ~hook:{
     update_hook_config=`Web (make_web_hook_config "http://example.net/" None);
     update_hook_events=Some (`Watch::hook.hook_events);
     update_hook_active=false;
@@ -79,12 +79,12 @@ let t = Github.(Monad.(run Github_t.(
   >>= fun () ->
   print_hooks "Retrieved:" get_hooks
   >>= fun () ->
-  Hook.delete ~token ~user ~repo ~id:hook.hook_id ()
+  Repo.Hook.delete ~token ~user ~repo ~id:hook.hook_id ()
   >>~ fun () -> print_hooks "Deleted:" (Stream.of_list [hook])
   >>= fun () ->
   print_hooks "Retrieved:" get_hooks
   >>= fun () ->
-  Hook.delete ~token ~user ~repo ~id:hook_a.hook_id ()
+  Repo.Hook.delete ~token ~user ~repo ~id:hook_a.hook_id ()
   >>~ fun () -> print_hooks "Deleted:" (Stream.of_list [hook_a])
   >>= fun () ->
   print_hooks "Present:" get_hooks

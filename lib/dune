@@ -10,9 +10,7 @@
 
 
 (library
- (name github)
   (public_name github)
   (wrapped false)
   (modules_without_implementation github_s)
-  (modules github_s github_core github_json github_j github_t)
   (libraries cohttp uri cohttp-lwt yojson atdgen))

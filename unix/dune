@@ -2,5 +2,4 @@
  (name github_unix)
   (public_name github-unix)
   (wrapped false)
-  (modules github github_cookie_jar)
   (libraries lwt.unix cohttp-lwt-unix github bytes))

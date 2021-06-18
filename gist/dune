@@ -1,5 +1,5 @@
-(executables
+(executable
  (libraries cohttp-lwt-unix github_unix cmdliner passwd)
-  (public_names git-gist)
+  (public_name git-gist)
   (package github-unix)
-  (names gist))
+  (name gist))

@@ -499,7 +499,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
 
     let error err = Err err
     let response r = Response r
-    let request ?token ?(params=[]) ({ uri; _ } as req) reqfn =
+    let request ?token:_ ?(params=[]) ({ uri; _ } as req) reqfn =
       let uri = Uri.add_query_params' uri params in
       Request ({req with uri}, reqfn)
 
@@ -520,9 +520,9 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
       | None -> headers
       | Some token -> C.Header.add headers "Authorization" ("token " ^ token)
 
-    let prepare_request state ({ headers; uri; _} as req) =
+    let prepare_request state req =
       { req with
-        headers=prepare_headers state headers;
+        headers=prepare_headers state req.headers;
       }
 
     let rec bind fn x = fun state -> x state >>= function
@@ -879,7 +879,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
     )
 
     let stream_fail_handlers restart fhs =
-      map_fail_handlers Lwt.(fun f (envelope, body) ->
+      map_fail_handlers Lwt.(fun f (_envelope, body) ->
         f body >>= fun buffer ->
         return {
           Stream.restart; buffer; refill=None; endpoint=Endpoint.empty;
@@ -1344,12 +1344,6 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
       match s with
       |`Created -> "created"
       |`Updated -> "updated"
-
-    type issue_type = [ `Pr | `Issue ]
-    let string_of_issue_type (s:issue_type) =
-      match s with
-      |`Pr -> "pr"
-      |`Issue -> "issue"
 
     type repo_sort = [ `Stars | `Forks | `Updated ]
     let string_of_repo_sort (s:repo_sort) =

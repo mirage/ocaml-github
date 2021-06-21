@@ -2,7 +2,4 @@
  (name github_unix)
   (public_name github-unix)
   (wrapped false)
-  (flags (:standard -principal -strict-sequence -g -safe-string
-                    -w "A-E-41-42-44-48"))
-  (modules github github_cookie_jar)
   (libraries lwt.unix cohttp-lwt-unix github bytes))

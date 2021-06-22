@@ -236,7 +236,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
     let repo_branches ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/branches" api user repo)
 
-    let repo_refs ?ty ~user ~repo =
+    let repo_refs ~ty ~user ~repo =
       let suffix =
         match ty with
         |None -> ""
@@ -1934,7 +1934,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
       )
 
     let refs ?token ?ty ~user ~repo () =
-      let uri = URI.repo_refs ?ty ~user ~repo in
+      let uri = URI.repo_refs ~ty ~user ~repo in
       let fail_handlers = [
         API.code_handler
           ~expected_code:`Not_found
@@ -1945,7 +1945,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
         (fun b -> return (git_refs_of_string b))
 
     let get_ref ?token ~user ~repo ~name () =
-      let uri = URI.repo_refs ~user ~ty:name ~repo in
+      let uri = URI.repo_refs ~user ~ty:(Some name) ~repo in
       API.get ?token ~uri (fun b -> return (git_ref_of_string b))
 
     let branches ?token ~user ~repo () =

@@ -2,4 +2,4 @@
  (name github_jsoo)
   (public_name github-jsoo)
   (wrapped false)
-  (libraries github lwt js_of_ocaml-lwt cohttp-lwt cohttp-lwt-jsoo))
+  (libraries github js_of_ocaml-lwt cohttp-lwt-jsoo))

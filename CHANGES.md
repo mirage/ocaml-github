@@ -1,3 +1,10 @@
+## dev
+
+- Fixes to odoc warnings and cohttp dependencies (@Aaylor #244)
+- Support for 4.12 and fixing recent compiler warnings (@tmcgilchrist #246 and @emillon #250 #247)
+- Add a new package `github-data` which contains just the serialisation logic
+  without a dependency on the web stack (#248 @emillon)
+
 ## 4.3.2 (2020-09-21)
 
 - Fix authentication on POST/PATCH/PUT requests. (#242 @Aaylor)

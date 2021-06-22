@@ -1,4 +1,3 @@
-open Lwt
 open Printf
 
 let token = Config.access_token
@@ -28,7 +27,7 @@ let t =
       new_status_context=Some "test tube";
     }) in
     Status.create ~token ~user ~repo ~sha:sha_a ~status ()
-    >>= fun status ->
+    >>= fun _status ->
     Stream.to_list (Status.for_ref ~token ~user ~repo ~git_ref:sha_a ())
     >>= fun statuses ->
     print_statuses statuses;
@@ -39,11 +38,11 @@ let t =
       new_status_context=Some "test tube";
     }) in
     Status.create ~token ~user ~repo ~sha:sha_a ~status ()
-    >>= fun status ->
+    >>= fun _ ->
     Stream.to_list (Status.for_ref ~token ~user ~repo ~git_ref:sha_a ())
     >>= fun statuses ->
     print_statuses statuses;
     return ()
   )))
-
-let _ = Lwt_main.run t
+;;
+Lwt_main.run t

@@ -1,0 +1,16 @@
+(library
+ (public_name github-data)
+ (name github_data)
+ (wrapped false)
+ (modules github_t github_j github_json)
+ (libraries yojson atdgen))
+
+(rule
+ (targets github_t.ml github_t.mli)
+ (action
+  (run atdgen -t %{dep:github.atd})))
+
+(rule
+ (targets github_j.ml github_j.mli)
+ (action
+  (run atdgen -j -j-std %{dep:github.atd})))

@@ -1,14 +1,16 @@
 (executables
- (libraries cohttp-lwt-unix github_unix atdgen stringext)
-  (flags (:standard -principal -strict-sequence -g -safe-string
-                    -w "A-E-41-42-44-48"))
+ (libraries cohttp-lwt-unix github_unix atdgen stringext cmdliner)
   (names 
    current_user
    current_user_orgs
+   organizations
+   organization_repos
     rwo
     get_token
     repo_info
-    contributors))
+    repo_stats
+    contributors
+    user_type))
 
 (rule (copy config.ml.in config.ml))
 
@@ -17,7 +19,11 @@
   (deps
    current_user.exe
    current_user_orgs.exe
+   organizations.exe
+   organization_repos.exe
     rwo.exe
     get_token.exe
     repo_info.exe
-    contributors.exe))
+    repo_stats.exe
+    contributors.exe
+    user_type.exe))

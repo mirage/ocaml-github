@@ -21,7 +21,7 @@ let token = Config.access_token
 let user = "ocamlot"
 let repo = "opam-repository"
 
-let get_hooks = Github.Hook.for_repo ~user ~repo ()
+let get_hooks = Github.Repo.Hook.for_repo ~user ~repo ()
 
 let t = Github.(Monad.(run Github_t.(
   API.set_user_agent "delete_all_hooks"
@@ -31,7 +31,7 @@ let t = Github.(Monad.(run Github_t.(
   printf "Present: %d hooks\n" (List.length hooks);
   List.fold_left (fun m h ->
     m >>= fun () ->
-    Hook.delete ~user ~repo ~id:h.hook_id ()
+    Repo.Hook.delete ~user ~repo ~id:h.hook_id ()
     >|= Response.value
   ) (return ()) hooks
   >>= fun () -> Stream.to_list get_hooks

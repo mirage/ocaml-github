@@ -18,15 +18,15 @@
   (ocaml (>= 4.03.0))
   (dune (>= 1.10))
   (uri (>= 1.9.0))
-  (cohttp (>= 0.99.0))
-  (cohttp-lwt (>= 0.99))
+  (cohttp (and (>= 0.99.0) (< 3.0.0)))
+  (cohttp-lwt (and (>= 0.99.0) (< 3.0.0)))
   (lwt (>= 2.4.4))
-  (atdgen (>= 2.0.0))
+  (github-data (= :version))
   (yojson (>= 1.6.0))
   stringext)
  (synopsis "GitHub APIv3 OCaml library")
  (description "This library provides an OCaml interface to the
-[GitHub APIv3](https://developer.github.com/v3/) (JSON).
+[GitHub APIv3](https://docs.github.com/rest/) (JSON).
 
 It is compatible with [MirageOS](https://mirage.io) and also compiles to pure
 JavaScript via [js_of_ocaml](http://ocsigen.org/js_of_ocaml)."))
@@ -38,11 +38,11 @@ JavaScript via [js_of_ocaml](http://ocsigen.org/js_of_ocaml)."))
   (ocaml (>= 4.03.0))
   (dune (>= 1.10))
   (github (= :version))
-  (cohttp (>= 0.99.0))
-  (cohttp-lwt-jsoo (>= 0.99.0))
+  (cohttp (and (>= 0.99.0) (< 3.0.0)))
+  (cohttp-lwt-jsoo (and (>= 0.99.0) (< 3.0.0)))
   (js_of_ocaml-lwt (>= 3.4.0)))
  (synopsis "GitHub APIv3 JavaScript library")
- (description "This library provides an OCaml interface to the [GitHub APIv3](https://developer.github.com/v3/)
+ (description "This library provides an OCaml interface to the [GitHub APIv3](https://docs.github.com/rest/)
 (JSON). This library installs the JavaScript version, which uses [js_of_ocaml](http://ocsigen.org/js_of_ocaml)."))
 
 (package
@@ -52,12 +52,24 @@ JavaScript via [js_of_ocaml](http://ocsigen.org/js_of_ocaml)."))
   (ocaml (>= 4.03.0))
   (dune (>= 1.10))
   (github (= :version))
-  (cohttp (>= 0.99.0))
-  (cohttp-lwt-unix (>= 0.99.0))
+  (cohttp (and (>= 0.99.0) (< 3.0.0)))
+  (cohttp-lwt-unix (and (>= 0.99.0) (< 3.0.0)))
   stringext
-  (lambda-term (>= 2.0))
   (cmdliner (>= 0.9.8))
-  base-unix)
+  base-unix
+  lwt)
  (synopsis "GitHub APIv3 Unix library")
- (description "This library provides an OCaml interface to the [GitHub APIv3](https://developer.github.com/v3/)
+ (description "This library provides an OCaml interface to the [GitHub APIv3](https://docs.github.com/rest/)
 (JSON).  This package installs the Unix (Lwt) version."))
+
+(package
+ (name github-data)
+ (tags (org:mirage org:xapi-project git))
+ (depends
+   (ocaml (>= 4.03.0))
+   (dune (>= 1.10))
+   (yojson (>= 1.6.0))
+   (atdgen (>= 2.0.0)))
+ (synopsis "GitHub APIv3 data library")
+ (description "This library provides an OCaml interface to the [GitHub APIv3](https://docs.github.com/rest/)
+(JSON).  This package installs the data conversion library."))

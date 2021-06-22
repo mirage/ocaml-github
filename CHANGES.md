@@ -1,3 +1,25 @@
+## 4.3.2 (2020-09-21)
+
+- Fix authentication on POST/PATCH/PUT requests. (#242 @Aaylor)
+- Add support for statistics endpoint. (#240 @tmcgilchrist)
+- Add support for listing organization's repository. (#239 @tmcgilchrist)
+- Remove the dependency `lambda-term`, which was only used to read password, for
+  the package `github-unix`. (#238 @emillon)
+- Add the field `committer` in the datatype `git_commit`. (#235 @Aaylor)
+
+## 4.3.1 (2020-08-18)
+
+- Fix a bug introduced by #228, by adding a default value when `user_type` is
+  not defined (#232 @Aaylor)
+- Do not print errors on `stderr`. (#234 @emillon)
+
+## 4.3.0 (2020-07-20)
+
+- Remove deprecated authentication method as GitHub has removed
+  support for it (#230 @Aaylor)
+- Reintroduce `user_type` to distinguish organisations and
+  users (#228 @Aaylor)
+
 ## 4.2.0 (2019-06-17)
 
 - Add repository permissions support (#226 @Aaylor)

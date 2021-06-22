@@ -236,7 +236,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
     let repo_branches ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/branches" api user repo)
 
-    let repo_refs ?ty ~user ~repo =
+    let repo_refs ~ty ~user ~repo =
       let suffix =
         match ty with
         |None -> ""
@@ -259,8 +259,19 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
     let repo_contributors ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/contributors" api user repo)
 
+    let repo_commit_activity ~user ~repo =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/stats/commit_activity" api user repo)
+
     let repo_contributors_stats ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/stats/contributors" api user repo)
+
+    let repo_code_frequency_stats ~user ~repo =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/stats/code_frequency" api user repo)
+    let repo_participation_stats ~user ~repo =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/stats/participation" api user repo)
+
+    let repo_code_hourly_stats ~user ~repo =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/stats/punch_card" api user repo)
 
     let repo_search =
       Uri.of_string (Printf.sprintf "%s/search/repositories" api)
@@ -488,26 +499,30 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
 
     let error err = Err err
     let response r = Response r
-    let request ?token ?(params=[]) ({ uri; _ } as req) reqfn =
-      let uri = Uri.add_query_params' uri begin match token with
-        | None -> params
-        | Some token -> ("access_token", token)::params
-      end in Request ({req with uri}, reqfn)
+    let request ?token:_ ?(params=[]) ({ uri; _ } as req) reqfn =
+      let uri = Uri.add_query_params' uri params in
+      Request ({req with uri}, reqfn)
 
-    let add_ua hdrs ua =
-      let hdrs = C.Header.prepend_user_agent hdrs (user_agent^" "^C.Header.user_agent) in
-      match ua with
-        | None -> hdrs
-        | Some ua -> C.Header.prepend_user_agent hdrs ua
+    let prepare_headers state headers =
+      (* Add User-Agent *)
+      let headers =
+        C.Header.prepend_user_agent
+          headers
+          (user_agent^" "^C.Header.user_agent)
+      in
+      let headers =
+        match state.user_agent with
+        | None -> headers
+        | Some ua -> C.Header.prepend_user_agent headers ua
+      in
+      (* Add access token *)
+      match state.token with
+      | None -> headers
+      | Some token -> C.Header.add headers "Authorization" ("token " ^ token)
 
-    let prepare_request state ({ headers; uri; _} as req) =
+    let prepare_request state req =
       { req with
-        headers=add_ua headers state.user_agent;
-        uri=if List.mem_assoc "access_token" (Uri.query req.uri)
-            then uri
-            else match state.token with
-              | Some token -> Uri.add_query_param' uri ("access_token",token)
-              | None -> uri
+        headers=prepare_headers state req.headers;
       }
 
     let rec bind fn x = fun state -> x state >>= function
@@ -529,8 +544,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
       | _, Request (_,_) -> Lwt.fail (Failure "Impossible: can't run unapplied request")
       | _, Response r -> Lwt.return r
       | _, Err (Semantic (status,msg)) -> Lwt.(fail (Message (status,msg)))
-      | _, Err e -> Lwt.(error_to_string e >>= fun err ->
-                           Printf.eprintf "%s%!" err; fail (Failure err))
+      | _, Err e -> Lwt.(error_to_string e >>= fun err -> fail (Failure err))
 
     let (>>=) m f = bind f m
     let (>|=) m f = map f m
@@ -805,9 +819,15 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
     let code_handler ~expected_code handler =
       (fun (res,_) -> C.Response.status res = expected_code), handler
 
-    (* Add the correct mime-type header *)
-    let realize_headers ?(media_type="application/vnd.github.v3+json") headers =
-      C.Header.add_opt headers "accept" media_type
+    (* Add the correct mime-type header and the authentication token. *)
+    let realize_headers
+        ~token
+        ?(media_type="application/vnd.github.v3+json")
+        headers =
+      let headers = C.Header.add_opt headers "accept" media_type in
+      match token with
+      | None -> headers
+      | Some token -> C.Header.add headers "Authorization" ("token " ^ token)
 
     let idempotent meth
         ?(rate=Core) ?media_type ?headers ?token ?params ~fail_handlers ~expected_code ~uri
@@ -815,7 +835,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
       fun state -> Lwt.return
         (state,
          (Monad.(request ?token ?params
-                   {meth; uri; headers=realize_headers ?media_type headers; body=""})
+                   {meth; uri; headers=realize_headers ~token ?media_type headers; body=""})
             (request ~rate ~token
                ((code_handler ~expected_code fn)::fail_handlers))))
 
@@ -832,7 +852,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
       fun state -> Lwt.return
         (state,
         (Monad.(request ?token ?params
-                  {meth; uri; headers=realize_headers headers; body })
+                  {meth; uri; headers=realize_headers ~token headers; body })
            (request ~rate ~token
               ((code_handler ~expected_code fn)::fail_handlers))))
 
@@ -859,7 +879,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
     )
 
     let stream_fail_handlers restart fhs =
-      map_fail_handlers Lwt.(fun f (envelope, body) ->
+      map_fail_handlers Lwt.(fun f (_envelope, body) ->
         f body >>= fun buffer ->
         return {
           Stream.restart; buffer; refill=None; endpoint=Endpoint.empty;
@@ -1278,6 +1298,12 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
     let current_user_orgs ?token () =
       let uri = URI.orgs in
       API.get_stream ?token ~uri (fun b -> return (orgs_of_string b))
+
+    let repositories ?token ~org () =
+      let uri = URI.org_repos ~org in
+      API.get_stream ?token ~uri (fun b ->
+          return (repositories_of_string b)
+        )
   end
 
   module Team = struct
@@ -1318,12 +1344,6 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
       match s with
       |`Created -> "created"
       |`Updated -> "updated"
-
-    type issue_type = [ `Pr | `Issue ]
-    let string_of_issue_type (s:issue_type) =
-      match s with
-      |`Pr -> "pr"
-      |`Issue -> "issue"
 
     type repo_sort = [ `Stars | `Forks | `Updated ]
     let string_of_repo_sort (s:repo_sort) =
@@ -1914,7 +1934,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
       )
 
     let refs ?token ?ty ~user ~repo () =
-      let uri = URI.repo_refs ?ty ~user ~repo in
+      let uri = URI.repo_refs ~ty ~user ~repo in
       let fail_handlers = [
         API.code_handler
           ~expected_code:`Not_found
@@ -1925,7 +1945,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
         (fun b -> return (git_refs_of_string b))
 
     let get_ref ?token ~user ~repo ~name () =
-      let uri = URI.repo_refs ~user ~ty:name ~repo in
+      let uri = URI.repo_refs ~user ~ty:(Some name) ~repo in
       API.get ?token ~uri (fun b -> return (git_ref_of_string b))
 
     let branches ?token ~user ~repo () =
@@ -1988,6 +2008,45 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
       API.get_stream ?token ~uri
         ~fail_handlers
         (fun b -> return (contributors_stats_of_string b))
+
+    let yearly_commit_activity ?token ~user ~repo () =
+      let uri = URI.repo_commit_activity ~user ~repo in
+      let fail_handlers = [
+          API.code_handler
+            ~expected_code:`Accepted
+            (fun _ -> Lwt.return [])
+        ] in
+      API.get_stream ?token ~uri
+        ~fail_handlers
+        (fun b -> return (commit_activities_of_string b))
+
+    let weekly_commit_activity ?token ~user ~repo () =
+      let uri = URI.repo_code_frequency_stats ~user ~repo in
+      let fail_handlers = [
+          API.code_handler
+            ~expected_code:`Accepted
+            (fun _ -> Lwt.return [])
+        ] in
+      API.get_stream ?token ~uri
+        ~fail_handlers
+        (fun b -> return (code_frequencies_of_string b))
+
+    let weekly_commit_count ?token ~user ~repo () =
+      let uri = URI.repo_participation_stats ~user ~repo in
+      API.get ?token ~uri
+        (fun b -> return (participation_of_string b))
+
+    let hourly_commit_count ?token ~user ~repo () =
+      let uri = URI.repo_code_hourly_stats ~user ~repo in
+
+      let fail_handlers = [
+          API.code_handler
+            ~expected_code:`Accepted
+            (fun _ -> Lwt.return [])
+        ] in
+      API.get_stream ?token ~uri
+        ~fail_handlers
+        (fun b -> return (punch_cards_of_string b))
   end
 
   module Event = struct
@@ -2033,7 +2092,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
   module Gist = struct
     open Lwt
 
-    (* List gists https://developer.github.com/v3/gists/#list-gists
+    (* List gists https://docs.github.com/v3/gists/#list-gists
      * Parameters
      *  since : string   A timestamp in ISO 8601 format:
      *                   YYYY-MM-DDTHH:MM:SSZ. Only gists updated at
@@ -2072,13 +2131,13 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
       let uri = uri_param_since uri since in
       API.get_stream ?token ~uri (fun b -> return (gists_of_string b))
 
-    (* Get a single gist https://developer.github.com/v3/gists/#get-a-single-gist
+    (* Get a single gist https://docs.github.com/rest/reference/gists#get-a-gist
      * GET /gists/:id  *)
     let get ?token ~id () =
       let uri = URI.gist ~id in
       API.get ?token ~uri (fun b -> return (gist_of_string b))
 
-    (* Create a gist https://developer.github.com/v3/gists/#create-a-gist
+    (* Create a gist https://docs.github.com/rest/reference/gists#create-a-gist
      * POST /gists
      * input
      *  files       hash      Required. Files that make up this gist.
@@ -2089,7 +2148,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
       let body = string_of_new_gist gist in
       API.post ~body ?token ~uri ~expected_code:`Created (fun b -> return (gist_of_string b))
 
-    (* Edit a gist https://developer.github.com/v3/gists/#edit-a-gist
+    (* Edit a gist https://docs.github.com/rest/reference/gists#update-a-gist
      * PATCH /gists/:id
      * input
      *  description string  A description of the gist.
@@ -2101,42 +2160,42 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
       let body = string_of_update_gist gist in
       API.patch ~body ?token ~uri ~expected_code:`OK (fun b -> return (gist_of_string b))
 
-    (* List gist commits https://developer.github.com/v3/gists/#list-gist-commits
+    (* List gist commits https://docs.github.com/rest/reference/gists#list-gist-commits
      * GET /gists/:id/commits *)
     let commits ?token ~id () =
       let uri = URI.gist_commits ~id in
       API.get_stream ?token ~uri (fun b -> return (gist_commits_of_string b))
 
-    (* Star a gist https://developer.github.com/v3/gists/#star-a-gist
+    (* Star a gist https://docs.github.com/rest/reference/gists#star-a-gist
      * PUT /gists/:id/star *)
     let star ?token ~id () =
       let uri = URI.gist_star ~id in
       API.put ?token ~uri ~expected_code:`No_content (fun _b -> return ())
 
-    (* Unstar a gist https://developer.github.com/v3/gists/#unstar-a-gist
+    (* Unstar a gist https://docs.github.com/rest/reference/gists#unstar-a-gist
      * DELETE /gists/:id/star *)
     let unstar ?token ~id () =
       let uri = URI.gist_star ~id in
       API.delete ?token ~uri ~expected_code:`No_content (fun _b -> return ())
 
-    (* Check if a gist is starred https://developer.github.com/v3/gists/#check-if-a-gist-is-starred
+    (* Check if a gist is starred https://docs.github.com/rest/reference/gists#check-if-a-gist-is-starred
      * GET /gists/:id/star
      * Response if gist is starred : 204 No Content
      * Response if gist is not starred : 404 Not Found *)
 
-    (* Fork a gist https://developer.github.com/v3/gists/#fork-a-gist
+    (* Fork a gist https://docs.github.com/rest/reference/gists#fork-a-gist
      * POST /gists/:id/forks *)
     let fork ?token ~id () =
       let uri = URI.gist_forks ~id in
       API.post ?token ~uri ~expected_code:`Created (fun b -> return (gist_of_string b))
 
-    (* List gist forks https://developer.github.com/v3/gists/#list-gist-forks
+    (* List gist forks https://docs.github.com/rest/reference/gists#list-gist-forks
      * GET /gists/:id/forks *)
     let forks ?token ~id () =
       let uri = URI.gist_forks ~id in
       API.get_stream ?token ~uri (fun b -> return (gist_forks_of_string b))
 
-    (* Delete a gist https://developer.github.com/v3/gists/#delete-a-gist
+    (* Delete a gist https://docs.github.com/rest/reference/gists#delete-a-gist
      * DELETE /gists/:id *)
     let delete ?token ~id () =
       let uri = URI.gist ~id in

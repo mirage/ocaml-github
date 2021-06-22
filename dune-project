@@ -56,7 +56,8 @@ JavaScript via [js_of_ocaml](http://ocsigen.org/js_of_ocaml)."))
   (cohttp-lwt-unix (and (>= 0.99.0) (< 3.0.0)))
   stringext
   (cmdliner (>= 0.9.8))
-  base-unix)
+  base-unix
+  lwt)
  (synopsis "GitHub APIv3 Unix library")
  (description "This library provides an OCaml interface to the [GitHub APIv3](https://docs.github.com/rest/)
 (JSON).  This package installs the Unix (Lwt) version."))

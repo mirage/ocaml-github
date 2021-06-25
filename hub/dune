@@ -1,0 +1,6 @@
+(executables
+ (libraries cohttp-lwt-unix github-unix cmdliner yaml yaml.unix)
+  (package github-unix)
+  (public_names hub)
+  (names hub))
+

@@ -55,6 +55,7 @@ JavaScript via [js_of_ocaml](http://ocsigen.org/js_of_ocaml)."))
   (cohttp (and (>= 0.99.0) (< 3.0.0)))
   (cohttp-lwt-unix (and (>= 0.99.0) (< 3.0.0)))
   stringext
+  (yaml (>= 2.0.0))
   (cmdliner (>= 0.9.8))
   base-unix
   lwt)

@@ -1136,6 +1136,9 @@ type release = {
   html_url: string;
   assets_url: string;
   upload_url: string;
+  assets: release_assets;
+  tarball_url: string;
+  zipball_url: string;
 } <ocaml field_prefix="release_">
 
 type releases = release list

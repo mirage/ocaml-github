@@ -10,6 +10,7 @@
     repo_info
     repo_stats
     contributors
+    releases
     user_type))
 
 (rule (copy config.ml.in config.ml))
@@ -25,5 +26,6 @@
     get_token.exe
     repo_info.exe
     repo_stats.exe
+    releases.exe
     contributors.exe
     user_type.exe))

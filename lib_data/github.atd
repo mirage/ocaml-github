@@ -1147,6 +1147,22 @@ type release_repo = {
 } <ocaml field_prefix="release_repo_">
 type release_repos = release_repo list
 
+type release_asset = {
+  url: string;
+  browser_download_url: string;
+  id: int <ocaml repr="int64">;
+  node_id: string;
+  name: string;
+  label: string;
+  state: string;
+  content_type: string;
+  size: int;
+  download_count: int;
+  ~created_at: string;
+  ~published_at: string;
+} <ocaml field_prefix="release_asset_">
+type release_assets = release_asset list
+
 type new_release = {
   tag_name: string;
   target_commitish: string;

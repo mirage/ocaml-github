@@ -1475,9 +1475,16 @@ module type Github = sig
     val get_by_tag_name:
       ?token:Token.t ->
       user:string -> repo:string -> tag:string ->
-      unit -> Github_t.release Monad.t
+      unit -> Github_t.release Response.t Monad.t
     (** [get_by_tag_name ~user ~repo ~tag ()] is the release in repo
         [user]/[repo] which is using git tag [tag]. *)
+
+    val get_latest:
+      ?token:Token.t ->
+      user:string -> repo:string ->
+      unit -> Github_t.release Response.t Monad.t
+    (** [get_latest ~user ~repo ()] is the latest published full release
+        in [user]/[repo]. *)
 
     val create :
       ?token:Token.t ->
@@ -1500,6 +1507,27 @@ module type Github = sig
       unit -> Github_t.release Response.t Monad.t
     (** [update ~user ~repo ~release ~id ()] is the updated release
         [id] in [user]/[repo] as described by [release]. *)
+
+    val list_assets:
+      ?token:Token.t ->
+      user:string -> repo:string -> id:int64 ->
+      unit -> Github_t.release_assets Response.t Monad.t
+    (** [list_assets ~user ~repo ~id ()] lists the assets in release
+        [id] in [user]/[repo]. *)
+
+    val get_asset:
+      ?token:Token.t ->
+      user:string -> repo:string -> id:int64 ->
+      unit -> Github_t.release_asset Response.t Monad.t
+    (** [get_asset ~user ~repo ~id ()] gets an asset from a release
+        [id] in [user]/[repo]. *)
+
+    val delete_asset:
+      ?token:Token.t ->
+      user:string -> repo:string -> id:int64 ->
+      unit -> unit Response.t Monad.t
+    (** [delete_asset ~user ~repo ~id ()] deletes an asset from a release
+        [id] in [user]/[repo]. *)
 
     val upload_asset :
       ?token:Token.t ->

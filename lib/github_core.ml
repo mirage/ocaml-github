@@ -232,7 +232,8 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
 
     let repo_tag ~user ~repo ~sha =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/git/tags/%s" api user repo sha)
-
+    let repo_tag_name ~user ~repo ~tag =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/releases/tags/%s" api user repo tag)
     let repo_branches ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/branches" api user repo)
 
@@ -345,11 +346,23 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
     let repo_release ~user ~repo ~id =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/releases/%Ld" api user repo id)
 
+    let repo_release_latest ~user ~repo=
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/releases/latest" api user repo)
+
     let upload_release_asset ~user ~repo ~id =
       Uri.of_string (
         Printf.sprintf
           "https://uploads.github.com/repos/%s/%s/releases/%Ld/assets"
           user repo id)
+
+    let get_asset ~user ~repo ~id =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/releases/assets/%Ld" api user repo id)
+
+    let delete_asset ~user ~repo ~id =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/releases/assets/%Ld" api user repo id)
+
+    let get_release_assets ~user ~repo ~id =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/releases/%Ld/assets" api user repo id)
 
     let repo_deploy_keys ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/keys" api user repo)
@@ -535,8 +548,6 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
 
     let return r = fun state -> Lwt.return (state, Response r)
     let map f m = bind (fun x -> return (f x)) m
-
-    let with_error err = fun state -> Lwt.return (state, Err err)
 
     let initial_state = {user_agent=None; token=None}
 
@@ -1578,28 +1589,22 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
       let uri = URI.repo_release ~user ~repo ~id in
       API.get ?token ~uri (fun b -> return (release_of_string b))
 
-    (** We need to stream down releases until we find the target *)
     let get_by_tag_name ?token ~user ~repo ~tag () =
-      let open Monad in
-      let releases = for_repo ?token ~user ~repo () in
-      Stream.find (fun r -> r.release_tag_name = tag) releases
-      >>= function
-      | Some (r,_) -> return r
-      | None ->
-        let msg =
-          Printf.sprintf "tag %s not found in repository %s/%s" tag user repo
-        in
-        let msg = {Github_t.message_message=msg; message_errors=[]} in
-        with_error (Semantic (`Not_found,msg))
+      let uri = URI.repo_tag_name ~user ~repo ~tag in
+      API.get ?token ~uri (fun b -> return (release_of_string b))
 
-    let delete ?token ~user ~repo ~id () =
-      let uri = URI.repo_release ~user ~repo ~id in
-      API.delete ?token ~uri (fun _ -> return ())
+    let get_latest ?token ~user ~repo () =
+      let uri = URI.repo_release_latest ~user ~repo in
+      API.get ?token ~uri (fun b -> return (release_of_string b))
 
     let create ?token ~user ~repo ~release () =
       let uri = URI.repo_releases ~user ~repo in
       let body = string_of_new_release release in
       API.post ?token ~body ~uri ~expected_code:`Created (fun b -> return (release_of_string b))
+
+    let delete ?token ~user ~repo ~id () =
+      let uri = URI.repo_release ~user ~repo ~id in
+      API.delete ?token ~uri (fun _ -> return ())
 
     let update ?token ~user ~repo ~release ~id () =
       let uri = URI.repo_release ~user ~repo ~id in
@@ -1612,6 +1617,18 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
       let uri = URI.upload_release_asset ~user ~repo ~id in
       API.post ?token ~params ~headers ~body ~uri ~expected_code:`Created
         (fun _b -> return ())
+
+    let delete_asset ?token ~user ~repo ~id () =
+      let uri = URI.delete_asset ~user ~repo ~id in
+      API.delete ?token ~uri (fun _ -> return ())
+
+    let get_asset ?token ~user ~repo ~id () =
+      let uri = URI.get_asset ~user ~repo ~id in
+      API.get ?token ~uri (fun b -> return (release_asset_of_string b))
+
+    let list_assets ?token ~user ~repo ~id () =
+      let uri = URI.get_release_assets ~user ~repo ~id in
+      API.get ?token ~uri (fun b -> return (release_assets_of_string b))
   end
 
   module Deploy_key = struct

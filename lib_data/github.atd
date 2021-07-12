@@ -469,7 +469,7 @@ type repository_issue_search = {
 } <ocaml field_prefix="repository_issue_search_">
 
 type branch = {
-  label: string;
+  label: string nullable;
   ref: string;
   sha: string;
   ?user: user option;
@@ -1136,6 +1136,9 @@ type release = {
   html_url: string;
   assets_url: string;
   upload_url: string;
+  assets: release_assets;
+  tarball_url: string;
+  zipball_url: string;
 } <ocaml field_prefix="release_">
 
 type releases = release list

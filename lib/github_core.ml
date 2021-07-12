@@ -234,6 +234,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/git/tags/%s" api user repo sha)
     let repo_tag_name ~user ~repo ~tag =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/releases/tags/%s" api user repo tag)
+
     let repo_branches ~user ~repo =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/branches" api user repo)
 

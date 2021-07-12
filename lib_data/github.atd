@@ -1328,3 +1328,154 @@ type timeline_event = {
 } <ocaml field_prefix="timeline_event_">
 
 type timeline_events = timeline_event list
+
+type check_status = [
+  | Queued <json name="queued">
+  | In_progress <json name="in_progress">
+  | Completed <json name="completed">
+] 
+
+type check_conclusion = [
+  | Success <json name="success">
+  | Failure <json name="failure">
+  | Neutral <json name="neutral">
+  | Cancelled <json name="cancelled">
+  | Timed_out <json name="timed_out">
+  | Action_required <json name="action_required">
+] 
+
+type check_run_output = {
+  title: string nullable;
+  summary: string nullable;
+  text: string nullable;
+  annotations_count: int;
+  annotations_url: string;
+} <ocaml field_prefix="check_run_">
+
+type check_suite_id = { id: int } <ocaml field_prefix="check_run_">
+
+type check_run_app_permissions = {
+  metadata: string;
+  checks: string;
+  ?issues: string option;
+  ?contents: string option;
+  ?single_file: string option;
+}
+
+type check_app = {
+  id: int <ocaml repr="int64">;
+  slug: string;
+  node_id: string;
+  owner: user;
+  name: string;
+  description: string;
+  external_url: string;
+  html_url: string;
+  created_at: string;
+  updated_at: string;
+  permissions: check_run_app_permissions;
+  events: string list;
+} <ocaml field_prefix="check_run_">
+
+type check_run_repo_ref = {
+  ref: string;
+  sha: string;
+  repo: repo;
+} <ocaml field_prefix="check_run_">
+
+type check_run_pull_request = {
+  url: string;
+  id: int <ocaml repr="int64">;
+  number: int <ocaml repr="int64">;
+  head: check_run_repo_ref;
+  base: check_run_repo_ref;
+} <ocaml field_prefix="check_run_">
+
+type check_run = {
+  id: int <ocaml repr="int64">;
+  head_sha: string;
+  node_id: string;
+  external_id: string;
+  url: string;
+  html_url: string;
+  details_url: string;
+  status: check_status;
+  conclusion: check_conclusion nullable;
+  started_at: string;
+  completed_at: string nullable;
+  output: check_run_output;
+  name: string;
+  check_suite: check_suite_id;
+  app: check_app;
+  pull_requests: check_run_pull_request list
+} <ocaml field_prefix="check_run_">
+
+type check_runs_list = {
+  total_count: int;
+  check_runs: check_run list;
+}
+
+type check_run_annotation = {
+  path: string;
+  start_line: int;
+  end_line: int;
+  start_column: int;
+  end_column: int;
+  annotation_level: string; (* Make this an ENUM *)
+  title: string;
+  message: string;
+  raw_details: string;
+  blob_href: link
+}
+
+type check_run_annotations = check_run_annotation list
+
+type check_suite_info = {
+  email: string;
+  name: string;
+} 
+
+type check_suite_head_commit = {
+  id: string;
+  tree_id: string;
+  message: string;
+  timestamp: string;
+  author: check_suite_info;
+  committer: check_suite_info;
+}
+
+type check_suite = {
+  id: int;
+  node_id: string;
+  head_branch: string;
+  head_sha: string;
+  status: check_status;
+  conclusion: check_conclusion nullable;
+  url: string;
+  before: string;
+  after: string;
+  pull_requests: string list;
+  created_at: string;
+  updated_at: string;
+  app: check_app;
+  (* repository: repository option;  GH docs say this should be here but check_suite webhooks aren't sending it.*)
+  head_commit: check_suite_head_commit;
+  latest_check_runs_count: int;
+  check_runs_url: string;
+}
+
+type check_suite_list = {
+  total_count: int <ocaml repr="int64">;
+  check_suites: check_suite list;
+}
+
+type auto_trigger_checks = {
+  app_id: int;
+  setting: bool;
+}
+
+type check_suite_preferences = {
+  preferences: auto_trigger_checks list;
+  respository: repository;
+}
+ 

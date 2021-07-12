@@ -1671,6 +1671,137 @@ module type Github = sig
 
   end
 
+  (** The [Check] module exposes Github's
+      {{:https://docs.github.com/en/rest/reference/checks}checks API}. *)
+  module Check : sig
+    val create_check_run :
+      ?token:Token.t ->
+      owner:string ->
+      repo:string ->
+      body:string -> (* JSON type here for body*)
+      unit -> Github_t.check_run Response.t Monad.t
+    (** [create_check_run ~owner ~repo ~body] creates a new check run for a specified commit in a repository.
+
+        See {{:https://docs.github.com/en/rest/reference/checks#create-a-check-run}create-a-check-run}.
+    *)
+
+    val update_check_run :
+      ?token:Token.t ->
+      owner:string ->
+      repo:string ->
+      check_run_id:string ->
+      body:string -> (* JSON type here for body*)
+      unit -> Github_t.check_run Response.t Monad.t
+    (** [update_check_run ~owner ~repo ~check_run_id ~body] for a specified [check_run_id] in a repository.
+
+        See {{:https://docs.github.com/en/rest/reference/checks#update-a-check-run}update-a-check-run}.
+    *)
+
+    val get_check_run :
+      ?token:Token.t ->
+      owner:string ->
+      repo:string ->
+      check_run_id:string ->
+      unit -> Github_t.check_run Response.t Monad.t 
+    (** [get_check_run ~owner ~repo ~check_run_id] using its [check_run_id] in a repository.
+
+        See {{:https://docs.github.com/en/rest/reference/checks#get-a-check-run}get-a-check-run}.
+    *)
+
+    val list_annotations :
+      ?token:Token.t ->
+      owner:string ->
+      repo:string ->
+      check_run_id:string ->
+      unit -> Github_t.check_run_annotations Response.t Monad.t 
+    (** [list_annotations ~owner ~repo ~check_run_id] for a check run using the annotation [check_run_id].
+
+        See {{:https://docs.github.com/en/rest/reference/checks#list-check-run-annotations}list-check-run-annotations}.
+    *)    
+    
+    val list_check_runs :
+      ?token:Token.t ->
+      owner:string ->
+      repo:string ->
+      check_suite_id:string ->
+      unit -> Github_t.check_runs_list Response.t Monad.t
+    (** [list_check_runs ~owner ~repo ~check_suite_id] in a check suite using its [check_suite_id].
+        
+        See {{:https://docs.github.com/en/rest/reference/checks#list-check-runs-in-a-check-suite} list-check-runs-in-a-check-suite}.
+    *)    
+    
+    val list_check_runs_for_ref :
+      ?token:Token.t ->
+      owner:string ->
+      repo:string ->
+      sha:string ->
+      ?check_name:string ->
+      ?app_id:string ->
+      ?status:string ->
+      unit -> Github_t.check_runs_list Response.t Monad.t
+    (** [list_check_runs_for_ref ~owner ~repo ~sha], the [sha] can be a SHA, branch name, or a tag name. 
+
+          See {{:https://docs.github.com/en/rest/reference/checks#list-check-runs-for-a-git-reference}list-check-runs-for-a-git-reference}.
+    *)
+
+    val create_check_suite :
+      ?token:Token.t ->
+      owner:string ->
+      repo:string ->
+      body:string ->
+      unit -> Github_t.check_suite Response.t Monad.t
+    (** [create_check_suite ~owner ~repo ~body] where body is the sha of the head commit.
+
+        See {{:https://docs.github.com/en/rest/reference/checks#create-a-check-suite}create-a-check-suite}.
+     *)
+
+    val update_preferences_for_check_suites :
+      ?token:Token.t ->
+      owner:string ->
+      repo:string ->
+      body:string ->
+      unit -> Github_t.check_suite_preferences Response.t Monad.t
+    (** [update_preferences_for_check_suites ~owner ~repo ~body] changes the default automatic flow when creating check suites.
+        Where [body] contains an array of auto_trigger_checks
+
+        See {{:https://docs.github.com/en/rest/reference/checks#update-repository-preferences-for-check-suites}update-repository-preferences-for-check-suites}.
+     *)
+
+    val get_check_suite :
+      ?token:Token.t ->
+      owner:string ->
+      repo:string ->
+      check_suite_id:int ->
+      unit -> Github_t.check_suite Response.t Monad.t
+    (** [get_check_suite ~owner ~repo ~check_suite_id] retrieves a single check_suite using its [check_suite_id]
+        
+        See {{:https://docs.github.com/en/rest/reference/checks#get-a-check-suite}get-a-check-suite}.
+     *)
+
+    val rerequest_check_suite :
+      ?token:Token.t ->
+      owner:string ->
+      repo:string ->
+      check_suite_id:int ->
+      unit -> unit Response.t Monad.t
+    (** [rerequest_check_suite ~owner ~repo ~check_suite_id] triggers GitHub to rerequest an existing check suite, 
+        without pushing new code to a repository. 
+
+        See {{:https://docs.github.com/en/rest/reference/checks#rerequest-a-check-suite}rerequest-a-check-suite}.
+     *)
+
+    val list_check_suites_for_ref :
+      ?token:Token.t ->
+      owner:string ->
+      repo:string ->
+      sha:string ->
+      unit -> Github_t.check_suite_list Response.t Monad.t
+    (** [list_check_suites_for_ref ~owner ~repo ~sha] lists check suites for a commit [sha]. 
+
+     See {{:https://docs.github.com/en/rest/reference/checks#list-check-suites-for-a-git-reference}list-check-suites-for-a-git-reference}.
+     *)
+  end
+
   (** The [Search] module exposes GitHub's
       {{:https://docs.github.com/rest/reference/search}search interfaces}. *)
   module Search : sig

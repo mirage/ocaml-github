@@ -4,6 +4,7 @@
 - Support for 4.12 and fixing recent compiler warnings (@tmcgilchrist #246 and @emillon #250 #247)
 - Add a new package `github-data` which contains just the serialisation logic
   without a dependency on the web stack (#248 @emillon)
+- Add Github checks API support (#249 @tmcgilchrist)
 
 ## 4.3.2 (2020-09-21)
 

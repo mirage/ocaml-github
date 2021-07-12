@@ -31,7 +31,7 @@ This library provides an OCaml interface to the
 It is compatible with [MirageOS](https://mirage.io) and also compiles to pure
 JavaScript via [js_of_ocaml](http://ocsigen.org/js_of_ocaml)."""
 depends: [
-  "ocaml" {>= "4.03.0"}
+  "ocaml" {>= "4.08.0"}
   "dune" {>= "1.10"}
   "uri" {>= "1.9.0"}
   "cohttp" {>= "0.99.0" & < "3.0.0"}

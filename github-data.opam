@@ -28,7 +28,7 @@ description: """
 This library provides an OCaml interface to the [GitHub APIv3](https://docs.github.com/rest/)
 (JSON).  This package installs the data conversion library."""
 depends: [
-  "ocaml" {>= "4.03.0"}
+  "ocaml" {>= "4.08.0"}
   "dune" {>= "1.10"}
   "yojson" {>= "1.6.0"}
   "atdgen" {>= "2.0.0"}

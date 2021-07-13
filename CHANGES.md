@@ -1,6 +1,4 @@
-## dev
-
-## 4.4 (2021-06-13)
+## 4.4.0 (2021-06-13)
 
 - Fixes to odoc warnings and cohttp dependencies (@Aaylor #244)
 - Support for 4.12 and fixing recent compiler warnings (@tmcgilchrist #246 #252 and @emillon #250 #247 #251)

@@ -469,7 +469,7 @@ type repository_issue_search = {
 } <ocaml field_prefix="repository_issue_search_">
 
 type branch = {
-  label: string;
+  label: string nullable;
   ref: string;
   sha: string;
   ?user: user option;

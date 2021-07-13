@@ -1,3 +1,6 @@
+## dev
+- label field missing in branch refs for ghost (@dra27 and @tmcgilchrist #256)
+
 ## 4.4.0 (2021-06-13)
 
 - Fixes to odoc warnings and cohttp dependencies (@Aaylor #244)

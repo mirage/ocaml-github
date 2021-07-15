@@ -1,6 +1,6 @@
 open Printf
 
-let token = None (* Some Config.access_token *)
+let token = Config.access_token
 
 let print_pulls pl = Github.(Monad.(
   Stream.iter (fun p ->
@@ -22,17 +22,17 @@ let t = Github.(Monad.(run (
   return (opam_repo_pulls ~state:`Closed ()) >>= print_pulls >>= fun () ->
   return (opam_repo_pulls ())
   >>= Stream.iter (fun hd ->
-    Pull.get ?token ~user ~repo ~num:hd.Github_t.pull_number ()
+    Pull.get ~token ~user ~repo ~num:hd.Github_t.pull_number ()
     >>~ fun p ->
     eprintf "Inside monad: pull %d: %s\n%!"
       p.Github_t.pull_number p.Github_t.pull_title;
-    return (Pull.commits ?token ~user ~repo ~num:hd.Github_t.pull_number ())
+    return (Pull.commits ~token ~user ~repo ~num:hd.Github_t.pull_number ())
     >>= Stream.iter (fun commit ->
       eprintf "    %s\n" commit.Github_t.commit_sha; return ()
     )
     >>= fun () ->
     eprintf "---------\n%!";
-    return (Pull.files ?token ~user ~repo ~num:hd.Github_t.pull_number ())
+    return (Pull.files ~token ~user ~repo ~num:hd.Github_t.pull_number ())
     >>= Stream.iter (fun file ->
       eprintf "    %s\n" file.Github_t.file_filename; return ()
     )

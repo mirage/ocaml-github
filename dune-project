@@ -2,6 +2,7 @@
 (name github)
 
 (generate_opam_files true)
+(formatting disabled)
 
 (license MIT)
 (maintainers "Anil Madhavapeddy <anil@recoil.org>")
@@ -20,6 +21,7 @@
   (cohttp (>= 4.0.0))
   (cohttp-lwt-jsoo (>= 4.0.0))
   (lwt (>= 2.4.4))
+  (cohttp-lwt (>= 4.0.0))
   (github-data (= :version))
   (yojson (>= 1.6.0))
   stringext)

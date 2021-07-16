@@ -885,8 +885,8 @@ module type Github = sig
     val get_commits :
       ?token:Token.t ->
       user:string -> repo:string ->
-      unit -> Github_t.commits Response.t Monad.t
-    (** [get_commits ~user ~repo ()] lists all commits in [user]/[repo]. *)
+      unit -> Github_t.commit Stream.t
+    (** [get_commits ~user ~repo ()] stream of all commits in [user]/[repo]. *)
 
     val get_commit :
       ?token:Token.t ->

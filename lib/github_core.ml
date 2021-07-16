@@ -2004,7 +2004,14 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
 
     let get_commits ?token ~user ~repo () =
       let uri = URI.repo_commits ~user ~repo in
-      API.get ?token ~uri (fun b -> return (commits_of_string b))
+      let fail_handlers = [
+        API.code_handler
+          ~expected_code:`Not_found
+          (fun _ -> Lwt.return [])
+      ] in
+      API.get_stream ?token ~uri ~fail_handlers
+        (fun b -> return (commits_of_string b))
+
 
     let get_commit ?token ~user ~repo ~sha () =
       let uri = URI.repo_commit ~user ~repo ~sha in

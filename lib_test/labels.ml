@@ -10,9 +10,10 @@ let t =
   let open Github_t in
   run (
     let labels = Label.for_repo ~token ~user ~repo () in
+    printf "labels for %s/%s\n\n" user repo;
     Stream.iter (fun label ->
       let name = label.label_name in
-      eprintf "label %s" name;
+      printf "%s\n" name;
       return ()
     ) labels
   )

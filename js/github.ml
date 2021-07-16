@@ -24,6 +24,6 @@ module Env = struct
   let debug = false
 end
 
-module Github' = Github_core.Make(Env)(Time)(Cohttp_lwt_xhr.Client)
+module Github' = Github_core.Make(Env)(Time)(Cohttp_lwt_jsoo.Client)
 include Github'
 

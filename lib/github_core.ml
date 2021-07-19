@@ -275,6 +275,9 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
       in
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/git/refs%s" api user repo suffix)
 
+    let repo_commits ~user ~repo =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/commits" api user repo)
+
     let repo_commit ~user ~repo ~sha =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/commits/%s" api user repo sha)
 
@@ -1998,6 +2001,17 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
     let branches ?token ~user ~repo () =
       let uri = URI.repo_branches ~user ~repo in
       API.get_stream ?token ~uri (fun b -> return (repo_branches_of_string b))
+
+    let get_commits ?token ~user ~repo () =
+      let uri = URI.repo_commits ~user ~repo in
+      let fail_handlers = [
+        API.code_handler
+          ~expected_code:`Not_found
+          (fun _ -> Lwt.return [])
+      ] in
+      API.get_stream ?token ~uri ~fail_handlers
+        (fun b -> return (commits_of_string b))
+
 
     let get_commit ?token ~user ~repo ~sha () =
       let uri = URI.repo_commit ~user ~repo ~sha in

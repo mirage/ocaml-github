@@ -882,6 +882,12 @@ module type Github = sig
         {{:https://docs.github.com/rest/reference/git#references}git reference}
         with name [name] for repo [user]/[repo]. *)
 
+    val get_commits :
+      ?token:Token.t ->
+      user:string -> repo:string ->
+      unit -> Github_t.commit Stream.t
+    (** [get_commits ~user ~repo ()] stream of all commits in [user]/[repo]. *)
+
     val get_commit :
       ?token:Token.t ->
       user:string -> repo:string -> sha:string ->

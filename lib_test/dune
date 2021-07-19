@@ -1,33 +1,43 @@
 (executables
  (libraries cohttp-lwt-unix github_unix atdgen stringext cmdliner)
   (names 
+   checks
+   contributors
    current_user
    current_user_orgs
-   organizations
+   get_token
+   issues
+   labels
+   milestones
    organization_repos
-   checks
-    rwo
-    get_token
-    repo_info
-    repo_stats
-    contributors
-    releases
-    user_type))
+   organizations
+   pulls
+   releases
+   repo_info
+   repo_stats
+   rwo
+   tags
+   user_type))
 
 (rule (copy config.ml.in config.ml))
 
 (alias
  (name DEFAULT)
   (deps
+   checks.exe
+   contributors.exe
    current_user.exe
    current_user_orgs.exe
-   organizations.exe
+   get_token.exe
+   issues.exe
+   labels.exe
+   milestones.exe
    organization_repos.exe
-   checks.exe
-    rwo.exe
-    get_token.exe
-    repo_info.exe
-    repo_stats.exe
-    releases.exe
-    contributors.exe
-    user_type.exe))
+   organizations.exe
+   pulls.exe
+   releases.exe
+   repo_info.exe
+   repo_stats.exe
+   rwo.exe
+   tags.exe
+   user_type.exe))

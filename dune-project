@@ -23,7 +23,7 @@
   (lwt (>= 2.4.4))
   (cohttp-lwt (>= 4.0.0))
   (github-data (= :version))
-  (yojson (>= 1.6.0))
+  (yojson (>= 1.7.0))
   stringext)
  (synopsis "GitHub APIv3 OCaml library")
  (description "This library provides an OCaml interface to the

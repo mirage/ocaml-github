@@ -1,13 +1,13 @@
-## dev
-- label field missing in branch refs for ghost (@dra27 and @tmcgilchrist #256)
-
-## 4.4.0 (2021-06-13)
+## 4.4.0 (2021-06-21)
 
 - Fixes to odoc warnings and cohttp dependencies (@Aaylor #244)
+- Support cohttp 4.0. (@tmcgilchrist #257)
 - Support for 4.12 and fixing recent compiler warnings (@tmcgilchrist #246 #252 and @emillon #250 #247 #251)
 - Add a new package `github-data` which contains just the serialisation logic
   without a dependency on the web stack (#248 @emillon)
 - Add Github checks API support (#249 @tmcgilchrist)
+- Label field missing in branch refs for ghost (@dra27 and @tmcgilchrist #256)
+- Get all commits for user/repo (@Stevendeo #245)
 
 ## 4.3.2 (2020-09-21)
 

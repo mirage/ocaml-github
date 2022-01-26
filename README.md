@@ -242,6 +242,8 @@ $ git upload-release mirage ocaml-uri v1.4.0 release.tar.gz
    ref](https://docs.github.com/rest/reference/repos#get-the-combined-status-for-a-specific-reference)
  * [List contributors](https://docs.github.com/rest/reference/repos#list-repository-contributors)
  * Most [Webhooks](https://docs.github.com/rest/reference/repos#webhooks) endpoints
+  * [Ping a
+   hook](https://docs.github.com/rest/reference/repos#ping-a-repository-webhook)
  * [Get contributors list with additions, deletions, and commit counts](https://docs.github.com/rest/reference/repos#get-all-contributor-commit-activity)
  * [Collaborators](https://docs.github.com/rest/reference/repos#collaborators)
  * [List organization
@@ -285,8 +287,6 @@ $ git upload-release mirage ocaml-uri v1.4.0 release.tar.gz
    release](https://docs.github.com/rest/reference/repos#get-the-latest-release)
  * [Edit a release
    asset](https://docs.github.com/rest/reference/repos#update-a-release-asset)
- * [Ping a
-   hook](https://docs.github.com/rest/reference/repos#ping-a-repository-webhook)
  * [PubSubHubbub](https://docs.github.com/rest/reference/repos#pubsubhubbub)
  * [Receiving Webhooks
    helpers](https://docs.github.com/rest/reference/repos#receiving-webhooks)

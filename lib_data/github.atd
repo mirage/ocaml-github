@@ -886,6 +886,42 @@ type watch_event = {
   action: watch_action;
 } <ocaml field_prefix="watch_event_">
 
+type last_response = {
+  code: string nullable;
+  status: string;
+  message: string nullable;
+} <ocaml field_prefix="last_response_">
+
+type ping_event_hook_config = {
+  content_type: string;
+  insecure_ssl: string;
+  url: string;
+} <ocaml field_prefix="ping_event_hook_config_">
+
+type ping_event_hook = {
+  ping_type <json name="type"> : string;
+  id: int;
+  name: string;
+  active: bool;
+  events: string list;
+  config: ping_event_hook_config;
+  updated_at: string;
+  created_at: string;
+  url: string;
+  test_url: string;
+  ping_url: string;
+  deliveries_url: string;
+  last_response: last_response;
+} <ocaml field_prefix="ping_event_hook_">
+
+type ping_event = {
+  zen: string;
+  hook_id: int;
+  hook: ping_event_hook;
+  repository: repository;
+  sender: user;
+} <ocaml field_prefix="ping_event_">
+
 type file = {
   ?sha: string option; (* e.g. if status is 'renamed', this is None *)
   filename: string;
@@ -926,6 +962,7 @@ type event_type = [
   | Issues <json name="issues">
   | Member <json name="member">
   | PageBuild <json name="page_build">
+  | Ping <json name="ping">
   | Public <json name="public">
   | PullRequest <json name="pull_request">
   | PullRequestReviewComment <json name="pull_request_review_comment">
@@ -1017,7 +1054,7 @@ type event_hook_constr = [
   | Status <json name="StatusEvent"> of status_event
   (*| TeamAdd <json name="team_add"> of team_add_event*)
   | Watch <json name="WatchEvent"> of watch_event
-
+  | Ping <json name="ping"> of ping_event
   (* Catch-all for unsupported event types *)
   | Unknown of (string * t nullable)
 ]

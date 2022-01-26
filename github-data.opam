@@ -43,3 +43,6 @@ build: [
   ]
 ]
 dev-repo: "git+https://github.com/mirage/ocaml-github.git"
+conflicts: [
+  "github" {!= version}
+]

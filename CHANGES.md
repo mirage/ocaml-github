@@ -1,4 +1,4 @@
-## dev
+## 4.4.1 (2022-01-26)
 - Fix older versions of github can be co-installed with github-data (@dra27 #261)
 - Fix github transitively depends on jsoo (@tmcgilchrist #262)
 

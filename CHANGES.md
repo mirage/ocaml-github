@@ -1,3 +1,7 @@
+## dev
+- Fix older versions of github can be co-installed with github-data (@dra27 #261)
+- Fix github transitively depends on jsoo (@tmcgilchrist #262)
+
 ## 4.4.0 (2021-06-21)
 
 - Fixes to odoc warnings and cohttp dependencies (@Aaylor #244)

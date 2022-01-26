@@ -28,6 +28,9 @@ depends: [
   "atdgen" {>= "2.0.0"}
   "odoc" {with-doc}
 ]
+conflicts: [
+  "github" {!= version}
+]
 build: [
   ["dune" "subst"] {dev}
   [
@@ -43,6 +46,3 @@ build: [
   ]
 ]
 dev-repo: "git+https://github.com/mirage/ocaml-github.git"
-conflicts: [
-  "github" {!= version}
-]

@@ -182,7 +182,8 @@ let cmd =
     `S "BUGS";
     `P "Email bug reports to <mirageos-devel@lists.xenproject.org>.";
   ] in
-  Term.((pure (fun t r -> Lwt_main.run (list_events t r)) $ cookie $ repos)),
-  Term.info "git-list-events" ~version:Jar_version.t ~doc ~man
+  let term = Term.((const (fun t r -> Lwt_main.run (list_events t r)) $ cookie $ repos)) in
+  let info = Cmd.info "git-list-events" ~version:Jar_version.t ~doc ~man in
+  Cmd.v info term
 
-let () = match Term.eval cmd with `Error _ -> exit 1 | _ -> exit 0
+let () = exit @@ Cmd.eval cmd 

@@ -79,7 +79,7 @@ let parse_events file_name ic =
           >>= fun () ->
           exit 1
         | exn -> fail exn
-      )          
+      )
   ) event_ss (1,0.)
 
 let parse_hours ~clean hours =
@@ -132,10 +132,9 @@ let cmd =
     `S "BUGS";
     `P "Email bug reports to <mirageos-devel@lists.xenproject.org>.";
   ] in
-  Term.((pure (fun y m d h clean -> Lwt_main.run (parse_cmd y m d h ~clean))
-         $ year $ month $ day $ hour $ clean),
-        info "parse_events" ~doc ~man)
+  let term = Term.(const (fun y m d h clean -> Lwt_main.run (parse_cmd y m d h ~clean))
+         $ year $ month $ day $ hour $ clean) in
+  let info = Cmd.info "parse_events" ~doc ~man in
+  Cmd.v info term
 
-;;
-
-match Term.eval cmd with `Error _ -> exit 1 | _ -> exit 0
+let () = exit @@ Cmd.eval cmd

@@ -84,7 +84,8 @@ let cmd =
   in
   let doc = "synchronize releases between GitHub repositories" in
   let man = [ `S "BUGS"; `P "Email bug reports to <mirageos-devel@lists.xenproject.org>.";] in
-  Term.((pure run $ cookie $ src_user $ src_repo $ dst_user $ dst_repo)),
-  Term.info "git-sync-releases" ~version:Jar_version.t ~doc ~man
+  let term = Term.((const run $ cookie $ src_user $ src_repo $ dst_user $ dst_repo)) in
+  let info = Cmd.info "git-sync-releases" ~version:Jar_version.t ~doc ~man in
+  Cmd.v info term
 
-let () = match Term.eval cmd with `Error _ -> exit 1 | _ -> exit 0
+let () = exit @@ Cmd.eval cmd

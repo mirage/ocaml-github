@@ -116,9 +116,10 @@ let cmd =
       `P "Email bug reports to <mirageos-devel@lists.xenproject.org>."
     ]
   in
-  Term.((pure run $ cookie
+  let term = Term.((const run $ cookie
     $ user $ repo $ tag $ release_name $ target_commitish
-    $ body $ assets $ content_type $ prerelease $ draft)),
-  Term.info "git-create-release" ~version:Jar_version.t ~doc ~man
+    $ body $ assets $ content_type $ prerelease $ draft)) in
+  let info = Cmd.info "git-create-release" ~version:Jar_version.t ~doc ~man in
+  Cmd.v info term
 
-let () = match Term.eval cmd with `Error _ -> exit 1 | _ -> exit 0
+let () = exit @@ Cmd.eval cmd

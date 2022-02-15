@@ -18,7 +18,7 @@
 open Printf
 open Cmdliner
 
-let map f = Term.(app (pure f))
+let map f = Term.(app (const f))
 
 let auth cookie = Lwt.(
   Lwt_main.run (
@@ -39,6 +39,6 @@ let repos ?(doc_append="") () =
 
 let cookie ?(doc_append="") () =
   let doc = "Authentication cookie"^doc_append in
-  let env = Arg.env_var "GH_COOKIE" in
+  let env = Cmd.Env.info "GH_COOKIE" in
   map auth Arg.(value & opt string "infra"
                 & info ~env ["c"] ~docv:"COOKIE" ~doc)

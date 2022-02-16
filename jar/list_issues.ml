@@ -91,11 +91,12 @@ let cmd =
     `S "BUGS";
     `P "Email bug reports to <mirageos-devel@lists.xenproject.org>.";
   ] in
-  Term.((pure (fun t r all closed prs_flag issues_flag ->
+  let term = Term.((const (fun t r all closed prs_flag issues_flag ->
     let prs = prs_flag || (not issues_flag) in
     let issues = issues_flag || (not prs_flag) in
     Lwt_main.run (list_issues t r ~all ~closed ~prs ~issues)
-  ) $ cookie $ repos $ all $ closed $ no_prs $ no_issues)),
-  Term.info "git-list-issues" ~version:Jar_version.t ~doc ~man
+  ) $ cookie $ repos $ all $ closed $ no_prs $ no_issues)) in
+  let info = Cmd.info "git-list-issues" ~version:Jar_version.t ~doc ~man in
+  Cmd.v info term
 
-let () = match Term.eval cmd with `Error _ -> exit 1 | _ -> exit 0
+let () = exit @@ Cmd.eval cmd

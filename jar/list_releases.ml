@@ -79,7 +79,8 @@ let cmd =
   let json =
     let doc = "Output in JSON format." in
     Arg.(value & flag & info ["json"] ~doc) in
-  Term.((pure (fun t r j -> Lwt_main.run (list_releases t r j )) $ cookie $ repos $ json)),
-  Term.info "git-list-releases" ~version:Jar_version.t ~doc ~man
+  let term = Term.((const (fun t r j -> Lwt_main.run (list_releases t r j )) $ cookie $ repos $ json)) in
+  let info = Cmd.info "git-list-releases" ~version:Jar_version.t ~doc ~man in
+  Cmd.v info term
 
-let () = match Term.eval cmd with `Error _ -> exit 1 | _ -> exit 0
+let () = exit @@ Cmd.eval cmd

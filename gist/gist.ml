@@ -250,16 +250,14 @@ let file_pos = Arg.(required & pos 1 (some string) None & info [] ~docv:"FILENAM
                   ~doc:"File name.")
 
 let list_your_gists =
-  Term.(pure list_your_gists $
-    auth_id $ user $ pass $ token_name $ json $ pretty
-  ),
-  Term.info "list" ~doc:"list your GISTs"
+  let term = Term.(const list_your_gists $ auth_id $ user $ pass $ token_name $ json $ pretty) in
+  let info = Cmd.info "list" ~doc:"list your GISTs" in
+  Cmd.v info term
 
 let list_user_gists =
-  Term.(pure list_user_gists $
-    auth_id $ user $ pass $ token_name $ json $ pretty $ user_pos
-  ),
-  Term.info "list-user" ~doc:"list users GISTs"
+  let term = Term.(const list_user_gists $ auth_id $ user $ pass $ token_name $ json $ pretty $ user_pos ) in
+  let info = Cmd.info "list-user" ~doc:"list users GISTs" in
+  Cmd.v info term
 
 let post_new_gist =
   let public = Arg.(value & flag & info ["public"] ~docv:"PUBLIC GIST"
@@ -267,31 +265,30 @@ let post_new_gist =
   let descr = Arg.(required & opt (some string) None & info ["d";"descr"] ~docv:"DESCRIPTION"
     ~doc:"Description of the Gist") in
   let files = Arg.(non_empty & pos_all file [] & info [] ~docv:"FILES") in
-  Term.(pure post_gist $
-    auth_id $ user $ pass $ token_name $ json $ pretty $ public $ descr $ files),
-  Term.info "create" ~doc:"create new gist"
+  let term = Term.(const post_gist $
+    auth_id $ user $ pass $ token_name $ json $ pretty $ public $ descr $ files) in
+  let info = Cmd.info "create" ~doc:"create new gist" in
+  Cmd.v info term
 
 let login =
-  Term.(pure login $
-    auth_id $ user $ pass $ token_name $ json $ pretty
-  ),
-  Term.info "login" ~doc:"show login token"
+  let term = Term.(const login $
+    auth_id $ user $ pass $ token_name $ json $ pretty) in
+  let info = Cmd.info "login" ~doc:"show login token" in
+  Cmd.v info term
 
 let gist_info =
-  Term.(pure gist_info $
-    auth_id $ user $ pass $ token_name $ json $ pretty $ gist_id_pos
-  ),
-  Term.info "info" ~doc:"display info about a given gist"
+  let term = Term.(const gist_info $ auth_id $ user $ pass $ token_name $ json $ pretty $ gist_id_pos) in
+  let info = Cmd.info "info" ~doc:"display info about a given gist" in
+  Cmd.v info term
 
 let gist_file_info =
-  Term.(pure gist_file_info $
-    auth_id $ user $ pass $ token_name $ json $ pretty $ gist_id_pos $ file_pos
-  ),
-  Term.info "file-info" ~doc:"display info about a file within gist"
+  let term = Term.(const gist_file_info $
+                     auth_id $ user $ pass $ token_name $ json $ pretty $ gist_id_pos $ file_pos) in
+  let info = Cmd.info "file-info" ~doc:"display info about a file within gist" in
+  Cmd.v info term
 
-let default_cmd =
+let default_info =
   let doc = "manipulate Github GIST files from the command line" in
-  Term.(ret (pure (`Help (`Pager, None)))),
   let man = [
     `S "DESCRIPTION";
     `P "Read, write and otherwise manipulate Github GIST files from the command line.  Github authentication is handled with tokens created with the $(b,git-jar) command line tool.";
@@ -308,10 +305,10 @@ let default_cmd =
     `P "$(b,--pretty) pretty print JSON responses.";
     `S "BUGS";
      `P "Email bug reports to <mirageos-devel@lists.xenproject.org>, or report them online at <http://github.com/mirage/ocaml-github/issues>." ] in
-  Term.info "git-gist" ~version:gist_version ~doc ~man
-
-let cmds = [list_your_gists; list_user_gists; login; gist_info; gist_file_info; post_new_gist]
+  Cmd.info "git-gist" ~version:gist_version ~doc ~man
 
 let () =
-  match Term.eval_choice default_cmd cmds with
-  | `Error _ -> exit 1 | _ -> exit 0
+  let default = Term.(ret (const (`Help (`Pager, None)))) in
+  let cmds = Cmd.group ~default default_info [list_your_gists; list_user_gists; login; gist_info; gist_file_info; post_new_gist] in
+  exit @@ Cmd.eval cmds
+  

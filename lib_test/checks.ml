@@ -3,11 +3,11 @@ open Cmdliner
 let token = Config.access_token
 
 let list_check_runs_for_ref owner repo sha () =
-  Lwt_main.run begin 
+  Lwt_main.run begin
     let open Github in
     let open Monad in
     run (
-      Check.list_check_runs_for_ref ~token ~owner ~repo ~sha () 
+      Check.list_check_runs_for_ref ~token ~owner ~repo ~sha ()
       >>~ fun check ->
       (List.iter (fun x -> Printf.printf "check_run_name %s check_run_id %Ld\n" x.Github_j.check_run_name x.Github_j.check_run_id) check.Github_j.check_runs);
       return ()
@@ -15,16 +15,16 @@ let list_check_runs_for_ref owner repo sha () =
   end
 
 let get_check_run owner repo check_run_id () =
-  Lwt_main.run begin 
+  Lwt_main.run begin
     let open Github in
     let open Monad in
     run (
-      Check.get_check_run ~token ~owner ~repo ~check_run_id () 
+      Check.get_check_run ~token ~owner ~repo ~check_run_id ()
       >>~ fun check_run ->
       Printf.printf "check_run_name %s check_run_id %s\n" check_run.Github_j.check_run_name (Github_j.string_of_check_status check_run.Github_j.check_run_status);
       return ()
     )
-  end  
+  end
 
 module CommandLine = struct
   let repo =
@@ -50,24 +50,22 @@ module CommandLine = struct
     Arg.(required
          & opt (some string) None
          & info ["c"; "check_run_id"] ~docv:"CHECK_RUN_ID" ~doc)
-  
+
   let list_cmd =
-    (Term.(pure list_check_runs_for_ref $ owner $ repo $ sha $ pure ())
-    , Term.info "list" ~doc:"List Check Runs for a git sha")
+    let term = Term.(const list_check_runs_for_ref $ owner $ repo $ sha $ const ()) in
+    let info = Cmd.info "list" ~doc:"List Check Runs for a git sha" in
+    Cmd.v info term
 
-  let get_check_run = 
-    (Term.(pure get_check_run $ owner $ repo $ check_run_id $ pure ())
-    , Term.info "get-check" ~doc:"Get a Check Run for check run id")
+  let get_check_run =
+    let term = Term.(const get_check_run $ owner $ repo $ check_run_id $ const ()) in
+    let info = Cmd.info "get-check" ~doc:"Get a Check Run for check run id" in
+    Cmd.v info term
 
-  let cmds = [get_check_run; list_cmd]
-
-  let default_cmd =
-    Term.(ret (pure (`Help (`Pager, None)))),
-    Term.info "checks" ~version:"0.1" ~doc:"Github Checks API."
-
+  let cmds =
+    let default = Term.(ret (const (`Help (`Pager, None)))) in
+    let default_info = Cmd.info "checks" ~version:"0.1" ~doc:"Github Checks API." in
+    Cmd.group ~default default_info [get_check_run; list_cmd]
 end
 
 let cmdliner =
-  match Term.eval_choice ~catch:false CommandLine.default_cmd CommandLine.cmds with
-  | `Error _ -> exit 1
-  | _ -> exit 0
+  exit @@ Cmd.eval CommandLine.cmds

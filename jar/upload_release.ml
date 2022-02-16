@@ -67,7 +67,8 @@ let cmd =
   in
   let doc = "upload a release asset to a GitHub repository" in
   let man = [ `S "BUGS"; `P "Email bug reports to <mirageos-devel@lists.xenproject.org>.";] in
-  Term.((pure run $ cookie $ user $ repo $ tag $ content_type $ filename)),
-  Term.info "git-upload-release" ~version:Jar_version.t ~doc ~man
+  let term = Term.((const run $ cookie $ user $ repo $ tag $ content_type $ filename)) in
+  let info = Cmd.info "git-upload-release" ~version:Jar_version.t ~doc ~man in
+  Cmd.v info term
 
-let () = match Term.eval cmd with `Error _ -> exit 1 | _ -> exit 0
+let () = exit @@ Cmd.eval cmd

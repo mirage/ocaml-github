@@ -155,13 +155,15 @@ let name_or_id = Arg.(
 )
 
 let list_local_cmd =
-  Term.(pure list_local $ (pure ())),
-  Term.info "local" ~doc:"list local active GitHub authorization tokens"
+  let term = Term.(const list_local $ const ()) in
+  let info = Cmd.info "local" ~doc:"list local active GitHub authorization tokens" in
+  Cmd.v info term
 
 let list_cmd =
-  Term.(pure list_auth $ user $ pass),
-  Term.info "show"
-    ~doc:"list all active GitHub authorization tokens, including remote ones."
+  let term = Term.(const list_auth $ user $ pass) in
+  let info = Cmd.info "show"
+               ~doc:"list all active GitHub authorization tokens, including remote ones." in
+  Cmd.v info term
 
 let make_cmd =
   let scopes =
@@ -189,19 +191,20 @@ let make_cmd =
   ) in
   let tname = Arg.(
     required & pos 1 (some string) None & info [] ~docv:"COOKIE" ~doc:"The local name for the authorization token that applications can look up.") in
-  Term.(pure make_auth
+  let term = Term.(const make_auth
         $ user $ pass $ tname
-        $ scopes $ note $ note_url $ client_id $ client_secret $ fingerprint),
-  Term.info "make" ~doc:"create a new GitHub authorization token"
+        $ scopes $ note $ note_url $ client_id $ client_secret $ fingerprint) in
+  let info = Cmd.info "make" ~doc:"create a new GitHub authorization token" in
+  Cmd.v info term
 
 let revoke_cmd =
-  Term.(pure revoke_auth $ user $ pass $ name_or_id),
-  Term.info "revoke"
-    ~doc:"revoke a remote GitHub authorization token and remove it from the local cookie jar."
+  let term = Term.(const revoke_auth $ user $ pass $ name_or_id) in
+  let info = Cmd.info "revoke"
+    ~doc:"revoke a remote GitHub authorization token and remove it from the local cookie jar." in
+  Cmd.v info term
 
-let default_cmd =
+let cmds =
   let doc = "let local applications use GitHub authorization tokens" in
-  Term.(ret (pure (`Help (`Pager, None)))),
   let man = [
     `S "DESCRIPTION";
     `P "Applications that want to use GitHub will need to save authorization tokens locally, and $(b,git-jar) provides a CLI interface to manipulate them. GitHub authorization tokens are mapped onto a local $(i,name), and applictions can query that name at runtime to retrieve a token to use in GitHub API calls.";
@@ -211,14 +214,13 @@ let default_cmd =
     `P "$(b,--help) will show more help for each of the sub-commands above.";
     `S "BUGS";
     `P "Email bug reports to <mirageos-devel@lists.xenproject.org>, or report them online at <http://github.com/mirage/ocaml-github/issues>."] in
-  Term.info "git-jar" ~version:Jar_version.t ~doc ~man
-
-let cmds = [list_cmd; list_local_cmd; make_cmd; revoke_cmd]
+  let info = Cmd.info "git-jar" ~version:Jar_version.t ~doc ~man in
+  let default = Term.(ret (const (`Help (`Pager, None)))) in
+  Cmd.group ~default info [list_cmd; list_local_cmd; make_cmd; revoke_cmd]
 
 let () =
   try
-    match Term.eval_choice ~catch:false default_cmd cmds with
-    | `Error _ -> exit 1 | _ -> exit 0
+    exit @@ Cmd.eval ~catch:false cmds
   with
   | Github.Message (_,m) ->
     eprintf "GitHub API error: %s\n" (Github.API.string_of_message m);

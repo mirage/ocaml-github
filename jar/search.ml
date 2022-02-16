@@ -86,24 +86,22 @@ let repo_cmd =
 
   let doc = "search GitHub repositories" in
   let man = help_sections in
-  Term.((pure (fun t language keywords sort ->
+  let term = Term.((const (fun t language keywords sort ->
     Lwt_main.run (search t ?language ?sort keywords)
-  ) $ cookie $ language $ keywords $ sort)),
-  Term.info "repo" ~version:Jar_version.t ~doc ~man
+  ) $ cookie $ language $ keywords $ sort)) in
+  let info = Cmd.info "repo" ~version:Jar_version.t ~doc ~man in
+  Cmd.v info term
 
-let default_cmd =
+let group =
   let doc = "search GitHub" in
   let man = [
     `S "DESCRIPTION";
     `P ("$(b, git search) searches GitHub for repositories, code, \
          issues, or users.");
-  ] @ help_sections
-  in
+  ] @ help_sections in
   let no_cmd_err = `Error (true, "No search object type given.") in
-  Term.(ret (pure no_cmd_err),
-        info "git-search" ~doc ~man)
+  let default = Term.(ret (const no_cmd_err)) in
+  let info = Cmd.info "git-search" ~doc ~man in
+  Cmd.group ~default info [repo_cmd]
 
-;;
-match Term.eval_choice default_cmd [
-  repo_cmd;
-] with `Error _ -> exit 1 | _ -> exit 0
+let () = exit @@ Cmd.eval group

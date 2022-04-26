@@ -702,6 +702,11 @@ module type Github = sig
       (** [delete ~org ~id ()] activates after hook [id] in
           organization [org] has been deleted. *)
 
+      val ping :
+        ?token:Token.t ->
+        org:string -> id:int64 -> unit -> unit Response.t Monad.t
+      (** [ping ~org ~id ()] trigger a ping event to be sent to the hook [id] in org [~org]. *)
+
       val test :
         ?token:Token.t ->
         org:string -> id:int64 -> unit -> unit Response.t Monad.t
@@ -948,6 +953,13 @@ module type Github = sig
         repo:string -> id:int64 -> unit -> unit Response.t Monad.t
       (** [delete ~user ~repo ~id ()] activates after hook [id] in repo
           [user]/[repo] has been deleted. *)
+ 
+      val ping :
+        ?token:Token.t ->
+        user:string ->
+        repo:string -> id:int64 -> unit -> unit Response.t Monad.t
+      (** [ping ~user ~repo ~id ()] trigger a ping event to be sent to the hook [id] in repo
+          [user]/[repo]. *)
 
       val test :
         ?token:Token.t ->

@@ -328,6 +328,9 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
     let repo_hook ~user ~repo ~id =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/hooks/%Ld" api user repo id)
 
+    let repo_hook_ping ~user ~repo ~id =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/%s/hooks/%Ld/pings" api user repo id)
+
     let repo_hook_test ~user ~repo ~id =
       Uri.of_string (Printf.sprintf "%s/repos/%s/%s/hooks/%Ld/tests" api user repo id)
 
@@ -428,6 +431,9 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
 
     let org_hook ~org ~id =
       Uri.of_string (Printf.sprintf "%s/repos/%s/hooks/%Ld" api org id)
+ 
+   let org_hook_ping ~org ~id =
+      Uri.of_string (Printf.sprintf "%s/repos/%s/hooks/%Ld/pings" api org id)
 
     let org_hook_test ~org ~id =
       Uri.of_string (Printf.sprintf "%s/repos/%s/hooks/%Ld/tests" api org id)
@@ -1268,6 +1274,10 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
         let uri = URI.org_hook ~org ~id in
         API.delete ?token ~uri (fun _ -> return ())
 
+      let ping ?token ~org ~id () =
+        let uri = URI.org_hook_ping ~org ~id in
+        API.post ?token ~uri ~expected_code:`Created (fun _ -> return ())
+
       let test ?token ~org ~id () =
         let uri = URI.org_hook_test ~org ~id in
         API.post ?token ~uri ~expected_code:`No_content (fun _b -> return ())
@@ -1324,6 +1334,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
           `Watch (Github_j.watch_event_of_string payload)
         | `All -> `Unknown ("*", parse_json payload)
         | `Unknown cons -> `Unknown (cons, parse_json payload)
+        | `Ping -> `Ping (Github_j.ping_event_of_string payload)
 
       let parse_event_metadata ~payload () =
         Github_j.event_hook_metadata_of_string payload
@@ -1937,6 +1948,10 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
       let delete ?token ~user ~repo ~id () =
         let uri = URI.repo_hook ~user ~repo ~id in
         API.delete ?token ~uri (fun _ -> return ())
+ 
+      let ping ?token ~user ~repo ~id () =
+        let uri = URI.repo_hook_ping ~user ~repo ~id in
+        API.post ?token ~uri ~expected_code:`Created (fun _ -> return ())
 
       let test ?token ~user ~repo ~id () =
         let uri = URI.repo_hook_test ~user ~repo ~id in

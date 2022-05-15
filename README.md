@@ -9,7 +9,7 @@ APIv3](https://docs.github.com/rest/) (JSON). It is compatible with
 [js_of_ocaml](http://ocsigen.org/js_of_ocaml).
 
 It is [not yet complete](#api-support-coverage) but
-[lib/github.atd](https://github.com/mirage/ocaml-github/blob/master/lib/github.atd)
+[lib/github.atd](https://github.com/mirage/ocaml-github/blob/master/lib_data/github.atd)
 contains the data types that have been bound so far.
 
 There are several tests and examples in

@@ -3,3 +3,4 @@ _build/
 .merlin
 *.install
 lib_test/config.ml
+_opam/

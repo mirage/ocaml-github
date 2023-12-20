@@ -1,5 +1,6 @@
 ## Unreleased
 - Add ping a repository and org webhook. (@tmcgilchrist #263)
+- Handle "Bot" user type (@zoggy #270)
 
 ## 4.4.1 (2022-01-26)
 - Fix older versions of github can be co-installed with github-data (@dra27 #261)

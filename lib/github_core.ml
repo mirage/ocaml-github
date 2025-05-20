@@ -877,7 +877,7 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
       let headers = C.Header.add_opt headers "accept" media_type in
       match token with
       | None -> headers
-      | Some token -> C.Header.add headers "Authorization" ("token " ^ token)
+      | Some token -> C.Header.add headers "Authorization" ("Bearer " ^ token)
 
     let idempotent meth
         ?(rate=Core) ?media_type ?headers ?token ?params ~fail_handlers ~expected_code ~uri

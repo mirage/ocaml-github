@@ -1,3 +1,6 @@
+## dev
+- Allow to make drafts (@oscar-chevalier #280)
+
 ## 4.5.0 (2025-08-23)
 - Add ping a repository and org webhook. (@tmcgilchrist #263)
 - Handle "Bot" user type (@zoggy #270)

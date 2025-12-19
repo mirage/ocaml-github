@@ -948,6 +948,8 @@ type merge = {
 } <ocaml field_prefix="merge_">
 
 type event_type = [
+  | CheckRun <json name="check_run">
+  | CheckSuite <json name="check_suite">
   | CommitComment <json name="commit_comment">
   | Create <json name="create">
   | Delete <json name="delete">
@@ -1026,6 +1028,8 @@ type event = {
 type events = event list
 
 type event_hook_constr = [
+  | CheckRun <json name="check_run"> of check_run_event
+  | CheckSuite <json name="check_suite"> of check_suite_event
   | CommitComment <json name="CommitCommentEvent"> of commit_comment_event
   | Create <json name="CreateEvent"> of create_event
   | Delete <json name="DeleteEvent"> of delete_event
@@ -1468,6 +1472,23 @@ type check_run_annotation = {
 
 type check_run_annotations = check_run_annotation list
 
+type check_run_action = [
+  | Completed <json name="completed">
+  | Created <json name="created">
+  | RequestedAction <json name="requested_action">
+  | Rerequested <json name="rerequested">
+  | Unknown of string
+] <json open_enum>
+
+type check_run_event = {
+  action: check_run_action;
+  check_run: check_run;
+  repository: repository;
+  sender: user;
+  ?installation: app_installation_event option;
+  ?organization: organization option;
+} <ocaml field_prefix="check_run_event_">
+
 type check_suite_info = {
   email: string;
   name: string;
@@ -1517,3 +1538,23 @@ type check_suite_preferences = {
   respository: repository;
 }
 
+type check_suite_action = [
+  | Completed <json name="completed">
+  | Requested <json name="requested">
+  | Rerequested <json name="rerequested">
+  | Unknown of string
+] <json open_enum>
+
+type check_suite_event = {
+  action: check_suite_action;
+  check_suite: check_suite;
+  repository: repository;
+  sender: user;
+  ?installation: app_installation_event option;
+  ?organization: organization option;
+} <ocaml field_prefix="check_suite_event_">
+
+type app_installation_event = {
+  id: int <ocaml repr="int64">;
+  node_id: string;
+} <ocaml field_prefix="app_installation_event_">

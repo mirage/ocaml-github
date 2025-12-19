@@ -1291,6 +1291,10 @@ module Make(Env : Github_s.Env)(Time : Github_s.Time)(CL : Cohttp_lwt.S.Client)
         match Github_j.event_type_of_string ("\"" ^ constr ^ "\"") with
         | `CommitComment ->
           `CommitComment (Github_j.commit_comment_event_of_string payload)
+        | `CheckRun ->
+            `CheckRun (Github_j.check_run_event_of_string payload)
+        | `CheckSuite->
+            `CheckSuite (Github_j.check_suite_event_of_string payload)
         | `Create ->
           `Create (Github_j.create_event_of_string payload)
         | `Delete ->
